@@ -333,6 +333,7 @@ class _FullScreenViewer extends StatefulWidget {
 class _FullScreenViewerState extends State<_FullScreenViewer> {
   late PageController _pageController;
   late int _currentIndex;
+  final Set<String> _favorites = {}; // In-memory favorites for demo
 
   @override
   void initState() {
@@ -380,17 +381,27 @@ class _FullScreenViewerState extends State<_FullScreenViewer> {
             ),
           ),
 
-          // 2. Favorite Button (Top Left)
           Positioned(
             top: 40,
             left: 20,
             child: IconButton(
-              icon: const Icon(FontAwesomeIcons.heart, color: Colors.white, size: 28),
+              icon: _favorites.contains(widget.images[_currentIndex])
+                  ? Stack(
+                      children: [
+                        const Icon(FontAwesomeIcons.solidHeart, color: Color(0xFFFF7043), size: 28),
+                        const Icon(FontAwesomeIcons.heart, color: Colors.white, size: 28),
+                      ],
+                    )
+                  : const Icon(FontAwesomeIcons.heart, color: Colors.white, size: 28),
               onPressed: () {
-                // TODO: Toggle favorite logic
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Added to favorites (Demo)"), duration: Duration(milliseconds: 500)),
-                );
+                setState(() {
+                  final currentImage = widget.images[_currentIndex];
+                  if (_favorites.contains(currentImage)) {
+                    _favorites.remove(currentImage);
+                  } else {
+                    _favorites.add(currentImage);
+                  }
+                });
               },
             ),
           ),

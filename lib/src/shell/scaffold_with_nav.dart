@@ -96,7 +96,13 @@ class ScaffoldWithNav extends StatelessWidget {
         child: FloatingActionButton(
           onPressed: () => context.push('/write'),
           elevation: 0,
+          focusElevation: 0,
+          hoverElevation: 0,
+          highlightElevation: 0,
           backgroundColor: Colors.transparent,
+          splashColor: Colors.transparent,
+          hoverColor: Colors.transparent,
+          focusColor: Colors.transparent,
           shape: const CircleBorder(),
           child: const Icon(FontAwesomeIcons.penNib, color: Colors.white, size: 28),
         ),
