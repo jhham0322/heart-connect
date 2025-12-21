@@ -64,7 +64,7 @@ class ContactsScreen extends ConsumerWidget {
 
   Widget _buildTopTabBar(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.only(top: 16 + 24, left: 20, right: 20, bottom: 0), // +24 for status bar
+      padding: const EdgeInsets.only(top: 16, left: 20, right: 20, bottom: 0),
       child: Row(
         children: [
           Expanded(

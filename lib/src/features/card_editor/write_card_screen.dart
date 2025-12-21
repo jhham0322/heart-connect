@@ -1,11 +1,14 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // for rootBundle
 import 'package:google_fonts/google_fonts.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class WriteCardScreen extends ConsumerStatefulWidget {
-  const WriteCardScreen({super.key});
+  final String? initialImage;
+  const WriteCardScreen({super.key, this.initialImage});
 
   @override
   ConsumerState<WriteCardScreen> createState() => _WriteCardScreenState();
@@ -15,29 +18,68 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   // State for Editing
   String _message = "Happy Birthday,\ndear Emma!\nWith love, Anna.";
   String _footerText = "Heart-Connect";
-  String _selectedImage = "https://images.unsplash.com/photo-1490750967868-58cb75065ed2?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"; // Demo
+  
+  // Default placeholder until loaded
+  String _selectedImage = ""; 
   
   // Style State
   TextStyle _currentStyle = GoogleFonts.greatVibes(fontSize: 32, color: const Color(0xFF1A1A1A));
   TextAlign _textAlign = TextAlign.center;
   
-  // Templates
-  final List<String> _templates = [
-    "https://images.unsplash.com/photo-1490750967868-58cb75065ed2?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
-    "https://images.unsplash.com/photo-1527638056260-2475e1491753?auto=format&fit=crop&w=600&q=80",
-    "https://images.unsplash.com/photo-1516062423079-7ca13cdc7f5a?auto=format&fit=crop&w=600&q=80",
-    // Add more demo urls
-  ];
+  // Templates (Loaded Dynamically)
+  List<String> _templates = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialImage != null) {
+      _selectedImage = widget.initialImage!;
+    }
+    _loadTemplateAssets();
+  }
+
+  // ★ Assets 폴더의 이미지를 동적으로 읽어오는 함수
+  Future<void> _loadTemplateAssets() async {
+    try {
+      final manifestContent = await rootBundle.loadString('AssetManifest.json');
+      final Map<String, dynamic> manifestMap = json.decode(manifestContent);
+      
+      final paths = manifestMap.keys
+          .where((String key) => key.startsWith('assets/images/cards/') && 
+                (key.toLowerCase().endsWith('.png') || key.toLowerCase().endsWith('.jpg') || key.toLowerCase().endsWith('.jpeg')))
+          .toList();
+      
+      if (mounted) {
+        setState(() {
+          _templates = paths;
+          if (_templates.isNotEmpty && _selectedImage.isEmpty) {
+            _selectedImage = _templates.first;
+          }
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      debugPrint("Asset loading error: $e");
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Scaffold(
+        backgroundColor: Color(0xFFFFFCF9),
+        body: Center(child: CircularProgressIndicator(color: Color(0xFFF29D86))),
+      );
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xFFFFFCF9),
       body: SafeArea(
         child: Column(
           children: [
-            // 1. Header
-            _buildHeader(),
+            const SizedBox(height: 16),
 
             Expanded(
               child: SingleChildScrollView(
@@ -65,100 +107,90 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     );
   }
 
-  Widget _buildHeader() {
-    return Container(
-      height: 60,
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          IconButton(
-            icon: const Icon(FontAwesomeIcons.arrowLeft, color: Color(0xFF222222)),
-            onPressed: () => context.pop(),
-          ),
-          const Text("Greeting Card Editor", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-          Row(
-            children: [
-              IconButton(icon: const Icon(FontAwesomeIcons.floppyDisk, size: 20), onPressed: () {}),
-              IconButton(icon: const Icon(FontAwesomeIcons.folderOpen, size: 20), onPressed: () {}),
-            ],
-          )
-        ],
-      ),
-    );
+  // Helper to load image securely (Asset or Network)
+  Widget _buildImage(String path, {BoxFit fit = BoxFit.cover, double? width, double? height}) {
+    if (path.isEmpty) return Container(color: Colors.grey[200]);
+    
+    if (path.startsWith('http')) {
+      return Image.network(path, fit: fit, width: width, height: height);
+    } else {
+      return Image.asset(path, fit: fit, width: width, height: height);
+    }
   }
 
   Widget _buildCardPreview() {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 20),
       child: Center(
-        child: Container(
-          width: MediaQuery.of(context).size.width * 0.85,
+        child: AspectRatio(
           aspectRatio: 4/5,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(8),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.08),
-                blurRadius: 25,
-                offset: const Offset(0, 10),
-              )
-            ],
-          ),
-          child: Column(
-            children: [
-              // Image Part (55%)
-              Expanded(
-                flex: 55,
-                child: ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
-                  child: Image.network(_selectedImage, fit: BoxFit.cover, width: double.infinity),
+          child: Container(
+            width: MediaQuery.of(context).size.width * 0.85,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 25,
+                  offset: const Offset(0, 10),
+                )
+              ],
+            ),
+            child: Column(
+              children: [
+                // Image Part (55%)
+                Expanded(
+                  flex: 55,
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
+                    child: _buildImage(_selectedImage, width: double.infinity),
+                  ),
                 ),
-              ),
-              // Text Part (45%)
-              Expanded(
-                flex: 45,
-                child: Stack(
-                  children: [
-                    Center(
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 0, 20, 40),
-                        child: Text(
-                          _message,
-                          style: _currentStyle,
-                          textAlign: _textAlign,
+                // Text Part (45%)
+                Expanded(
+                  flex: 45,
+                  child: Stack(
+                    children: [
+                      Center(
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 0, 20, 40),
+                          child: Text(
+                            _message,
+                            style: _currentStyle,
+                            textAlign: _textAlign,
+                          ),
                         ),
                       ),
-                    ),
-                    Positioned(
-                      bottom: 20,
-                      left: 0,
-                      right: 0,
-                      child: Center(
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFD6B5A1),
-                            borderRadius: BorderRadius.circular(2),
-                            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4, offset: const Offset(0, 2))]
-                          ),
-                          child: Text(
-                            _footerText.toUpperCase(),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w500,
-                              letterSpacing: 1,
+                      Positioned(
+                        bottom: 20,
+                        left: 0,
+                        right: 0,
+                        child: Center(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFD6B5A1),
+                              borderRadius: BorderRadius.circular(2),
+                              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4, offset: const Offset(0, 2))]
+                            ),
+                            child: Text(
+                              _footerText.toUpperCase(),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w500,
+                                letterSpacing: 1,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    )
-                  ],
-                ),
-              )
-            ],
+                      )
+                    ],
+                  ),
+                )
+              ],
+            ),
           ),
         ),
       ),
@@ -166,6 +198,14 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   }
 
   Widget _buildTemplateSelector() {
+    // Show empty state if no templates
+    if (_templates.isEmpty) {
+        return const SizedBox(
+            height: 100,
+            child: Center(child: Text("No card images found in assets."))
+        );
+    }
+
     return SizedBox(
       height: 110,
       child: ListView.builder(
@@ -174,7 +214,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
         itemCount: _templates.length + 1,
         itemBuilder: (context, index) {
           if (index == _templates.length) {
-            // Upload button
+            // Upload button placeholder
             return _buildThumbItem(null, isUpload: true);
           }
           final idx = index;
@@ -206,7 +246,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                 ? const Center(child: Icon(FontAwesomeIcons.camera, color: Color(0xFFAAAAAA)))
                 : ClipRRect(
                   borderRadius: BorderRadius.circular(10),
-                  child: Image.network(imgUrl!, fit: BoxFit.cover),
+                  child: _buildImage(imgUrl!),
                 ),
             ),
             const SizedBox(height: 6),
@@ -226,7 +266,6 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
         children: [
           // Font Family
           _buildToolbarButton(icon: FontAwesomeIcons.font, onTap: () {
-            // Cycle fonts demo
             setState(() {
               if (_currentStyle.fontFamily?.contains('Great Vibes') ?? false) {
                  _currentStyle = GoogleFonts.caveat(fontSize: _currentStyle.fontSize, color: _currentStyle.color);
@@ -250,7 +289,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
            Container(width: 1, height: 24, color: Colors.grey[300]),
           const SizedBox(width: 8),
           
-          // Color (Demo toggle)
+          // Color
           _buildToolbarButton(icon: FontAwesomeIcons.palette, onTap: () {
              setState(() {
                _currentStyle = _currentStyle.copyWith(
@@ -302,7 +341,6 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
              ),
              child: Column(
                children: [
-                 // Top rip effect simulation
                  Container(height: 10, decoration: const BoxDecoration(color: Color(0xFFFFFDF5))), 
                  Padding(
                    padding: const EdgeInsets.all(16),
@@ -325,20 +363,9 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   }
 
   Future<void> _handleSend() async {
-    // 1. Generate Image
-    // final file = await ImageGenerator().generateCard(
-    //   templateUrl: _selectedImage,
-    //   message: _message,
-    //   footerText: _footerText,
-    // );
-    
-    // 2. Demo feedback
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text("Image Generated! Proceeding to recipient selection... (Demo)")),
     );
-    
-    // 3. Navigate to Selection (Not implemented in this view)
-    // context.push('/select-contacts', extra: file.path);
   }
 
   Widget _buildSendButton() {

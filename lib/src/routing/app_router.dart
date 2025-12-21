@@ -62,18 +62,28 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               ),
             ],
           ),
+          // Additional branches for Settings and Write if they need to be 'fixed' screens
+          // Or just keep them as sub-routes of the Home branch to show the shell
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/settings',
+                pageBuilder: (context, state) => const NoTransitionPage(child: SettingsScreen()),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/write',
+                pageBuilder: (context, state) {
+                  final initialImage = state.extra as String?;
+                  return NoTransitionPage(child: WriteCardScreen(initialImage: initialImage));
+                },
+              ),
+            ],
+          ),
         ],
-      ),
-      // Fullscreen routes
-      GoRoute(
-        path: '/write',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const WriteCardScreen(),
-      ),
-      GoRoute(
-        path: '/settings',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const SettingsScreen(),
       ),
     ],
   );

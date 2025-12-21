@@ -38,13 +38,17 @@ dependencies:
   workmanager: ^0.5.2
 
   # Deep Links
-  app_links: ^3.4.5 # using app_links as suggested alternative to uni_links
+  app_links: ^3.4.5 
 
   # UI
   google_fonts: ^6.1.0
   font_awesome_flutter: ^10.7.0
   intl: ^0.19.0
   cupertino_icons: ^1.0.6
+  device_calendar: ^4.3.3
+  window_manager: ^0.5.1
+  reorderable_grid_view: ^2.2.8
+  photo_view: ^0.15.0
 
 dev_dependencies:
   flutter_test:
@@ -57,5 +61,19 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   
-  # assets:
-  #   - assets/images/
+  assets:
+    - assets/icons/
+    - assets/images/
+    - assets/images/cards/
+    - assets/images/cards/christmas/
+    - assets/images/cards/newyear/
+    - assets/images/cards/birthday/
+    - assets/images/cards/thanks/
+    - assets/images/cards/motherDay/
+    - assets/images/cards/teachersDay/
+    - assets/images/cards/tour/
+    - assets/images/cards/halloween/
+    - assets/images/cards/thanksgiving/
+    - assets/images/cards/my_photos/
+    - assets/images/cards/favorites/
+    - assets/images/cards/letters/

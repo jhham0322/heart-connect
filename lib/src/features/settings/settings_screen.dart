@@ -11,29 +11,7 @@ class SettingsScreen extends StatelessWidget {
       backgroundColor: const Color(0xFFF5F5F5),
       body: Column(
         children: [
-          // Header
-          Container(
-            padding: const EdgeInsets.only(top: 50, bottom: 10),
-            child: Center(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(50),
-                  border: Border.all(color: const Color(0xFF5D4037)),
-                  boxShadow: [BoxShadow(color: const Color(0xFF5D4037).withOpacity(0.1), offset: const Offset(0, 4))],
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Text("설정 (Settings)", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                    const SizedBox(width: 10),
-                    const Icon(FontAwesomeIcons.gear, size: 20),
-                  ],
-                ),
-              ),
-            ),
-          ),
+          const SizedBox(height: 16),
 
           // List
           Expanded(

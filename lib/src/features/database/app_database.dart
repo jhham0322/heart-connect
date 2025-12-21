@@ -61,6 +61,21 @@ class AppDatabase extends _$AppDatabase {
   }
   
   Future<int> insertHistory(HistoryCompanion entry) => into(history).insert(entry);
+
+  // STATISTICS & EVENTS
+  Future<int> getTodaySentCount() async {
+    final now = DateTime.now();
+    final startOfDay = DateTime(now.year, now.month, now.day);
+    final endOfDay = startOfDay.add(const Duration(days: 1));
+    
+    final countExp = history.id.count();
+    final query = selectOnly(history)
+      ..addColumns([countExp])
+      ..where(history.type.equals('SENT') & 
+              history.eventDate.isBetweenValues(startOfDay, endOfDay));
+    
+    return await query.map((row) => row.read(countExp)).getSingle() ?? 0;
+  }
 }
 
 LazyDatabase _openConnection() {
