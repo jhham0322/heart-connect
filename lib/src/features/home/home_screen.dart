@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:go_router/go_router.dart';
 import '../../theme/app_theme.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -34,6 +35,36 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Header
+         Padding(
+            padding: const EdgeInsets.only(top: 50, left: 24, right: 24, bottom: 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Row(
+                  children: [
+                     // Simple Heart Icons for logo
+                    Icon(FontAwesomeIcons.heart, color: Color(0xFFFF7043), size: 20),
+                    SizedBox(width: 4),
+                    Text("Heart-Connect", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppTheme.textPrimary)),
+                  ],
+                ),
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(FontAwesomeIcons.bell),
+                      onPressed: () {},
+                    ),
+                    IconButton(
+                      icon: const Icon(FontAwesomeIcons.gear),
+                      onPressed: () => context.push('/settings'),
+                    ),
+                  ],
+                )
+              ],
+            ),
+          ),
+
           // Warmth Section
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 10.0),
@@ -117,7 +148,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           Expanded(
                             flex: 2,
                             child: ElevatedButton.icon(
-                              onPressed: () {},
+                              onPressed: () => context.push('/write'),
                               icon: const Icon(FontAwesomeIcons.pen, size: 16, color: Colors.white),
                               label: const Text("Write", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                               style: ElevatedButton.styleFrom(

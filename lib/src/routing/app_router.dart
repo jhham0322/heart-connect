@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../features/home/home_screen.dart';
+import '../features/contacts/contacts_screen.dart';
+import '../features/gallery/gallery_screen.dart';
+import '../features/card_editor/write_card_screen.dart';
+import '../features/settings/settings_screen.dart';
 import '../shell/scaffold_with_nav.dart';
 
 // Private navigator keys
@@ -36,7 +40,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/contacts',
-                pageBuilder: (context, state) => const NoTransitionPage(child: Scaffold(body: Center(child: Text("Contacts")))),
+                pageBuilder: (context, state) => const NoTransitionPage(child: ContactsScreen()),
               ),
             ],
           ),
@@ -45,7 +49,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/gallery',
-                pageBuilder: (context, state) => const NoTransitionPage(child: Scaffold(body: Center(child: Text("Gallery")))),
+                pageBuilder: (context, state) => const NoTransitionPage(child: GalleryScreen()),
               ),
             ],
           ),
@@ -54,11 +58,22 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/mailbox',
-                pageBuilder: (context, state) => const NoTransitionPage(child: Scaffold(body: Center(child: Text("Mailbox")))),
+                pageBuilder: (context, state) => const NoTransitionPage(child: Scaffold(body: Center(child: Text("Mailbox Construction")))),
               ),
             ],
           ),
         ],
+      ),
+      // Fullscreen routes
+      GoRoute(
+        path: '/write',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const WriteCardScreen(),
+      ),
+      GoRoute(
+        path: '/settings',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const SettingsScreen(),
       ),
     ],
   );
