@@ -9,10 +9,10 @@ where flutter >nul 2>nul
 if %errorlevel% neq 0 (
     echo.
     echo [오류] 'flutter' 명령어를 찾을 수 없습니다.
-    echo 시스템 환경 변수(PATH)에 Flutter가 등록되어 있지 않은 것 같습니다.
+    echo 시스템 환경 변수^(PATH^)에 Flutter가 등록되어 있지 않은 것 같습니다.
     echo.
     echo Flutter SDK의 'bin' 폴더 경로를 입력해주세요.
-    echo (예: C:\src\flutter\bin 또는 E:\flutter\bin)
+    echo ^(예: C:\src\flutter\bin 또는 E:\flutter\bin^)
     echo.
     set /p FLUTTER_BIN_PATH="경로 입력: "
     

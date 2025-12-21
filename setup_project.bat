@@ -11,7 +11,7 @@ if %errorlevel% neq 0 (
     echo [오류] 경고: 'flutter'가 시스템 경로에서 감지되지 않았습니다.
     echo.
     echo Flutter SDK의 'bin' 폴더 경로를 입력해주세요.
-    echo (예: C:\src\flutter\bin)
+    echo ^(예: C:\src\flutter\bin^)
     echo.
     set /p FLUTTER_BIN_PATH="경로 입력: "
     set "PATH=%PATH%;%FLUTTER_BIN_PATH%"
