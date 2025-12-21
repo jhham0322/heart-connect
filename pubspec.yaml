@@ -1,0 +1,60 @@
+name: heart_connect
+description: "A Flutter-based emotional relationship management and semi-automatic card sending solution."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.2.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # State Management
+  flutter_riverpod: ^2.5.1
+  riverpod_annotation: ^2.3.5
+
+  # Navigation
+  go_router: ^13.2.0
+
+  # Database
+  drift: ^2.16.0
+  sqlite3_flutter_libs: ^0.5.20
+  path_provider: ^2.1.2
+  path: ^1.9.0
+
+  # Permissions & Contacts
+  permission_handler: ^11.3.0
+  flutter_contacts: ^1.1.8
+
+  # Image & Files
+  image: ^4.1.7
+  share_plus: ^9.0.0
+  url_launcher: ^6.2.5
+
+  # Notifications & Background
+  flutter_local_notifications: ^17.0.0
+  workmanager: ^0.5.2
+
+  # Deep Links
+  app_links: ^3.4.5 # using app_links as suggested alternative to uni_links
+
+  # UI
+  google_fonts: ^6.1.0
+  font_awesome_flutter: ^10.7.0
+  intl: ^0.19.0
+  cupertino_icons: ^1.0.6
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+  build_runner: ^2.4.8
+  drift_dev: ^2.16.0
+  riverpod_generator: ^2.4.0
+
+flutter:
+  uses-material-design: true
+  
+  # assets:
+  #   - assets/images/

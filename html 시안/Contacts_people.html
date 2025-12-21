@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contacts - Heart Connect</title>
+    <!-- 폰트 로드 -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+    <!-- 아이콘 로드 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* 1. 디자인 토큰 */
+        :root {
+            /* Palette */
+            --bg-base: #FFFDF5;
+            --bg-dot: #D7CCC8;
+            
+            --tab-active-bg: #FFAB91; /* Soft Coral */
+            --tab-inactive-bg: #FFF9C4; /* Pastel Yellow */
+            
+            --text-strong: #3E2723;
+            --text-sub: #795548;
+            --border-color: #5D4037;
+
+            --card-bg: #FFFFFF;
+            
+            /* Dimensions */
+            --nav-height: 70px;
+            --header-height: auto;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Nunito', 'Noto Sans KR', sans-serif;
+            background-color: #F5F5F5;
+            color: var(--text-strong);
+            display: flex;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* 앱 컨테이너 */
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            height: 100%;
+            background-color: var(--bg-base);
+            /* 도트 패턴 배경 */
+            background-image: radial-gradient(var(--bg-dot) 1.5px, transparent 1.5px);
+            background-size: 20px 20px;
+            
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        /* 2. 상단 탭 (Pill Shape Tabs) */
+        .top-tab-bar {
+            padding: 16px 20px 0;
+            display: flex;
+            gap: 12px;
+            background: transparent; /* 배경 투명하게 하여 도트 패턴 노출 */
+        }
+
+        .tab-pill {
+            flex: 1;
+            border: none;
+            padding: 12px;
+            border-radius: 50px; /* 완전 둥근 알약 형태 */
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: transform 0.1s;
+        }
+        
+        .tab-pill:active {
+            transform: scale(0.98);
+        }
+
+        .tab-pill.active {
+            background-color: var(--tab-active-bg);
+            color: var(--text-strong);
+            border: 2px solid var(--border-color);
+        }
+
+        .tab-pill.inactive {
+            background-color: var(--tab-inactive-bg);
+            color: var(--text-sub);
+            border: 1px solid rgba(93, 64, 55, 0.2);
+            opacity: 0.8;
+        }
+
+        /* 3. 검색 및 필터 영역 */
+        .search-section {
+            padding: 20px 20px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .search-input-box {
+            position: relative;
+            width: 100%;
+        }
+
+        .search-input-box input {
+            width: 100%;
+            padding: 12px 12px 12px 44px;
+            border-radius: 25px;
+            border: 2px solid var(--border-color);
+            background: white;
+            font-family: inherit;
+            font-size: 0.95rem;
+            color: var(--text-strong);
+            outline: none;
+        }
+        
+        .search-input-box input::placeholder {
+            color: #BCAAA4;
+        }
+
+        .search-input-box i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-sub);
+            font-size: 1.1rem;
+        }
+
+        .filter-chips {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 4px; /* 스크롤바 공간 */
+        }
+        
+        .filter-chips::-webkit-scrollbar {
+            display: none;
+        }
+
+        .chip {
+            background: white;
+            border: 1px solid var(--border-color);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-sub);
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .chip.active {
+            background-color: var(--text-strong);
+            color: white;
+        }
+
+        /* 4. 메인 리스트 영역 (Scrollable) */
+        .contact-list-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px 20px 100px; /* 하단 내비게이션 고려 */
+        }
+        
+        .contact-list-area::-webkit-scrollbar {
+            display: none;
+        }
+
+        .contact-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* 연락처 카드 */
+        .contact-card {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+            border: 1px solid rgba(93, 64, 55, 0.05);
+            transition: transform 0.2s;
+        }
+
+        .contact-card:active {
+            transform: scale(0.98);
+        }
+
+        /* 아바타 */
+        .avatar-wrapper {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            font-size: 1.5rem; /* 이모지용 */
+            flex-shrink: 0;
+        }
+        
+        .avatar-wrapper.yellow-bg { background-color: #FFF59D; }
+        .avatar-wrapper.mint-bg { background-color: #B2DFDB; }
+        .avatar-wrapper.pink-bg { background-color: #FFCCBC; }
+        .avatar-wrapper.blue-bg { background-color: #BBDEFB; }
+
+        /* 정보 텍스트 */
+        .info-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 2px;
+        }
+
+        .name {
+            font-size: 1rem;
+            font-weight: 800;
+            color: var(--text-strong);
+        }
+
+        .sub-text {
+            font-size: 0.8rem;
+            color: var(--text-sub);
+            font-weight: 500;
+        }
+
+        /* 즐겨찾기 버튼 */
+        .btn-favorite {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            color: #FF8A65; /* 하트 색상 */
+            font-size: 1.2rem;
+        }
+
+        /* 5. 하단 내비게이션 */
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: var(--nav-height);
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            box-shadow: 0 -4px 15px rgba(0,0,0,0.05);
+            z-index: 20;
+        }
+
+        .nav-item {
+            text-decoration: none;
+            color: #9E9E9E;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            font-size: 0.7rem;
+            width: 60px;
+            height: 100%;
+        }
+
+        .nav-item i {
+            font-size: 1.4rem;
+            z-index: 2;
+            transition: all 0.2s;
+        }
+
+        /* 활성 내비게이션 아이템 스타일 (원형 배경) */
+        .nav-item.active-circle {
+            color: var(--text-strong);
+            font-weight: 700;
+        }
+
+        .nav-item.active-circle i {
+            background-color: #FFAB91;
+            color: var(--text-strong);
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: -10px; /* 아이콘 위치 조정 */
+            border: 2px solid var(--border-color);
+            transform: translateY(-5px);
+            font-size: 1.2rem;
+        }
+        
+        .nav-item.active-circle span {
+            margin-top: 8px; /* 텍스트 위치 조정 */
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- A. 상단 탭 -->
+        <nav class="top-tab-bar">
+            <button class="tab-pill active">
+                <i class="fa-regular fa-heart"></i> 내 사람들
+            </button>
+            <!-- 탭 클릭 시 추억 기록 페이지로 이동하는 로직 필요 -->
+            <button class="tab-pill inactive">
+                추억 기록
+            </button>
+        </nav>
+
+        <!-- B. 검색 및 필터 -->
+        <section class="search-section">
+            <div class="search-input-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" placeholder="이름, 태그 검색">
+            </div>
+            <div class="filter-chips">
+                <button class="chip active">전체</button>
+                <button class="chip">즐겨찾기</button>
+                <button class="chip">최근 연락</button>
+                <button class="chip">가족</button>
+            </div>
+        </section>
+
+        <!-- C. 연락처 리스트 -->
+        <main class="contact-list-area">
+            <ul class="contact-list">
+                <!-- 아이템 1 -->
+                <li class="contact-card">
+                    <div class="avatar-wrapper yellow-bg">
+                        <!-- 이미지 대신 이모지로 대체 -->
+                        👩🏻
+                    </div>
+                    <div class="info-wrapper">
+                        <h3 class="name">이영희</h3>
+                        <p class="sub-text">Lee Young-hee</p>
+                    </div>
+                    <button class="btn-favorite">
+                        <i class="fa-solid fa-heart"></i>
+                    </button>
+                </li>
+
+                <!-- 아이템 2 -->
+                <li class="contact-card">
+                    <div class="avatar-wrapper mint-bg">
+                        👨🏻‍🏫
+                    </div>
+                    <div class="info-wrapper">
+                        <h3 class="name">김선생님</h3>
+                        <p class="sub-text">Math Teacher</p>
+                    </div>
+                    <button class="btn-favorite">
+                        <i class="fa-regular fa-heart"></i>
+                    </button>
+                </li>
+                
+                <!-- 아이템 3 -->
+                <li class="contact-card">
+                    <div class="avatar-wrapper pink-bg">
+                        👵🏻
+                    </div>
+                    <div class="info-wrapper">
+                        <h3 class="name">할머니</h3>
+                        <p class="sub-text">Grandma ♡</p>
+                    </div>
+                    <button class="btn-favorite">
+                        <i class="fa-solid fa-heart"></i>
+                    </button>
+                </li>
+
+                <!-- 아이템 4 -->
+                <li class="contact-card">
+                    <div class="avatar-wrapper blue-bg">
+                        👦🏻
+                    </div>
+                    <div class="info-wrapper">
+                        <h3 class="name">박지성</h3>
+                        <p class="sub-text">Soccer Club</p>
+                    </div>
+                    <button class="btn-favorite">
+                        <i class="fa-regular fa-heart"></i>
+                    </button>
+                </li>
+
+                <!-- 스크롤 테스트용 더미 -->
+                <li class="contact-card">
+                    <div class="avatar-wrapper yellow-bg">
+                        🐱
+                    </div>
+                    <div class="info-wrapper">
+                        <h3 class="name">우리집 고양이</h3>
+                        <p class="sub-text">Meow</p>
+                    </div>
+                    <button class="btn-favorite">
+                        <i class="fa-solid fa-heart"></i>
+                    </button>
+                </li>
+            </ul>
+        </main>
+
+        <!-- D. 하단 내비게이션 -->
+        <nav class="bottom-nav">
+            <a href="#" class="nav-item active-circle">
+                <i class="fa-solid fa-user-group"></i>
+                <span>인연</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fa-solid fa-house"></i>
+                <span>홈</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fa-regular fa-image"></i>
+                <span>갤러리</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fa-solid fa-gear"></i>
+                <span>설정</span>
+            </a>
+        </nav>
+    </div>
+
+</body>
+</html>

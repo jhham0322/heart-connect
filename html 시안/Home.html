@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heart-Connect</title>
+    <!-- 폰트 로드: 부드러운 느낌을 위한 Nunito (영문) & Noto Sans KR (한글) -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- 아이콘 로드: FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* 1. 디자인 시스템 (CSS Variables) */
+        :root {
+            /* Colors */
+            --bg-color: #FFFCF9;
+            --text-primary: #5D4037; /* 짙은 갈색 */
+            --text-secondary: #8D6E63;
+            --accent-coral: #FF8A65; /* 버튼, 테두리, FAB */
+            --accent-coral-light: #FFF1EB;
+            --accent-yellow: #FDD835; /* 프로그레스 바 */
+            --card-bg: #FFF8E1;
+            --white: #FFFFFF;
+            --gray-light: #F5F5F5;
+            --gray-btn: #E0E0E0;
+            
+            /* Shadows */
+            --shadow-soft: 0 10px 20px rgba(93, 64, 55, 0.08);
+            --shadow-fab: 0 4px 15px rgba(255, 138, 101, 0.5);
+            --shadow-nav: 0 -5px 20px rgba(0,0,0,0.03);
+
+            /* Sizes */
+            --nav-height: 80px;
+            --header-height: 70px;
+            --radius-lg: 24px;
+            --radius-md: 16px;
+            --radius-sm: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Nunito', 'Noto Sans KR', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            height: 100vh;
+            overflow: hidden; /* 전체 스크롤 방지, 내부 스크롤 사용 */
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 2. 상단 헤더 (Header) */
+        header {
+            height: var(--header-height);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 24px;
+            background: transparent;
+            z-index: 10;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            position: relative;
+            width: 32px;
+            height: 32px;
+        }
+
+        .heart {
+            position: absolute;
+            font-size: 20px;
+        }
+        
+        .heart.orange {
+            color: #FF7043;
+            left: 0;
+            top: 4px;
+            z-index: 2;
+        }
+
+        .heart.apricot {
+            color: #FFCCBC;
+            left: 12px;
+            top: 0;
+            z-index: 1;
+        }
+
+        .brand-text {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            letter-spacing: -0.5px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 16px;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            color: var(--text-primary);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .icon-btn.active::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 8px;
+            height: 8px;
+            background-color: var(--accent-coral);
+            border-radius: 50%;
+            border: 2px solid var(--bg-color);
+        }
+
+        /* 3. 메인 콘텐츠 영역 (Scrollable) */
+        main {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-bottom: calc(var(--nav-height) + 40px); /* FAB 공간 확보 */
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+        }
+
+        /* 스크롤바 숨기기 */
+        main::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Section Common */
+        .section {
+            padding: 0 24px;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+
+        /* B. 온도 섹션 (Warmth Meter) */
+        .warmth-container {
+            margin-top: 10px;
+        }
+
+        .warmth-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+        }
+
+        .progress-track {
+            height: 30px;
+            background-color: var(--white);
+            border: 1px solid rgba(93, 64, 55, 0.1);
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--accent-yellow);
+            width: 40%;
+            border-radius: 14px 0 0 14px; /* 오른쪽만 직각에 가깝게 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            transition: width 1s ease-out;
+        }
+
+        .progress-text {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            z-index: 2;
+            line-height: 30px;
+        }
+
+        /* C. 카드 캐러셀 (Card Carousel) */
+        .carousel-section {
+            padding: 0; /* Full width scroll */
+        }
+
+        .carousel-track {
+            display: flex;
+            gap: 16px;
+            overflow-x: auto;
+            padding: 10px 24px 30px 24px; /* Bottom padding for shadow */
+            scroll-snap-type: x mandatory;
+            
+            /* 드래그 가능 커서 표시 */
+            cursor: grab;
+            user-select: none; /* 드래그 시 텍스트 선택 방지 */
+        }
+
+        /* 드래그 중일 때 스타일 */
+        .carousel-track.dragging {
+            cursor: grabbing;
+            scroll-snap-type: none; /* 드래그 중에는 스냅 해제 */
+            scroll-behavior: auto; /* 부드러운 스크롤 대신 즉각 반응 */
+        }
+
+        .carousel-track::-webkit-scrollbar {
+            display: none;
+        }
+
+        .card {
+            min-width: 85%;
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            scroll-snap-align: center;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.3s ease;
+            
+            /* 카드 내부 요소 드래그 방지 및 텍스트 선택 방지 */
+            user-select: none; 
+            -webkit-user-drag: none;
+        }
+
+        /* Active Card Style */
+        .card.active {
+            border: 2px solid var(--accent-coral);
+            box-shadow: var(--shadow-soft);
+            background: var(--card-bg);
+            transform: scale(1);
+        }
+
+        /* Next Card Effect */
+        .card:not(.active) {
+            background: var(--white);
+            border: 1px solid var(--gray-btn);
+            opacity: 0.6;
+            transform: scale(0.95);
+        }
+
+        .card-img-wrapper {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem; /* 이모지 크기 */
+            pointer-events: none; /* 이미지(이모지)가 드래그 이벤트를 가로채지 않도록 설정 */
+        }
+
+        .card-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            pointer-events: none;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .btn-action {
+            padding: 12px 24px;
+            border-radius: 50px;
+            border: none;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: transform 0.1s;
+        }
+
+        .btn-action:active {
+            transform: scale(0.95);
+        }
+
+        .btn-write {
+            background-color: var(--accent-coral);
+            color: white; /* 텍스트 가독성을 위해 흰색 또는 검은색 선택 */
+            color: #2D2D2D;
+            flex: 2;
+        }
+
+        .btn-skip {
+            background-color: var(--gray-btn);
+            color: var(--text-secondary);
+            flex: 1;
+        }
+
+        /* D. 일정 리스트 (Upcoming Events) */
+        .events-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .event-item {
+            background: var(--white);
+            padding: 16px 20px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+        }
+
+        .event-icon-box {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+        
+        .bg-green { background: #E8F5E9; color: #43A047; }
+        .bg-orange { background: #FFF3E0; color: #FB8C00; }
+        .bg-blue { background: #E3F2FD; color: #1E88E5; }
+
+        .event-divider {
+            width: 2px;
+            height: 24px;
+            background-color: #EEE;
+            border-radius: 2px;
+        }
+
+        .event-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .event-date {
+            font-size: 0.8rem;
+            font-weight: 800;
+            color: var(--accent-coral);
+            margin-bottom: 2px;
+        }
+
+        .event-name {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* E. 하단 내비게이션 (Bottom Navigation) */
+        .bottom-nav-wrapper {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: var(--nav-height);
+            z-index: 100;
+            pointer-events: none; /* 래퍼는 클릭 통과 */
+        }
+
+        .nav-container {
+            width: 100%;
+            height: 100%;
+            background: var(--white);
+            pointer-events: auto;
+            border-top-left-radius: 24px;
+            border-top-right-radius: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 10px;
+            box-shadow: var(--shadow-nav);
+            
+            /* 핵심: 중앙 펀치홀 마스킹 */
+            /* 배경을 중앙에서 원형으로 파냄 */
+            -webkit-mask: radial-gradient(circle at 50% 0, transparent 38px, black 39px);
+            mask: radial-gradient(circle at 50% 0, transparent 38px, black 39px);
+            
+            position: relative;
+        }
+
+        /* 네비게이션 아이템 그룹 */
+        .nav-group {
+            display: flex;
+            gap: 4px;
+            flex: 1;
+            justify-content: space-around;
+        }
+
+        /* 중앙 여백용 */
+        .nav-spacer {
+            width: 80px; 
+            flex-shrink: 0;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            text-decoration: none;
+            color: var(--text-secondary);
+            padding: 8px;
+            width: 60px;
+            transition: color 0.3s;
+        }
+
+        .nav-item i {
+            font-size: 1.3rem;
+            margin-bottom: 2px;
+        }
+
+        .nav-item span {
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .nav-item.active {
+            color: var(--accent-coral);
+        }
+
+        /* FAB (Floating Action Button) */
+        .fab-container {
+            position: absolute;
+            bottom: 30px; /* 네비게이션 바 위로 올라오도록 */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 64px;
+            height: 64px;
+            pointer-events: auto;
+            z-index: 101;
+        }
+
+        .fab-main {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #FF8A65, #FF7043);
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            box-shadow: var(--shadow-fab);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* 중요: 버튼 주변에 투명한 테두리를 주어 내비게이션 바와 분리된 느낌 강조 */
+            outline: 8px solid transparent; 
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .fab-main:active {
+            transform: scale(0.9);
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- A. 헤더 -->
+    <header>
+        <div class="brand">
+            <div class="logo-icon">
+                <i class="fa-solid fa-heart heart orange"></i>
+                <i class="fa-solid fa-heart heart apricot"></i>
+            </div>
+            <span class="brand-text">Heart-Connect</span>
+        </div>
+        <div class="header-actions">
+            <button class="icon-btn active" aria-label="Notifications">
+                <i class="fa-regular fa-bell"></i>
+            </button>
+            <button class="icon-btn" aria-label="Settings">
+                <i class="fa-solid fa-gear"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- 메인 콘텐츠 -->
+    <main>
+        <!-- B. 온도 섹션 -->
+        <section class="section warmth-container">
+            <div class="warmth-label">
+                <span>Today's Warmth</span>
+                <span style="color: var(--text-primary)">2/5 Sent</span>
+            </div>
+            <div class="progress-track">
+                <!-- 텍스트는 바 중앙에 절대 위치 -->
+                <div class="progress-text">40%</div>
+                <div class="progress-fill" style="width: 40%"></div>
+            </div>
+        </section>
+
+        <!-- C. 메인 카드 캐러셀 -->
+        <section class="carousel-section">
+            <div class="carousel-track">
+                <!-- Card 1 (Active) -->
+                <div class="card active">
+                    <div class="card-img-wrapper">
+                        🎂
+                    </div>
+                    <h2 class="card-title">Kim (Birthday)</h2>
+                    <div class="card-actions">
+                        <button class="btn-action btn-write">
+                            <i class="fa-solid fa-pen"></i> Write
+                        </button>
+                        <button class="btn-action btn-skip">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Card 2 (Next) -->
+                <div class="card">
+                    <div class="card-img-wrapper">
+                        🎓
+                    </div>
+                    <h2 class="card-title">Lee (Graduation)</h2>
+                    <div class="card-actions">
+                        <button class="btn-action btn-write">
+                            <i class="fa-solid fa-pen"></i> Write
+                        </button>
+                        <button class="btn-action btn-skip">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Card 3 -->
+                <div class="card">
+                    <div class="card-img-wrapper">
+                        🎄
+                    </div>
+                    <h2 class="card-title">Christmas</h2>
+                    <div class="card-actions">
+                        <button class="btn-action btn-write">
+                            <i class="fa-solid fa-pen"></i> Write
+                        </button>
+                        <button class="btn-action btn-skip">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- D. 다가오는 일정 -->
+        <section class="section">
+            <h3 class="section-title">Upcoming Events</h3>
+            <div class="events-list">
+                <div class="event-item">
+                    <div class="event-icon-box bg-green">
+                        <i class="fa-solid fa-tree"></i>
+                    </div>
+                    <div class="event-divider"></div>
+                    <div class="event-details">
+                        <span class="event-date">Tomorrow</span>
+                        <span class="event-name">Mom (Hiking)</span>
+                    </div>
+                </div>
+
+                <div class="event-item">
+                    <div class="event-icon-box bg-orange">
+                        <i class="fa-regular fa-sun"></i>
+                    </div>
+                    <div class="event-divider"></div>
+                    <div class="event-details">
+                        <span class="event-date">D-7</span>
+                        <span class="event-name">Sunday Picnic</span>
+                    </div>
+                </div>
+
+                <div class="event-item">
+                    <div class="event-icon-box bg-blue">
+                        <i class="fa-solid fa-gift"></i>
+                    </div>
+                    <div class="event-divider"></div>
+                    <div class="event-details">
+                        <span class="event-date">01/11</span>
+                        <span class="event-name">Anniversary</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- E. 하단 내비게이션 바 -->
+    <div class="bottom-nav-wrapper">
+        <!-- 중앙 FAB 버튼 -->
+        <div class="fab-container">
+            <button class="fab-main" aria-label="Compose">
+                <i class="fa-solid fa-pen-nib"></i>
+            </button>
+        </div>
+
+        <!-- 내비게이션 배경 및 아이콘 -->
+        <nav class="nav-container">
+            <div class="nav-group">
+                <a href="#" class="nav-item active">
+                    <i class="fa-solid fa-house"></i>
+                    <span>Home</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fa-regular fa-address-book"></i>
+                    <span>Contacts</span>
+                </a>
+            </div>
+
+            <!-- 중앙 공백 (FAB 공간) -->
+            <div class="nav-spacer"></div>
+
+            <div class="nav-group">
+                <a href="#" class="nav-item">
+                    <i class="fa-regular fa-image"></i>
+                    <span>Gallery</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fa-regular fa-envelope"></i>
+                    <span>Mailbox</span>
+                </a>
+            </div>
+        </nav>
+    </div>
+
+    <script>
+        // 간단한 인터랙션 스크립트
+        
+        // 1. 네비게이션 탭 클릭 효과
+        const navItems = document.querySelectorAll('.nav-item');
+        navItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                document.querySelector('.nav-item.active').classList.remove('active');
+                item.classList.add('active');
+            });
+        });
+
+        // 2. FAB 클릭 효과 (Ripple 대신 간단한 애니메이션)
+        const fab = document.querySelector('.fab-main');
+        fab.addEventListener('click', () => {
+            fab.style.transform = 'scale(0.9) rotate(15deg)';
+            setTimeout(() => {
+                fab.style.transform = 'scale(1) rotate(0deg)';
+            }, 200);
+            
+            // 데모용 알림
+            alert('Write a new message!');
+        });
+
+        // 3. 카드 캐러셀 드래그 스크롤 (Drag to Scroll)
+        // PC 브라우저에서도 모바일처럼 마우스 드래그로 스크롤 할 수 있게 함
+        const slider = document.querySelector('.carousel-track');
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+
+        slider.addEventListener('mousedown', (e) => {
+            isDown = true;
+            slider.classList.add('dragging');
+            // 시작 지점 계산
+            startX = e.pageX - slider.offsetLeft;
+            scrollLeft = slider.scrollLeft;
+        });
+
+        slider.addEventListener('mouseleave', () => {
+            isDown = false;
+            slider.classList.remove('dragging');
+        });
+
+        slider.addEventListener('mouseup', () => {
+            isDown = false;
+            slider.classList.remove('dragging');
+        });
+
+        slider.addEventListener('mousemove', (e) => {
+            if(!isDown) return;
+            e.preventDefault(); // 텍스트 선택 등 기본 동작 방지
+            const x = e.pageX - slider.offsetLeft;
+            const walk = (x - startX) * 1.5; // 스크롤 속도 조절 (숫자가 클수록 빠름)
+            slider.scrollLeft = scrollLeft - walk;
+        });
+    </script>
+</body>
+</html>

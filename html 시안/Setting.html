@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Heart Connect</title>
+    <!-- 폰트 로드 -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+    <!-- 아이콘 로드 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* 1. 디자인 토큰 */
+        :root {
+            /* Colors */
+            --bg-base: #FFFDF5;
+            --bg-dot: #D7CCC8;
+            
+            --border-color: #5D4037;
+            --text-strong: #3E2723;
+            --text-sub: #795548;
+            
+            --accent-yellow: #FFF59D;
+            --accent-pink: #FFAB91;
+            --toggle-on: #A5D6A7;
+            --toggle-off: #D7CCC8;
+            
+            /* Dimensions */
+            --header-height: 60px;
+            --footer-height: 80px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Nunito', 'Noto Sans KR', sans-serif;
+            background-color: #F5F5F5; /* 앱 외부 배경 */
+            color: var(--text-strong);
+            display: flex;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* 앱 컨테이너 */
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            height: 100%;
+            background-color: var(--bg-base);
+            /* 도트 패턴 배경 */
+            background-image: radial-gradient(var(--bg-dot) 1.5px, transparent 1.5px);
+            background-size: 20px 20px;
+            
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        /* A. 헤더 */
+        .settings-header {
+            padding: 20px 24px 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .header-pill {
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 50px;
+            padding: 10px 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 0 rgba(93, 64, 55, 0.1);
+        }
+
+        .header-pill h1 {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--text-strong);
+        }
+
+        .header-pill i {
+            font-size: 1.2rem;
+            color: var(--text-strong);
+        }
+
+        /* B. 설정 리스트 */
+        .settings-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 24px 100px; /* 푸터 공간 확보 */
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .settings-list::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* 카드 스타일 */
+        .setting-card {
+            display: flex;
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 20px;
+            overflow: hidden;
+            height: 90px;
+            box-shadow: 0 4px 0 rgba(93, 64, 55, 0.05);
+            transition: transform 0.1s;
+        }
+        
+        .setting-card:active {
+            transform: scale(0.98);
+        }
+
+        /* 좌측 아이콘 영역 */
+        .card-left {
+            width: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-right: 2px solid var(--border-color);
+            font-size: 1.8rem;
+            color: var(--text-strong);
+        }
+        
+        .yellow-bg { background-color: var(--accent-yellow); }
+        .pink-bg { background-color: var(--accent-pink); }
+
+        /* 우측 콘텐츠 영역 */
+        .card-right {
+            flex: 1;
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .text-info {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .text-info h2 {
+            font-size: 1rem;
+            font-weight: 800;
+            color: var(--text-strong);
+        }
+
+        .text-info p {
+            font-size: 0.8rem;
+            color: var(--text-sub);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 600;
+        }
+
+        .text-info p i {
+            font-size: 0.9rem;
+        }
+
+        /* 액션 영역 (스위치/버튼) */
+        .action-area {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 6px;
+        }
+
+        .time-text {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-align: right;
+            color: var(--text-strong);
+            line-height: 1.2;
+        }
+
+        /* 토글 스위치 CSS */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+
+        .switch input { 
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--toggle-off);
+            transition: .4s;
+            border-radius: 34px;
+            border: 2px solid var(--border-color);
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 14px;
+            width: 14px;
+            left: 2px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+            border: 2px solid var(--border-color);
+        }
+
+        input:checked + .slider {
+            background-color: var(--toggle-on);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+
+        /* 백업 버튼 */
+        .btn-backup {
+            background-color: var(--accent-yellow);
+            border: 2px solid var(--border-color);
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.8rem;
+            cursor: pointer;
+            font-family: inherit;
+            color: var(--text-strong);
+        }
+
+        .icon-group {
+            display: flex;
+            gap: 8px;
+            color: var(--text-sub);
+            font-size: 1rem;
+            margin-bottom: 2px;
+        }
+
+        .link-contact {
+            text-decoration: underline;
+            color: var(--text-sub);
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        /* C. 하단 푸터 */
+        .settings-footer {
+            position: absolute;
+            bottom: 20px;
+            left: 24px;
+            right: 24px;
+            height: var(--footer-height);
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 20px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            box-shadow: 0 4px 0 rgba(93, 64, 55, 0.1);
+        }
+
+        .footer-item {
+            background: none;
+            border: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            color: var(--text-sub);
+            font-family: inherit;
+        }
+        
+        .footer-item i {
+            font-size: 1.4rem;
+            color: var(--text-strong);
+        }
+
+        .footer-item span {
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .footer-item:active {
+            opacity: 0.7;
+            transform: scale(0.95);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- 헤더 -->
+        <header class="settings-header">
+            <div class="header-pill">
+                <h1>설정 (Settings)</h1>
+                <i class="fa-solid fa-gear"></i>
+            </div>
+        </header>
+
+        <!-- 설정 리스트 -->
+        <main class="settings-list">
+            
+            <!-- 1. 알림 설정 -->
+            <article class="setting-card">
+                <div class="card-left yellow-bg">
+                    <i class="fa-regular fa-bell"></i>
+                </div>
+                <div class="card-right">
+                    <div class="text-info">
+                        <h2>Notifications</h2>
+                        <p><i class="fa-solid fa-moon"></i> Receive Alerts</p>
+                    </div>
+                    <div class="action-area">
+                        <span class="time-text">Set Time<br>9:00 AM</span>
+                        <label class="switch">
+                            <input type="checkbox" checked>
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                </div>
+            </article>
+
+            <!-- 2. 디자인 및 발송 -->
+            <article class="setting-card">
+                <div class="card-left pink-bg">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                </div>
+                <div class="card-right">
+                    <div class="text-info">
+                        <h2>Design & Sending</h2>
+                        <p><i class="fa-solid fa-heart"></i> 카드 하단 브랜딩</p>
+                    </div>
+                    <div class="action-area">
+                        <label class="switch">
+                            <input type="checkbox" checked>
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                </div>
+            </article>
+
+            <!-- 3. 데이터 관리 -->
+            <article class="setting-card">
+                <div class="card-left yellow-bg">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                </div>
+                <div class="card-right">
+                    <div class="text-info">
+                        <h2>Data Management</h2>
+                        <p><i class="fa-solid fa-rotate"></i> Sync Contacts</p>
+                    </div>
+                    <div class="action-area">
+                        <div class="icon-group">
+                            <i class="fa-solid fa-file-export"></i>
+                            <i class="fa-solid fa-file-import"></i>
+                        </div>
+                        <button class="btn-backup">Backup</button>
+                    </div>
+                </div>
+            </article>
+
+            <!-- 4. 앱 정보 -->
+            <article class="setting-card">
+                <div class="card-left yellow-bg">
+                    <i class="fa-solid fa-circle-info"></i>
+                </div>
+                <div class="card-right">
+                    <div class="text-info">
+                        <h2>App Info & Support</h2>
+                        <p>Version v1.0.0</p>
+                    </div>
+                    <div class="action-area">
+                        <a href="#" class="link-contact">Contact Us</a>
+                    </div>
+                </div>
+            </article>
+
+        </main>
+
+        <!-- 푸터 메뉴 -->
+        <footer class="settings-footer">
+            <button class="footer-item">
+                <i class="fa-regular fa-user"></i>
+                <span>Account</span>
+            </button>
+            <button class="footer-item">
+                <i class="fa-solid fa-globe"></i>
+                <span>Language</span>
+            </button>
+            <button class="footer-item">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                <span>Logout</span>
+            </button>
+        </footer>
+    </div>
+
+</body>
+</html>

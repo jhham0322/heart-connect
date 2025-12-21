@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Record - Heart Connect</title>
+    <!-- 폰트 로드 -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+    <!-- 아이콘 로드 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* 1. 디자인 토큰 (Design Tokens) */
+        :root {
+            /* Palette */
+            --bg-base: #FFFDF5;
+            --bg-dot: #D7CCC8;
+            --tab-inactive: #E0E0E0;
+            --tab-active: #FFAB91; /* Soft Coral */
+            
+            --card-mint: #C8E6C9; /* 수신 메시지 배경 */
+            --card-yellow: #FFF9C4; /* 발신 메시지 배경 */
+            --card-border: rgba(93, 64, 55, 0.1);
+
+            --text-strong: #3E2723;
+            --text-sub: #5D4037;
+            
+            --btn-cta: #FF7043;
+            --btn-cta-shadow: #D84315;
+
+            /* Dimensions */
+            --nav-height: 70px;
+            --header-height: 60px;
+            --tab-height: 45px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Nunito', 'Noto Sans KR', sans-serif;
+            background-color: #F5F5F5; /* 앱 외부 배경 */
+            color: var(--text-strong);
+            display: flex;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* 앱 컨테이너 (모바일 뷰포트 제한) */
+        .app-container {
+            width: 100%;
+            max-width: 480px; /* 태블릿/PC 대응 */
+            height: 100%;
+            background-color: var(--bg-base);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        /* 2. 상단 탭 (Top Tabs) */
+        .top-tabs {
+            height: var(--tab-height);
+            display: flex;
+            align-items: flex-end;
+            padding: 0 16px;
+            background-color: var(--bg-base); /* 탭 배경색 */
+            z-index: 1;
+            /* 스크롤 추가 */
+            overflow-x: auto;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch; /* 모바일 부드러운 스크롤 */
+        }
+
+        /* 스크롤바 숨기기 */
+        .top-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-item {
+            border: none;
+            outline: none;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 700;
+            padding: 10px 24px 8px;
+            border-radius: 12px 12px 0 0;
+            font-size: 0.9rem;
+            position: relative;
+            transition: all 0.2s;
+            
+            /* 가득 차게 + 스크롤 대응 */
+            flex: 1 0 auto; /* 공간이 남으면 채우고(1), 줄어들지 않음(0) */
+            min-width: 100px; /* 최소 너비 설정 (이보다 좁아지면 스크롤 발생) */
+            text-align: center; /* 텍스트 중앙 정렬 */
+        }
+
+        /* 비활성 탭 */
+        .tab-item.inactive {
+            background-color: var(--tab-inactive);
+            color: #757575;
+            margin-right: -10px; /* 겹치는 효과 */
+            z-index: 1;
+            box-shadow: inset 0 -2px 5px rgba(0,0,0,0.05);
+        }
+
+        /* 활성 탭 */
+        .tab-item.active {
+            background-color: var(--tab-active);
+            color: var(--text-strong);
+            z-index: 2;
+            padding-bottom: 12px; /* 조금 더 높게 */
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
+        }
+
+        .tab-item i {
+            margin-right: 4px;
+            font-size: 0.8rem;
+        }
+
+        /* 3. 메인 시트 (Memory Sheet) */
+        .memory-sheet {
+            flex: 1;
+            background-color: var(--bg-base);
+            /* 도트 패턴 구현 */
+            background-image: radial-gradient(var(--bg-dot) 1.5px, transparent 1.5px);
+            background-size: 20px 20px;
+            
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            /* 탭보다 위로 올라오게 하여 연결감 형성 */
+            margin-top: -10px; 
+            z-index: 3;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.03);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* B. 콘텐츠 헤더 */
+        .sheet-header {
+            height: var(--header-height);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            background: rgba(255, 253, 245, 0.95); /* 반투명 배경 */
+            backdrop-filter: blur(5px);
+            border-bottom: 2px dashed rgba(93, 64, 55, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .user-title {
+            font-size: 1.1rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-title i {
+            color: #FF5252;
+        }
+
+        .btn-close {
+            background: #EFEBE9;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            color: var(--text-sub);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 스크롤 영역 */
+        .scroll-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 20px 100px 20px; /* 하단 내비게이션 고려 */
+        }
+        
+        .scroll-area::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* C. 메인 액션 버튼 (CTA) */
+        .cta-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .btn-send-card {
+            width: 100%;
+            padding: 14px;
+            border-radius: 50px;
+            border: 3px double #FFD54F; /* 노란색 이중 테두리 */
+            background: linear-gradient(to bottom, #FFAB91, #FF8A65);
+            color: white;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 0 var(--btn-cta-shadow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: transform 0.1s;
+        }
+
+        .btn-send-card:active {
+            transform: translateY(4px);
+            box-shadow: none;
+        }
+
+        /* D. 타임라인 리스트 (Tickets) */
+        .timeline-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .ticket-card {
+            display: flex;
+            border-radius: 12px;
+            padding: 0;
+            position: relative;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            overflow: hidden;
+            border: 1px solid rgba(0,0,0,0.02);
+            transition: transform 0.2s;
+        }
+
+        .ticket-card:hover {
+            transform: translateY(-2px);
+        }
+
+        /* 색상 변형 */
+        .ticket-card.mint {
+            background-color: var(--card-mint);
+        }
+        .ticket-card.yellow {
+            background-color: var(--card-yellow);
+        }
+
+        /* 티켓 좌측 (날짜/아이콘) */
+        .ticket-left {
+            width: 70px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 16px 0;
+            gap: 6px;
+            color: var(--text-sub);
+        }
+
+        .ticket-left i {
+            font-size: 1.2rem;
+            opacity: 0.7;
+        }
+
+        .ticket-left .date {
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        /* 구분선 (수직 점선) */
+        .ticket-divider {
+            width: 2px;
+            background: transparent;
+            border-left: 2px dashed rgba(93, 64, 55, 0.2);
+            position: relative;
+            margin: 10px 0;
+        }
+
+        /* 티켓 펀치홀 효과 (옵션) */
+        .ticket-divider::before, .ticket-divider::after {
+            content: '';
+            position: absolute;
+            left: -6px;
+            width: 10px;
+            height: 10px;
+            background-color: var(--bg-base); /* 배경색과 동일하게 */
+            border-radius: 50%;
+            /* 도트 패턴 위에서도 자연스럽게 보이기 위해 약간의 그림자나 조정 필요할 수 있음 */
+        }
+        .ticket-divider::before { top: -15px; }
+        .ticket-divider::after { bottom: -15px; }
+
+
+        /* 티켓 우측 (콘텐츠) */
+        .ticket-right {
+            flex: 1;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .thumb {
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            object-fit: cover;
+            background: rgba(255,255,255,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem; /* 이모지용 */
+        }
+
+        .desc {
+            font-size: 0.9rem;
+            font-weight: 600;
+            line-height: 1.4;
+            color: var(--text-strong);
+        }
+
+        /* E. 리스트 구분선 (Divider) */
+        .list-divider {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 8px 0;
+            opacity: 0.6;
+        }
+
+        .list-divider .line {
+            height: 1px;
+            width: 40px;
+            border-top: 2px dotted #8D6E63;
+        }
+
+        .list-divider i {
+            color: #FFB74D;
+            font-size: 0.8rem;
+        }
+
+        /* F. 하단 내비게이션 */
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: var(--nav-height);
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            box-shadow: 0 -4px 15px rgba(0,0,0,0.05);
+            z-index: 20;
+        }
+
+        .nav-item {
+            text-decoration: none;
+            color: #9E9E9E;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.7rem;
+            position: relative;
+            width: 60px;
+        }
+
+        .nav-item i {
+            font-size: 1.4rem;
+            z-index: 2;
+        }
+
+        /* 활성 탭 효과 (Glow) */
+        .nav-item.active {
+            color: #FF7043;
+            font-weight: 700;
+        }
+
+        .nav-item.active .glow-effect {
+            position: absolute;
+            top: -5px;
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle, rgba(255,171,145,0.4) 0%, rgba(255,255,255,0) 70%);
+            border-radius: 50%;
+            z-index: 1;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- A. 상단 탭 -->
+        <nav class="top-tabs">
+            <button class="tab-item inactive">내 사람들</button>
+            <button class="tab-item active">
+                <i class="fa-solid fa-star"></i> 추억 기록
+            </button>
+        </nav>
+
+        <!-- 메인 콘텐츠 시트 -->
+        <main class="memory-sheet">
+            <!-- B. 헤더 -->
+            <header class="sheet-header">
+                <h2 class="user-title">
+                    <i class="fa-solid fa-heart"></i>
+                    With 김철수
+                </h2>
+                <button class="btn-close">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </header>
+
+            <!-- 스크롤 영역 -->
+            <div class="scroll-area">
+                <!-- C. 메인 액션 버튼 -->
+                <div class="cta-container">
+                    <button class="btn-send-card" onclick="alert('카드 작성 화면으로 이동합니다.')">
+                        <i class="fa-regular fa-envelope"></i>
+                        <span>김철수님에게 카드 쓰기</span>
+                    </button>
+                </div>
+
+                <!-- D. 타임라인 리스트 -->
+                <ul class="timeline-list">
+                    <!-- 수신 메시지 (민트) -->
+                    <li class="ticket-card mint">
+                        <div class="ticket-left">
+                            <i class="fa-solid fa-envelope-open-text"></i>
+                            <span class="date">오늘</span>
+                        </div>
+                        <div class="ticket-divider"></div>
+                        <div class="ticket-right">
+                            <div class="thumb">🎂</div> <!-- 이미지 대신 이모지 사용 -->
+                            <p class="desc">김철수님이 보낸<br>생일 축하 ♡</p>
+                        </div>
+                    </li>
+
+                    <!-- E. 리스트 구분선 -->
+                    <li class="list-divider">
+                        <span class="line"></span>
+                        <i class="fa-solid fa-star"></i>
+                        <span class="line"></span>
+                    </li>
+
+                    <!-- 발신 메시지 (노랑) -->
+                    <li class="ticket-card yellow">
+                        <div class="ticket-left">
+                            <i class="fa-regular fa-paper-plane"></i>
+                            <span class="date">어제</span>
+                        </div>
+                        <div class="ticket-divider"></div>
+                        <div class="ticket-right">
+                            <div class="thumb">💐</div>
+                            <p class="desc">감사 답장 보냄<br><span style="font-size:0.8rem; color:#8D6E63; font-weight:400;">(읽음)</span></p>
+                        </div>
+                    </li>
+
+                    <!-- 추가 예시: 수신 -->
+                    <li class="ticket-card mint">
+                        <div class="ticket-left">
+                            <i class="fa-solid fa-gift"></i>
+                            <span class="date">3일 전</span>
+                        </div>
+                        <div class="ticket-divider"></div>
+                        <div class="ticket-right">
+                            <div class="thumb">☕</div>
+                            <p class="desc">김철수님이 보낸<br>커피 기프티콘</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </main>
+
+        <!-- F. 하단 내비게이션 -->
+        <nav class="bottom-nav">
+            <a href="#" class="nav-item">
+                <i class="fa-solid fa-house"></i>
+                <span>홈</span>
+            </a>
+            <a href="#" class="nav-item active">
+                <div class="glow-effect"></div>
+                <i class="fa-solid fa-user-group"></i>
+                <span>인연</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fa-solid fa-book-open"></i>
+                <span>기록</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fa-solid fa-gear"></i>
+                <span>설정</span>
+            </a>
+        </nav>
+    </div>
+
+</body>
+</html>

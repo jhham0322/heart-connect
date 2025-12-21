@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gallery - Heart Connect</title>
+    <!-- 폰트 로드 -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+    <!-- 아이콘 로드 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* 1. 디자인 토큰 */
+        :root {
+            /* Palette (Pastel) */
+            --bg-base: #F5F5F5;
+            
+            --card-pink: #EF9A9A;
+            --card-yellow: #FFF59D;
+            --card-green: #A5D6A7;
+            --card-blue: #90CAF9;
+            --card-purple: #CE93D8;
+            
+            --tab-active: #90CAF9;
+            --tab-inactive: #EEEEEE;
+            
+            --fab-color: #FFCC80;
+            
+            --text-dark: #37474F;
+            --text-light: #FFFFFF;
+            --text-label: #455A64;
+
+            /* Dimensions */
+            --nav-height: 70px;
+            --header-height: 60px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Nunito', 'Noto Sans KR', sans-serif;
+            background-color: #E0E0E0; /* 앱 외부 배경 */
+            color: var(--text-dark);
+            display: flex;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* 앱 컨테이너 */
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            height: 100%;
+            background-color: var(--bg-base);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        /* 2. 상단 헤더 & 세그먼트 컨트롤 */
+        .gallery-header {
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: transparent;
+            padding: 0 20px;
+            z-index: 10;
+        }
+
+        .segment-control {
+            display: flex;
+            background-color: white;
+            padding: 4px;
+            border-radius: 50px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .segment-btn {
+            border: none;
+            padding: 8px 24px;
+            border-radius: 50px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .segment-btn.active {
+            background-color: var(--tab-active);
+            color: white;
+            box-shadow: 0 2px 4px rgba(144, 202, 249, 0.4);
+        }
+
+        .segment-btn.inactive {
+            background-color: transparent;
+            color: #9E9E9E;
+        }
+
+        /* 3. 갤러리 그리드 영역 */
+        .gallery-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px 20px 100px; /* 하단 FAB 및 내비게이션 공간 */
+        }
+        
+        .gallery-content::-webkit-scrollbar {
+            display: none;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* 3열 고정 */
+            gap: 12px;
+        }
+
+        .grid-card {
+            aspect-ratio: 1 / 1; /* 정사각형 비율 유지 */
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.1s;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .grid-card:active {
+            transform: scale(0.95);
+        }
+
+        /* 카드 색상 */
+        .pink { background-color: var(--card-pink); }
+        .yellow { background-color: var(--card-yellow); }
+        .green { background-color: var(--card-green); }
+        .blue { background-color: var(--card-blue); }
+        .purple { background-color: var(--card-purple); }
+        .white { background-color: white; }
+
+        /* 카드 내부 요소 */
+        .card-label {
+            position: absolute;
+            top: 8px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: rgba(0,0,0,0.5);
+            text-transform: uppercase;
+        }
+
+        .icon-wrapper {
+            font-size: 2rem;
+            color: white;
+            /* 텍스트 쉐도우로 롱 섀도우 흉내 (CSS 한계) */
+            text-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+        }
+        
+        /* 폴더 스타일 */
+        .folder-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: white;
+        }
+        
+        .folder-name {
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* Quotes View Styling */
+        .quotes-list {
+            display: none; /* 기본 숨김 */
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .quote-card {
+            padding: 24px;
+            border-radius: 16px;
+            color: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .quote-card p {
+            font-size: 1.1rem;
+            font-weight: 700;
+            line-height: 1.4;
+        }
+        
+        .quote-card span {
+            font-size: 0.85rem;
+            opacity: 0.9;
+            align-self: flex-end;
+        }
+
+        /* 4. FAB (Floating Action Button) */
+        .fab-add {
+            position: absolute;
+            bottom: 90px; /* 내비게이션 위 */
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background-color: var(--fab-color);
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 10px rgba(255, 204, 128, 0.6);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 20;
+            transition: transform 0.2s;
+        }
+
+        .fab-add:active {
+            transform: scale(0.9) rotate(90deg);
+        }
+
+        /* 5. 하단 내비게이션 */
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: var(--nav-height);
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            box-shadow: 0 -4px 15px rgba(0,0,0,0.05);
+            z-index: 30;
+        }
+
+        .nav-item {
+            text-decoration: none;
+            color: #90A4AE;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            font-size: 0.7rem;
+            width: 60px;
+            height: 100%;
+            position: relative;
+        }
+
+        .nav-item i {
+            font-size: 1.4rem;
+            z-index: 2;
+            transition: all 0.2s;
+        }
+
+        /* 활성 내비게이션 아이템 (Glow Effect) */
+        .nav-item.active-glow {
+            color: var(--card-blue);
+            font-weight: 700;
+        }
+
+        .nav-item.active-glow .glow-bg {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle, rgba(144, 202, 249, 0.3) 0%, transparent 70%);
+            border-radius: 50%;
+            top: 5px;
+            z-index: 1;
+        }
+
+        .nav-item.active-glow i {
+            transform: translateY(-2px);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- A. 헤더 -->
+        <header class="gallery-header">
+            <div class="segment-control">
+                <!-- ID 추가 및 JS 연동을 위한 식별자 -->
+                <button class="segment-btn active" id="tab-gallery">Gallery</button>
+                <button class="segment-btn inactive" id="tab-quotes">Quotes</button>
+            </div>
+        </header>
+
+        <!-- B. 그리드 콘텐츠 -->
+        <main class="gallery-content">
+            <!-- 갤러리 뷰 -->
+            <div class="gallery-grid" id="view-gallery">
+                <!-- 아이템 1 -->
+                <article class="grid-card pink">
+                    <span class="card-label">Birthday</span>
+                    <div class="icon-wrapper">
+                        <i class="fa-solid fa-cake-candles"></i>
+                    </div>
+                </article>
+
+                <!-- 아이템 2 -->
+                <article class="grid-card yellow">
+                    <span class="card-label">Thanks</span>
+                    <div class="icon-wrapper">
+                        <i class="fa-solid fa-heart"></i>
+                    </div>
+                </article>
+
+                <!-- 아이템 3 -->
+                <article class="grid-card green">
+                    <div class="icon-wrapper">
+                        <i class="fa-solid fa-envelope"></i>
+                    </div>
+                </article>
+
+                <!-- 아이템 4 (폴더) -->
+                <article class="grid-card blue">
+                    <div class="folder-wrapper">
+                        <i class="fa-regular fa-folder-open" style="font-size: 2rem;"></i>
+                        <span class="folder-name">My Photos</span>
+                    </div>
+                </article>
+
+                <!-- 아이템 5 -->
+                <article class="grid-card purple">
+                    <span class="card-label">Snow</span>
+                    <div class="icon-wrapper">
+                        <i class="fa-regular fa-snowflake"></i>
+                    </div>
+                </article>
+
+                <!-- 아이템 6 -->
+                <article class="grid-card pink">
+                    <div class="icon-wrapper">
+                        <i class="fa-solid fa-gift"></i>
+                    </div>
+                </article>
+
+                <!-- 아이템 7 -->
+                <article class="grid-card white">
+                    <img src="https://placehold.co/100x100/png?text=IMG" alt="User Photo" style="width:100%; height:100%; object-fit:cover; opacity:0.8;">
+                </article>
+
+                <!-- 아이템 8 -->
+                <article class="grid-card yellow">
+                    <div class="icon-wrapper">
+                        <i class="fa-solid fa-star"></i>
+                    </div>
+                </article>
+
+                <!-- 아이템 9 -->
+                <article class="grid-card green">
+                    <span class="card-label">Travel</span>
+                    <div class="icon-wrapper">
+                        <i class="fa-solid fa-plane"></i>
+                    </div>
+                </article>
+            </div>
+
+            <!-- 명언(Quotes) 뷰 -->
+            <div class="quotes-list" id="view-quotes">
+                <article class="quote-card blue">
+                    <p>"Love looks not with the eyes, but with the mind."</p>
+                    <span>- William Shakespeare</span>
+                </article>
+                <article class="quote-card pink">
+                    <p>"The best thing to hold onto in life is each other."</p>
+                    <span>- Audrey Hepburn</span>
+                </article>
+                <article class="quote-card purple">
+                    <p>"Life is the flower for which love is the honey."</p>
+                    <span>- Victor Hugo</span>
+                </article>
+            </div>
+        </main>
+
+        <!-- C. FAB -->
+        <button class="fab-add">
+            <i class="fa-solid fa-plus"></i>
+        </button>
+
+        <!-- D. 하단 내비게이션 -->
+        <nav class="bottom-nav">
+            <a href="#" class="nav-item">
+                <i class="fa-solid fa-hard-drive"></i>
+                <span>Storage</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fa-regular fa-images"></i>
+                <span>Albums</span>
+            </a>
+            <!-- 중앙 활성 아이콘 -->
+            <a href="#" class="nav-item active-glow">
+                <div class="glow-bg"></div>
+                <i class="fa-solid fa-cubes"></i>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fa-regular fa-compass"></i>
+                <span>Explore</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fa-solid fa-bars"></i>
+                <span>Menu</span>
+            </a>
+        </nav>
+    </div>
+
+    <script>
+        // 탭 전환 로직
+        const tabGallery = document.getElementById('tab-gallery');
+        const tabQuotes = document.getElementById('tab-quotes');
+        const viewGallery = document.getElementById('view-gallery');
+        const viewQuotes = document.getElementById('view-quotes');
+
+        function activateTab(tabName) {
+            if (tabName === 'gallery') {
+                // 갤러리 활성화
+                tabGallery.classList.add('active');
+                tabGallery.classList.remove('inactive');
+                tabQuotes.classList.remove('active');
+                tabQuotes.classList.add('inactive');
+                
+                viewGallery.style.display = 'grid';
+                viewQuotes.style.display = 'none';
+            } else {
+                // 명언 활성화
+                tabQuotes.classList.add('active');
+                tabQuotes.classList.remove('inactive');
+                tabGallery.classList.remove('active');
+                tabGallery.classList.add('inactive');
+                
+                viewGallery.style.display = 'none';
+                viewQuotes.style.display = 'flex';
+            }
+        }
+
+        // 이벤트 리스너 추가
+        tabGallery.addEventListener('click', () => activateTab('gallery'));
+        tabQuotes.addEventListener('click', () => activateTab('quotes'));
+    </script>
+</body>
+</html>
