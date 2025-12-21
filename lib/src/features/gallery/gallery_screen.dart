@@ -6,6 +6,9 @@ import 'package:reorderable_grid_view/reorderable_grid_view.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../database/database_provider.dart';
+import '../database/app_database.dart';
 
 // --- Model ---
 class CategoryItem {
@@ -205,15 +208,15 @@ class _GalleryScreenState extends State<GalleryScreen> {
 }
 
 // --- Detail Screen ---
-class GalleryDetailScreen extends StatefulWidget {
+class GalleryDetailScreen extends ConsumerStatefulWidget {
   final CategoryItem category;
   const GalleryDetailScreen({super.key, required this.category});
 
   @override
-  State<GalleryDetailScreen> createState() => _GalleryDetailScreenState();
+  ConsumerState<GalleryDetailScreen> createState() => _GalleryDetailScreenState();
 }
 
-class _GalleryDetailScreenState extends State<GalleryDetailScreen> {
+class _GalleryDetailScreenState extends ConsumerState<GalleryDetailScreen> {
   List<String> _images = [];
   bool _isLoading = true;
 
@@ -262,7 +265,7 @@ class _GalleryDetailScreenState extends State<GalleryDetailScreen> {
   }
 
   void _openImageViewer(int index) {
-     Navigator.push(context, MaterialPageRoute(builder: (_) => 
+     Navigator.of(context, rootNavigator: true).push(MaterialPageRoute(builder: (_) => 
        _FullScreenViewer(images: _images, initialIndex: index)
      ));
   }
@@ -279,61 +282,81 @@ class _GalleryDetailScreenState extends State<GalleryDetailScreen> {
       ),
       body: _isLoading 
         ? const Center(child: CircularProgressIndicator())
-        : _images.isEmpty 
-           ? Center(
-               child: Column(
-                 mainAxisAlignment: MainAxisAlignment.center,
-                 children: [
-                    Icon(widget.category.icon, size: 64, color: Colors.grey[300]),
-                    const SizedBox(height: 16),
-                    Text("No images in ${widget.category.title}", style: TextStyle(color: Colors.grey[500])),
-                 ],
-               ))
-           : GridView.builder(
-              padding: const EdgeInsets.only(bottom: 50),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                crossAxisSpacing: 4,
-                mainAxisSpacing: 4,
-              ),
-              itemCount: _images.length,
-              itemBuilder: (context, index) {
-                return GestureDetector(
-                  onTap: () => _openImageViewer(index),
-                  child: Hero(
-                    tag: _images[index],
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.grey[200],
-                        image: DecorationImage(
-                          image: AssetImage(_images[index]),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
+            : StreamBuilder<List<GalleryFavorite>>(
+               stream: ref.watch(appDatabaseProvider).watchAllGalleryFavorites(),
+               builder: (context, snapshot) {
+                 final favPaths = (snapshot.data ?? []).map((e) => e.assetPath).toSet();
+                 
+                 return GridView.builder(
+                    padding: const EdgeInsets.fromLTRB(4, 4, 4, 120),
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3,
+                      crossAxisSpacing: 4,
+                      mainAxisSpacing: 4,
                     ),
-                  ),
-                );
-              },
-           ),
+                    itemCount: _images.length,
+                    itemBuilder: (context, index) {
+                      final path = _images[index];
+                      final isFav = favPaths.contains(path);
+                      
+                      return GestureDetector(
+                        onTap: () => _openImageViewer(index),
+                        child: Hero(
+                          tag: path,
+                          child: Stack(
+                            children: [
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[200],
+                                  image: DecorationImage(
+                                    image: AssetImage(path),
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              ),
+                              if (isFav)
+                                Positioned(
+                                  top: 8,
+                                  right: 8,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(4),
+                                    decoration: BoxDecoration(
+                                      color: Colors.black.withOpacity(0.3),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      FontAwesomeIcons.solidHeart, 
+                                      color: Color(0xFFFF7043), 
+                                      size: 14
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                 );
+               }
+            ),
     );
   }
 }
 
 // --- Full Screen Viewer (Stateful for Nav & Buttons) ---
-class _FullScreenViewer extends StatefulWidget {
+class _FullScreenViewer extends ConsumerStatefulWidget {
   final List<String> images;
   final int initialIndex;
 
   const _FullScreenViewer({required this.images, required this.initialIndex});
 
   @override
-  State<_FullScreenViewer> createState() => _FullScreenViewerState();
+  ConsumerState<_FullScreenViewer> createState() => _FullScreenViewerState();
 }
 
-class _FullScreenViewerState extends State<_FullScreenViewer> {
+class _FullScreenViewerState extends ConsumerState<_FullScreenViewer> {
   late PageController _pageController;
   late int _currentIndex;
-  final Set<String> _favorites = {}; // In-memory favorites for demo
 
   @override
   void initState() {
@@ -381,29 +404,36 @@ class _FullScreenViewerState extends State<_FullScreenViewer> {
             ),
           ),
 
-          Positioned(
-            top: 40,
-            left: 20,
-            child: IconButton(
-              icon: _favorites.contains(widget.images[_currentIndex])
-                  ? Stack(
-                      children: [
-                        const Icon(FontAwesomeIcons.solidHeart, color: Color(0xFFFF7043), size: 28),
-                        const Icon(FontAwesomeIcons.heart, color: Colors.white, size: 28),
-                      ],
-                    )
-                  : const Icon(FontAwesomeIcons.heart, color: Colors.white, size: 28),
-              onPressed: () {
-                setState(() {
-                  final currentImage = widget.images[_currentIndex];
-                  if (_favorites.contains(currentImage)) {
-                    _favorites.remove(currentImage);
-                  } else {
-                    _favorites.add(currentImage);
-                  }
-                });
-              },
-            ),
+          StreamBuilder<List<GalleryFavorite>>(
+            stream: ref.watch(appDatabaseProvider).watchAllGalleryFavorites(),
+            builder: (context, snapshot) {
+              final favPaths = (snapshot.data ?? []).map((e) => e.assetPath).toSet();
+              final currentPath = widget.images[_currentIndex];
+              final isFav = favPaths.contains(currentPath);
+              
+              return Positioned(
+                top: 40,
+                left: 20,
+                child: IconButton(
+                  icon: isFav
+                      ? Stack(
+                          children: [
+                            const Icon(FontAwesomeIcons.solidHeart, color: Color(0xFFFF7043), size: 28),
+                            const Icon(FontAwesomeIcons.heart, color: Colors.white, size: 28),
+                          ],
+                        )
+                      : const Icon(FontAwesomeIcons.heart, color: Colors.white, size: 28),
+                  onPressed: () async {
+                    final db = ref.read(appDatabaseProvider);
+                    if (isFav) {
+                      await db.removeGalleryFavorite(currentPath);
+                    } else {
+                      await db.addGalleryFavorite(currentPath);
+                    }
+                  },
+                ),
+              );
+            }
           ),
 
           // 3. Navigation Arrows (Left/Right)

@@ -1084,18 +1084,177 @@ class TemplatesCompanion extends UpdateCompanion<Template> {
   }
 }
 
+class $GalleryFavoritesTable extends GalleryFavorites
+    with TableInfo<$GalleryFavoritesTable, GalleryFavorite> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $GalleryFavoritesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _assetPathMeta =
+      const VerificationMeta('assetPath');
+  @override
+  late final GeneratedColumn<String> assetPath = GeneratedColumn<String>(
+      'asset_path', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [assetPath];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'gallery_favorites';
+  @override
+  VerificationContext validateIntegrity(Insertable<GalleryFavorite> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('asset_path')) {
+      context.handle(_assetPathMeta,
+          assetPath.isAcceptableOrUnknown(data['asset_path']!, _assetPathMeta));
+    } else if (isInserting) {
+      context.missing(_assetPathMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {assetPath};
+  @override
+  GalleryFavorite map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return GalleryFavorite(
+      assetPath: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}asset_path'])!,
+    );
+  }
+
+  @override
+  $GalleryFavoritesTable createAlias(String alias) {
+    return $GalleryFavoritesTable(attachedDatabase, alias);
+  }
+}
+
+class GalleryFavorite extends DataClass implements Insertable<GalleryFavorite> {
+  final String assetPath;
+  const GalleryFavorite({required this.assetPath});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['asset_path'] = Variable<String>(assetPath);
+    return map;
+  }
+
+  GalleryFavoritesCompanion toCompanion(bool nullToAbsent) {
+    return GalleryFavoritesCompanion(
+      assetPath: Value(assetPath),
+    );
+  }
+
+  factory GalleryFavorite.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return GalleryFavorite(
+      assetPath: serializer.fromJson<String>(json['assetPath']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'assetPath': serializer.toJson<String>(assetPath),
+    };
+  }
+
+  GalleryFavorite copyWith({String? assetPath}) => GalleryFavorite(
+        assetPath: assetPath ?? this.assetPath,
+      );
+  GalleryFavorite copyWithCompanion(GalleryFavoritesCompanion data) {
+    return GalleryFavorite(
+      assetPath: data.assetPath.present ? data.assetPath.value : this.assetPath,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('GalleryFavorite(')
+          ..write('assetPath: $assetPath')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => assetPath.hashCode;
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is GalleryFavorite && other.assetPath == this.assetPath);
+}
+
+class GalleryFavoritesCompanion extends UpdateCompanion<GalleryFavorite> {
+  final Value<String> assetPath;
+  final Value<int> rowid;
+  const GalleryFavoritesCompanion({
+    this.assetPath = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  GalleryFavoritesCompanion.insert({
+    required String assetPath,
+    this.rowid = const Value.absent(),
+  }) : assetPath = Value(assetPath);
+  static Insertable<GalleryFavorite> custom({
+    Expression<String>? assetPath,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (assetPath != null) 'asset_path': assetPath,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  GalleryFavoritesCompanion copyWith(
+      {Value<String>? assetPath, Value<int>? rowid}) {
+    return GalleryFavoritesCompanion(
+      assetPath: assetPath ?? this.assetPath,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (assetPath.present) {
+      map['asset_path'] = Variable<String>(assetPath.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('GalleryFavoritesCompanion(')
+          ..write('assetPath: $assetPath, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $ContactsTable contacts = $ContactsTable(this);
   late final $HistoryTable history = $HistoryTable(this);
   late final $TemplatesTable templates = $TemplatesTable(this);
+  late final $GalleryFavoritesTable galleryFavorites =
+      $GalleryFavoritesTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [contacts, history, templates];
+      [contacts, history, templates, galleryFavorites];
 }
 
 typedef $$ContactsTableCreateCompanionBuilder = ContactsCompanion Function({
@@ -1549,6 +1708,71 @@ class $$TemplatesTableOrderingComposer
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
+typedef $$GalleryFavoritesTableCreateCompanionBuilder
+    = GalleryFavoritesCompanion Function({
+  required String assetPath,
+  Value<int> rowid,
+});
+typedef $$GalleryFavoritesTableUpdateCompanionBuilder
+    = GalleryFavoritesCompanion Function({
+  Value<String> assetPath,
+  Value<int> rowid,
+});
+
+class $$GalleryFavoritesTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $GalleryFavoritesTable,
+    GalleryFavorite,
+    $$GalleryFavoritesTableFilterComposer,
+    $$GalleryFavoritesTableOrderingComposer,
+    $$GalleryFavoritesTableCreateCompanionBuilder,
+    $$GalleryFavoritesTableUpdateCompanionBuilder> {
+  $$GalleryFavoritesTableTableManager(
+      _$AppDatabase db, $GalleryFavoritesTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          filteringComposer:
+              $$GalleryFavoritesTableFilterComposer(ComposerState(db, table)),
+          orderingComposer:
+              $$GalleryFavoritesTableOrderingComposer(ComposerState(db, table)),
+          updateCompanionCallback: ({
+            Value<String> assetPath = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              GalleryFavoritesCompanion(
+            assetPath: assetPath,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String assetPath,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              GalleryFavoritesCompanion.insert(
+            assetPath: assetPath,
+            rowid: rowid,
+          ),
+        ));
+}
+
+class $$GalleryFavoritesTableFilterComposer
+    extends FilterComposer<_$AppDatabase, $GalleryFavoritesTable> {
+  $$GalleryFavoritesTableFilterComposer(super.$state);
+  ColumnFilters<String> get assetPath => $state.composableBuilder(
+      column: $state.table.assetPath,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+}
+
+class $$GalleryFavoritesTableOrderingComposer
+    extends OrderingComposer<_$AppDatabase, $GalleryFavoritesTable> {
+  $$GalleryFavoritesTableOrderingComposer(super.$state);
+  ColumnOrderings<String> get assetPath => $state.composableBuilder(
+      column: $state.table.assetPath,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+}
+
 class $AppDatabaseManager {
   final _$AppDatabase _db;
   $AppDatabaseManager(this._db);
@@ -1558,4 +1782,6 @@ class $AppDatabaseManager {
       $$HistoryTableTableManager(_db, _db.history);
   $$TemplatesTableTableManager get templates =>
       $$TemplatesTableTableManager(_db, _db.templates);
+  $$GalleryFavoritesTableTableManager get galleryFavorites =>
+      $$GalleryFavoritesTableTableManager(_db, _db.galleryFavorites);
 }
