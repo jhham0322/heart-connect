@@ -1278,6 +1278,348 @@ class GalleryFavoritesCompanion extends UpdateCompanion<GalleryFavorite> {
   }
 }
 
+class $SavedCardsTable extends SavedCards
+    with TableInfo<$SavedCardsTable, SavedCard> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SavedCardsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant('제목 없음'));
+  static const VerificationMeta _htmlContentMeta =
+      const VerificationMeta('htmlContent');
+  @override
+  late final GeneratedColumn<String> htmlContent = GeneratedColumn<String>(
+      'html_content', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _footerTextMeta =
+      const VerificationMeta('footerText');
+  @override
+  late final GeneratedColumn<String> footerText = GeneratedColumn<String>(
+      'footer_text', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _imagePathMeta =
+      const VerificationMeta('imagePath');
+  @override
+  late final GeneratedColumn<String> imagePath = GeneratedColumn<String>(
+      'image_path', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, name, htmlContent, footerText, imagePath, createdAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'saved_cards';
+  @override
+  VerificationContext validateIntegrity(Insertable<SavedCard> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    }
+    if (data.containsKey('html_content')) {
+      context.handle(
+          _htmlContentMeta,
+          htmlContent.isAcceptableOrUnknown(
+              data['html_content']!, _htmlContentMeta));
+    } else if (isInserting) {
+      context.missing(_htmlContentMeta);
+    }
+    if (data.containsKey('footer_text')) {
+      context.handle(
+          _footerTextMeta,
+          footerText.isAcceptableOrUnknown(
+              data['footer_text']!, _footerTextMeta));
+    }
+    if (data.containsKey('image_path')) {
+      context.handle(_imagePathMeta,
+          imagePath.isAcceptableOrUnknown(data['image_path']!, _imagePathMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  SavedCard map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SavedCard(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      htmlContent: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}html_content'])!,
+      footerText: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}footer_text']),
+      imagePath: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}image_path']),
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+    );
+  }
+
+  @override
+  $SavedCardsTable createAlias(String alias) {
+    return $SavedCardsTable(attachedDatabase, alias);
+  }
+}
+
+class SavedCard extends DataClass implements Insertable<SavedCard> {
+  final int id;
+  final String name;
+  final String htmlContent;
+  final String? footerText;
+  final String? imagePath;
+  final DateTime createdAt;
+  const SavedCard(
+      {required this.id,
+      required this.name,
+      required this.htmlContent,
+      this.footerText,
+      this.imagePath,
+      required this.createdAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['name'] = Variable<String>(name);
+    map['html_content'] = Variable<String>(htmlContent);
+    if (!nullToAbsent || footerText != null) {
+      map['footer_text'] = Variable<String>(footerText);
+    }
+    if (!nullToAbsent || imagePath != null) {
+      map['image_path'] = Variable<String>(imagePath);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  SavedCardsCompanion toCompanion(bool nullToAbsent) {
+    return SavedCardsCompanion(
+      id: Value(id),
+      name: Value(name),
+      htmlContent: Value(htmlContent),
+      footerText: footerText == null && nullToAbsent
+          ? const Value.absent()
+          : Value(footerText),
+      imagePath: imagePath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(imagePath),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory SavedCard.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SavedCard(
+      id: serializer.fromJson<int>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      htmlContent: serializer.fromJson<String>(json['htmlContent']),
+      footerText: serializer.fromJson<String?>(json['footerText']),
+      imagePath: serializer.fromJson<String?>(json['imagePath']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'name': serializer.toJson<String>(name),
+      'htmlContent': serializer.toJson<String>(htmlContent),
+      'footerText': serializer.toJson<String?>(footerText),
+      'imagePath': serializer.toJson<String?>(imagePath),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  SavedCard copyWith(
+          {int? id,
+          String? name,
+          String? htmlContent,
+          Value<String?> footerText = const Value.absent(),
+          Value<String?> imagePath = const Value.absent(),
+          DateTime? createdAt}) =>
+      SavedCard(
+        id: id ?? this.id,
+        name: name ?? this.name,
+        htmlContent: htmlContent ?? this.htmlContent,
+        footerText: footerText.present ? footerText.value : this.footerText,
+        imagePath: imagePath.present ? imagePath.value : this.imagePath,
+        createdAt: createdAt ?? this.createdAt,
+      );
+  SavedCard copyWithCompanion(SavedCardsCompanion data) {
+    return SavedCard(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      htmlContent:
+          data.htmlContent.present ? data.htmlContent.value : this.htmlContent,
+      footerText:
+          data.footerText.present ? data.footerText.value : this.footerText,
+      imagePath: data.imagePath.present ? data.imagePath.value : this.imagePath,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SavedCard(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('htmlContent: $htmlContent, ')
+          ..write('footerText: $footerText, ')
+          ..write('imagePath: $imagePath, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, name, htmlContent, footerText, imagePath, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SavedCard &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.htmlContent == this.htmlContent &&
+          other.footerText == this.footerText &&
+          other.imagePath == this.imagePath &&
+          other.createdAt == this.createdAt);
+}
+
+class SavedCardsCompanion extends UpdateCompanion<SavedCard> {
+  final Value<int> id;
+  final Value<String> name;
+  final Value<String> htmlContent;
+  final Value<String?> footerText;
+  final Value<String?> imagePath;
+  final Value<DateTime> createdAt;
+  const SavedCardsCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.htmlContent = const Value.absent(),
+    this.footerText = const Value.absent(),
+    this.imagePath = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  SavedCardsCompanion.insert({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    required String htmlContent,
+    this.footerText = const Value.absent(),
+    this.imagePath = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  }) : htmlContent = Value(htmlContent);
+  static Insertable<SavedCard> custom({
+    Expression<int>? id,
+    Expression<String>? name,
+    Expression<String>? htmlContent,
+    Expression<String>? footerText,
+    Expression<String>? imagePath,
+    Expression<DateTime>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (htmlContent != null) 'html_content': htmlContent,
+      if (footerText != null) 'footer_text': footerText,
+      if (imagePath != null) 'image_path': imagePath,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  SavedCardsCompanion copyWith(
+      {Value<int>? id,
+      Value<String>? name,
+      Value<String>? htmlContent,
+      Value<String?>? footerText,
+      Value<String?>? imagePath,
+      Value<DateTime>? createdAt}) {
+    return SavedCardsCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      htmlContent: htmlContent ?? this.htmlContent,
+      footerText: footerText ?? this.footerText,
+      imagePath: imagePath ?? this.imagePath,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (htmlContent.present) {
+      map['html_content'] = Variable<String>(htmlContent.value);
+    }
+    if (footerText.present) {
+      map['footer_text'] = Variable<String>(footerText.value);
+    }
+    if (imagePath.present) {
+      map['image_path'] = Variable<String>(imagePath.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SavedCardsCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('htmlContent: $htmlContent, ')
+          ..write('footerText: $footerText, ')
+          ..write('imagePath: $imagePath, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -1286,12 +1628,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $TemplatesTable templates = $TemplatesTable(this);
   late final $GalleryFavoritesTable galleryFavorites =
       $GalleryFavoritesTable(this);
+  late final $SavedCardsTable savedCards = $SavedCardsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [contacts, history, templates, galleryFavorites];
+      [contacts, history, templates, galleryFavorites, savedCards];
 }
 
 typedef $$ContactsTableCreateCompanionBuilder = ContactsCompanion Function({
@@ -1317,22 +1660,204 @@ typedef $$ContactsTableUpdateCompanionBuilder = ContactsCompanion Function({
   Value<bool> isFavorite,
 });
 
+final class $$ContactsTableReferences
+    extends BaseReferences<_$AppDatabase, $ContactsTable, Contact> {
+  $$ContactsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$HistoryTable, List<HistoryData>>
+      _historyRefsTable(_$AppDatabase db) =>
+          MultiTypedResultKey.fromTable(db.history,
+              aliasName:
+                  $_aliasNameGenerator(db.contacts.id, db.history.contactId));
+
+  $$HistoryTableProcessedTableManager get historyRefs {
+    final manager = $$HistoryTableTableManager($_db, $_db.history)
+        .filter((f) => f.contactId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_historyRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+}
+
+class $$ContactsTableFilterComposer
+    extends Composer<_$AppDatabase, $ContactsTable> {
+  $$ContactsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get phone => $composableBuilder(
+      column: $table.phone, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get birthday => $composableBuilder(
+      column: $table.birthday, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get groupTag => $composableBuilder(
+      column: $table.groupTag, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get lastSentDate => $composableBuilder(
+      column: $table.lastSentDate, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get lastReceivedDate => $composableBuilder(
+      column: $table.lastReceivedDate,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get photoData => $composableBuilder(
+      column: $table.photoData, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get isFavorite => $composableBuilder(
+      column: $table.isFavorite, builder: (column) => ColumnFilters(column));
+
+  Expression<bool> historyRefs(
+      Expression<bool> Function($$HistoryTableFilterComposer f) f) {
+    final $$HistoryTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.history,
+        getReferencedColumn: (t) => t.contactId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$HistoryTableFilterComposer(
+              $db: $db,
+              $table: $db.history,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+}
+
+class $$ContactsTableOrderingComposer
+    extends Composer<_$AppDatabase, $ContactsTable> {
+  $$ContactsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get phone => $composableBuilder(
+      column: $table.phone, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get birthday => $composableBuilder(
+      column: $table.birthday, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get groupTag => $composableBuilder(
+      column: $table.groupTag, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get lastSentDate => $composableBuilder(
+      column: $table.lastSentDate,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get lastReceivedDate => $composableBuilder(
+      column: $table.lastReceivedDate,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get photoData => $composableBuilder(
+      column: $table.photoData, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get isFavorite => $composableBuilder(
+      column: $table.isFavorite, builder: (column) => ColumnOrderings(column));
+}
+
+class $$ContactsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ContactsTable> {
+  $$ContactsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get phone =>
+      $composableBuilder(column: $table.phone, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get birthday =>
+      $composableBuilder(column: $table.birthday, builder: (column) => column);
+
+  GeneratedColumn<String> get groupTag =>
+      $composableBuilder(column: $table.groupTag, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get lastSentDate => $composableBuilder(
+      column: $table.lastSentDate, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get lastReceivedDate => $composableBuilder(
+      column: $table.lastReceivedDate, builder: (column) => column);
+
+  GeneratedColumn<String> get photoData =>
+      $composableBuilder(column: $table.photoData, builder: (column) => column);
+
+  GeneratedColumn<bool> get isFavorite => $composableBuilder(
+      column: $table.isFavorite, builder: (column) => column);
+
+  Expression<T> historyRefs<T extends Object>(
+      Expression<T> Function($$HistoryTableAnnotationComposer a) f) {
+    final $$HistoryTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.history,
+        getReferencedColumn: (t) => t.contactId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$HistoryTableAnnotationComposer(
+              $db: $db,
+              $table: $db.history,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+}
+
 class $$ContactsTableTableManager extends RootTableManager<
     _$AppDatabase,
     $ContactsTable,
     Contact,
     $$ContactsTableFilterComposer,
     $$ContactsTableOrderingComposer,
+    $$ContactsTableAnnotationComposer,
     $$ContactsTableCreateCompanionBuilder,
-    $$ContactsTableUpdateCompanionBuilder> {
+    $$ContactsTableUpdateCompanionBuilder,
+    (Contact, $$ContactsTableReferences),
+    Contact,
+    PrefetchHooks Function({bool historyRefs})> {
   $$ContactsTableTableManager(_$AppDatabase db, $ContactsTable table)
       : super(TableManagerState(
           db: db,
           table: table,
-          filteringComposer:
-              $$ContactsTableFilterComposer(ComposerState(db, table)),
-          orderingComposer:
-              $$ContactsTableOrderingComposer(ComposerState(db, table)),
+          createFilteringComposer: () =>
+              $$ContactsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ContactsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ContactsTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback: ({
             Value<int> id = const Value.absent(),
             Value<String> phone = const Value.absent(),
@@ -1377,120 +1902,49 @@ class $$ContactsTableTableManager extends RootTableManager<
             photoData: photoData,
             isFavorite: isFavorite,
           ),
+          withReferenceMapper: (p0) => p0
+              .map((e) =>
+                  (e.readTable(table), $$ContactsTableReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: ({historyRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [if (historyRefs) db.history],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (historyRefs)
+                    await $_getPrefetchedData<Contact, $ContactsTable,
+                            HistoryData>(
+                        currentTable: table,
+                        referencedTable:
+                            $$ContactsTableReferences._historyRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$ContactsTableReferences(db, table, p0)
+                                .historyRefs,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.contactId == item.id),
+                        typedResults: items)
+                ];
+              },
+            );
+          },
         ));
 }
 
-class $$ContactsTableFilterComposer
-    extends FilterComposer<_$AppDatabase, $ContactsTable> {
-  $$ContactsTableFilterComposer(super.$state);
-  ColumnFilters<int> get id => $state.composableBuilder(
-      column: $state.table.id,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-
-  ColumnFilters<String> get phone => $state.composableBuilder(
-      column: $state.table.phone,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-
-  ColumnFilters<String> get name => $state.composableBuilder(
-      column: $state.table.name,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-
-  ColumnFilters<DateTime> get birthday => $state.composableBuilder(
-      column: $state.table.birthday,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-
-  ColumnFilters<String> get groupTag => $state.composableBuilder(
-      column: $state.table.groupTag,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-
-  ColumnFilters<DateTime> get lastSentDate => $state.composableBuilder(
-      column: $state.table.lastSentDate,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-
-  ColumnFilters<DateTime> get lastReceivedDate => $state.composableBuilder(
-      column: $state.table.lastReceivedDate,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-
-  ColumnFilters<String> get photoData => $state.composableBuilder(
-      column: $state.table.photoData,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-
-  ColumnFilters<bool> get isFavorite => $state.composableBuilder(
-      column: $state.table.isFavorite,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-
-  ComposableFilter historyRefs(
-      ComposableFilter Function($$HistoryTableFilterComposer f) f) {
-    final $$HistoryTableFilterComposer composer = $state.composerBuilder(
-        composer: this,
-        getCurrentColumn: (t) => t.id,
-        referencedTable: $state.db.history,
-        getReferencedColumn: (t) => t.contactId,
-        builder: (joinBuilder, parentComposers) => $$HistoryTableFilterComposer(
-            ComposerState(
-                $state.db, $state.db.history, joinBuilder, parentComposers)));
-    return f(composer);
-  }
-}
-
-class $$ContactsTableOrderingComposer
-    extends OrderingComposer<_$AppDatabase, $ContactsTable> {
-  $$ContactsTableOrderingComposer(super.$state);
-  ColumnOrderings<int> get id => $state.composableBuilder(
-      column: $state.table.id,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-
-  ColumnOrderings<String> get phone => $state.composableBuilder(
-      column: $state.table.phone,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-
-  ColumnOrderings<String> get name => $state.composableBuilder(
-      column: $state.table.name,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-
-  ColumnOrderings<DateTime> get birthday => $state.composableBuilder(
-      column: $state.table.birthday,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-
-  ColumnOrderings<String> get groupTag => $state.composableBuilder(
-      column: $state.table.groupTag,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-
-  ColumnOrderings<DateTime> get lastSentDate => $state.composableBuilder(
-      column: $state.table.lastSentDate,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-
-  ColumnOrderings<DateTime> get lastReceivedDate => $state.composableBuilder(
-      column: $state.table.lastReceivedDate,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-
-  ColumnOrderings<String> get photoData => $state.composableBuilder(
-      column: $state.table.photoData,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-
-  ColumnOrderings<bool> get isFavorite => $state.composableBuilder(
-      column: $state.table.isFavorite,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-}
-
+typedef $$ContactsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $ContactsTable,
+    Contact,
+    $$ContactsTableFilterComposer,
+    $$ContactsTableOrderingComposer,
+    $$ContactsTableAnnotationComposer,
+    $$ContactsTableCreateCompanionBuilder,
+    $$ContactsTableUpdateCompanionBuilder,
+    (Contact, $$ContactsTableReferences),
+    Contact,
+    PrefetchHooks Function({bool historyRefs})>;
 typedef $$HistoryTableCreateCompanionBuilder = HistoryCompanion Function({
   Value<int> id,
   required int contactId,
@@ -1508,22 +1962,182 @@ typedef $$HistoryTableUpdateCompanionBuilder = HistoryCompanion Function({
   Value<String?> imagePath,
 });
 
+final class $$HistoryTableReferences
+    extends BaseReferences<_$AppDatabase, $HistoryTable, HistoryData> {
+  $$HistoryTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $ContactsTable _contactIdTable(_$AppDatabase db) => db.contacts
+      .createAlias($_aliasNameGenerator(db.history.contactId, db.contacts.id));
+
+  $$ContactsTableProcessedTableManager get contactId {
+    final $_column = $_itemColumn<int>('contact_id')!;
+
+    final manager = $$ContactsTableTableManager($_db, $_db.contacts)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_contactIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+}
+
+class $$HistoryTableFilterComposer
+    extends Composer<_$AppDatabase, $HistoryTable> {
+  $$HistoryTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get type => $composableBuilder(
+      column: $table.type, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get eventDate => $composableBuilder(
+      column: $table.eventDate, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get message => $composableBuilder(
+      column: $table.message, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get imagePath => $composableBuilder(
+      column: $table.imagePath, builder: (column) => ColumnFilters(column));
+
+  $$ContactsTableFilterComposer get contactId {
+    final $$ContactsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.contactId,
+        referencedTable: $db.contacts,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$ContactsTableFilterComposer(
+              $db: $db,
+              $table: $db.contacts,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$HistoryTableOrderingComposer
+    extends Composer<_$AppDatabase, $HistoryTable> {
+  $$HistoryTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get type => $composableBuilder(
+      column: $table.type, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get eventDate => $composableBuilder(
+      column: $table.eventDate, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get message => $composableBuilder(
+      column: $table.message, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get imagePath => $composableBuilder(
+      column: $table.imagePath, builder: (column) => ColumnOrderings(column));
+
+  $$ContactsTableOrderingComposer get contactId {
+    final $$ContactsTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.contactId,
+        referencedTable: $db.contacts,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$ContactsTableOrderingComposer(
+              $db: $db,
+              $table: $db.contacts,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$HistoryTableAnnotationComposer
+    extends Composer<_$AppDatabase, $HistoryTable> {
+  $$HistoryTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get type =>
+      $composableBuilder(column: $table.type, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get eventDate =>
+      $composableBuilder(column: $table.eventDate, builder: (column) => column);
+
+  GeneratedColumn<String> get message =>
+      $composableBuilder(column: $table.message, builder: (column) => column);
+
+  GeneratedColumn<String> get imagePath =>
+      $composableBuilder(column: $table.imagePath, builder: (column) => column);
+
+  $$ContactsTableAnnotationComposer get contactId {
+    final $$ContactsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.contactId,
+        referencedTable: $db.contacts,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$ContactsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.contacts,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
 class $$HistoryTableTableManager extends RootTableManager<
     _$AppDatabase,
     $HistoryTable,
     HistoryData,
     $$HistoryTableFilterComposer,
     $$HistoryTableOrderingComposer,
+    $$HistoryTableAnnotationComposer,
     $$HistoryTableCreateCompanionBuilder,
-    $$HistoryTableUpdateCompanionBuilder> {
+    $$HistoryTableUpdateCompanionBuilder,
+    (HistoryData, $$HistoryTableReferences),
+    HistoryData,
+    PrefetchHooks Function({bool contactId})> {
   $$HistoryTableTableManager(_$AppDatabase db, $HistoryTable table)
       : super(TableManagerState(
           db: db,
           table: table,
-          filteringComposer:
-              $$HistoryTableFilterComposer(ComposerState(db, table)),
-          orderingComposer:
-              $$HistoryTableOrderingComposer(ComposerState(db, table)),
+          createFilteringComposer: () =>
+              $$HistoryTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$HistoryTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$HistoryTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback: ({
             Value<int> id = const Value.absent(),
             Value<int> contactId = const Value.absent(),
@@ -1556,91 +2170,60 @@ class $$HistoryTableTableManager extends RootTableManager<
             message: message,
             imagePath: imagePath,
           ),
+          withReferenceMapper: (p0) => p0
+              .map((e) =>
+                  (e.readTable(table), $$HistoryTableReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: ({contactId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (contactId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.contactId,
+                    referencedTable:
+                        $$HistoryTableReferences._contactIdTable(db),
+                    referencedColumn:
+                        $$HistoryTableReferences._contactIdTable(db).id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
         ));
 }
 
-class $$HistoryTableFilterComposer
-    extends FilterComposer<_$AppDatabase, $HistoryTable> {
-  $$HistoryTableFilterComposer(super.$state);
-  ColumnFilters<int> get id => $state.composableBuilder(
-      column: $state.table.id,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-
-  ColumnFilters<String> get type => $state.composableBuilder(
-      column: $state.table.type,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-
-  ColumnFilters<DateTime> get eventDate => $state.composableBuilder(
-      column: $state.table.eventDate,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-
-  ColumnFilters<String> get message => $state.composableBuilder(
-      column: $state.table.message,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-
-  ColumnFilters<String> get imagePath => $state.composableBuilder(
-      column: $state.table.imagePath,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-
-  $$ContactsTableFilterComposer get contactId {
-    final $$ContactsTableFilterComposer composer = $state.composerBuilder(
-        composer: this,
-        getCurrentColumn: (t) => t.contactId,
-        referencedTable: $state.db.contacts,
-        getReferencedColumn: (t) => t.id,
-        builder: (joinBuilder, parentComposers) =>
-            $$ContactsTableFilterComposer(ComposerState(
-                $state.db, $state.db.contacts, joinBuilder, parentComposers)));
-    return composer;
-  }
-}
-
-class $$HistoryTableOrderingComposer
-    extends OrderingComposer<_$AppDatabase, $HistoryTable> {
-  $$HistoryTableOrderingComposer(super.$state);
-  ColumnOrderings<int> get id => $state.composableBuilder(
-      column: $state.table.id,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-
-  ColumnOrderings<String> get type => $state.composableBuilder(
-      column: $state.table.type,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-
-  ColumnOrderings<DateTime> get eventDate => $state.composableBuilder(
-      column: $state.table.eventDate,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-
-  ColumnOrderings<String> get message => $state.composableBuilder(
-      column: $state.table.message,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-
-  ColumnOrderings<String> get imagePath => $state.composableBuilder(
-      column: $state.table.imagePath,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-
-  $$ContactsTableOrderingComposer get contactId {
-    final $$ContactsTableOrderingComposer composer = $state.composerBuilder(
-        composer: this,
-        getCurrentColumn: (t) => t.contactId,
-        referencedTable: $state.db.contacts,
-        getReferencedColumn: (t) => t.id,
-        builder: (joinBuilder, parentComposers) =>
-            $$ContactsTableOrderingComposer(ComposerState(
-                $state.db, $state.db.contacts, joinBuilder, parentComposers)));
-    return composer;
-  }
-}
-
+typedef $$HistoryTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $HistoryTable,
+    HistoryData,
+    $$HistoryTableFilterComposer,
+    $$HistoryTableOrderingComposer,
+    $$HistoryTableAnnotationComposer,
+    $$HistoryTableCreateCompanionBuilder,
+    $$HistoryTableUpdateCompanionBuilder,
+    (HistoryData, $$HistoryTableReferences),
+    HistoryData,
+    PrefetchHooks Function({bool contactId})>;
 typedef $$TemplatesTableCreateCompanionBuilder = TemplatesCompanion Function({
   Value<int> id,
   required String category,
@@ -1654,22 +2237,94 @@ typedef $$TemplatesTableUpdateCompanionBuilder = TemplatesCompanion Function({
   Value<bool> isFavorite,
 });
 
+class $$TemplatesTableFilterComposer
+    extends Composer<_$AppDatabase, $TemplatesTable> {
+  $$TemplatesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get category => $composableBuilder(
+      column: $table.category, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get content => $composableBuilder(
+      column: $table.content, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get isFavorite => $composableBuilder(
+      column: $table.isFavorite, builder: (column) => ColumnFilters(column));
+}
+
+class $$TemplatesTableOrderingComposer
+    extends Composer<_$AppDatabase, $TemplatesTable> {
+  $$TemplatesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get category => $composableBuilder(
+      column: $table.category, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get content => $composableBuilder(
+      column: $table.content, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get isFavorite => $composableBuilder(
+      column: $table.isFavorite, builder: (column) => ColumnOrderings(column));
+}
+
+class $$TemplatesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $TemplatesTable> {
+  $$TemplatesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get category =>
+      $composableBuilder(column: $table.category, builder: (column) => column);
+
+  GeneratedColumn<String> get content =>
+      $composableBuilder(column: $table.content, builder: (column) => column);
+
+  GeneratedColumn<bool> get isFavorite => $composableBuilder(
+      column: $table.isFavorite, builder: (column) => column);
+}
+
 class $$TemplatesTableTableManager extends RootTableManager<
     _$AppDatabase,
     $TemplatesTable,
     Template,
     $$TemplatesTableFilterComposer,
     $$TemplatesTableOrderingComposer,
+    $$TemplatesTableAnnotationComposer,
     $$TemplatesTableCreateCompanionBuilder,
-    $$TemplatesTableUpdateCompanionBuilder> {
+    $$TemplatesTableUpdateCompanionBuilder,
+    (Template, BaseReferences<_$AppDatabase, $TemplatesTable, Template>),
+    Template,
+    PrefetchHooks Function()> {
   $$TemplatesTableTableManager(_$AppDatabase db, $TemplatesTable table)
       : super(TableManagerState(
           db: db,
           table: table,
-          filteringComposer:
-              $$TemplatesTableFilterComposer(ComposerState(db, table)),
-          orderingComposer:
-              $$TemplatesTableOrderingComposer(ComposerState(db, table)),
+          createFilteringComposer: () =>
+              $$TemplatesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$TemplatesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$TemplatesTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback: ({
             Value<int> id = const Value.absent(),
             Value<String> category = const Value.absent(),
@@ -1694,57 +2349,25 @@ class $$TemplatesTableTableManager extends RootTableManager<
             content: content,
             isFavorite: isFavorite,
           ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
         ));
 }
 
-class $$TemplatesTableFilterComposer
-    extends FilterComposer<_$AppDatabase, $TemplatesTable> {
-  $$TemplatesTableFilterComposer(super.$state);
-  ColumnFilters<int> get id => $state.composableBuilder(
-      column: $state.table.id,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-
-  ColumnFilters<String> get category => $state.composableBuilder(
-      column: $state.table.category,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-
-  ColumnFilters<String> get content => $state.composableBuilder(
-      column: $state.table.content,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-
-  ColumnFilters<bool> get isFavorite => $state.composableBuilder(
-      column: $state.table.isFavorite,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-}
-
-class $$TemplatesTableOrderingComposer
-    extends OrderingComposer<_$AppDatabase, $TemplatesTable> {
-  $$TemplatesTableOrderingComposer(super.$state);
-  ColumnOrderings<int> get id => $state.composableBuilder(
-      column: $state.table.id,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-
-  ColumnOrderings<String> get category => $state.composableBuilder(
-      column: $state.table.category,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-
-  ColumnOrderings<String> get content => $state.composableBuilder(
-      column: $state.table.content,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-
-  ColumnOrderings<bool> get isFavorite => $state.composableBuilder(
-      column: $state.table.isFavorite,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-}
-
+typedef $$TemplatesTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $TemplatesTable,
+    Template,
+    $$TemplatesTableFilterComposer,
+    $$TemplatesTableOrderingComposer,
+    $$TemplatesTableAnnotationComposer,
+    $$TemplatesTableCreateCompanionBuilder,
+    $$TemplatesTableUpdateCompanionBuilder,
+    (Template, BaseReferences<_$AppDatabase, $TemplatesTable, Template>),
+    Template,
+    PrefetchHooks Function()>;
 typedef $$GalleryFavoritesTableCreateCompanionBuilder
     = GalleryFavoritesCompanion Function({
   required String imagePath,
@@ -1758,23 +2381,80 @@ typedef $$GalleryFavoritesTableUpdateCompanionBuilder
   Value<int> rowid,
 });
 
+class $$GalleryFavoritesTableFilterComposer
+    extends Composer<_$AppDatabase, $GalleryFavoritesTable> {
+  $$GalleryFavoritesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get imagePath => $composableBuilder(
+      column: $table.imagePath, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get addedDate => $composableBuilder(
+      column: $table.addedDate, builder: (column) => ColumnFilters(column));
+}
+
+class $$GalleryFavoritesTableOrderingComposer
+    extends Composer<_$AppDatabase, $GalleryFavoritesTable> {
+  $$GalleryFavoritesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get imagePath => $composableBuilder(
+      column: $table.imagePath, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get addedDate => $composableBuilder(
+      column: $table.addedDate, builder: (column) => ColumnOrderings(column));
+}
+
+class $$GalleryFavoritesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $GalleryFavoritesTable> {
+  $$GalleryFavoritesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get imagePath =>
+      $composableBuilder(column: $table.imagePath, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get addedDate =>
+      $composableBuilder(column: $table.addedDate, builder: (column) => column);
+}
+
 class $$GalleryFavoritesTableTableManager extends RootTableManager<
     _$AppDatabase,
     $GalleryFavoritesTable,
     GalleryFavorite,
     $$GalleryFavoritesTableFilterComposer,
     $$GalleryFavoritesTableOrderingComposer,
+    $$GalleryFavoritesTableAnnotationComposer,
     $$GalleryFavoritesTableCreateCompanionBuilder,
-    $$GalleryFavoritesTableUpdateCompanionBuilder> {
+    $$GalleryFavoritesTableUpdateCompanionBuilder,
+    (
+      GalleryFavorite,
+      BaseReferences<_$AppDatabase, $GalleryFavoritesTable, GalleryFavorite>
+    ),
+    GalleryFavorite,
+    PrefetchHooks Function()> {
   $$GalleryFavoritesTableTableManager(
       _$AppDatabase db, $GalleryFavoritesTable table)
       : super(TableManagerState(
           db: db,
           table: table,
-          filteringComposer:
-              $$GalleryFavoritesTableFilterComposer(ComposerState(db, table)),
-          orderingComposer:
-              $$GalleryFavoritesTableOrderingComposer(ComposerState(db, table)),
+          createFilteringComposer: () =>
+              $$GalleryFavoritesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$GalleryFavoritesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$GalleryFavoritesTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback: ({
             Value<String> imagePath = const Value.absent(),
             Value<DateTime> addedDate = const Value.absent(),
@@ -1795,36 +2475,202 @@ class $$GalleryFavoritesTableTableManager extends RootTableManager<
             addedDate: addedDate,
             rowid: rowid,
           ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
         ));
 }
 
-class $$GalleryFavoritesTableFilterComposer
-    extends FilterComposer<_$AppDatabase, $GalleryFavoritesTable> {
-  $$GalleryFavoritesTableFilterComposer(super.$state);
-  ColumnFilters<String> get imagePath => $state.composableBuilder(
-      column: $state.table.imagePath,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
+typedef $$GalleryFavoritesTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $GalleryFavoritesTable,
+    GalleryFavorite,
+    $$GalleryFavoritesTableFilterComposer,
+    $$GalleryFavoritesTableOrderingComposer,
+    $$GalleryFavoritesTableAnnotationComposer,
+    $$GalleryFavoritesTableCreateCompanionBuilder,
+    $$GalleryFavoritesTableUpdateCompanionBuilder,
+    (
+      GalleryFavorite,
+      BaseReferences<_$AppDatabase, $GalleryFavoritesTable, GalleryFavorite>
+    ),
+    GalleryFavorite,
+    PrefetchHooks Function()>;
+typedef $$SavedCardsTableCreateCompanionBuilder = SavedCardsCompanion Function({
+  Value<int> id,
+  Value<String> name,
+  required String htmlContent,
+  Value<String?> footerText,
+  Value<String?> imagePath,
+  Value<DateTime> createdAt,
+});
+typedef $$SavedCardsTableUpdateCompanionBuilder = SavedCardsCompanion Function({
+  Value<int> id,
+  Value<String> name,
+  Value<String> htmlContent,
+  Value<String?> footerText,
+  Value<String?> imagePath,
+  Value<DateTime> createdAt,
+});
 
-  ColumnFilters<DateTime> get addedDate => $state.composableBuilder(
-      column: $state.table.addedDate,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
+class $$SavedCardsTableFilterComposer
+    extends Composer<_$AppDatabase, $SavedCardsTable> {
+  $$SavedCardsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get htmlContent => $composableBuilder(
+      column: $table.htmlContent, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get footerText => $composableBuilder(
+      column: $table.footerText, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get imagePath => $composableBuilder(
+      column: $table.imagePath, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
 }
 
-class $$GalleryFavoritesTableOrderingComposer
-    extends OrderingComposer<_$AppDatabase, $GalleryFavoritesTable> {
-  $$GalleryFavoritesTableOrderingComposer(super.$state);
-  ColumnOrderings<String> get imagePath => $state.composableBuilder(
-      column: $state.table.imagePath,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
+class $$SavedCardsTableOrderingComposer
+    extends Composer<_$AppDatabase, $SavedCardsTable> {
+  $$SavedCardsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<DateTime> get addedDate => $state.composableBuilder(
-      column: $state.table.addedDate,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
+  ColumnOrderings<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get htmlContent => $composableBuilder(
+      column: $table.htmlContent, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get footerText => $composableBuilder(
+      column: $table.footerText, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get imagePath => $composableBuilder(
+      column: $table.imagePath, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
 }
+
+class $$SavedCardsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SavedCardsTable> {
+  $$SavedCardsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get htmlContent => $composableBuilder(
+      column: $table.htmlContent, builder: (column) => column);
+
+  GeneratedColumn<String> get footerText => $composableBuilder(
+      column: $table.footerText, builder: (column) => column);
+
+  GeneratedColumn<String> get imagePath =>
+      $composableBuilder(column: $table.imagePath, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$SavedCardsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $SavedCardsTable,
+    SavedCard,
+    $$SavedCardsTableFilterComposer,
+    $$SavedCardsTableOrderingComposer,
+    $$SavedCardsTableAnnotationComposer,
+    $$SavedCardsTableCreateCompanionBuilder,
+    $$SavedCardsTableUpdateCompanionBuilder,
+    (SavedCard, BaseReferences<_$AppDatabase, $SavedCardsTable, SavedCard>),
+    SavedCard,
+    PrefetchHooks Function()> {
+  $$SavedCardsTableTableManager(_$AppDatabase db, $SavedCardsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SavedCardsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SavedCardsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SavedCardsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<String> name = const Value.absent(),
+            Value<String> htmlContent = const Value.absent(),
+            Value<String?> footerText = const Value.absent(),
+            Value<String?> imagePath = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+          }) =>
+              SavedCardsCompanion(
+            id: id,
+            name: name,
+            htmlContent: htmlContent,
+            footerText: footerText,
+            imagePath: imagePath,
+            createdAt: createdAt,
+          ),
+          createCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<String> name = const Value.absent(),
+            required String htmlContent,
+            Value<String?> footerText = const Value.absent(),
+            Value<String?> imagePath = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+          }) =>
+              SavedCardsCompanion.insert(
+            id: id,
+            name: name,
+            htmlContent: htmlContent,
+            footerText: footerText,
+            imagePath: imagePath,
+            createdAt: createdAt,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$SavedCardsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $SavedCardsTable,
+    SavedCard,
+    $$SavedCardsTableFilterComposer,
+    $$SavedCardsTableOrderingComposer,
+    $$SavedCardsTableAnnotationComposer,
+    $$SavedCardsTableCreateCompanionBuilder,
+    $$SavedCardsTableUpdateCompanionBuilder,
+    (SavedCard, BaseReferences<_$AppDatabase, $SavedCardsTable, SavedCard>),
+    SavedCard,
+    PrefetchHooks Function()>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -1837,4 +2683,6 @@ class $AppDatabaseManager {
       $$TemplatesTableTableManager(_db, _db.templates);
   $$GalleryFavoritesTableTableManager get galleryFavorites =>
       $$GalleryFavoritesTableTableManager(_db, _db.galleryFavorites);
+  $$SavedCardsTableTableManager get savedCards =>
+      $$SavedCardsTableTableManager(_db, _db.savedCards);
 }

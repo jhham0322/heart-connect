@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../theme/app_theme.dart';
+import '../features/gallery/gallery_selection_provider.dart';
 
-class ScaffoldWithNav extends StatelessWidget {
+class ScaffoldWithNav extends ConsumerWidget {
   const ScaffoldWithNav({
     required this.navigationShell,
     super.key,
@@ -19,7 +21,7 @@ class ScaffoldWithNav extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       backgroundColor: AppTheme.bgColor,
       appBar: PreferredSize(
@@ -94,7 +96,16 @@ class ScaffoldWithNav extends StatelessWidget {
           ],
         ),
         child: FloatingActionButton(
-          onPressed: () => context.push('/write'),
+          onPressed: () {
+            final selectedImage = ref.read(currentSelectionProvider);
+            if (selectedImage != null) {
+               print("[ScaffoldWithNav] Navigating to Write with image: $selectedImage");
+               final uri = Uri(path: '/write', queryParameters: {'image': selectedImage});
+               context.push(uri.toString());
+            } else {
+               context.push('/write');
+            }
+          },
           elevation: 0,
           focusElevation: 0,
           hoverElevation: 0,

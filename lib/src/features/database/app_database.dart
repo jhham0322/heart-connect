@@ -46,12 +46,22 @@ class GalleryFavorites extends Table {
   Set<Column> get primaryKey => {imagePath};
 }
 
-@DriftDatabase(tables: [Contacts, History, Templates, GalleryFavorites])
+// 5. Saved Cards (Drafts)
+class SavedCards extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get name => text().withDefault(const Constant('제목 없음'))();
+  TextColumn get htmlContent => text()(); // HTML format for rich text support
+  TextColumn get footerText => text().nullable()();
+  TextColumn get imagePath => text().nullable()();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+}
+
+@DriftDatabase(tables: [Contacts, History, Templates, GalleryFavorites, SavedCards])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 2; // Incremented for new table
+  int get schemaVersion => 3; // Incremented for new table
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -62,6 +72,10 @@ class AppDatabase extends _$AppDatabase {
       if (from < 2) {
         // Create GalleryFavorites table for version 2
         await m.createTable(galleryFavorites);
+      }
+      if (from < 3) {
+        // Create SavedCards table for version 3
+        await m.createTable(savedCards);
       }
     },
   );
@@ -111,6 +125,11 @@ class AppDatabase extends _$AppDatabase {
     
     return await query.map((row) => row.read(countExp)).getSingle() ?? 0;
   }
+
+  // SAVED CARDS (DRAFTS) methods
+  Future<List<SavedCard>> getAllSavedCards() => (select(savedCards)..orderBy([(t) => OrderingTerm.desc(t.createdAt)])).get();
+  Future<int> insertSavedCard(SavedCardsCompanion entry) => into(savedCards).insert(entry);
+  Future<int> deleteSavedCard(int id) => (delete(savedCards)..where((t) => t.id.equals(id))).go();
 }
 
 LazyDatabase _openConnection() {

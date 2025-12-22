@@ -1,17 +1,17 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter_contacts/flutter_contacts.dart' as fc;
 import 'package:drift/drift.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../database/app_database.dart';
 import '../database/database_provider.dart';
 
-part 'contact_service.g.dart';
-
-@riverpod
-class ContactService extends _$ContactService {
+/// ContactService - 연락처 동기화 서비스
+class ContactService extends AsyncNotifier<void> {
   @override
   FutureOr<void> build() {
     // No initial state needed
+    return null;
   }
 
   Future<void> syncContacts() async {
@@ -112,3 +112,8 @@ class ContactService extends _$ContactService {
     }
   }
 }
+
+/// ContactService Provider
+final contactServiceProvider = AsyncNotifierProvider<ContactService, void>(() {
+  return ContactService();
+});

@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../theme/app_theme.dart';
 import 'favorites_provider.dart';
+import 'gallery_selection_provider.dart';
 
 import 'gallery_data.dart';
 
@@ -244,7 +245,7 @@ class _GalleryDetailScreenState extends ConsumerState<GalleryDetailScreen> {
   }
 
   void _openImageViewer(int index) {
-     Navigator.of(context, rootNavigator: true).push(MaterialPageRoute(builder: (_) => 
+     Navigator.push(context, MaterialPageRoute(builder: (_) => 
        _FullScreenViewer(
          images: _images, 
          initialIndex: index, 
@@ -358,12 +359,28 @@ class _FullScreenViewerState extends ConsumerState<_FullScreenViewer> {
     super.initState();
     _currentIndex = widget.initialIndex;
     _pageController = PageController(initialPage: widget.initialIndex);
+    
+    // Sync initial selection
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(currentSelectionProvider.notifier).state = widget.images[_currentIndex];
+    });
   }
 
   void _onPageChanged(int index) {
     setState(() {
       _currentIndex = index;
     });
+    // Sync selection on change
+    ref.read(currentSelectionProvider.notifier).state = widget.images[index];
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    // Reset selection when viewer is closed
+    // Use microtask to avoid modifying provider during widget tree updates
+    Future.microtask(() => ref.read(currentSelectionProvider.notifier).state = null);
+    super.dispose();
   }
 
   @override
@@ -459,37 +476,7 @@ class _FullScreenViewerState extends ConsumerState<_FullScreenViewer> {
               ),
             ),
 
-          // 3. Pencil FAB (Bottom Center)
-          Positioned(
-            bottom: 50, // Raised slightly from 40 to 50
-            left: 0,
-            right: 0,
-            child: Center(
-              child: GestureDetector(
-                onTap: () {
-                  final imgPath = widget.images[_currentIndex];
-                  print("[GalleryScreen] Pencil Tap. Index: $_currentIndex, Path: $imgPath");
-                  
-                  // Close the full screen viewer first so it doesn't cover the new screen
-                  Navigator.of(context).pop();
-                  
-                  final uri = Uri(path: '/write', queryParameters: {'image': imgPath});
-                  context.push(uri.toString());
-                },
-                child: Container(
-                  width: 64, height: 64,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFFF7043), // Vibrant Orange
-                    shape: BoxShape.circle,
-                    // No Shadow to prevent artifacts
-                  ),
-                  child: const Center(
-                    child: Icon(FontAwesomeIcons.penNib, color: Colors.white, size: 28),
-                  ),
-                ),
-              ),
-            ),
-          ),
+
           
           // 4. Image Counter (Bottom of AppBar area)
           Positioned(
