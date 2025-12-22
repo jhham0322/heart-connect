@@ -1,8 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui' as ui;
+import 'dart:typed_data';
 import '../ai/ai_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // for rootBundle
+import 'package:flutter/rendering.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
@@ -16,6 +19,7 @@ import 'package:flutter_quill/flutter_quill.dart'; // Rich Text Editor
 import 'package:flutter_quill_extensions/flutter_quill_extensions.dart';
 import 'package:vsc_quill_delta_to_html/vsc_quill_delta_to_html.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:path_provider/path_provider.dart';
 
 class WriteCardScreen extends ConsumerStatefulWidget {
   final String? initialImage;
@@ -36,12 +40,12 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   String _selectedImage = "assets/images/cards/christmas/baecb8cc-2d6e-40a3-9754-95eae4022ab7.png"; 
   
   // Style State
-  TextStyle _currentStyle = GoogleFonts.greatVibes(fontSize: 32, color: const Color(0xFF1A1A1A), height: 1.0);
+  TextStyle _currentStyle = GoogleFonts.greatVibes(fontSize: 24, color: const Color(0xFF1A1A1A), height: 1.2);
   TextAlign _textAlign = TextAlign.center;
   bool _isBold = false;
   bool _isItalic = false;
   bool _isUnderline = false;
-  double _fontSize = 32.0;
+  double _fontSize = 24.0;
   String _fontName = 'Great Vibes';
   
   // Templates (Loaded Dynamically)
@@ -64,7 +68,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   // Font size dropdown options (6~32)
   final List<double> _fontSizeOptions = [6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32];
 
-  // Text Drag Offset
+  // Text Drag Offset - 이제 위치 유지됨
   Offset _dragOffset = Offset.zero;
 
   // Scroll Controller for Template Selector
@@ -72,12 +76,12 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
 
   // Quill Editor Controller
   late QuillController _quillController;
-
-  void _resetDragOffset() {
-    setState(() {
-      _dragOffset = Offset.zero;
-    });
-  }
+  
+  // Focus Node for Quill Editor
+  final FocusNode _editorFocusNode = FocusNode();
+  
+  // GlobalKey for RepaintBoundary (이미지 캡처용)
+  final GlobalKey _captureKey = GlobalKey();
 
   @override
   void initState() {
@@ -145,6 +149,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     _scrollController.dispose();
     _messageController.dispose();
     _footerController.dispose();
+    _editorFocusNode.dispose();
     _quillController.removeListener(_onQuillChanged);
     _quillController.dispose();
     super.dispose();
@@ -245,7 +250,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
 
     setState(() {
       final String fontFamily = fontMatch?.group(1) ?? 'Great Vibes';
-      final double fontSize = double.tryParse(sizeMatch?.group(1) ?? '32.0') ?? 32.0;
+      final double fontSize = double.tryParse(sizeMatch?.group(1) ?? '24.0') ?? 24.0;
       final Color textColor = Color(int.parse("FF${colorMatch?.group(1) ?? '1A1A1A'}", radix: 16));
       
       _fontName = fontFamily;
@@ -271,9 +276,67 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
         fontWeight: _isBold ? FontWeight.bold : FontWeight.normal,
         fontStyle: _isItalic ? FontStyle.italic : FontStyle.normal,
         decoration: _isUnderline ? TextDecoration.underline : TextDecoration.none,
-        height: 1.0, // Reduced line spacing
+        height: 1.2,
       );
     });
+    
+    // Quill 에디터에 스타일 적용
+    _applyStyleToQuill();
+  }
+  
+  // Quill 에디터에 현재 스타일 적용
+  void _applyStyleToQuill() {
+    final selection = _quillController.selection;
+    if (selection.baseOffset != selection.extentOffset) {
+      // 선택된 텍스트가 있으면 해당 텍스트에 스타일 적용
+      if (_isBold) {
+        _quillController.formatSelection(Attribute.bold);
+      } else {
+        _quillController.formatSelection(Attribute.clone(Attribute.bold, null));
+      }
+      
+      if (_isItalic) {
+        _quillController.formatSelection(Attribute.italic);
+      } else {
+        _quillController.formatSelection(Attribute.clone(Attribute.italic, null));
+      }
+      
+      if (_isUnderline) {
+        _quillController.formatSelection(Attribute.underline);
+      } else {
+        _quillController.formatSelection(Attribute.clone(Attribute.underline, null));
+      }
+      
+      // Font size 적용
+      _quillController.formatSelection(Attribute.fromKeyValue('size', '${_fontSize.toInt()}px'));
+    }
+  }
+  
+  // 텍스트 정렬 적용
+  void _applyAlignment(TextAlign align) {
+    setState(() {
+      _textAlign = align;
+    });
+    
+    // Quill에 정렬 적용
+    Attribute alignAttr;
+    switch (align) {
+      case TextAlign.left:
+        alignAttr = Attribute.leftAlignment;
+        break;
+      case TextAlign.center:
+        alignAttr = Attribute.centerAlignment;
+        break;
+      case TextAlign.right:
+        alignAttr = Attribute.rightAlignment;
+        break;
+      default:
+        alignAttr = Attribute.leftAlignment;
+    }
+    
+    // 전체 문서에 정렬 적용
+    final length = _quillController.document.length;
+    _quillController.formatText(0, length, alignAttr);
   }
 
   Future<void> _saveCurrentCard() async {
@@ -519,6 +582,36 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     }
   }
 
+  // 이미지 캡처 함수 - 배경이미지 + 글씨박스 + 글씨만 캡처
+  Future<Uint8List?> _captureCardImage() async {
+    try {
+      RenderRepaintBoundary boundary = _captureKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+      ui.Image image = await boundary.toImage(pixelRatio: 3.0);
+      ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      return byteData?.buffer.asUint8List();
+    } catch (e) {
+      print("캡처 오류: $e");
+      return null;
+    }
+  }
+  
+  // 캡처한 이미지 저장
+  Future<String?> _saveCardImage() async {
+    final imageBytes = await _captureCardImage();
+    if (imageBytes == null) return null;
+    
+    try {
+      final directory = await getApplicationDocumentsDirectory();
+      final fileName = 'card_${DateTime.now().millisecondsSinceEpoch}.png';
+      final filePath = '${directory.path}/$fileName';
+      final file = File(filePath);
+      await file.writeAsBytes(imageBytes);
+      return filePath;
+    } catch (e) {
+      print("저장 오류: $e");
+      return null;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -555,19 +648,21 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-                    // 2. Card Preview
+                    const SizedBox(height: 50), // Header 공간
+                    
+                    // 1. Card Preview (캡쳐 가능 영역)
                     _buildCardPreview(),
+                    
+                    // 2. Toolbar (이미지와 썸네일 사이)
+                    _buildToolbar(),
                     
                     // 3. Template Selector
                     _buildTemplateSelector(),
+                    
+                    // 4. Footer Input
+                    _buildFooterInput(),
 
-                    // 4. Spacer (Toolbar removed as it is now part of Editor)
-                    const SizedBox(height: 8),
-
-                    // 5. Editor Input
-                    _buildEditorInput(),
-
-                    // 6. Bottom Padding
+                    // 5. Bottom Padding
                     const SizedBox(height: 100),
                   ],
                 ),
@@ -575,7 +670,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
             ),
           ),
 
-          // 1. Floating Header (Transparent)
+          // Floating Header (Transparent)
           Positioned(
             top: MediaQuery.of(context).padding.top + 8,
             left: 16,
@@ -690,9 +785,9 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
       padding: const EdgeInsets.symmetric(vertical: 5),
       child: Center(
         child: AspectRatio(
-          aspectRatio: 4/4.5, // 이미지 크기에 맞게 늘림
+          aspectRatio: 4/4.5,
           child: Container(
-            width: MediaQuery.of(context).size.width * 0.90, // 너비 확대
+            width: MediaQuery.of(context).size.width * 0.92,
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(8),
@@ -708,15 +803,138 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
               borderRadius: BorderRadius.circular(8),
               child: Stack(
                 children: [
-                  // 1. Full Background Image
-                  Positioned.fill(
-                    child: GestureDetector(
-                      onTap: _showCategoryPicker,
-                      child: _buildImage(_selectedImage, fit: BoxFit.cover, width: double.infinity, height: double.infinity),
+                  // RepaintBoundary로 캡처 영역 감싸기 (버튼 제외)
+                  RepaintBoundary(
+                    key: _captureKey,
+                    child: Stack(
+                      children: [
+                        // 1. Full Background Image
+                        Positioned.fill(
+                          child: _buildImage(_selectedImage, fit: BoxFit.cover, width: double.infinity, height: double.infinity),
+                        ),
+
+                        // 2. Draggable Text Area (위치 유지됨)
+                        Positioned(
+                          left: 0,
+                          right: 0,
+                          top: 0,
+                          bottom: 0,
+                          child: Center(
+                            child: Transform.translate(
+                              offset: _dragOffset,
+                              child: GestureDetector(
+                                onPanUpdate: (details) {
+                                  setState(() {
+                                    _dragOffset += details.delta;
+                                  });
+                                },
+                                // 드래그 끝나도 위치 유지 (resetDragOffset 호출 안함)
+                                child: Container(
+                                  width: MediaQuery.of(context).size.width * 0.78,
+                                  constraints: BoxConstraints(
+                                    maxHeight: MediaQuery.of(context).size.width * 0.90 * 0.85,
+                                  ),
+                                  padding: const EdgeInsets.all(20),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.3),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: Colors.white.withOpacity(0.2), width: 1),
+                                  ),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      // 편집 가능한 QuillEditor
+                                      ConstrainedBox(
+                                        constraints: BoxConstraints(
+                                          maxHeight: MediaQuery.of(context).size.width * 0.5,
+                                        ),
+                                        child: QuillEditor(
+                                          controller: _quillController,
+                                          focusNode: _editorFocusNode,
+                                          scrollController: ScrollController(),
+                                          config: QuillEditorConfig(
+                                            autoFocus: false,
+                                            expands: false,
+                                            scrollable: true,
+                                            padding: EdgeInsets.zero,
+                                            showCursor: true,
+                                            placeholder: '여기를 탭하여 메시지 입력...',
+                                            customStyles: DefaultStyles(
+                                              paragraph: DefaultTextBlockStyle(
+                                                _currentStyle,
+                                                HorizontalSpacing.zero,
+                                                VerticalSpacing.zero,
+                                                VerticalSpacing.zero,
+                                                null,
+                                              ),
+                                            ),
+                                          ), 
+                                        ),
+                                      ),
+                                      const SizedBox(height: 16),
+                                      // Footer
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFFD6B5A1),
+                                          borderRadius: BorderRadius.circular(4),
+                                          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4, offset: const Offset(0, 2))],
+                                        ),
+                                        child: Text(
+                                          _footerText.toUpperCase(),
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w600,
+                                            letterSpacing: 1.2,
+                                          ),
+                                        ),
+                                      ),
+                                      // 글자수 카운터 & AI 버튼 (박스 아래)
+                                      const SizedBox(height: 8),
+                                      Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                            decoration: BoxDecoration(
+                                              color: Colors.white.withOpacity(0.7),
+                                              borderRadius: BorderRadius.circular(10),
+                                            ),
+                                            child: Text(
+                                              "${_message.length} / 75",
+                                              style: TextStyle(fontSize: 10, color: _message.length >= 75 ? Colors.red : Colors.grey[700]),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          GestureDetector(
+                                            onTap: _showAiToneSelector,
+                                            child: Container(
+                                              padding: const EdgeInsets.all(4),
+                                              decoration: BoxDecoration(
+                                                color: Colors.white.withOpacity(0.7),
+                                                borderRadius: BorderRadius.circular(6),
+                                              ),
+                                              child: _isAiLoading 
+                                                ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFFF29D86)))
+                                                : const Icon(FontAwesomeIcons.wandMagicSparkles, size: 12, color: Color(0xFFF29D86)),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-
-                  // 2. Change BG Indicator (Top Right)
+                  
+                  // 3. Change BG Indicator (Top Right) - 캡처에서 제외
                   Positioned(
                     top: 12, right: 12,
                     child: GestureDetector(
@@ -732,76 +950,8 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                           children: [
                             Icon(Icons.image, color: Colors.white, size: 14),
                             SizedBox(width: 4),
-                            Text("Change BG", style: TextStyle(color: Colors.white, fontSize: 11)),
+                            Text("배경", style: TextStyle(color: Colors.white, fontSize: 11)),
                           ],
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  // 3. Draggable Text Area
-                  Align(
-                    alignment: Alignment.center,
-                    child: GestureDetector(
-                      onPanUpdate: (details) {
-                        setState(() {
-                          _dragOffset += details.delta;
-                        });
-                      },
-                      onPanEnd: (_) => _resetDragOffset(),
-                      onPanCancel: () => _resetDragOffset(),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeOutBack,
-                        transform: Matrix4.translationValues(_dragOffset.dx, _dragOffset.dy, 0),
-                        child: Container(
-                          width: MediaQuery.of(context).size.width * 0.78, // 텍스트 영역 너비 확대
-                          // Limit max height to prevent overflow stripes
-                          constraints: BoxConstraints(
-                            maxHeight: MediaQuery.of(context).size.width * 0.90 * 0.85, // 높이도 확대
-                          ),
-                          padding: const EdgeInsets.all(28), // 패딩 증가
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.3), // 30% Transparent White
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.white.withOpacity(0.2), width: 1),
-                          ),
-                          child: SingleChildScrollView(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                // Render Quill content in preview
-                                QuillEditor.basic(
-                                  controller: _quillController,
-                                  config: const QuillEditorConfig(
-                                    autoFocus: false,
-                                    expands: false,
-                                    scrollable: false,
-                                    padding: EdgeInsets.zero,
-                                    showCursor: false,
-                                  ), 
-                                ),
-                                const SizedBox(height: 24),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFD6B5A1),
-                                    borderRadius: BorderRadius.circular(4),
-                                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4, offset: const Offset(0, 2))],
-                                  ),
-                                  child: Text(
-                                    _footerText.toUpperCase(),
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w600,
-                                      letterSpacing: 1.2,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
                         ),
                       ),
                     ),
@@ -810,6 +960,96 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+  
+  // 툴바 (이미지와 썸네일 사이)
+  Widget _buildToolbar() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 2))],
+      ),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // 글자 크기 콤보박스 (6~32)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6),
+              decoration: BoxDecoration(
+                border: Border.all(color: const Color(0xFFDDDDDD)),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<double>(
+                  value: _fontSizeOptions.contains(_fontSize) ? _fontSize : 24,
+                  isDense: true,
+                  style: const TextStyle(fontSize: 12, color: Color(0xFF555555)),
+                  icon: const Icon(Icons.arrow_drop_down, size: 16),
+                  items: _fontSizeOptions.map((size) {
+                    return DropdownMenuItem<double>(
+                      value: size,
+                      child: Text('${size.toInt()}', style: const TextStyle(fontSize: 12)),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() {
+                        _fontSize = value;
+                        _updateStyle();
+                      });
+                    }
+                  },
+                ),
+              ),
+            ),
+            const SizedBox(width: 6),
+            // Bold
+            _buildToolbarButton(icon: FontAwesomeIcons.bold, isActive: _isBold, onTap: () {
+              setState(() {
+                _isBold = !_isBold;
+                _updateStyle();
+              });
+            }),
+            // Italic
+            _buildToolbarButton(icon: FontAwesomeIcons.italic, isActive: _isItalic, onTap: () {
+              setState(() {
+                _isItalic = !_isItalic;
+                _updateStyle();
+              });
+            }),
+            // Underline
+            _buildToolbarButton(icon: FontAwesomeIcons.underline, isActive: _isUnderline, onTap: () {
+              setState(() {
+                _isUnderline = !_isUnderline;
+                _updateStyle();
+              });
+            }),
+            const SizedBox(width: 4),
+            // Color
+            _buildToolbarButton(icon: FontAwesomeIcons.palette, onTap: _showColorPicker),
+            const SizedBox(width: 4),
+            Container(width: 1, height: 24, color: Colors.grey[300]),
+            const SizedBox(width: 4),
+            // Align Left
+            _buildToolbarButton(icon: FontAwesomeIcons.alignLeft, isActive: _textAlign == TextAlign.left, onTap: () => _applyAlignment(TextAlign.left)),
+            // Align Center
+            _buildToolbarButton(icon: FontAwesomeIcons.alignCenter, isActive: _textAlign == TextAlign.center, onTap: () => _applyAlignment(TextAlign.center)),
+            // Align Right
+            _buildToolbarButton(icon: FontAwesomeIcons.alignRight, isActive: _textAlign == TextAlign.right, onTap: () => _applyAlignment(TextAlign.right)),
+            const SizedBox(width: 4),
+            Container(width: 1, height: 24, color: Colors.grey[300]),
+            const SizedBox(width: 4),
+            // Font Picker
+            _buildToolbarButton(icon: FontAwesomeIcons.font, onTap: _showFontPicker),
+          ],
         ),
       ),
     );
@@ -883,87 +1123,6 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
       ),
     );
   }
-  
-  Widget _buildToolbar() {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      child: Container(
-        // Use a container with minWidth to help with centering on wide screens
-        constraints: BoxConstraints(minWidth: MediaQuery.of(context).size.width - 24),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-          // Font Toggle (Open Picker)
-          _buildToolbarButton(
-            icon: FontAwesomeIcons.font, 
-            onTap: _showFontPicker,
-          ),
-          
-          const SizedBox(width: 8),
-          Container(width: 1, height: 24, color: Colors.grey[300]),
-          const SizedBox(width: 8),
-
-          // Bold, Italic, Underline
-          _buildToolbarButton(icon: FontAwesomeIcons.bold, isActive: _isBold, onTap: () {
-            setState(() {
-              _isBold = !_isBold;
-              _updateStyle();
-            });
-          }),
-          _buildToolbarButton(icon: FontAwesomeIcons.italic, isActive: _isItalic, onTap: () {
-            setState(() {
-              _isItalic = !_isItalic;
-              _updateStyle();
-            });
-          }),
-          _buildToolbarButton(icon: FontAwesomeIcons.underline, isActive: _isUnderline, onTap: () {
-            setState(() {
-              _isUnderline = !_isUnderline;
-              _updateStyle();
-            });
-          }),
-
-          const SizedBox(width: 8),
-          Container(width: 1, height: 24, color: Colors.grey[300]),
-          const SizedBox(width: 8),
-
-          // Font Size
-          _buildToolbarButton(icon: FontAwesomeIcons.minus, onTap: () {
-            setState(() {
-              _fontSize = (_fontSize - 2).clamp(12.0, 100.0);
-              _updateStyle();
-            });
-          }),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Text("${_fontSize.toInt()}", style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-          ),
-          _buildToolbarButton(icon: FontAwesomeIcons.plus, onTap: () {
-            setState(() {
-              _fontSize = (_fontSize + 2).clamp(12.0, 100.0);
-              _updateStyle();
-            });
-          }),
-
-          const SizedBox(width: 8),
-          Container(width: 1, height: 24, color: Colors.grey[300]),
-          const SizedBox(width: 8),
-
-          // Align
-          _buildToolbarButton(icon: FontAwesomeIcons.alignLeft, isActive: _textAlign == TextAlign.left, onTap: () => setState(() => _textAlign = TextAlign.left)),
-          _buildToolbarButton(icon: FontAwesomeIcons.alignCenter, isActive: _textAlign == TextAlign.center, onTap: () => setState(() => _textAlign = TextAlign.center)),
-          _buildToolbarButton(icon: FontAwesomeIcons.alignRight, isActive: _textAlign == TextAlign.right, onTap: () => setState(() => _textAlign = TextAlign.right)),
-
-          const SizedBox(width: 8),
-           Container(width: 1, height: 24, color: Colors.grey[300]),
-          const SizedBox(width: 8),
-          
-        ],
-      ),
-    ),
-  );
-}
 
   void _showColorPicker() {
     final colors = [
@@ -971,6 +1130,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
       const Color(0xFF512DA8), const Color(0xFF1976D2), const Color(0xFF0288D1), const Color(0xFF0097A7),
       const Color(0xFF00796B), const Color(0xFF388E3C), const Color(0xFF689F38), const Color(0xFFFBC02D),
       const Color(0xFFFFA000), const Color(0xFFF57C00), const Color(0xFFE64A19), const Color(0xFF5D4037),
+      Colors.white, const Color(0xFFFFFFCC), const Color(0xFFFFCCCC), const Color(0xFFCCFFCC),
     ];
 
     showModalBottomSheet(
@@ -1002,7 +1162,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                       decoration: BoxDecoration(
                         color: color,
                         shape: BoxShape.circle,
-                        border: Border.all(color: isSelected ? const Color(0xFFF29D86) : Colors.white.withOpacity(0.5), width: 3),
+                        border: Border.all(color: isSelected ? const Color(0xFFF29D86) : Colors.grey.withOpacity(0.3), width: isSelected ? 3 : 1),
                         boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4)],
                       ),
                       child: isSelected ? const Icon(Icons.check, color: Colors.white, size: 20) : null,
@@ -1022,173 +1182,37 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 32, height: 32,
-        margin: const EdgeInsets.symmetric(horizontal: 1),
+        width: 36, height: 36,
+        margin: const EdgeInsets.symmetric(horizontal: 2),
         decoration: BoxDecoration(
           color: isActive ? const Color(0xFFEEF2FF) : Colors.white,
           border: Border.all(color: isActive ? const Color(0xFFF29D86) : const Color(0xFFDDDDDD)),
-          borderRadius: BorderRadius.circular(6),
+          borderRadius: BorderRadius.circular(8),
         ),
-        child: Center(child: Icon(icon, size: 14, color: isActive ? const Color(0xFFF29D86) : const Color(0xFF555555))),
+        child: Center(child: Icon(icon, size: 16, color: isActive ? const Color(0xFFF29D86) : const Color(0xFF555555))),
       ),
     );
   }
-
-  Widget _buildEditorInput() {
+  
+  // Footer 입력 영역
+  Widget _buildFooterInput() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 2), // 줄간격 축소
-      child: Column(
-        children: [
-           TextField(
-             controller: _footerController,
-             onChanged: (val) {
-               setState(() => _footerText = val);
-               _saveFooter(val); // Footer 저장
-             },
-             decoration: const InputDecoration(
-               labelText: "Footer (보낸사람)",
-               border: OutlineInputBorder(),
-               contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-             ),
-             style: const TextStyle(fontSize: 13),
-           ),
-           const SizedBox(height: 4), // 간격 축소
-            Container(
-              decoration: BoxDecoration(
-                color: const Color(0xFFFFFDF5),
-                borderRadius: BorderRadius.circular(4),
-                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), offset: const Offset(0, -2), blurRadius: 4)],
-              ),
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2), // 패딩 축소
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        // 1줄 툴바 with 글자 크기 콤보박스
-                        SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              // 글자 크기 콤보박스 (6~32)
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 4),
-                                decoration: BoxDecoration(
-                                  border: Border.all(color: const Color(0xFFDDDDDD)),
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                                child: DropdownButtonHideUnderline(
-                                  child: DropdownButton<double>(
-                                    value: _fontSizeOptions.contains(_fontSize) ? _fontSize : 18,
-                                    isDense: true,
-                                    style: const TextStyle(fontSize: 12, color: Color(0xFF555555)),
-                                    icon: const Icon(Icons.arrow_drop_down, size: 16),
-                                    items: _fontSizeOptions.map((size) {
-                                      return DropdownMenuItem<double>(
-                                        value: size,
-                                        child: Text('${size.toInt()}', style: const TextStyle(fontSize: 12)),
-                                      );
-                                    }).toList(),
-                                    onChanged: (value) {
-                                      if (value != null) {
-                                        setState(() {
-                                          _fontSize = value;
-                                          _updateStyle();
-                                        });
-                                      }
-                                    },
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 4),
-                              // Bold, Italic, Underline
-                              _buildToolbarButton(icon: FontAwesomeIcons.bold, isActive: _isBold, onTap: () {
-                                setState(() {
-                                  _isBold = !_isBold;
-                                  _updateStyle();
-                                });
-                              }),
-                              _buildToolbarButton(icon: FontAwesomeIcons.italic, isActive: _isItalic, onTap: () {
-                                setState(() {
-                                  _isItalic = !_isItalic;
-                                  _updateStyle();
-                                });
-                              }),
-                              _buildToolbarButton(icon: FontAwesomeIcons.underline, isActive: _isUnderline, onTap: () {
-                                setState(() {
-                                  _isUnderline = !_isUnderline;
-                                  _updateStyle();
-                                });
-                              }),
-                              const SizedBox(width: 2),
-                              // Color
-                              _buildToolbarButton(icon: FontAwesomeIcons.palette, onTap: _showColorPicker),
-                              const SizedBox(width: 2),
-                              Container(width: 1, height: 20, color: Colors.grey[300]),
-                              const SizedBox(width: 2),
-                              // Align
-                              _buildToolbarButton(icon: FontAwesomeIcons.alignLeft, isActive: _textAlign == TextAlign.left, onTap: () => setState(() => _textAlign = TextAlign.left)),
-                              _buildToolbarButton(icon: FontAwesomeIcons.alignCenter, isActive: _textAlign == TextAlign.center, onTap: () => setState(() => _textAlign = TextAlign.center)),
-                              _buildToolbarButton(icon: FontAwesomeIcons.alignRight, isActive: _textAlign == TextAlign.right, onTap: () => setState(() => _textAlign = TextAlign.right)),
-                              const SizedBox(width: 2),
-                              Container(width: 1, height: 20, color: Colors.grey[300]),
-                              const SizedBox(width: 2),
-                              // Font Picker
-                              _buildToolbarButton(icon: FontAwesomeIcons.font, onTap: _showFontPicker),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Container(
-                          height: 150, // Fixed height for editor
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey[200]!),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: QuillEditor.basic(
-                            controller: _quillController,
-                            config: const QuillEditorConfig(
-                              expands: true,
-                              autoFocus: false,
-                              padding: EdgeInsets.all(8),
-                              scrollable: true,
-                              placeholder: '메시지를 입력하세요 (한 줄 15자, 최대 5줄)',
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              "${_message.length} / 75",
-                              style: TextStyle(fontSize: 10, color: _message.length >= 75 ? Colors.red : Colors.grey),
-                            ),
-                            const SizedBox(width: 12),
-                            // AI Button relocated here
-                            GestureDetector(
-                              onTap: _showAiToneSelector,
-                              child: Container(
-                                padding: const EdgeInsets.all(6),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFFFF0EB),
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(color: const Color(0xFFF29D86).withOpacity(0.5)),
-                                ),
-                                child: const Icon(FontAwesomeIcons.wandMagicSparkles, size: 14, color: Color(0xFFF29D86)),
-                              ),
-                            )
-                          ],
-                        ),
-                      ],
-                    ),
-                  )
-                ],
-              ),
-            )
-        ],
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      child: TextField(
+        controller: _footerController,
+        onChanged: (val) {
+          setState(() => _footerText = val);
+          _saveFooter(val);
+        },
+        decoration: InputDecoration(
+          labelText: "보낸 사람 (Footer)",
+          labelStyle: const TextStyle(fontSize: 12),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          filled: true,
+          fillColor: Colors.white,
+        ),
+        style: const TextStyle(fontSize: 14),
       ),
     );
   }
@@ -1199,13 +1223,19 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     setState(() => _isSending = true);
     
     try {
-      // Simulate sending delay
-      await Future.delayed(const Duration(seconds: 2));
+      // 이미지 캡처 및 저장
+      final savedPath = await _saveCardImage();
       
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("카드가 생성되었습니다! 수신자 선택으로 이동합니다...")),
-        );
+        if (savedPath != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("카드가 저장되었습니다: $savedPath")),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("카드가 생성되었습니다! 수신자 선택으로 이동합니다...")),
+          );
+        }
       }
     } finally {
       if (mounted) {
