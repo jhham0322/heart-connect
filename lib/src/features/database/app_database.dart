@@ -37,14 +37,7 @@ class Templates extends Table {
   BoolColumn get isFavorite => boolean().withDefault(const Constant(false))();
 }
 
-// 4. Gallery Favorites Table
-class GalleryFavorites extends Table {
-  TextColumn get assetPath => text()();
-  @override
-  Set<Column> get primaryKey => {assetPath};
-}
-
-@DriftDatabase(tables: [Contacts, History, Templates, GalleryFavorites])
+@DriftDatabase(tables: [Contacts, History, Templates])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
@@ -82,17 +75,6 @@ class AppDatabase extends _$AppDatabase {
               history.eventDate.isBetweenValues(startOfDay, endOfDay));
     
     return await query.map((row) => row.read(countExp)).getSingle() ?? 0;
-  }
-
-  // GALLERY FAVORITES methods
-  Future<List<GalleryFavorite>> getAllGalleryFavorites() => select(galleryFavorites).get();
-  Stream<List<GalleryFavorite>> watchAllGalleryFavorites() => select(galleryFavorites).watch();
-  Future<int> addGalleryFavorite(String path) => into(galleryFavorites).insert(GalleryFavoritesCompanion.insert(assetPath: path), mode: InsertMode.insertOrReplace);
-  Future<int> removeGalleryFavorite(String path) => (delete(galleryFavorites)..where((t) => t.assetPath.equals(path))).go();
-  Future<bool> isGalleryFavorite(String path) async {
-    final query = select(galleryFavorites)..where((t) => t.assetPath.equals(path));
-    final result = await query.getSingleOrNull();
-    return result != null;
   }
 }
 
