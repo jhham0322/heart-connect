@@ -92,7 +92,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
       document: Document()..insert(0, _message),
       selection: const TextSelection.collapsed(offset: 0),
     );
-    _quillController.addListener(_onQuillChanged);
+    _quillController.addListener(_onEditorChanged);
 
     print("[WriteCardScreen] initState at ${DateTime.now()}");
     print("[WriteCardScreen] Received InitialImage: ${widget.initialImage}");
@@ -150,9 +150,59 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     _messageController.dispose();
     _footerController.dispose();
     _editorFocusNode.dispose();
-    _quillController.removeListener(_onQuillChanged);
+    _quillController.removeListener(_onEditorChanged);
     _quillController.dispose();
     super.dispose();
+  }
+
+  void _onEditorChanged() {
+    _onQuillChanged();
+    _updateToolbarState();
+  }
+
+  // 커서 위치나 선택 영역 변경 시 툴바 상태 업데이트
+  void _updateToolbarState() {
+    final style = _quillController.getSelectionStyle();
+    
+    setState(() {
+      _isBold = style.containsKey(Attribute.bold.key);
+      _isItalic = style.containsKey(Attribute.italic.key);
+      _isUnderline = style.containsKey(Attribute.underline.key);
+      
+      // 정렬 상태 확인
+      if (style.containsKey(Attribute.leftAlignment.key)) _textAlign = TextAlign.left;
+      else if (style.containsKey(Attribute.centerAlignment.key)) _textAlign = TextAlign.center;
+      else if (style.containsKey(Attribute.rightAlignment.key)) _textAlign = TextAlign.right;
+      else _textAlign = TextAlign.left; // Default
+
+      // 폰트 사이즈 확인
+      if (style.containsKey('size')) {
+        final sizeStr = style.attributes['size']?.value;
+        if (sizeStr != null) {
+            // "14" or "14.0" or "small" etc.
+             final parsed = double.tryParse(sizeStr.toString());
+             if (parsed != null) _fontSize = parsed;
+        }
+      }
+      
+      // 폰트 패밀리 확인
+      if (style.containsKey('font')) {
+         _fontName = style.attributes['font']?.value ?? 'Great Vibes';
+      }
+      
+      // 색상 확인
+      if (style.containsKey('color')) {
+        final colorHex = style.attributes['color']?.value;
+        if (colorHex != null) {
+           // #AABBCC
+           try {
+             if (colorHex.toString().startsWith('#')) {
+                _currentStyle = _currentStyle.copyWith(color: Color(int.parse("FF${colorHex.toString().substring(1)}", radix: 16)));
+             }
+           } catch (_) {}
+        }
+      }
+    });
   }
 
   void _scrollToSelected() {
@@ -267,43 +317,65 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     });
   }
 
-  void _updateStyle() {
-    setState(() {
-      _currentStyle = GoogleFonts.getFont(
-        _fontName,
-        fontSize: _fontSize,
-        color: _currentStyle.color,
-        fontWeight: _isBold ? FontWeight.bold : FontWeight.normal,
-        fontStyle: _isItalic ? FontStyle.italic : FontStyle.normal,
-        decoration: _isUnderline ? TextDecoration.underline : TextDecoration.none,
-        height: 1.2,
-      );
-    });
-  }
-  
-  // 볼드 토글
+  // 볼드 토글 (부분 적용)
   void _toggleBold() {
-    setState(() => _isBold = !_isBold);
-    _updateStyle();
+    final isBold = _quillController.getSelectionStyle().containsKey(Attribute.bold.key);
+    _quillController.formatSelection(
+      isBold ? Attribute.clone(Attribute.bold, null) : Attribute.bold
+    );
   }
   
-  // 이탤릭 토글
+  // 이탤릭 토글 (부분 적용)
   void _toggleItalic() {
-    setState(() => _isItalic = !_isItalic);
-    _updateStyle();
+    final isItalic = _quillController.getSelectionStyle().containsKey(Attribute.italic.key);
+    _quillController.formatSelection(
+      isItalic ? Attribute.clone(Attribute.italic, null) : Attribute.italic
+    );
   }
   
-  // 밑줄 토글
+  // 밑줄 토글 (부분 적용)
   void _toggleUnderline() {
-    setState(() => _isUnderline = !_isUnderline);
-    _updateStyle();
+    final isUnder = _quillController.getSelectionStyle().containsKey(Attribute.underline.key);
+    _quillController.formatSelection(
+      isUnder ? Attribute.clone(Attribute.underline, null) : Attribute.underline
+    );
   }
   
-  // 텍스트 정렬 적용
+  // 텍스트 정렬 적용 (부분/문단 적용)
   void _applyAlignment(TextAlign align) {
-    setState(() {
-      _textAlign = align;
-    });
+    Attribute alignAttr;
+    switch (align) {
+      case TextAlign.left:
+        alignAttr = Attribute.leftAlignment;
+        break;
+      case TextAlign.center:
+        alignAttr = Attribute.centerAlignment;
+        break;
+      case TextAlign.right:
+        alignAttr = Attribute.rightAlignment;
+        break;
+      default:
+        alignAttr = Attribute.leftAlignment;
+    }
+    _quillController.formatSelection(alignAttr);
+    // 상태 업데이트는 Listener에서 처리됨
+  }
+
+  // 폰트 변경 (부분 적용)
+  void _applyFont(String fontName) {
+    _quillController.formatSelection(Attribute.fromKeyValue('font', fontName));
+  }
+  
+  // 폰트 사이즈 변경 (부분 적용)
+  void _applyFontSize(double size) {
+    // 픽셀 값으로 저장 (나중에 파싱할 때 주의)
+    _quillController.formatSelection(Attribute.fromKeyValue('size', size.toString()));
+  }
+  
+  // 색상 변경 (부분 적용)
+  void _applyColor(Color color) {
+    final hex = '#${color.value.toRadixString(16).padLeft(8, '0').substring(2).toUpperCase()}';
+    _quillController.formatSelection(Attribute.fromKeyValue('color', hex));
   }
 
   Future<void> _saveCurrentCard() async {
@@ -454,10 +526,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                       title: Text(font, style: GoogleFonts.getFont(font, fontSize: 18)),
                       trailing: isSelected ? const Icon(Icons.check, color: Color(0xFFF29D86)) : null,
                       onTap: () {
-                        setState(() {
-                          _fontName = font;
-                          _updateStyle();
-                        });
+                        _applyFont(font);
                         Navigator.pop(context);
                       },
                     );
@@ -992,10 +1061,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                   }).toList(),
                   onChanged: (value) {
                     if (value != null) {
-                      setState(() {
-                        _fontSize = value;
-                        _updateStyle();
-                      });
+                      _applyFontSize(value);
                     }
                   },
                 ),
@@ -1128,9 +1194,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                   final isSelected = _currentStyle.color?.value == color.value;
                   return GestureDetector(
                     onTap: () {
-                      setState(() {
-                        _currentStyle = _currentStyle.copyWith(color: color);
-                      });
+                      _applyColor(color);
                       Navigator.pop(context);
                     },
                     child: Container(
