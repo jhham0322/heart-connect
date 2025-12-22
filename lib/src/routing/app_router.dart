@@ -62,8 +62,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               ),
             ],
           ),
-          // Additional branches for Settings and Write if they need to be 'fixed' screens
-          // Or just keep them as sub-routes of the Home branch to show the shell
+          // Additional branches for Settings and Write
           StatefulShellBranch(
             routes: [
               GoRoute(
@@ -77,8 +76,14 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: '/write',
                 pageBuilder: (context, state) {
-                  final initialImage = state.extra as String?;
-                  return NoTransitionPage(child: WriteCardScreen(initialImage: initialImage));
+                  final initialImage = state.uri.queryParameters['image'];
+                  print("[AppRouter] /write route. Param: $initialImage");
+                  return NoTransitionPage(
+                    child: WriteCardScreen(
+                      key: ValueKey(initialImage), // Force rebuild when image changes
+                      initialImage: initialImage,
+                    ),
+                  );
                 },
               ),
             ],

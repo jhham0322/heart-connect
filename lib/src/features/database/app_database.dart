@@ -37,12 +37,34 @@ class Templates extends Table {
   BoolColumn get isFavorite => boolean().withDefault(const Constant(false))();
 }
 
-@DriftDatabase(tables: [Contacts, History, Templates])
+// 4. Gallery Favorites Table
+class GalleryFavorites extends Table {
+  TextColumn get imagePath => text()();
+  DateTimeColumn get addedDate => dateTime().withDefault(currentDateAndTime)();
+  
+  @override
+  Set<Column> get primaryKey => {imagePath};
+}
+
+@DriftDatabase(tables: [Contacts, History, Templates, GalleryFavorites])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2; // Incremented for new table
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+    onCreate: (Migrator m) async {
+      await m.createAll();
+    },
+    onUpgrade: (Migrator m, int from, int to) async {
+      if (from < 2) {
+        // Create GalleryFavorites table for version 2
+        await m.createTable(galleryFavorites);
+      }
+    },
+  );
 
   // READ: Contacts
   Future<List<Contact>> getAllContacts() => select(contacts).get();
@@ -61,6 +83,19 @@ class AppDatabase extends _$AppDatabase {
   }
   
   Future<int> insertHistory(HistoryCompanion entry) => into(history).insert(entry);
+
+  // GALLERY FAVORITES
+  Future<int> addGalleryFavorite(String path) {
+    return into(galleryFavorites).insert(GalleryFavoritesCompanion.insert(imagePath: path), mode: InsertMode.insertOrIgnore);
+  }
+
+  Future<int> removeGalleryFavorite(String path) {
+    return (delete(galleryFavorites)..where((t) => t.imagePath.equals(path))).go();
+  }
+
+  Future<List<String>> getAllGalleryFavorites() {
+    return select(galleryFavorites).map((row) => row.imagePath).get();
+  }
 
   // STATISTICS & EVENTS
   Future<int> getTodaySentCount() async {
@@ -82,6 +117,6 @@ LazyDatabase _openConnection() {
   return LazyDatabase(() async {
     final dbFolder = await getApplicationDocumentsDirectory();
     final file = File(p.join(dbFolder.path, 'db.sqlite'));
-    return NativeDatabase.createInBackground(file);
+    return NativeDatabase.createInBackground(file, logStatements: true);
   });
 }

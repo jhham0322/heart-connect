@@ -1090,14 +1090,22 @@ class $GalleryFavoritesTable extends GalleryFavorites
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
   $GalleryFavoritesTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _assetPathMeta =
-      const VerificationMeta('assetPath');
+  static const VerificationMeta _imagePathMeta =
+      const VerificationMeta('imagePath');
   @override
-  late final GeneratedColumn<String> assetPath = GeneratedColumn<String>(
-      'asset_path', aliasedName, false,
+  late final GeneratedColumn<String> imagePath = GeneratedColumn<String>(
+      'image_path', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _addedDateMeta =
+      const VerificationMeta('addedDate');
   @override
-  List<GeneratedColumn> get $columns => [assetPath];
+  late final GeneratedColumn<DateTime> addedDate = GeneratedColumn<DateTime>(
+      'added_date', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
+  @override
+  List<GeneratedColumn> get $columns => [imagePath, addedDate];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -1108,23 +1116,29 @@ class $GalleryFavoritesTable extends GalleryFavorites
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
-    if (data.containsKey('asset_path')) {
-      context.handle(_assetPathMeta,
-          assetPath.isAcceptableOrUnknown(data['asset_path']!, _assetPathMeta));
+    if (data.containsKey('image_path')) {
+      context.handle(_imagePathMeta,
+          imagePath.isAcceptableOrUnknown(data['image_path']!, _imagePathMeta));
     } else if (isInserting) {
-      context.missing(_assetPathMeta);
+      context.missing(_imagePathMeta);
+    }
+    if (data.containsKey('added_date')) {
+      context.handle(_addedDateMeta,
+          addedDate.isAcceptableOrUnknown(data['added_date']!, _addedDateMeta));
     }
     return context;
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => {assetPath};
+  Set<GeneratedColumn> get $primaryKey => {imagePath};
   @override
   GalleryFavorite map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return GalleryFavorite(
-      assetPath: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}asset_path'])!,
+      imagePath: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}image_path'])!,
+      addedDate: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}added_date'])!,
     );
   }
 
@@ -1135,18 +1149,21 @@ class $GalleryFavoritesTable extends GalleryFavorites
 }
 
 class GalleryFavorite extends DataClass implements Insertable<GalleryFavorite> {
-  final String assetPath;
-  const GalleryFavorite({required this.assetPath});
+  final String imagePath;
+  final DateTime addedDate;
+  const GalleryFavorite({required this.imagePath, required this.addedDate});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['asset_path'] = Variable<String>(assetPath);
+    map['image_path'] = Variable<String>(imagePath);
+    map['added_date'] = Variable<DateTime>(addedDate);
     return map;
   }
 
   GalleryFavoritesCompanion toCompanion(bool nullToAbsent) {
     return GalleryFavoritesCompanion(
-      assetPath: Value(assetPath),
+      imagePath: Value(imagePath),
+      addedDate: Value(addedDate),
     );
   }
 
@@ -1154,67 +1171,83 @@ class GalleryFavorite extends DataClass implements Insertable<GalleryFavorite> {
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return GalleryFavorite(
-      assetPath: serializer.fromJson<String>(json['assetPath']),
+      imagePath: serializer.fromJson<String>(json['imagePath']),
+      addedDate: serializer.fromJson<DateTime>(json['addedDate']),
     );
   }
   @override
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
-      'assetPath': serializer.toJson<String>(assetPath),
+      'imagePath': serializer.toJson<String>(imagePath),
+      'addedDate': serializer.toJson<DateTime>(addedDate),
     };
   }
 
-  GalleryFavorite copyWith({String? assetPath}) => GalleryFavorite(
-        assetPath: assetPath ?? this.assetPath,
+  GalleryFavorite copyWith({String? imagePath, DateTime? addedDate}) =>
+      GalleryFavorite(
+        imagePath: imagePath ?? this.imagePath,
+        addedDate: addedDate ?? this.addedDate,
       );
   GalleryFavorite copyWithCompanion(GalleryFavoritesCompanion data) {
     return GalleryFavorite(
-      assetPath: data.assetPath.present ? data.assetPath.value : this.assetPath,
+      imagePath: data.imagePath.present ? data.imagePath.value : this.imagePath,
+      addedDate: data.addedDate.present ? data.addedDate.value : this.addedDate,
     );
   }
 
   @override
   String toString() {
     return (StringBuffer('GalleryFavorite(')
-          ..write('assetPath: $assetPath')
+          ..write('imagePath: $imagePath, ')
+          ..write('addedDate: $addedDate')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => assetPath.hashCode;
+  int get hashCode => Object.hash(imagePath, addedDate);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is GalleryFavorite && other.assetPath == this.assetPath);
+      (other is GalleryFavorite &&
+          other.imagePath == this.imagePath &&
+          other.addedDate == this.addedDate);
 }
 
 class GalleryFavoritesCompanion extends UpdateCompanion<GalleryFavorite> {
-  final Value<String> assetPath;
+  final Value<String> imagePath;
+  final Value<DateTime> addedDate;
   final Value<int> rowid;
   const GalleryFavoritesCompanion({
-    this.assetPath = const Value.absent(),
+    this.imagePath = const Value.absent(),
+    this.addedDate = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   GalleryFavoritesCompanion.insert({
-    required String assetPath,
+    required String imagePath,
+    this.addedDate = const Value.absent(),
     this.rowid = const Value.absent(),
-  }) : assetPath = Value(assetPath);
+  }) : imagePath = Value(imagePath);
   static Insertable<GalleryFavorite> custom({
-    Expression<String>? assetPath,
+    Expression<String>? imagePath,
+    Expression<DateTime>? addedDate,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
-      if (assetPath != null) 'asset_path': assetPath,
+      if (imagePath != null) 'image_path': imagePath,
+      if (addedDate != null) 'added_date': addedDate,
       if (rowid != null) 'rowid': rowid,
     });
   }
 
   GalleryFavoritesCompanion copyWith(
-      {Value<String>? assetPath, Value<int>? rowid}) {
+      {Value<String>? imagePath,
+      Value<DateTime>? addedDate,
+      Value<int>? rowid}) {
     return GalleryFavoritesCompanion(
-      assetPath: assetPath ?? this.assetPath,
+      imagePath: imagePath ?? this.imagePath,
+      addedDate: addedDate ?? this.addedDate,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1222,8 +1255,11 @@ class GalleryFavoritesCompanion extends UpdateCompanion<GalleryFavorite> {
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    if (assetPath.present) {
-      map['asset_path'] = Variable<String>(assetPath.value);
+    if (imagePath.present) {
+      map['image_path'] = Variable<String>(imagePath.value);
+    }
+    if (addedDate.present) {
+      map['added_date'] = Variable<DateTime>(addedDate.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -1234,7 +1270,8 @@ class GalleryFavoritesCompanion extends UpdateCompanion<GalleryFavorite> {
   @override
   String toString() {
     return (StringBuffer('GalleryFavoritesCompanion(')
-          ..write('assetPath: $assetPath, ')
+          ..write('imagePath: $imagePath, ')
+          ..write('addedDate: $addedDate, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1710,12 +1747,14 @@ class $$TemplatesTableOrderingComposer
 
 typedef $$GalleryFavoritesTableCreateCompanionBuilder
     = GalleryFavoritesCompanion Function({
-  required String assetPath,
+  required String imagePath,
+  Value<DateTime> addedDate,
   Value<int> rowid,
 });
 typedef $$GalleryFavoritesTableUpdateCompanionBuilder
     = GalleryFavoritesCompanion Function({
-  Value<String> assetPath,
+  Value<String> imagePath,
+  Value<DateTime> addedDate,
   Value<int> rowid,
 });
 
@@ -1737,19 +1776,23 @@ class $$GalleryFavoritesTableTableManager extends RootTableManager<
           orderingComposer:
               $$GalleryFavoritesTableOrderingComposer(ComposerState(db, table)),
           updateCompanionCallback: ({
-            Value<String> assetPath = const Value.absent(),
+            Value<String> imagePath = const Value.absent(),
+            Value<DateTime> addedDate = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               GalleryFavoritesCompanion(
-            assetPath: assetPath,
+            imagePath: imagePath,
+            addedDate: addedDate,
             rowid: rowid,
           ),
           createCompanionCallback: ({
-            required String assetPath,
+            required String imagePath,
+            Value<DateTime> addedDate = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               GalleryFavoritesCompanion.insert(
-            assetPath: assetPath,
+            imagePath: imagePath,
+            addedDate: addedDate,
             rowid: rowid,
           ),
         ));
@@ -1758,8 +1801,13 @@ class $$GalleryFavoritesTableTableManager extends RootTableManager<
 class $$GalleryFavoritesTableFilterComposer
     extends FilterComposer<_$AppDatabase, $GalleryFavoritesTable> {
   $$GalleryFavoritesTableFilterComposer(super.$state);
-  ColumnFilters<String> get assetPath => $state.composableBuilder(
-      column: $state.table.assetPath,
+  ColumnFilters<String> get imagePath => $state.composableBuilder(
+      column: $state.table.imagePath,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<DateTime> get addedDate => $state.composableBuilder(
+      column: $state.table.addedDate,
       builder: (column, joinBuilders) =>
           ColumnFilters(column, joinBuilders: joinBuilders));
 }
@@ -1767,8 +1815,13 @@ class $$GalleryFavoritesTableFilterComposer
 class $$GalleryFavoritesTableOrderingComposer
     extends OrderingComposer<_$AppDatabase, $GalleryFavoritesTable> {
   $$GalleryFavoritesTableOrderingComposer(super.$state);
-  ColumnOrderings<String> get assetPath => $state.composableBuilder(
-      column: $state.table.assetPath,
+  ColumnOrderings<String> get imagePath => $state.composableBuilder(
+      column: $state.table.imagePath,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<DateTime> get addedDate => $state.composableBuilder(
+      column: $state.table.addedDate,
       builder: (column, joinBuilders) =>
           ColumnOrderings(column, joinBuilders: joinBuilders));
 }

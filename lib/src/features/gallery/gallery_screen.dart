@@ -7,17 +7,10 @@ import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../theme/app_theme.dart';
 import 'favorites_provider.dart';
 
-// --- Model ---
-class CategoryItem {
-  final String id;
-  final String title;
-  final IconData icon;
-  final Color color;
-
-  CategoryItem({required this.id, required this.title, required this.icon, required this.color});
-}
+import 'gallery_data.dart';
 
 class GalleryScreen extends StatefulWidget {
   const GalleryScreen({super.key});
@@ -28,20 +21,7 @@ class GalleryScreen extends StatefulWidget {
 
 class _GalleryScreenState extends State<GalleryScreen> {
   // Categories
-  final List<CategoryItem> _categories = [
-    CategoryItem(id: 'christmas', title: 'Christmas', icon: FontAwesomeIcons.tree, color: const Color(0xFFEF9A9A)), 
-    CategoryItem(id: 'newyear', title: 'New Year', icon: FontAwesomeIcons.champagneGlasses, color: const Color(0xFF90CAF9)), 
-    CategoryItem(id: 'birthday', title: 'Birthday', icon: FontAwesomeIcons.cakeCandles, color: const Color(0xFFF48FB1)), 
-    CategoryItem(id: 'thanks', title: 'Thanks', icon: FontAwesomeIcons.heart, color: const Color(0xFFFFF59D)), 
-    CategoryItem(id: 'motherDay', title: 'Parents Day', icon: FontAwesomeIcons.personBreastfeeding, color: const Color(0xFFCE93D8)), 
-    CategoryItem(id: 'teachersDay', title: 'Teachers Day', icon: FontAwesomeIcons.chalkboardUser, color: const Color(0xFFBCAAA4)), 
-    CategoryItem(id: 'tour', title: 'Travel', icon: FontAwesomeIcons.plane, color: const Color(0xFFA5D6A7)), 
-    CategoryItem(id: 'halloween', title: 'Halloween', icon: FontAwesomeIcons.ghost, color: const Color(0xFFFFAB91)), 
-    CategoryItem(id: 'thanksgiving', title: 'Harvest', icon: FontAwesomeIcons.wheatAwn, color: const Color(0xFFFFCC80)), 
-    CategoryItem(id: 'my_photos', title: 'My Photos', icon: FontAwesomeIcons.images, color: const Color(0xFF90A4AE)), 
-    CategoryItem(id: 'favorites', title: 'Favorites', icon: FontAwesomeIcons.star, color: const Color(0xFFFFF176)), 
-    CategoryItem(id: 'letters', title: 'Letters', icon: FontAwesomeIcons.envelopeOpenText, color: const Color(0xFFB0BEC5)), 
-  ];
+  final List<CategoryItem> _categories = galleryCategories;
 
   Map<String, int> _categoryCounts = {};
   Map<String, bool> _hasNewItems = {}; 
@@ -264,8 +244,12 @@ class _GalleryDetailScreenState extends ConsumerState<GalleryDetailScreen> {
   }
 
   void _openImageViewer(int index) {
-     Navigator.push(context, MaterialPageRoute(builder: (_) => 
-       _FullScreenViewer(images: _images, initialIndex: index)
+     Navigator.of(context, rootNavigator: true).push(MaterialPageRoute(builder: (_) => 
+       _FullScreenViewer(
+         images: _images, 
+         initialIndex: index, 
+         categoryName: widget.category.title,
+       )
      ));
   }
 
@@ -274,10 +258,22 @@ class _GalleryDetailScreenState extends ConsumerState<GalleryDetailScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       appBar: AppBar(
-        title: Text(widget.category.title),
+        title: Text(
+          widget.category.title,
+          style: const TextStyle(
+            color: AppTheme.textPrimary,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: false,
         backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
         elevation: 0,
+        titleSpacing: 0, 
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: AppTheme.textPrimary),
+          onPressed: () => context.pop(),
+        ),
       ),
       body: _isLoading 
         ? const Center(child: CircularProgressIndicator())
@@ -319,11 +315,12 @@ class _GalleryDetailScreenState extends ConsumerState<GalleryDetailScreen> {
                         if (isFavorite)
                           Positioned(
                             top: 8,
-                            right: 8,
-                            child: const Icon(
-                              FontAwesomeIcons.solidHeart,
-                              color: Color(0xFFFF7043),
-                              size: 18,
+                            left: 8,
+                            child: Stack(
+                              children: [
+                                const Icon(FontAwesomeIcons.solidHeart, color: Color(0xFFFF7043), size: 18),
+                                const Icon(FontAwesomeIcons.heart, color: Colors.white, size: 18),
+                              ],
                             ),
                           ),
                       ],
@@ -340,8 +337,13 @@ class _GalleryDetailScreenState extends ConsumerState<GalleryDetailScreen> {
 class _FullScreenViewer extends ConsumerStatefulWidget {
   final List<String> images;
   final int initialIndex;
+  final String categoryName;
 
-  const _FullScreenViewer({required this.images, required this.initialIndex});
+  const _FullScreenViewer({
+    required this.images, 
+    required this.initialIndex, 
+    required this.categoryName,
+  });
 
   @override
   ConsumerState<_FullScreenViewer> createState() => _FullScreenViewerState();
@@ -371,66 +373,73 @@ class _FullScreenViewerState extends ConsumerState<_FullScreenViewer> {
 
     return Scaffold(
       backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        elevation: 0,
+        automaticallyImplyLeading: false, // Hide default back button
+        title: Text(
+          widget.categoryName,
+          style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        actions: [
+          // Favorite Heart
+          Consumer(
+            builder: (context, ref, child) {
+              final favorites = ref.watch(favoritesProvider);
+              final isFav = favorites.contains(widget.images[_currentIndex]);
+              
+              return IconButton(
+                icon: isFav
+                    ? Stack(
+                        children: [
+                          const Icon(FontAwesomeIcons.solidHeart, color: Color(0xFFFF7043), size: 24),
+                          const Icon(FontAwesomeIcons.heart, color: Colors.white, size: 24),
+                        ],
+                      )
+                    : const Icon(FontAwesomeIcons.heart, color: Colors.white, size: 24),
+                onPressed: () {
+                  ref.read(favoritesProvider.notifier).toggleFavorite(widget.images[_currentIndex]);
+                },
+              );
+            },
+          ),
+          // Close/Back Button moved to right
+          IconButton(
+            icon: const Icon(Icons.close, color: Colors.white, size: 28),
+            onPressed: () => Navigator.pop(context),
+          ),
+          const SizedBox(width: 8),
+        ],
+      ),
       body: Stack(
         children: [
-          // 1. Photo Gallery (Tap background to close)
-          GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: PhotoViewGallery.builder(
-              scrollPhysics: const BouncingScrollPhysics(),
-              pageController: _pageController,
-              onPageChanged: _onPageChanged,
-              itemCount: widget.images.length,
-              builder: (context, index) {
-                return PhotoViewGalleryPageOptions(
-                  imageProvider: AssetImage(widget.images[index]),
-                  initialScale: PhotoViewComputedScale.contained,
-                  minScale: PhotoViewComputedScale.contained,
-                  maxScale: PhotoViewComputedScale.covered * 2,
-                  heroAttributes: PhotoViewHeroAttributes(tag: widget.images[index]),
-                );
-              },
-              loadingBuilder: (context, event) => const Center(
-                child: CircularProgressIndicator(color: Colors.white),
-              ),
-              backgroundDecoration: const BoxDecoration(color: Colors.black),
+          // 1. Photo Gallery
+          PhotoViewGallery.builder(
+            scrollPhysics: const BouncingScrollPhysics(),
+            pageController: _pageController,
+            onPageChanged: _onPageChanged,
+            itemCount: widget.images.length,
+            builder: (context, index) {
+              return PhotoViewGalleryPageOptions(
+                imageProvider: AssetImage(widget.images[index]),
+                initialScale: PhotoViewComputedScale.contained,
+                minScale: PhotoViewComputedScale.contained,
+                maxScale: PhotoViewComputedScale.covered * 2,
+                heroAttributes: PhotoViewHeroAttributes(tag: widget.images[index]),
+              );
+            },
+            loadingBuilder: (context, event) => const Center(
+              child: CircularProgressIndicator(color: Colors.white),
             ),
+            backgroundDecoration: const BoxDecoration(color: Colors.black),
           ),
 
-          Positioned(
-            top: 40,
-            left: 20,
-          Positioned(
-            top: 40,
-            left: 20,
-            child: Consumer(
-              builder: (context, ref, child) {
-                final favorites = ref.watch(favoritesProvider);
-                final isFav = favorites.contains(widget.images[_currentIndex]);
-                
-                return IconButton(
-                  icon: isFav
-                      ? Stack(
-                          children: [
-                            const Icon(FontAwesomeIcons.solidHeart, color: Color(0xFFFF7043), size: 28),
-                            const Icon(FontAwesomeIcons.heart, color: Colors.white, size: 28),
-                          ],
-                        )
-                      : const Icon(FontAwesomeIcons.heart, color: Colors.white, size: 28),
-                  onPressed: () {
-                    ref.read(favoritesProvider.notifier).toggleFavorite(widget.images[_currentIndex]);
-                  },
-                );
-              },
-            ),
-          ),
-          ),
 
-          // 3. Navigation Arrows (Left/Right)
+          // 2. Navigation Arrows (Left/Right)
           if (_currentIndex > 0)
             Positioned(
               left: 10,
-              top: size.height / 2 - 24,
+              top: size.height / 2 - 80,
               child: IconButton(
                 icon: const Icon(Icons.arrow_back_ios, color: Colors.white70, size: 36),
                 onPressed: () {
@@ -441,7 +450,7 @@ class _FullScreenViewerState extends ConsumerState<_FullScreenViewer> {
           if (_currentIndex < widget.images.length - 1)
             Positioned(
               right: 10,
-              top: size.height / 2 - 24,
+              top: size.height / 2 - 80,
               child: IconButton(
                 icon: const Icon(Icons.arrow_forward_ios, color: Colors.white70, size: 36),
                 onPressed: () {
@@ -450,28 +459,31 @@ class _FullScreenViewerState extends ConsumerState<_FullScreenViewer> {
               ),
             ),
 
-          // 4. Pencil FAB (Bottom Center)
+          // 3. Pencil FAB (Bottom Center)
           Positioned(
-            bottom: 40,
+            bottom: 50, // Raised slightly from 40 to 50
             left: 0,
             right: 0,
             child: Center(
               child: GestureDetector(
                 onTap: () {
-                  // Navigate to write screen with current image
-                  context.push('/write', extra: widget.images[_currentIndex]);
+                  final imgPath = widget.images[_currentIndex];
+                  print("[GalleryScreen] Pencil Tap. Index: $_currentIndex, Path: $imgPath");
+                  
+                  // Close the full screen viewer first so it doesn't cover the new screen
+                  Navigator.of(context).pop();
+                  
+                  final uri = Uri(path: '/write', queryParameters: {'image': imgPath});
+                  context.push(uri.toString());
                 },
                 child: Container(
                   width: 64, height: 64,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFF7043), // Vibrant Orange
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFFF7043), // Vibrant Orange
                     shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(color: Colors.black.withOpacity(0.4), blurRadius: 10, offset: const Offset(0, 4)),
-                    ],
+                    // No Shadow to prevent artifacts
                   ),
                   child: const Center(
-                    // Using penNib to mimic the user's image
                     child: Icon(FontAwesomeIcons.penNib, color: Colors.white, size: 28),
                   ),
                 ),
@@ -479,14 +491,21 @@ class _FullScreenViewerState extends ConsumerState<_FullScreenViewer> {
             ),
           ),
           
-          // Image Counter (Optional, Top Center)
+          // 4. Image Counter (Bottom of AppBar area)
           Positioned(
-            top: 50,
+            top: 0,
             left: 0, right: 0,
             child: Center(
-              child: Text(
-                "${_currentIndex + 1} / ${widget.images.length}",
-                style: const TextStyle(color: Colors.white70, fontSize: 16, fontWeight: FontWeight.bold),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.black54,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  "${_currentIndex + 1} / ${widget.images.length}",
+                  style: const TextStyle(color: Colors.white70, fontSize: 14, fontWeight: FontWeight.bold),
+                ),
               ),
             ),
           )

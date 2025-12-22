@@ -37,7 +37,7 @@ namespace FlutterControlPanel
         private void SetupCustomUI()
         {
             this.Text = "Heart Connect - Flutter Controller";
-            this.Size = new Size(950, 600); // Increased width
+            this.Size = new Size(768, 1024); // Default size as requested
             this.BackColor = Color.FromArgb(245, 245, 245);
 
             try {
@@ -52,7 +52,7 @@ namespace FlutterControlPanel
             // 1. Controls Panel
             Panel controlPanel = new Panel();
             controlPanel.Dock = DockStyle.Top;
-            controlPanel.Height = 120; // Increased height for more controls
+            controlPanel.Height = 180; // Increased height for two rows
             controlPanel.Padding = new Padding(10);
             controlPanel.BackColor = Color.White;
             this.Controls.Add(controlPanel);
@@ -61,23 +61,26 @@ namespace FlutterControlPanel
             // Run Windows Button
             btnRunWindows = new Button();
             btnRunWindows.Text = "▶ Run Windows";
-            btnRunWindows.Size = new Size(110, 40);
+            btnRunWindows.Size = new Size(140, 50);
             btnRunWindows.Location = new Point(10, 10);
             btnRunWindows.BackColor = Color.FromArgb(255, 138, 101); // Accent Coral
             btnRunWindows.ForeColor = Color.White;
             btnRunWindows.FlatStyle = FlatStyle.Flat;
-            btnRunWindows.Font = new Font("Segoe UI", 9, FontStyle.Bold);
-            btnRunWindows.Click += BtnRunWindows_Click;
+            btnRunWindows.Font = new Font("Segoe UI", 10, FontStyle.Bold);
+            btnRunWindows.Click += (s, e) => {
+                 // Fast Run: Reuse existing packages/build
+                 RunProcessChain("flutter run -d windows");
+            };
             controlPanel.Controls.Add(btnRunWindows);
 
             // Hot Reload Button
             btnHotReload = new Button();
             btnHotReload.Text = "⚡ Hot Reload";
-            btnHotReload.Size = new Size(110, 40);
-            btnHotReload.Location = new Point(130, 10);
+            btnHotReload.Size = new Size(140, 50);
+            btnHotReload.Location = new Point(160, 10);
             btnHotReload.BackColor = Color.FromArgb(255, 204, 128); 
             btnHotReload.FlatStyle = FlatStyle.Flat;
-            btnHotReload.Font = new Font("Segoe UI", 9, FontStyle.Bold);
+            btnHotReload.Font = new Font("Segoe UI", 10, FontStyle.Bold);
             btnHotReload.Click += BtnHotReload_Click;
             btnHotReload.Enabled = false;
             controlPanel.Controls.Add(btnHotReload);
@@ -85,11 +88,11 @@ namespace FlutterControlPanel
             // Hot Restart Button
             btnHotRestart = new Button();
             btnHotRestart.Text = "🔄 Hot Restart";
-            btnHotRestart.Size = new Size(110, 40);
-            btnHotRestart.Location = new Point(250, 10);
+            btnHotRestart.Size = new Size(140, 50);
+            btnHotRestart.Location = new Point(310, 10);
             btnHotRestart.BackColor = Color.FromArgb(144, 202, 249); 
             btnHotRestart.FlatStyle = FlatStyle.Flat;
-            btnHotRestart.Font = new Font("Segoe UI", 9, FontStyle.Bold);
+            btnHotRestart.Font = new Font("Segoe UI", 10, FontStyle.Bold);
             btnHotRestart.Click += BtnHotRestart_Click;
             btnHotRestart.Enabled = false;
             controlPanel.Controls.Add(btnHotRestart);
@@ -97,13 +100,13 @@ namespace FlutterControlPanel
             // Auto Reload Group (Wider)
             GroupBox grpAuto = new GroupBox();
             grpAuto.Text = "Auto Reload";
-            grpAuto.Location = new Point(370, 5); // Shifted right
-            grpAuto.Size = new Size(240, 50); // Compact height
+            grpAuto.Location = new Point(460, 5); // Shifted right
+            grpAuto.Size = new Size(280, 60); // Compact height
             controlPanel.Controls.Add(grpAuto);
 
             chkAutoReload = new CheckBox();
             chkAutoReload.Text = "Enable";
-            chkAutoReload.Location = new Point(15, 20);
+            chkAutoReload.Location = new Point(15, 25);
             chkAutoReload.AutoSize = true;
             chkAutoReload.CheckedChanged += ChkAutoReload_CheckedChanged;
             grpAuto.Controls.Add(chkAutoReload);
@@ -112,56 +115,67 @@ namespace FlutterControlPanel
             numInterval.Minimum = 1;
             numInterval.Maximum = 600;
             numInterval.Value = 3;
-            numInterval.Location = new Point(100, 18);
+            numInterval.Location = new Point(100, 23);
             numInterval.Width = 60;
             grpAuto.Controls.Add(numInterval);
 
             Label lblSec = new Label();
             lblSec.Text = "sec";
-            lblSec.Location = new Point(170, 20);
+            lblSec.Location = new Point(170, 25);
             grpAuto.Controls.Add(lblSec);
 
-            // Clean Project Button
-            Button btnClean = new Button();
-            btnClean.Text = "🧹 Clean & Run";
-            btnClean.Size = new Size(120, 40); // Slightly wider
-            btnClean.Location = new Point(620, 10); 
-            btnClean.BackColor = Color.FromArgb(176, 190, 197);
-            btnClean.FlatStyle = FlatStyle.Flat;
-            btnClean.Click += (s, ev) => {
-                if (cmdProcess != null && !cmdProcess.HasExited) {
-                     Log("Stopping current process...");
-                     StopProcess();
-                     // Allow some time for cleanup
-                     System.Threading.Thread.Sleep(1000);
-                }
-                StartProcess("cmd", "/c flutter clean && flutter pub get && flutter run -d windows");
-                btnRunWindows.Text = "⏹ Stop";
-                btnHotReload.Enabled = true;
-                btnHotRestart.Enabled = true;
-            };
-            controlPanel.Controls.Add(btnClean);
+            // Row 2: Reinstall & Gen buttons
+            int row2Y = 75;
 
-            // Row 2: Log & Build Controls
-            int row2Y = 65;
+            // Reinstall Packages Button (Clean, Pub Get, Run)
+            Button btnReinstall = new Button();
+            btnReinstall.Text = "📥 Reinstall Packages";
+            btnReinstall.Size = new Size(180, 50);
+            btnReinstall.Location = new Point(10, row2Y);
+            btnReinstall.BackColor = Color.FromArgb(176, 190, 197);
+            btnReinstall.FlatStyle = FlatStyle.Flat;
+            btnReinstall.Font = new Font("Segoe UI", 10, FontStyle.Bold);
+            btnReinstall.Click += (s, ev) => {
+                // Full Clean & Reinstall
+                RunProcessChain("flutter clean && flutter pub get && dart run build_runner build --delete-conflicting-outputs && flutter run -d windows");
+            };
+            controlPanel.Controls.Add(btnReinstall);
+
+            // Gen & Run button
+            Button btnGenRun = new Button();
+            btnGenRun.Text = "🏗 Gen && Run";
+            btnGenRun.Size = new Size(150, 50); 
+            btnGenRun.Location = new Point(200, row2Y); 
+            btnGenRun.BackColor = Color.FromArgb(207, 216, 220);
+            btnGenRun.FlatStyle = FlatStyle.Flat;
+            btnGenRun.Font = new Font("Segoe UI", 10, FontStyle.Bold);
+            btnGenRun.Click += (s, ev) => {
+                 RunProcessChain("dart run build_runner build --delete-conflicting-outputs && flutter run -d windows");
+            };
+            controlPanel.Controls.Add(btnGenRun);
+
+            // Row 3: Log & Build Controls
+            int row3Y = 135;
 
             // Clear Log Button
             Button btnClearLog = new Button();
             btnClearLog.Text = "🗑 Clear Log";
-            btnClearLog.Size = new Size(100, 35);
-            btnClearLog.Location = new Point(10, row2Y);
+            btnClearLog.Size = new Size(120, 35);
+            btnClearLog.Location = new Point(10, row3Y);
             btnClearLog.BackColor = Color.FromArgb(238, 238, 238);
             btnClearLog.FlatStyle = FlatStyle.Flat;
+            btnClearLog.Font = new Font("Segoe UI", 9, FontStyle.Bold);
             btnClearLog.Click += (s, e) => outputBox.Clear();
             controlPanel.Controls.Add(btnClearLog);
 
             // Copy Log Button
             Button btnCopyLog = new Button();
             btnCopyLog.Text = "📋 Copy Log";
-            btnCopyLog.Size = new Size(100, 35);
-            btnCopyLog.Location = new Point(120, row2Y);
+            btnCopyLog.Size = new Size(120, 35);
+            btnCopyLog.Location = new Point(140, row3Y);
             btnCopyLog.BackColor = Color.FromArgb(238, 238, 238);
             btnCopyLog.FlatStyle = FlatStyle.Flat;
+            btnCopyLog.Font = new Font("Segoe UI", 9, FontStyle.Bold);
             btnCopyLog.Click += (s, e) => {
                 if (!string.IsNullOrEmpty(outputBox.Text)) {
                     Clipboard.SetText(outputBox.Text);
@@ -201,7 +215,7 @@ namespace FlutterControlPanel
             this.Controls.Add(statusStrip);
         }
 
-        private void BtnRunWindows_Click(object sender, EventArgs e)
+        private void RunProcessChain(string commandChain)
         {
             if (cmdProcess != null && !cmdProcess.HasExited)
             {
@@ -216,10 +230,16 @@ namespace FlutterControlPanel
                 }
             }
 
-            StartProcess("flutter", "run -d windows");
+            StartProcess("cmd", "/c " + commandChain);
             btnRunWindows.Text = "⏹ Stop";
             btnHotReload.Enabled = true;
             btnHotRestart.Enabled = true;
+        }
+
+        private void BtnRunWindows_Click(object sender, EventArgs e)
+        {
+             // Fallback or explicit handler if needed, now replaced by lambda above
+             RunProcessChain("flutter run -d windows");
         }
 
         private void BtnHotReload_Click(object sender, EventArgs e)
