@@ -15,6 +15,7 @@ import '../database/database_provider.dart';
 import 'package:flutter_quill/flutter_quill.dart'; // Rich Text Editor
 import 'package:flutter_quill_extensions/flutter_quill_extensions.dart';
 import 'package:vsc_quill_delta_to_html/vsc_quill_delta_to_html.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class WriteCardScreen extends ConsumerStatefulWidget {
   final String? initialImage;
@@ -28,6 +29,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   // State for Editing
   String _message = "Happy Birthday,\ndear Emma!\nWith love, Anna.";
   late final TextEditingController _messageController;
+  late final TextEditingController _footerController;
   String _footerText = "HEART-CONNECT";
   
   // Default placeholder matching the Nativity scene
@@ -49,12 +51,18 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   // AI Service
   final _aiService = AiService();
   bool _isAiLoading = false;
+  
+  // Send State
+  bool _isSending = false;
 
   final List<String> _fontList = [
     'Great Vibes', 'Caveat', 'Dancing Script', 'Pacifico', 'Indie Flower',
     'Roboto', 'Montserrat', 'Playfair Display',
     'Nanum Pen Script', 'Nanum Gothic', 'Gowun Batang', 'Song Myung'
   ];
+  
+  // Font size dropdown options (6~32)
+  final List<double> _fontSizeOptions = [6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32];
 
   // Text Drag Offset
   Offset _dragOffset = Offset.zero;
@@ -75,6 +83,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   void initState() {
     super.initState();
     _messageController = TextEditingController(text: _message);
+    _footerController = TextEditingController(text: _footerText);
     _quillController = QuillController(
       document: Document()..insert(0, _message),
       selection: const TextSelection.collapsed(offset: 0),
@@ -92,6 +101,25 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
       print("[WriteCardScreen] InitialImage is NULL!");
     }
     _loadTemplateAssets();
+    _loadSavedFooter(); // Load saved footer
+  }
+  
+  // Load footer from SharedPreferences
+  Future<void> _loadSavedFooter() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedFooter = prefs.getString('footer_text');
+    if (savedFooter != null && savedFooter.isNotEmpty && mounted) {
+      setState(() {
+        _footerText = savedFooter;
+        _footerController.text = savedFooter;
+      });
+    }
+  }
+  
+  // Save footer to SharedPreferences
+  Future<void> _saveFooter(String value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('footer_text', value);
   }
 
   void _onQuillChanged() {
@@ -116,6 +144,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   void dispose() {
     _scrollController.dispose();
     _messageController.dispose();
+    _footerController.dispose();
     _quillController.removeListener(_onQuillChanged);
     _quillController.dispose();
     super.dispose();
@@ -503,20 +532,20 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFFFFCF9),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: Container(
-         margin: const EdgeInsets.only(bottom: 30), // Adjust to sit correctly on dock
-         child: SizedBox(
-           width: 65, height: 65,
-           child: FloatingActionButton(
-             onPressed: _isAiLoading ? null : _handleSend,
-             backgroundColor: const Color(0xFFF29D86),
-             shape: const CircleBorder(),
-             elevation: 8,
-             child: _isAiLoading 
-                ? const CircularProgressIndicator(color: Colors.white)
-                : const Icon(FontAwesomeIcons.penNib, color: Colors.white, size: 28),
-           ),
-         ),
+      floatingActionButton: SizedBox(
+        width: 65, height: 65,
+        child: FloatingActionButton(
+          onPressed: _isSending ? null : _handleSend,
+          backgroundColor: const Color(0xFFF29D86),
+          shape: const CircleBorder(),
+          elevation: 8,
+          child: _isSending 
+             ? const SizedBox(
+                 width: 28, height: 28,
+                 child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3),
+               )
+             : const Icon(FontAwesomeIcons.paperPlane, color: Colors.white, size: 26),
+        ),
       ),
       body: Stack(
         children: [
@@ -533,7 +562,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                     _buildTemplateSelector(),
 
                     // 4. Spacer (Toolbar removed as it is now part of Editor)
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 8),
 
                     // 5. Editor Input
                     _buildEditorInput(),
@@ -661,9 +690,9 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
       padding: const EdgeInsets.symmetric(vertical: 5),
       child: Center(
         child: AspectRatio(
-          aspectRatio: 4/5,
+          aspectRatio: 4/4.5, // 이미지 크기에 맞게 늘림
           child: Container(
-            width: MediaQuery.of(context).size.width * 0.85,
+            width: MediaQuery.of(context).size.width * 0.90, // 너비 확대
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(8),
@@ -726,12 +755,12 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                         curve: Curves.easeOutBack,
                         transform: Matrix4.translationValues(_dragOffset.dx, _dragOffset.dy, 0),
                         child: Container(
-                          width: MediaQuery.of(context).size.width * 0.65,
+                          width: MediaQuery.of(context).size.width * 0.78, // 텍스트 영역 너비 확대
                           // Limit max height to prevent overflow stripes
                           constraints: BoxConstraints(
-                            maxHeight: MediaQuery.of(context).size.width * 0.85 * 0.8,
+                            maxHeight: MediaQuery.of(context).size.width * 0.90 * 0.85, // 높이도 확대
                           ),
-                          padding: const EdgeInsets.all(24),
+                          padding: const EdgeInsets.all(28), // 패딩 증가
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.3), // 30% Transparent White
                             borderRadius: BorderRadius.circular(12),
@@ -1007,11 +1036,15 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
 
   Widget _buildEditorInput() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 2), // 줄간격 축소
       child: Column(
         children: [
            TextField(
-             onChanged: (val) => setState(() => _footerText = val),
+             controller: _footerController,
+             onChanged: (val) {
+               setState(() => _footerText = val);
+               _saveFooter(val); // Footer 저장
+             },
              decoration: const InputDecoration(
                labelText: "Footer (보낸사람)",
                border: OutlineInputBorder(),
@@ -1019,7 +1052,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
              ),
              style: const TextStyle(fontSize: 13),
            ),
-           const SizedBox(height: 4),
+           const SizedBox(height: 4), // 간격 축소
             Container(
               decoration: BoxDecoration(
                 color: const Color(0xFFFFFDF5),
@@ -1029,51 +1062,85 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
               child: Column(
                 children: [
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2), // 패딩 축소
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        QuillSimpleToolbar(
-                          controller: _quillController,
-                          config: QuillSimpleToolbarConfig(
-                            showFontFamily: false,
-                            showFontSize: false,
-                            showBoldButton: true,
-                            showItalicButton: true,
-                            showUnderLineButton: true,
-                            showStrikeThrough: false,
-                            showInlineCode: false,
-                            showColorButton: true,
-                            showBackgroundColorButton: false,
-                            showClearFormat: false,
-                            showAlignmentButtons: true,
-                            showLeftAlignment: false,
-                            showCenterAlignment: false,
-                            showRightAlignment: false,
-                            showJustifyAlignment: false,
-                            showHeaderStyle: false,
-                            showListNumbers: false,
-                            showListBullets: false,
-                            showListCheck: false,
-                            showCodeBlock: false,
-                            showQuote: false,
-                            showIndent: false,
-                            showLink: false,
-                            showUndo: false,
-                            showRedo: false,
-                            showDirection: false,
-                            showSearchButton: false,
-                            showSubscript: false,
-                            showSuperscript: false,
-                            customButtons: [
-                              QuillToolbarCustomButtonOptions(
-                                icon: const Icon(FontAwesomeIcons.font),
-                                tooltip: 'Font',
-                                onPressed: () => _showFontPicker(),
+                        // 1줄 툴바 with 글자 크기 콤보박스
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              // 글자 크기 콤보박스 (6~32)
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 4),
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: const Color(0xFFDDDDDD)),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: DropdownButtonHideUnderline(
+                                  child: DropdownButton<double>(
+                                    value: _fontSizeOptions.contains(_fontSize) ? _fontSize : 18,
+                                    isDense: true,
+                                    style: const TextStyle(fontSize: 12, color: Color(0xFF555555)),
+                                    icon: const Icon(Icons.arrow_drop_down, size: 16),
+                                    items: _fontSizeOptions.map((size) {
+                                      return DropdownMenuItem<double>(
+                                        value: size,
+                                        child: Text('${size.toInt()}', style: const TextStyle(fontSize: 12)),
+                                      );
+                                    }).toList(),
+                                    onChanged: (value) {
+                                      if (value != null) {
+                                        setState(() {
+                                          _fontSize = value;
+                                          _updateStyle();
+                                        });
+                                      }
+                                    },
+                                  ),
+                                ),
                               ),
+                              const SizedBox(width: 4),
+                              // Bold, Italic, Underline
+                              _buildToolbarButton(icon: FontAwesomeIcons.bold, isActive: _isBold, onTap: () {
+                                setState(() {
+                                  _isBold = !_isBold;
+                                  _updateStyle();
+                                });
+                              }),
+                              _buildToolbarButton(icon: FontAwesomeIcons.italic, isActive: _isItalic, onTap: () {
+                                setState(() {
+                                  _isItalic = !_isItalic;
+                                  _updateStyle();
+                                });
+                              }),
+                              _buildToolbarButton(icon: FontAwesomeIcons.underline, isActive: _isUnderline, onTap: () {
+                                setState(() {
+                                  _isUnderline = !_isUnderline;
+                                  _updateStyle();
+                                });
+                              }),
+                              const SizedBox(width: 2),
+                              // Color
+                              _buildToolbarButton(icon: FontAwesomeIcons.palette, onTap: _showColorPicker),
+                              const SizedBox(width: 2),
+                              Container(width: 1, height: 20, color: Colors.grey[300]),
+                              const SizedBox(width: 2),
+                              // Align
+                              _buildToolbarButton(icon: FontAwesomeIcons.alignLeft, isActive: _textAlign == TextAlign.left, onTap: () => setState(() => _textAlign = TextAlign.left)),
+                              _buildToolbarButton(icon: FontAwesomeIcons.alignCenter, isActive: _textAlign == TextAlign.center, onTap: () => setState(() => _textAlign = TextAlign.center)),
+                              _buildToolbarButton(icon: FontAwesomeIcons.alignRight, isActive: _textAlign == TextAlign.right, onTap: () => setState(() => _textAlign = TextAlign.right)),
+                              const SizedBox(width: 2),
+                              Container(width: 1, height: 20, color: Colors.grey[300]),
+                              const SizedBox(width: 2),
+                              // Font Picker
+                              _buildToolbarButton(icon: FontAwesomeIcons.font, onTap: _showFontPicker),
                             ],
                           ),
                         ),
+                        const SizedBox(height: 4),
                         Container(
                           height: 150, // Fixed height for editor
                           decoration: BoxDecoration(
@@ -1127,9 +1194,24 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   }
 
   Future<void> _handleSend() async {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Image Generated! Proceeding to recipient selection... (Demo)")),
-    );
+    if (_isSending) return;
+    
+    setState(() => _isSending = true);
+    
+    try {
+      // Simulate sending delay
+      await Future.delayed(const Duration(seconds: 2));
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("카드가 생성되었습니다! 수신자 선택으로 이동합니다...")),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSending = false);
+      }
+    }
   }
 
 
