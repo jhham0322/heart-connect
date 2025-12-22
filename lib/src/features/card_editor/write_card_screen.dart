@@ -598,8 +598,8 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  // 상단 safe area만큼 여백 (헤더 버튼 공간)
-                  SizedBox(height: MediaQuery.of(context).padding.top + 50),
+                  // 상단 여백 제거 (이미지 상단 밀착)
+                  // SizedBox(height: MediaQuery.of(context).padding.top + 50),
                   
                   // 1. Card Preview (캡쳐 가능 영역) - 상단에 붙음
                   _buildCardPreview(),
@@ -652,36 +652,39 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
             left: 0,
             right: 0,
             child: Center(
-              child: Container(
-                height: 70,
-                width: 70,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFFFF8A65), Color(0xFFFF7043)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFFFF8A65).withOpacity(0.4),
-                      blurRadius: 20,
-                      offset: const Offset(0, 8),
+              child: Hero(
+                tag: 'write-fab',
+                child: Container(
+                  height: 70,
+                  width: 70,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFFF8A65), Color(0xFFFF7043)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
-                  ],
-                ),
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: _isSending ? null : _handleSend,
-                    borderRadius: BorderRadius.circular(35),
-                    child: Center(
-                      child: _isSending 
-                        ? const SizedBox(
-                            width: 28, height: 28,
-                            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3),
-                          )
-                        : const Icon(FontAwesomeIcons.paperPlane, color: Colors.white, size: 26),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFFFF8A65).withOpacity(0.4),
+                        blurRadius: 20,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: _isSending ? null : _handleSend,
+                      borderRadius: BorderRadius.circular(35),
+                      child: Center(
+                        child: _isSending 
+                          ? const SizedBox(
+                              width: 28, height: 28,
+                              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3),
+                            )
+                          : const Icon(FontAwesomeIcons.paperPlane, color: Colors.white, size: 26),
+                      ),
                     ),
                   ),
                 ),
@@ -770,7 +773,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
 
   Widget _buildCardPreview() {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 5),
+      padding: EdgeInsets.zero, // 패딩 제거
       child: Center(
         child: AspectRatio(
           aspectRatio: 4/4.5,

@@ -96,6 +96,7 @@ class ScaffoldWithNav extends ConsumerWidget {
           ],
         ),
         child: FloatingActionButton(
+          heroTag: 'write-fab',
           onPressed: () {
             final selectedImage = ref.read(currentSelectionProvider);
             if (selectedImage != null) {
