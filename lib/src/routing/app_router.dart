@@ -21,6 +21,33 @@ final goRouterProvider = Provider<GoRouter>((ref) {
     navigatorKey: _rootNavigatorKey,
     debugLogDiagnostics: true,
     routes: [
+      // WriteCardScreen - 독립적인 전체 화면 (shell 밖)
+      GoRoute(
+        path: '/write',
+        parentNavigatorKey: _rootNavigatorKey,
+        pageBuilder: (context, state) {
+          final initialImage = state.uri.queryParameters['image'];
+          print("[AppRouter] /write route (standalone). Param: $initialImage");
+          return MaterialPage(
+            fullscreenDialog: true,
+            child: WriteCardScreen(
+              key: ValueKey(initialImage),
+              initialImage: initialImage,
+            ),
+          );
+        },
+      ),
+      // Settings - 독립적인 전체 화면 (shell 밖)
+      GoRoute(
+        path: '/settings',
+        parentNavigatorKey: _rootNavigatorKey,
+        pageBuilder: (context, state) {
+          return const MaterialPage(
+            fullscreenDialog: true,
+            child: SettingsScreen(),
+          );
+        },
+      ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
           return ScaffoldWithNav(navigationShell: navigationShell);
@@ -59,32 +86,6 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: '/mailbox',
                 pageBuilder: (context, state) => const NoTransitionPage(child: Scaffold(body: Center(child: Text("Mailbox Construction")))),
-              ),
-            ],
-          ),
-          // Additional branches for Settings and Write
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: '/settings',
-                pageBuilder: (context, state) => const NoTransitionPage(child: SettingsScreen()),
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: '/write',
-                pageBuilder: (context, state) {
-                  final initialImage = state.uri.queryParameters['image'];
-                  print("[AppRouter] /write route. Param: $initialImage");
-                  return NoTransitionPage(
-                    child: WriteCardScreen(
-                      key: ValueKey(initialImage), // Force rebuild when image changes
-                      initialImage: initialImage,
-                    ),
-                  );
-                },
               ),
             ],
           ),
