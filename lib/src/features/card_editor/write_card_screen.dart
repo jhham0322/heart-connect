@@ -2774,9 +2774,11 @@ class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
     _localRecipients = List.from(widget.recipients);
   }
 
+  /// 마우스 트래커 재진입 에러 방지를 위해 완전히 다른 이벤트 루프 턴에서 setState 실행
+  /// Future.delayed(Duration.zero)는 현재 이벤트 루프가 완전히 끝난 후 실행됨
   void _safeSetState(VoidCallback fn) {
     if (!mounted) return;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    Future.delayed(Duration.zero, () {
       if (!mounted) return;
       setState(fn);
     });
@@ -2859,9 +2861,9 @@ class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
   Future<void> _startSending() async {
     if (_isSending) return;
     
-    // MouseTracker 에러 방지: 버튼 클릭 이벤트 처리가 완전히 끝난 후에 발송 로직 실행
-    // 이렇게 하면 마우스 트래커 업데이트 중에 setState가 호출되는 충돌을 방지함
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
+    // MouseTracker 에러 방지: Future.delayed(Duration.zero)를 사용하여 
+    // 현재 이벤트 루프가 완전히 끝난 후 다음 이벤트 루프 턴에서 발송 로직 실행
+    Future.delayed(Duration.zero, () async {
       if (!mounted) return;
       
       setState(() {
@@ -2923,7 +2925,7 @@ class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
 
         if (!mounted) break;
 
-        // 안전한 setState - mounted 체크 후 직접 호출 (이미 post-frame 안에 있음)
+        // 안전한 setState - mounted 체크 후 직접 호출
         if (mounted) {
           setState(() {
             for (var item in batch) {
