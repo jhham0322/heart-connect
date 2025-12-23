@@ -2861,91 +2861,106 @@ class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
   Future<void> _startSending() async {
     if (_isSending) return;
     
-    // MouseTracker 에러 방지: Future.delayed(Duration.zero)를 사용하여 
-    // 현재 이벤트 루프가 완전히 끝난 후 다음 이벤트 루프 턴에서 발송 로직 실행
-    Future.delayed(Duration.zero, () async {
-      if (!mounted) return;
+    // 1. 동기적으로 플래그만 먼저 설정 (이건 안전함)
+    _isSending = true;
+    if (_pendingRecipients.isEmpty) {
+      _pendingRecipients = List.from(_localRecipients);
+      _sentCount = 0;
+    }
+    
+    // 2. UI 업데이트는 다음 프레임에 예약
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() {});
+    });
+    
+    // 3. 실제 발송 로직은 별도의 마이크로태스크에서 실행
+    await Future.microtask(() async {
+      await _executeSendingLoop();
+    });
+  }
+  
+  /// 실제 발송 루프 - UI 업데이트와 분리되어 실행됨
+  Future<void> _executeSendingLoop() async {
+    while (_pendingRecipients.isNotEmpty && _isSending) {
+      if (!mounted) break;
+
+      int batchSize = 5;
+      if (_pendingRecipients.length < batchSize) batchSize = _pendingRecipients.length;
+      final batch = _pendingRecipients.take(batchSize).toList();
+
+      // Wait 3 seconds
+      await Future.delayed(const Duration(seconds: 3));
       
-      setState(() {
-        _isSending = true;
-        if (_pendingRecipients.isEmpty) {
-          _pendingRecipients = List.from(_localRecipients);
-          _sentCount = 0;
-        }
-      });
+      if (!mounted || !_isSending) break;
 
-      while (_pendingRecipients.isNotEmpty && _isSending) {
-        if (!mounted) break;
-
-        int batchSize = 5;
-        if (_pendingRecipients.length < batchSize) batchSize = _pendingRecipients.length;
-        final batch = _pendingRecipients.take(batchSize).toList();
-
-        // Wait 3 seconds
-        await Future.delayed(const Duration(seconds: 3));
-        
-        if (!mounted || !_isSending) break;
-
-        // Process batch (DB inserts)
-        for (var item in batch) {
-           final dashedPhone = _extractDashedPhone(item);
-           if (dashedPhone != null) {
-             // Try to find contact
-             var contact = await (widget.database.select(widget.database.contacts)..where((t) => t.phone.equals(dashedPhone))).getSingleOrNull();
-             
-             if (contact != null) {
-               await widget.database.insertHistory(HistoryCompanion(
-                 contactId: Value(contact.id),
-                 type: const Value('SENT'),
-                 message: const Value('카드 발송'), 
-                 imagePath: Value(widget.savedPath),
-                 eventDate: Value(DateTime.now()),
-               ));
-             } else {
-               // Create dummy contact for history test if it's one of our generated ones
-                if (item.contains("수신자")) {
-                  final phoneStartIndex = item.indexOf(dashedPhone);
-                  final dummyName = phoneStartIndex > 0 ? item.substring(0, phoneStartIndex).trimRight() : item;
-                  final newId = await widget.database.insertContact(ContactsCompanion(
-                    name: Value(dummyName.trim()),
-                    phone: Value(dashedPhone),
-                    groupTag: const Value('Test'),
-                  ));
-                  await widget.database.insertHistory(HistoryCompanion(
-                     contactId: Value(newId),
-                     type: const Value('SENT'),
-                     message: const Value('카드 발송'), 
-                     imagePath: Value(widget.savedPath),
-                     eventDate: Value(DateTime.now()),
-                   ));
-               }
+      // Process batch (DB inserts)
+      for (var item in batch) {
+         final dashedPhone = _extractDashedPhone(item);
+         if (dashedPhone != null) {
+           // Try to find contact
+           var contact = await (widget.database.select(widget.database.contacts)..where((t) => t.phone.equals(dashedPhone))).getSingleOrNull();
+           
+           if (contact != null) {
+             await widget.database.insertHistory(HistoryCompanion(
+               contactId: Value(contact.id),
+               type: const Value('SENT'),
+               message: const Value('카드 발송'), 
+               imagePath: Value(widget.savedPath),
+               eventDate: Value(DateTime.now()),
+             ));
+           } else {
+             // Create dummy contact for history test if it's one of our generated ones
+              if (item.contains("수신자")) {
+                final phoneStartIndex = item.indexOf(dashedPhone);
+                final dummyName = phoneStartIndex > 0 ? item.substring(0, phoneStartIndex).trimRight() : item;
+                final newId = await widget.database.insertContact(ContactsCompanion(
+                  name: Value(dummyName.trim()),
+                  phone: Value(dashedPhone),
+                  groupTag: const Value('Test'),
+                ));
+                await widget.database.insertHistory(HistoryCompanion(
+                   contactId: Value(newId),
+                   type: const Value('SENT'),
+                   message: const Value('카드 발송'), 
+                   imagePath: Value(widget.savedPath),
+                   eventDate: Value(DateTime.now()),
+                 ));
              }
            }
-        }
-
-        if (!mounted) break;
-
-        // 안전한 setState - mounted 체크 후 직접 호출
-        if (mounted) {
-          setState(() {
-            for (var item in batch) {
-              _pendingRecipients.remove(item);
-            }
-            _sentCount += batchSize;
-          });
-        }
-
-        if (!_autoContinue && _pendingRecipients.isNotEmpty) {
-          if (mounted) setState(() => _isSending = false);
-          break;
-        }
+         }
       }
+
+      if (!mounted) break;
+
+      // 배치 완료 후 상태 업데이트 - 다음 프레임에 예약
+      for (var item in batch) {
+        _pendingRecipients.remove(item);
+      }
+      _sentCount += batchSize;
       
-      if (mounted && _isSending && _pendingRecipients.isEmpty) {
-        setState(() => _isSending = false);
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("전체 발송 완료!")));
+      // UI 업데이트는 다음 프레임에서
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) setState(() {});
+      });
+
+      if (!_autoContinue && _pendingRecipients.isNotEmpty) {
+        _isSending = false;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) setState(() {});
+        });
+        break;
       }
-    });
+    }
+    
+    if (mounted && _isSending && _pendingRecipients.isEmpty) {
+      _isSending = false;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {});
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("전체 발송 완료!")));
+        }
+      });
+    }
   }
 
   @override
