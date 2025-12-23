@@ -39,6 +39,12 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   // Default placeholder matching the Nativity scene
   String _selectedImage = "assets/images/cards/christmas/baecb8cc-2d6e-40a3-9754-95eae4022ab7.png"; 
   
+  // Frame Logic
+  bool _isFrameMode = false;
+  String? _selectedFrame;
+  List<String> _frameImages = [];
+  bool _isLoadingFrames = false;
+
   // Style State
   TextStyle _currentStyle = GoogleFonts.greatVibes(fontSize: 24, color: const Color(0xFF1A1A1A), height: 1.2);
   TextAlign _textAlign = TextAlign.center;
@@ -58,30 +64,97 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   
   // Send State
   bool _isSending = false;
+  bool _isCapturing = false; // 캡쳐 중인지 여부
+
+  // Text Box Style State (글상자 스타일)
+  Color _boxColor = Colors.white;
+  double _boxOpacity = 0.5; // 기본 투명도 약간 높임
+  double _boxRadius = 12.0;
+  bool _hasBorder = true;
+  Color _borderColor = Colors.white;
+  double _borderWidth = 1.0;
+
+  // Footer Style State
+  Color _footerColor = Colors.white;
+  double _footerFontSize = 10.0;
+  String _footerFont = 'Roboto'; // 푸터 폰트 (기본값)
+  bool _isFooterBold = true;
+  bool _isFooterItalic = false;
+  bool _isFooterUnderline = false;
+  
+  // Track active input for styling
+  bool _isFooterActive = false;
+  
+  // Footer Box Style
+  Color _footerBgColor = Colors.transparent;
+  double _footerBgOpacity = 0.0;
+  double _footerRadius = 0.0;
+
+  // Footer Position
+  Offset _footerOffset = Offset.zero; // Relative to bottom-right
+
+  // 발송 관련 상태
+  final List<String> _recipients = [];
+  List<String> _pendingRecipients = [];
+  int _sentCount = 0;
+  bool _autoContinue = false; // 자동 발송 여부
 
   final List<String> _fontList = [
     'Great Vibes', 'Caveat', 'Dancing Script', 'Pacifico', 'Indie Flower',
     'Roboto', 'Montserrat', 'Playfair Display',
-    'Nanum Pen Script', 'Nanum Gothic', 'Gowun Batang', 'Song Myung'
+    'Nanum Pen Script', 'Nanum Gothic', 'Gowun Batang', 'Song Myung',
+    'Dongle', 'Gowun Dodum', 'Noto Sans KR', 'Hi Melody', 'Gamja Flower', 'Single Day', 'Jua', 'Do Hyeon',
+    'Sunflower', 'Black Han Sans', 'Cute Font', 'Gaegu', 'Yeon Sung', 'Poor Story'
   ];
+
+  final Map<String, String> _fontDisplayNames = {
+    'Nanum Pen Script': '나눔 펜 (Nanum Pen)',
+    'Nanum Gothic': '나눔 고딕 (Nanum Gothic)',
+    'Gowun Batang': '고운 바탕 (Gowun Batang)',
+    'Song Myung': '송명 (Song Myung)',
+    'Dongle': '동글 (Dongle)',
+    'Gowun Dodum': '고운 돋움 (Gowun Dodum)',
+    'Noto Sans KR': '본고딕 (Noto Sans)',
+    'Hi Melody': '하이 멜로디 (Hi Melody)',
+    'Gamja Flower': '감자 꽃 (Gamja Flower)',
+    'Single Day': '싱글 데이 (Single Day)',
+    'Jua': '주아 (Jua)',
+    'Do Hyeon': '도현 (Do Hyeon)',
+    'Sunflower': '해바라기 (Sunflower)',
+    'Black Han Sans': '검은 고딕 (Black Han Sans)',
+    'Cute Font': '큐트 (Cute Font)',
+    'Gaegu': '개구쟁이 (Gaegu)',
+    'Yeon Sung': '연성 (Yeon Sung)',
+    'Poor Story': '푸어 스토리 (Poor Story)',
+  };
   
   // Font size dropdown options (6~32)
   final List<double> _fontSizeOptions = [6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32];
 
   // Text Drag Offset - 이제 위치 유지됨
   Offset _dragOffset = Offset.zero;
+  
+  // Zoom & Pan State
+  final TransformationController _transformationController = TransformationController();
+  TapDownDetails? _doubleTapDetails;
 
   // Scroll Controller for Template Selector
   final ScrollController _scrollController = ScrollController();
 
   // Quill Editor Controller
   late QuillController _quillController;
+  late QuillController _footerQuillController;
   
   // Focus Node for Quill Editor
   final FocusNode _editorFocusNode = FocusNode();
+  final FocusNode _footerFocusNode = FocusNode(); // 푸터 포커스 노드 추가
   
   // GlobalKey for RepaintBoundary (이미지 캡처용)
   final GlobalKey _captureKey = GlobalKey();
+
+  // List of saved cards for swipe navigation
+  List<SavedCard> _savedCards = [];
+  int? _currentCardId;
 
   @override
   void initState() {
@@ -92,7 +165,17 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
       document: Document()..insert(0, _message),
       selection: const TextSelection.collapsed(offset: 0),
     );
+    _footerQuillController = QuillController(
+      document: Document()..insert(0, _footerText),
+      selection: const TextSelection.collapsed(offset: 0),
+    );
+    
     _quillController.addListener(_onEditorChanged);
+    _footerQuillController.addListener(_onFooterEditorChanged);
+    
+    // 포커스 리스너 추가
+    _footerFocusNode.addListener(_onFocusChanged);
+    _editorFocusNode.addListener(_onFocusChanged);
 
     print("[WriteCardScreen] initState at ${DateTime.now()}");
     print("[WriteCardScreen] Received InitialImage: ${widget.initialImage}");
@@ -105,7 +188,14 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
       print("[WriteCardScreen] InitialImage is NULL!");
     }
     _loadTemplateAssets();
+    _loadFrameAssets();
     _loadSavedFooter(); // Load saved footer
+
+    // 더미 수신자 데이터 생성 (20명)
+    for (int i = 1; i <= 20; i++) {
+      _recipients.add("수신자 $i (010-0000-${i.toString().padLeft(4, '0')})");
+    }
+    _pendingRecipients = List.from(_recipients);
   }
   
   // Load footer from SharedPreferences
@@ -113,11 +203,94 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     final prefs = await SharedPreferences.getInstance();
     final savedFooter = prefs.getString('footer_text');
     if (savedFooter != null && savedFooter.isNotEmpty && mounted) {
+      _updateFooterController(savedFooter);
+    }
+  }
+
+  void _updateFooterController(String textOrJson) {
+    try {
+      final json = jsonDecode(textOrJson);
+      _footerQuillController.document = Document.fromJson(json);
+    } catch (e) {
+      // Not JSON, treat as plain text
+      _footerQuillController.document = Document()..insert(0, textOrJson);
+    }
+  }
+
+  Future<void> _fetchAllSavedCards() async {
+    final db = ref.read(appDatabaseProvider);
+    final cards = await db.getAllSavedCards(); // Assuming this method returns all cards sorted by date DESC
+    if (mounted) {
       setState(() {
-        _footerText = savedFooter;
-        _footerController.text = savedFooter;
+        _savedCards = cards;
+        // Sort by createdAt DESC just in case
+        _savedCards.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       });
     }
+  }
+
+  void _handleSwipeNavigation(DragEndDetails details) {
+    if (_savedCards.isEmpty) return;
+    
+    // Check if zoomed in
+    if (_transformationController.value != Matrix4.identity()) return;
+
+    final velocity = details.primaryVelocity;
+    if (velocity == null) return;
+
+    // Threshold for swipe
+    if (velocity.abs() < 500) return;
+
+    int currentIndex = -1;
+    if (_currentCardId != null) {
+      currentIndex = _savedCards.indexWhere((c) => c.id == _currentCardId);
+    }
+
+    if (velocity > 0) {
+      // Swipe Right (Left to Right) -> Past (Older) -> Next Index
+      // "왼쪽에서 오른쪽은 과거"
+      if (currentIndex < _savedCards.length - 1) {
+        _loadCard(_savedCards[currentIndex + 1]);
+      } else if (currentIndex == -1 && _savedCards.isNotEmpty) {
+        // If currently on new/unsaved card, go to the latest saved card (Index 0)
+        _loadCard(_savedCards[0]);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("더 이상 이전 카드가 없습니다."), duration: Duration(milliseconds: 1000)),
+        );
+      }
+    } else {
+      // Swipe Left (Right to Left) -> Recent (Newer) -> Prev Index
+      // "오른쪽에서 왼쪽은 최신"
+      if (currentIndex > 0) {
+        _loadCard(_savedCards[currentIndex - 1]);
+      } else if (currentIndex == 0) {
+        // At the newest saved card. 
+        // User might want to go to "New Card" mode?
+        // Let's implement a reset to new card if user swipes left from the newest saved card
+        _resetToNewCard();
+      } else {
+         // Already at new card or error
+      }
+    }
+  }
+
+  void _resetToNewCard() {
+    if (_currentCardId == null) return; // Already new
+
+    setState(() {
+      _currentCardId = null;
+      _message = "Happy Birthday,\ndear Emma!\nWith love, Anna.";
+      _quillController.document = Document()..insert(0, _message);
+      _selectedFrame = null;
+      _boxColor = Colors.white.withOpacity(0.4);
+      _hasBorder = false;
+      // Reset other properties as needed
+      // Maybe keep the image?
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("새로운 카드를 작성합니다."), duration: Duration(milliseconds: 1000)),
+    );
   }
   
   // Save footer to SharedPreferences
@@ -149,20 +322,59 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     _scrollController.dispose();
     _messageController.dispose();
     _footerController.dispose();
+    _footerFocusNode.removeListener(_onFocusChanged);
+    _editorFocusNode.removeListener(_onFocusChanged);
     _editorFocusNode.dispose();
+    _footerFocusNode.dispose();
     _quillController.removeListener(_onEditorChanged);
+    _footerQuillController.removeListener(_onFooterEditorChanged);
     _quillController.dispose();
+    _footerQuillController.dispose();
     super.dispose();
   }
+
+  void _onFocusChanged() {
+    if (mounted) {
+      setState(() {
+         // Focus change tracking
+         if (_footerFocusNode.hasFocus) {
+           _isFooterActive = true;
+           // Clear selection in main editor
+           _quillController.updateSelection(const TextSelection.collapsed(offset: 0), ChangeSource.local);
+         } else if (_editorFocusNode.hasFocus) {
+           _isFooterActive = false;
+           // Clear selection in footer editor
+           _footerQuillController.updateSelection(const TextSelection.collapsed(offset: 0), ChangeSource.local);
+         }
+         _updateToolbarState();
+      });
+    }
+  }
+
+  QuillController get _activeController => _isFooterActive ? _footerQuillController : _quillController;
 
   void _onEditorChanged() {
     _onQuillChanged();
     _updateToolbarState();
   }
 
+  void _onFooterEditorChanged() {
+    setState(() {
+      // Delta를 일반 텍스트로 변환하여 저장 (미리보기 등에서 사용)
+      // 실제 저장은 Delta JSON으로 해야 스타일이 유지됨
+      _footerText = _footerQuillController.document.toPlainText().trim();
+    });
+    // JSON 저장
+    final jsonStr = jsonEncode(_footerQuillController.document.toDelta().toJson());
+    _saveFooter(jsonStr);
+    
+    _updateToolbarState();
+  }
+
   // 커서 위치나 선택 영역 변경 시 툴바 상태 업데이트
   void _updateToolbarState() {
-    final style = _quillController.getSelectionStyle();
+    final controller = _activeController;
+    final style = controller.getSelectionStyle();
     
     setState(() {
       _isBold = style.containsKey(Attribute.bold.key);
@@ -170,47 +382,48 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
       _isUnderline = style.containsKey(Attribute.underline.key);
       
       // 정렬 상태 확인
-      if (style.containsKey(Attribute.leftAlignment.key)) _textAlign = TextAlign.left;
-      else if (style.containsKey(Attribute.centerAlignment.key)) _textAlign = TextAlign.center;
-      else if (style.containsKey(Attribute.rightAlignment.key)) _textAlign = TextAlign.right;
-      else _textAlign = TextAlign.left; // Default
+      if (style.containsKey(Attribute.leftAlignment.key)) {
+        _textAlign = TextAlign.left;
+      } else if (style.containsKey(Attribute.centerAlignment.key)) {
+        _textAlign = TextAlign.center;
+      } else if (style.containsKey(Attribute.rightAlignment.key)) {
+        _textAlign = TextAlign.right;
+      } else {
+        // Default alignments
+        _textAlign = _isFooterActive ? TextAlign.right : TextAlign.center;
+      }
 
       // 폰트 사이즈 확인
       if (style.containsKey('size')) {
         final sizeStr = style.attributes['size']?.value;
         if (sizeStr != null) {
-            // "14" or "14.0" or "small" etc.
              final parsed = double.tryParse(sizeStr.toString());
              if (parsed != null) _fontSize = parsed;
         }
+      } else {
+        _fontSize = _isFooterActive ? _footerFontSize : 24.0;
       }
       
       // 폰트 패밀리 확인
       if (style.containsKey('font')) {
          _fontName = style.attributes['font']?.value ?? 'Great Vibes';
+      } else {
+         _fontName = _isFooterActive ? _footerFont : 'Great Vibes';
       }
       
       // 색상 확인
-      if (style.containsKey('color')) {
-        final colorHex = style.attributes['color']?.value;
-        if (colorHex != null) {
-           // #AABBCC
-           try {
-             if (colorHex.toString().startsWith('#')) {
-                _currentStyle = _currentStyle.copyWith(color: Color(int.parse("FF${colorHex.toString().substring(1)}", radix: 16)));
-             }
-           } catch (_) {}
-        }
-      }
+      // Quill uses hex strings
     });
   }
 
   void _scrollToSelected() {
-    if (_templates.isEmpty || _selectedImage.isEmpty) return;
+    final list = _isFrameMode ? _frameImages : _templates;
+    final selected = _isFrameMode ? _selectedFrame : _selectedImage;
+
+    if (list.isEmpty || selected == null || selected.isEmpty) return;
     
-    final index = _templates.indexOf(_selectedImage);
+    final index = list.indexOf(selected);
     if (index != -1 && _scrollController.hasClients) {
-      // Item width 80 + margin 12 = 92. Center it.
       final screenWidth = MediaQuery.of(context).size.width;
       final offset = (index * 92.0) - (screenWidth / 2) + 40; // 40 is half item width
       
@@ -226,22 +439,14 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   Future<void> _loadTemplateAssets() async {
     List<String> allAssets = [];
     try {
-      // Preferred method since Flutter 3.10
       final manifest = await AssetManifest.loadFromAssetBundle(rootBundle);
       allAssets = manifest.listAssets();
     } catch (e) {
       print("AssetManifest load error: $e");
-      try {
-        final manifestContent = await rootBundle.loadString('AssetManifest.json');
-        final Map<String, dynamic> manifestMap = json.decode(manifestContent);
-        allAssets = manifestMap.keys.toList();
-      } catch (e2) {
-        if (mounted) setState(() => _isLoading = false);
-        return;
-      }
+      if (mounted) setState(() => _isLoading = false);
+      return;
     }
 
-    // Filter for card images
     final paths = allAssets
         .where((String key) => key.startsWith('assets/images/cards/') && 
               (key.toLowerCase().endsWith('.png') || key.toLowerCase().endsWith('.jpg') || key.toLowerCase().endsWith('.jpeg')))
@@ -255,8 +460,33 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
         }
         _isLoading = false;
       });
-      // Scroll to initial selection after loading
       WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToSelected());
+    }
+  }
+  
+  // ★ Frame 폴더의 이미지를 읽어오는 함수
+  Future<void> _loadFrameAssets() async {
+    setState(() => _isLoadingFrames = true);
+    List<String> allAssets = [];
+    try {
+      final manifest = await AssetManifest.loadFromAssetBundle(rootBundle);
+      allAssets = manifest.listAssets();
+    } catch (e) {
+      print("Frame AssetManifest load error: $e");
+      if (mounted) setState(() => _isLoadingFrames = false);
+      return;
+    }
+
+    final paths = allAssets
+        .where((String key) => key.startsWith('assets/images/frame/') && 
+              (key.toLowerCase().endsWith('.png') || key.toLowerCase().endsWith('.jpg') || key.toLowerCase().endsWith('.jpeg')))
+        .toList();
+
+    if (mounted) {
+      setState(() {
+        _frameImages = paths;
+        _isLoadingFrames = false;
+      });
     }
   }
 
@@ -273,7 +503,8 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     // Apply custom styles not directly handled by Quill (like text alignment for the whole block)
     final colorHex = (_currentStyle.color ?? Colors.black).value.toRadixString(16).padLeft(8, '0').substring(2);
     final align = _textAlign.name;
-    final fontFamily = _currentStyle.fontFamily ?? 'Caveat';
+    // Use _fontName instead of _currentStyle.fontFamily to ensure canonical name is saved
+    final fontFamily = _fontName; 
     final fontSize = _currentStyle.fontSize ?? 22.0;
     
     // Wrap the generated HTML in a div with overall styles
@@ -281,15 +512,11 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   }
 
   void _loadFromHtml(String html) {
-    // This is a simplified approach. A full HTML to Quill Delta converter would be complex.
-    // For now, we'll extract text and basic styles.
     final fontMatch = RegExp(r"font-family:\s*'([^']+)'").firstMatch(html);
     final sizeMatch = RegExp(r"font-size:\s*([\d.]+)px").firstMatch(html);
     final colorMatch = RegExp(r"color:\s*#([0-9a-fA-F]+)").firstMatch(html);
     final alignMatch = RegExp(r"text-align:\s*(\w+)").firstMatch(html);
     
-    // Extract plain text content from HTML using regex (simplified, since Document.fromHtml is not available)
-    // Remove HTML tags to get plain text
     final plainText = html
         .replaceAll(RegExp(r'<[^>]*>'), '')
         .replaceAll('&nbsp;', ' ')
@@ -299,13 +526,26 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
         .trim();
 
     setState(() {
-      final String fontFamily = fontMatch?.group(1) ?? 'Great Vibes';
+      String fontFamily = fontMatch?.group(1) ?? 'Great Vibes';
+      
+      // Fix for legacy saved cards with internal font names
+      if (fontFamily == 'GreatVibes_regular') {
+        fontFamily = 'Great Vibes';
+      }
+      
       final double fontSize = double.tryParse(sizeMatch?.group(1) ?? '24.0') ?? 24.0;
       final Color textColor = Color(int.parse("FF${colorMatch?.group(1) ?? '1A1A1A'}", radix: 16));
       
       _fontName = fontFamily;
       _fontSize = fontSize;
-      _currentStyle = GoogleFonts.getFont(fontFamily, fontSize: fontSize, color: textColor);
+      try {
+        _currentStyle = GoogleFonts.getFont(fontFamily, fontSize: fontSize, color: textColor);
+      } catch (e) {
+        // Fallback if font not found
+        print("Font not found: $fontFamily, falling back to Great Vibes");
+        _fontName = 'Great Vibes';
+        _currentStyle = GoogleFonts.greatVibes(fontSize: fontSize, color: textColor);
+      }
 
       if (alignMatch != null) {
         final alignStr = alignMatch.group(1);
@@ -317,32 +557,36 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     });
   }
 
-  // 볼드 토글 (부분 적용)
+  // 볼드 토글
   void _toggleBold() {
-    final isBold = _quillController.getSelectionStyle().containsKey(Attribute.bold.key);
-    _quillController.formatSelection(
+    final controller = _activeController;
+    final isBold = controller.getSelectionStyle().containsKey(Attribute.bold.key);
+    controller.formatSelection(
       isBold ? Attribute.clone(Attribute.bold, null) : Attribute.bold
     );
   }
   
-  // 이탤릭 토글 (부분 적용)
+  // 이탤릭 토글
   void _toggleItalic() {
-    final isItalic = _quillController.getSelectionStyle().containsKey(Attribute.italic.key);
-    _quillController.formatSelection(
+    final controller = _activeController;
+    final isItalic = controller.getSelectionStyle().containsKey(Attribute.italic.key);
+    controller.formatSelection(
       isItalic ? Attribute.clone(Attribute.italic, null) : Attribute.italic
     );
   }
   
-  // 밑줄 토글 (부분 적용)
+  // 밑줄 토글
   void _toggleUnderline() {
-    final isUnder = _quillController.getSelectionStyle().containsKey(Attribute.underline.key);
-    _quillController.formatSelection(
+    final controller = _activeController;
+    final isUnder = controller.getSelectionStyle().containsKey(Attribute.underline.key);
+    controller.formatSelection(
       isUnder ? Attribute.clone(Attribute.underline, null) : Attribute.underline
     );
   }
   
-  // 텍스트 정렬 적용 (부분/문단 적용)
+  // 텍스트 정렬 적용
   void _applyAlignment(TextAlign align) {
+    final controller = _activeController;
     Attribute alignAttr;
     switch (align) {
       case TextAlign.left:
@@ -357,25 +601,73 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
       default:
         alignAttr = Attribute.leftAlignment;
     }
-    _quillController.formatSelection(alignAttr);
-    // 상태 업데이트는 Listener에서 처리됨
+    controller.formatSelection(alignAttr);
   }
 
-  // 폰트 변경 (부분 적용)
-  void _applyFont(String fontName) {
-    _quillController.formatSelection(Attribute.fromKeyValue('font', fontName));
+  // 폰트 변경
+  void _applyFont(String fontName, {bool? isFooterOverride}) {
+    final isFooter = isFooterOverride ?? _isFooterActive;
+    final controller = isFooter ? _footerQuillController : _quillController;
+    controller.formatSelection(Attribute.fromKeyValue('font', fontName));
+    
+    setState(() {
+      if (isFooter) {
+         _footerFont = fontName;
+      } else {
+         _fontName = fontName;
+         // Update current style for non-rich text parts if any
+         try {
+            _currentStyle = GoogleFonts.getFont(fontName, fontSize: _fontSize, color: _currentStyle.color);
+         } catch (e) {
+            // Fallback
+            _currentStyle = GoogleFonts.greatVibes(fontSize: _fontSize, color: _currentStyle.color);
+         }
+      }
+    });
   }
   
-  // 폰트 사이즈 변경 (부분 적용)
-  void _applyFontSize(double size) {
-    // 픽셀 값으로 저장 (나중에 파싱할 때 주의)
-    _quillController.formatSelection(Attribute.fromKeyValue('size', size.toString()));
+  // 폰트 사이즈 변경
+  void _applyFontSize(double size, {bool? isFooterOverride}) {
+    final isFooter = isFooterOverride ?? _isFooterActive;
+    final controller = isFooter ? _footerQuillController : _quillController;
+    controller.formatSelection(Attribute.fromKeyValue('size', size.toString()));
+    
+    setState(() {
+      if (isFooter) {
+         _footerFontSize = size;
+      } else {
+         _fontSize = size;
+         _currentStyle = _currentStyle.copyWith(fontSize: size);
+      }
+    });
   }
   
-  // 색상 변경 (부분 적용)
-  void _applyColor(Color color) {
+  // 색상 변경
+  void _applyColor(Color color, {bool? isFooterOverride}) {
+    final isFooter = isFooterOverride ?? _isFooterActive;
+    final controller = isFooter ? _footerQuillController : _quillController;
     final hex = '#${color.value.toRadixString(16).padLeft(8, '0').substring(2).toUpperCase()}';
-    _quillController.formatSelection(Attribute.fromKeyValue('color', hex));
+    controller.formatSelection(Attribute.fromKeyValue('color', hex));
+    
+    setState(() {
+      if (isFooter) {
+         _footerColor = color;
+      } else {
+         _currentStyle = _currentStyle.copyWith(color: color);
+      }
+    });
+  }
+
+  // 되돌리기
+  void _undo() {
+    final controller = _activeController;
+    if (controller.hasUndo) controller.undo();
+  }
+
+  // 다시실행
+  void _redo() {
+    final controller = _activeController;
+    if (controller.hasRedo) controller.redo();
   }
 
   Future<void> _saveCurrentCard() async {
@@ -400,13 +692,19 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
 
     final db = ref.read(appDatabaseProvider);
     final html = _convertToHtml(_message);
+    final footerJson = jsonEncode(_footerQuillController.document.toDelta().toJson());
     
-    await db.insertSavedCard(SavedCardsCompanion.insert(
+    final newId = await db.insertSavedCard(SavedCardsCompanion.insert(
       name: Value(nameController.text),
       htmlContent: html,
-      footerText: Value(_footerText),
+      footerText: Value(footerJson),
       imagePath: Value(_selectedImage),
     ));
+    
+    await _fetchAllSavedCards();
+    setState(() {
+      _currentCardId = newId;
+    });
     
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("현재 내용이 저장되었습니다.")));
@@ -488,20 +786,26 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
         );
       },
     );
+    await _fetchAllSavedCards(); // Refresh list after dialog closes (e.g. deletions)
   }
 
   void _loadCard(SavedCard card) {
     _loadFromHtml(card.htmlContent);
     setState(() {
-      _footerText = card.footerText ?? "";
+      _currentCardId = card.id; // Set current card ID
+      // _footerText = card.footerText ?? ""; // Deprecated, use controller
       if (card.imagePath != null) {
         _selectedImage = card.imagePath!;
       }
     });
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("메시지를 불러왔습니다.")));
+    if (card.footerText != null) {
+      _updateFooterController(card.footerText!);
+    }
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("메시지를 불러왔습니다."), duration: Duration(milliseconds: 500)));
   }
 
   void _showFontPicker() {
+    final bool isFooter = _isFooterActive;
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.white,
@@ -521,12 +825,13 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                   itemCount: _fontList.length,
                   itemBuilder: (context, index) {
                     final font = _fontList[index];
-                    final isSelected = _fontName == font;
+                    final isSelected = isFooter ? (_footerFont == font) : (_fontName == font);
+                    final displayName = _fontDisplayNames[font] ?? font;
                     return ListTile(
-                      title: Text(font, style: GoogleFonts.getFont(font, fontSize: 18)),
+                      title: Text(displayName, style: GoogleFonts.getFont(font, fontSize: 18)),
                       trailing: isSelected ? const Icon(Icons.check, color: Color(0xFFF29D86)) : null,
                       onTap: () {
-                        _applyFont(font);
+                        _applyFont(font, isFooterOverride: isFooter);
                         Navigator.pop(context);
                       },
                     );
@@ -591,6 +896,326 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     );
   }
 
+  void _showBoxStylePicker() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      isScrollControlled: true,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Container(
+              padding: const EdgeInsets.all(20),
+              height: 600, 
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text("글상자 스타일", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 10),
+
+                  // 0. 미리보기 영역 (고정)
+                  Container(
+                    width: double.infinity,
+                    height: 150,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.grey[300]!),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          // 배경 이미지
+                          _buildImage(_selectedImage, fit: BoxFit.cover),
+                          
+                          // 글상자 미리보기
+                          Center(
+                            child: Container(
+                              width: 200,
+                              height: 120, // 높이 고정
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: _boxColor.withOpacity(_boxOpacity),
+                                borderRadius: BorderRadius.circular(_boxRadius),
+                                border: _hasBorder 
+                                  ? Border.all(color: _borderColor.withOpacity(0.5), width: _borderWidth)
+                                  : null,
+                              ),
+                              child: Stack(
+                                children: [
+                                  Align(
+                                    alignment: Alignment.center,
+                                    child: Text(
+                                      "Preview Text\n스타일 미리보기",
+                                      textAlign: TextAlign.center,
+                                      style: GoogleFonts.getFont(_fontName, fontSize: 16, color: _currentStyle.color),
+                                    ),
+                                  ),
+                                  // 푸터 미리보기 추가
+                                  Align(
+                                    alignment: Alignment.bottomRight,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: _footerBgColor.withOpacity(_footerBgOpacity),
+                                        borderRadius: BorderRadius.circular(_footerRadius),
+                                      ),
+                                      child: Text(
+                                        "보낸 사람",
+                                        style: GoogleFonts.getFont(
+                                          _footerFont,
+                                          color: _footerColor,
+                                          fontSize: _footerFontSize, // 1:1 크기로 변경
+                                          fontWeight: _isFooterBold ? FontWeight.bold : FontWeight.normal,
+                                          fontStyle: _isFooterItalic ? FontStyle.italic : FontStyle.normal,
+                                          decoration: _isFooterUnderline ? TextDecoration.underline : TextDecoration.none,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // 설정 영역 (스크롤 가능)
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // 1. 배경 색상
+                          const Text("배경 색상", style: TextStyle(fontWeight: FontWeight.w600)),
+                          const SizedBox(height: 10),
+                          SizedBox(
+                            height: 40,
+                            child: ListView(
+                              scrollDirection: Axis.horizontal,
+                              children: [
+                                Colors.white, Colors.black, 
+                                const Color(0xFFFFF3E0), const Color(0xFFE8F5E9), const Color(0xFFE3F2FD), const Color(0xFFF3E5F5),
+                                const Color(0xFFFFEBEE), const Color(0xFFEFEBE9), const Color(0xFFFAFAFA), Colors.transparent
+                              ].map((color) {
+                                final isSelected = _boxColor.value == color.value;
+                                return GestureDetector(
+                                  onTap: () {
+                                    setModalState(() => _boxColor = color);
+                                    this.setState(() {}); // 메인 화면 갱신
+                                  },
+                                  child: Container(
+                                    width: 40, height: 40,
+                                    margin: const EdgeInsets.only(right: 12),
+                                    decoration: BoxDecoration(
+                                      color: color,
+                                      shape: BoxShape.circle,
+                                      border: Border.all(color: Colors.grey[300]!, width: 1),
+                                      boxShadow: isSelected ? [const BoxShadow(color: Color(0xFFF29D86), blurRadius: 4, spreadRadius: 1)] : null,
+                                    ),
+                                    child: color == Colors.transparent 
+                                      ? const Icon(Icons.block, color: Colors.grey, size: 20)
+                                      : (isSelected ? Icon(Icons.check, color: color.computeLuminance() > 0.5 ? Colors.black : Colors.white, size: 20) : null),
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+                          ),
+                          
+                          const SizedBox(height: 20),
+                          
+                          // 2. 투명도 슬라이더
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text("투명도", style: TextStyle(fontWeight: FontWeight.w600)),
+                              Text("${(_boxOpacity * 100).toInt()}%", style: const TextStyle(color: Colors.grey)),
+                            ],
+                          ),
+                          Slider(
+                            value: _boxOpacity,
+                            min: 0.0,
+                            max: 1.0,
+                            activeColor: const Color(0xFFF29D86),
+                            inactiveColor: Colors.grey[200],
+                            onChanged: (val) {
+                              setModalState(() => _boxOpacity = val);
+                              this.setState(() {});
+                            },
+                          ),
+                          
+                          // 3. 둥근 모서리 슬라이더
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text("둥근 모서리", style: TextStyle(fontWeight: FontWeight.w600)),
+                              Text("${_boxRadius.toInt()}px", style: const TextStyle(color: Colors.grey)),
+                            ],
+                          ),
+                          Slider(
+                            value: _boxRadius,
+                            min: 0.0,
+                            max: 50.0,
+                            activeColor: const Color(0xFFF29D86),
+                            inactiveColor: Colors.grey[200],
+                            onChanged: (val) {
+                              setModalState(() => _boxRadius = val);
+                              this.setState(() {});
+                            },
+                          ),
+
+                          // 4. 테두리 설정
+                          const SizedBox(height: 10),
+                          Row(
+                            children: [
+                              const Text("테두리", style: TextStyle(fontWeight: FontWeight.w600)),
+                              const Spacer(),
+                              Switch(
+                                value: _hasBorder,
+                                activeColor: const Color(0xFFF29D86),
+                                onChanged: (val) {
+                                  setModalState(() => _hasBorder = val);
+                                  this.setState(() {});
+                                },
+                              ),
+                            ],
+                          ),
+
+                          const Divider(height: 30),
+
+                          // 5. 푸터 스타일 (Footer Style)
+                          const Text("푸터 (보낸 사람) 배경 스타일", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                          const SizedBox(height: 10),
+                          
+                          // 안내 문구
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.grey[100],
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Row(
+                              children: [
+                                Icon(Icons.info_outline, size: 16, color: Colors.grey),
+                                SizedBox(width: 8),
+                                Expanded(child: Text("글자 크기와 색상은 푸터를 선택 후 상단 툴바에서 변경하세요.", style: TextStyle(fontSize: 12, color: Colors.grey))),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+
+                          // 푸터 배경 색상
+                          const Text("배경 색상", style: TextStyle(fontWeight: FontWeight.w600)),
+                          const SizedBox(height: 10),
+                          SizedBox(
+                            height: 40,
+                            child: ListView(
+                              scrollDirection: Axis.horizontal,
+                              children: [
+                                Colors.transparent, Colors.white, Colors.black, 
+                                const Color(0xFFFFF3E0), const Color(0xFFE8F5E9), const Color(0xFFE3F2FD),
+                                const Color(0xFFF3E5F5), const Color(0xFFFFEBEE)
+                              ].map((color) {
+                                final isSelected = _footerBgColor.value == color.value;
+                                return GestureDetector(
+                                  onTap: () {
+                                    setModalState(() => _footerBgColor = color);
+                                    this.setState(() {}); // 메인 화면 갱신
+                                  },
+                                  child: Container(
+                                    width: 40, height: 40,
+                                    margin: const EdgeInsets.only(right: 12),
+                                    decoration: BoxDecoration(
+                                      color: color,
+                                      shape: BoxShape.circle,
+                                      border: Border.all(color: Colors.grey[300]!, width: 1),
+                                      boxShadow: isSelected ? [const BoxShadow(color: Color(0xFFF29D86), blurRadius: 4, spreadRadius: 1)] : null,
+                                    ),
+                                    child: color == Colors.transparent 
+                                      ? const Icon(Icons.block, color: Colors.grey, size: 20)
+                                      : (isSelected ? Icon(Icons.check, color: color.computeLuminance() > 0.5 ? Colors.black : Colors.white, size: 20) : null),
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+                          ),
+
+                          const SizedBox(height: 20),
+                          
+                          // 푸터 배경 투명도
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text("배경 투명도", style: TextStyle(fontWeight: FontWeight.w600)),
+                              Text("${(_footerBgOpacity * 100).toInt()}%", style: const TextStyle(color: Colors.grey)),
+                            ],
+                          ),
+                          Slider(
+                            value: _footerBgOpacity,
+                            min: 0.0,
+                            max: 1.0,
+                            activeColor: const Color(0xFFF29D86),
+                            inactiveColor: Colors.grey[200],
+                            onChanged: (val) {
+                              setModalState(() => _footerBgOpacity = val);
+                              this.setState(() {});
+                            },
+                          ),
+
+                          // 푸터 둥근 모서리
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text("배경 둥근 모서리", style: TextStyle(fontWeight: FontWeight.w600)),
+                              Text("${_footerRadius.toInt()}px", style: const TextStyle(color: Colors.grey)),
+                            ],
+                          ),
+                          Slider(
+                            value: _footerRadius,
+                            min: 0.0,
+                            max: 30.0,
+                            activeColor: const Color(0xFFF29D86),
+                            inactiveColor: Colors.grey[200],
+                            onChanged: (val) {
+                              setModalState(() => _footerRadius = val);
+                              this.setState(() {});
+                            },
+                          ),
+                          
+                          const SizedBox(height: 20),
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: () => Navigator.pop(context),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFFF29D86),
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              ),
+                              child: const Text("완료"),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   /// AI를 사용해 메시지를 더 감성적으로 다듬는 기능
   Future<void> _refineMessageWithAi({String tone = 'warm and emotional'}) async {
     if (_message.trim().isEmpty) return;
@@ -633,7 +1258,21 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   
   // 캡처한 이미지 저장
   Future<String?> _saveCardImage() async {
+    if (!mounted) return null;
+
+    // 캡쳐 전에 UI 요소 숨기기
+    setState(() => _isCapturing = true);
+    
+    // UI 업데이트 및 리페인트를 위해 충분히 대기
+    await Future.delayed(const Duration(milliseconds: 500));
+
     final imageBytes = await _captureCardImage();
+
+    // 캡쳐 후 UI 복구
+    if (mounted) {
+      setState(() => _isCapturing = false);
+    }
+
     if (imageBytes == null) return null;
     
     try {
@@ -667,23 +1306,18 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  // 상단 여백 제거 (이미지 상단 밀착)
-                  // SizedBox(height: MediaQuery.of(context).padding.top + 50),
-                  
                   // 1. Card Preview (캡쳐 가능 영역) - 상단에 붙음
                   _buildCardPreview(),
                   
                   // 2. Toolbar (이미지와 썸네일 사이)
                   _buildToolbar(),
                   
-                  // 3. Template Selector
+                  // 3. Template Selector (Background or Frame)
                   _buildTemplateSelector(),
                   
-                  // 4. Footer Input
-                  _buildFooterInput(),
+                  // 4. Footer Input (보낸 사람 입력) - Removed as per user request
+                  const SizedBox(height: 40), // Extra spacing instead
 
-                  // 5. Bottom Padding for send button
-                  const SizedBox(height: 120),
                 ],
               ),
             ),
@@ -702,62 +1336,169 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                 ),
                 const SizedBox(width: 8),
                 _buildHeaderButton(
-                  icon: Icons.file_download, 
+                  icon: Icons.folder_open, 
                   onTap: _showSavedCardsDialog,
                 ),
                 const SizedBox(width: 8),
                 _buildHeaderButton(
-                  icon: Icons.save_alt, 
+                  icon: Icons.save, 
                   onTap: _saveCurrentCard,
                 ),
+                
                 const Spacer(),
+                
+                // 배경 버튼 (상단 고정)
+                GestureDetector(
+                  onTap: () {
+                    setState(() {
+                       _isFrameMode = false;
+                       WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToSelected());
+                    });
+                    _showCategoryPicker();
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: !_isFrameMode ? const Color(0xFFF29D86) : Colors.white.withOpacity(0.8),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.white.withOpacity(0.5)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.image, color: !_isFrameMode ? Colors.white : const Color(0xFFF29D86), size: 18),
+                        const SizedBox(width: 6),
+                        Text("배경", style: TextStyle(color: !_isFrameMode ? Colors.white : const Color(0xFF555555), fontSize: 12, fontWeight: FontWeight.w600)),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                // 프레임 버튼 (상단 고정)
+                GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _isFrameMode = true;
+                      // Switch to frame thumbnails
+                      WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToSelected());
+                    });
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: _isFrameMode ? const Color(0xFFF29D86) : Colors.white.withOpacity(0.8),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.white.withOpacity(0.5)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.crop_free, color: _isFrameMode ? Colors.white : const Color(0xFFF29D86), size: 18),
+                        const SizedBox(width: 6),
+                        Text("프레임", style: TextStyle(color: _isFrameMode ? Colors.white : const Color(0xFF555555), fontSize: 12, fontWeight: FontWeight.w600)),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                // 글상자 스타일 버튼 (상단 고정)
+                GestureDetector(
+                  onTap: _showBoxStylePicker,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.8),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.white.withOpacity(0.5)),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.style, color: Color(0xFFF29D86), size: 18),
+                        SizedBox(width: 6),
+                        Text("글상자", style: TextStyle(color: Color(0xFF555555), fontSize: 12, fontWeight: FontWeight.w600)),
+                      ],
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
           
-          // 하단 고정 전송 버튼
+          // 하단 고정 전송 버튼 및 수신자 목록
           Positioned(
-            bottom: 30,
+            bottom: 20,
             left: 0,
             right: 0,
-            child: Center(
-              child: Hero(
-                tag: 'write-fab',
-                child: Container(
-                  height: 70,
-                  width: 70,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFFFF8A65), Color(0xFFFF7043)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFFFF8A65).withOpacity(0.4),
-                        blurRadius: 20,
-                        offset: const Offset(0, 8),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // 전송 버튼 및 카운터
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // 중앙 정렬을 위한 Spacer (왼쪽)
+                    const SizedBox(width: 80), 
+
+                    Hero(
+                      tag: 'write-fab',
+                      child: Container(
+                        height: 70,
+                        width: 70,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFFFF8A65), Color(0xFFFF7043)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFFFF8A65).withOpacity(0.4),
+                              blurRadius: 20,
+                              offset: const Offset(0, 8),
+                            ),
+                          ],
+                        ),
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: _isSending ? null : _handleSend,
+                            borderRadius: BorderRadius.circular(35),
+                            child: Center(
+                              child: _isSending 
+                                ? const SizedBox(
+                                    width: 28, height: 28,
+                                    child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3),
+                                  )
+                                : const Icon(FontAwesomeIcons.paperPlane, color: Colors.white, size: 26),
+                            ),
+                          ),
+                        ),
                       ),
-                    ],
-                  ),
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: _isSending ? null : _handleSend,
-                      borderRadius: BorderRadius.circular(35),
-                      child: Center(
-                        child: _isSending 
-                          ? const SizedBox(
-                              width: 28, height: 28,
-                              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3),
-                            )
-                          : const Icon(FontAwesomeIcons.paperPlane, color: Colors.white, size: 26),
+                    ),
+                    
+                    // 발송 대상 카운터 (오른쪽)
+                    Container(
+                      width: 80,
+                      padding: const EdgeInsets.only(left: 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text("발송대상", style: TextStyle(fontSize: 11, color: Colors.grey)),
+                          Text(
+                            "$_sentCount / ${_recipients.length}",
+                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFFF29D86)),
+                          ),
+                        ],
                       ),
                     ),
-                  ),
+                  ],
                 ),
-              ),
+                
+                const SizedBox(height: 16),
+              ],
             ),
           ),
         ],
@@ -797,9 +1538,6 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   Widget _buildImage(String path, {BoxFit fit = BoxFit.cover, double? width, double? height}) {
     if (path.isEmpty) return Container(color: Colors.grey[200]);
     
-    // Debug info
-    print("[WriteCardScreen] Loading image: $path");
-
     if (path.startsWith('http') || path.startsWith('https')) {
       return Image.network(path, fit: fit, width: width, height: height,
         errorBuilder: (_, __, ___) => _buildErrorPlaceholder());
@@ -826,8 +1564,6 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
       print("File check error: $e");
     }
 
-    // Fallback: try asset one last time (maybe path doesn't start with assets/ but is in pubspec?)
-    // Or just show error
     return Image.asset(path, fit: fit, width: width, height: height,
       errorBuilder: (_, __, ___) => _buildErrorPlaceholder(),
     );
@@ -840,186 +1576,261 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     );
   }
 
+  void _handleDoubleTap() {
+    if (_transformationController.value != Matrix4.identity()) {
+      _transformationController.value = Matrix4.identity();
+    } else {
+      _transformationController.value = Matrix4.identity()..scale(2.0);
+    }
+  }
+
   Widget _buildCardPreview() {
     return Container(
-      padding: EdgeInsets.zero, // 패딩 제거
+      padding: EdgeInsets.zero,
       child: Center(
         child: AspectRatio(
-          aspectRatio: 4/4.5,
+          aspectRatio: 3 / 4,
           child: Container(
             width: MediaQuery.of(context).size.width * 0.92,
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
-                  blurRadius: 25,
-                  offset: const Offset(0, 10),
-                )
-              ],
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Stack(
-                children: [
-                  // RepaintBoundary로 캡처 영역 감싸기 (버튼 제외)
-                  RepaintBoundary(
-                    key: _captureKey,
-                    child: Stack(
-                      children: [
-                        // 1. Full Background Image
-                        Positioned.fill(
-                          child: _buildImage(_selectedImage, fit: BoxFit.cover, width: double.infinity, height: double.infinity),
-                        ),
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.08),
+                blurRadius: 25,
+                offset: const Offset(0, 10),
+              )
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: GestureDetector(
+              onHorizontalDragEnd: _handleSwipeNavigation,
+              onDoubleTapDown: (details) => _doubleTapDetails = details,
+              onDoubleTap: _handleDoubleTap,
+              child: InteractiveViewer(
+                transformationController: _transformationController,
+                minScale: 1.0,
+                maxScale: 4.0,
+                panEnabled: true,
+                scaleEnabled: true,
+                child: Stack(
+                  children: [
+                    // RepaintBoundary로 캡처 영역 감싸기 (버튼 제외)
+                    RepaintBoundary(
+                      key: _captureKey,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      // 1. Full Background Image
+                      Positioned.fill(
+                        child: _buildImage(_selectedImage, fit: BoxFit.cover),
+                      ),
 
-                        // 2. Draggable Text Area (위치 유지됨)
-                        Positioned(
-                          left: 0,
-                          right: 0,
-                          top: 0,
-                          bottom: 0,
-                          child: Center(
-                            child: Transform.translate(
-                              offset: _dragOffset,
-                              child: GestureDetector(
-                                onPanUpdate: (details) {
-                                  setState(() {
-                                    _dragOffset += details.delta;
-                                  });
-                                },
-                                // 드래그 끝나도 위치 유지 (resetDragOffset 호출 안함)
-                                child: Container(
-                                  width: MediaQuery.of(context).size.width * 0.78,
-                                  constraints: BoxConstraints(
-                                    maxHeight: MediaQuery.of(context).size.width * 0.90 * 0.85,
-                                  ),
-                                  padding: const EdgeInsets.all(20),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.3),
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(color: Colors.white.withOpacity(0.2), width: 1),
-                                  ),
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      // 편집 가능한 QuillEditor
-                                      ConstrainedBox(
-                                        constraints: BoxConstraints(
-                                          maxHeight: MediaQuery.of(context).size.width * 0.5,
-                                        ),
-                                        child: QuillEditor(
-                                          controller: _quillController,
-                                          focusNode: _editorFocusNode,
-                                          scrollController: ScrollController(),
-                                          config: QuillEditorConfig(
-                                            autoFocus: false,
-                                            expands: false,
-                                            scrollable: true,
-                                            padding: EdgeInsets.zero,
-                                            showCursor: true,
-                                            placeholder: '여기를 탭하여 메시지 입력...',
-                                            customStyles: DefaultStyles(
-                                              paragraph: DefaultTextBlockStyle(
-                                                _currentStyle,
-                                                HorizontalSpacing.zero,
-                                                VerticalSpacing.zero,
-                                                VerticalSpacing.zero,
-                                                null,
+                      // 2. Draggable Text Area (위치 유지됨)
+                      // 이미지가 짤리지 않게 글자 수정 아이콘을 배경 이미지 크기에 맞게 내리라는 요청에 따라
+                      // Positioned.fill 대신 중앙에 배치하거나, 이미지 크기에 맞춤
+                      Positioned.fill(
+                        child: Center(
+                          child: Transform.translate(
+                            offset: _dragOffset,
+                            child: GestureDetector(
+                              onPanUpdate: (details) {
+                                setState(() {
+                                  _dragOffset += details.delta;
+                                });
+                              },
+                              child: Container(
+                                width: MediaQuery.of(context).size.width * 0.78,
+                                constraints: BoxConstraints(
+                                  maxHeight: MediaQuery.of(context).size.width * 0.90 * 0.85,
+                                ),
+                                padding: const EdgeInsets.fromLTRB(20, 20, 30, 20),
+                                decoration: BoxDecoration(
+                                  // 프레임 이미지가 있으면 이미지 배경, 없으면 사용자 정의 스타일
+                                  color: _selectedFrame != null ? null : _boxColor.withOpacity(_boxOpacity),
+                                  image: _selectedFrame != null ? DecorationImage(
+                                    image: AssetImage(_selectedFrame!),
+                                    fit: BoxFit.fill, // 프레임은 늘려서 채움
+                                  ) : null,
+                                  borderRadius: BorderRadius.circular(_selectedFrame != null ? 0 : _boxRadius),
+                                  border: _selectedFrame == null && _hasBorder
+                                      ? Border.all(color: _borderColor.withOpacity(0.5), width: _borderWidth)
+                                      : null,
+                                ),
+                                child: Stack(
+                                  clipBehavior: Clip.none,
+                                  children: [
+                                    Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                                      children: [
+                                        // 1. 글자수 & AI 버튼 (상단 오른쪽 정렬) - 캡쳐 시 숨김
+                                        if (!_isCapturing)
+                                          Align(
+                                            alignment: Alignment.centerRight,
+                                            child: Padding(
+                                              padding: const EdgeInsets.only(bottom: 8.0),
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Container(
+                                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                                    decoration: BoxDecoration(
+                                                      color: Colors.white.withOpacity(0.7),
+                                                      borderRadius: BorderRadius.circular(8),
+                                                    ),
+                                                    child: Text(
+                                                      "${_message.length} / 75",
+                                                      style: TextStyle(fontSize: 10, color: _message.length >= 75 ? Colors.red : Colors.grey[700]),
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 6),
+                                                  GestureDetector(
+                                                    onTap: _showAiToneSelector,
+                                                    child: Container(
+                                                      padding: const EdgeInsets.all(4),
+                                                      decoration: BoxDecoration(
+                                                        color: Colors.white.withOpacity(0.7),
+                                                        borderRadius: BorderRadius.circular(6),
+                                                      ),
+                                                      child: _isAiLoading 
+                                                        ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFFF29D86)))
+                                                        : const Icon(FontAwesomeIcons.wandMagicSparkles, size: 12, color: Color(0xFFF29D86)),
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
                                             ),
-                                          ), 
-                                        ),
-                                      ),
-                                      const SizedBox(height: 16),
-                                      // Footer
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xFFD6B5A1),
-                                          borderRadius: BorderRadius.circular(4),
-                                          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4, offset: const Offset(0, 2))],
-                                        ),
-                                        child: Text(
-                                          _footerText.toUpperCase(),
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w600,
-                                            letterSpacing: 1.2,
                                           ),
-                                        ),
-                                      ),
-                                      // 글자수 카운터 & AI 버튼 (박스 아래)
-                                      const SizedBox(height: 8),
-                                      Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                            decoration: BoxDecoration(
-                                              color: Colors.white.withOpacity(0.7),
-                                              borderRadius: BorderRadius.circular(10),
-                                            ),
-                                            child: Text(
-                                              "${_message.length} / 75",
-                                              style: TextStyle(fontSize: 10, color: _message.length >= 75 ? Colors.red : Colors.grey[700]),
-                                            ),
+
+                                        // 2. 편집 가능한 QuillEditor
+                                        ConstrainedBox(
+                                          constraints: BoxConstraints(
+                                            maxHeight: MediaQuery.of(context).size.width * 0.5,
                                           ),
-                                          const SizedBox(width: 8),
-                                          GestureDetector(
-                                            onTap: _showAiToneSelector,
-                                            child: Container(
-                                              padding: const EdgeInsets.all(4),
-                                              decoration: BoxDecoration(
-                                                color: Colors.white.withOpacity(0.7),
-                                                borderRadius: BorderRadius.circular(6),
+                                          child: QuillEditor(
+                                            controller: _quillController,
+                                            focusNode: _editorFocusNode,
+                                            scrollController: ScrollController(),
+                                            config: QuillEditorConfig(
+                                              autoFocus: false,
+                                              expands: false,
+                                              scrollable: true,
+                                              padding: EdgeInsets.zero,
+                                              showCursor: true,
+                                              placeholder: '여기를 탭하여 메시지 입력...',
+                                              customStyleBuilder: (attribute) {
+                                                if (attribute.key == 'font') {
+                                                  try {
+                                                    return GoogleFonts.getFont(attribute.value);
+                                                  } catch (e) {
+                                                    return const TextStyle();
+                                                  }
+                                                }
+                                                return const TextStyle();
+                                              },
+                                              customStyles: DefaultStyles(
+                                                paragraph: DefaultTextBlockStyle(
+                                                  _currentStyle,
+                                                  HorizontalSpacing.zero,
+                                                  VerticalSpacing.zero,
+                                                  VerticalSpacing.zero,
+                                                  null,
+                                                ),
                                               ),
-                                              child: _isAiLoading 
-                                                ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFFF29D86)))
-                                                : const Icon(FontAwesomeIcons.wandMagicSparkles, size: 12, color: Color(0xFFF29D86)),
+                                            ), 
+                                          ),
+                                        ),
+                                        // Footer space placeholder if needed? No, it floats.
+                                        const SizedBox(height: 40), // Reserve some space so main text doesn't overlap footer initially
+                                      ],
+                                    ),
+                                    
+                                    // 3. Footer (Floating & Draggable)
+                                    Positioned.fill(
+                                      child: Align(
+                                        alignment: Alignment.bottomRight,
+                                        child: Transform.translate(
+                                          offset: _footerOffset,
+                                          child: GestureDetector(
+                                            onPanUpdate: (details) {
+                                              setState(() {
+                                                _footerOffset += details.delta;
+                                              });
+                                            },
+                                            child: IntrinsicWidth(
+                                              child: Container(
+                                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                                decoration: BoxDecoration(
+                                                  color: _footerBgColor.withOpacity(_footerBgOpacity),
+                                                  borderRadius: BorderRadius.circular(_footerRadius),
+                                                ),
+                                                child: QuillEditor(
+                                                  controller: _footerQuillController,
+                                                  focusNode: _footerFocusNode,
+                                                  scrollController: ScrollController(),
+                                                  config: QuillEditorConfig(
+                                                    autoFocus: false,
+                                                    expands: false,
+                                                    scrollable: false, // Auto-size height
+                                                    padding: EdgeInsets.zero,
+                                                    showCursor: true,
+                                                    placeholder: '보낸 사람',
+                                                    customStyleBuilder: (attribute) {
+                                                      if (attribute.key == 'font') {
+                                                        try {
+                                                          return GoogleFonts.getFont(attribute.value);
+                                                        } catch (e) {
+                                                          return const TextStyle();
+                                                        }
+                                                      }
+                                                      return const TextStyle();
+                                                    },
+                                                    customStyles: DefaultStyles(
+                                                      paragraph: DefaultTextBlockStyle(
+                                                        GoogleFonts.getFont(
+                                                          _footerFont,
+                                                          color: _footerColor,
+                                                          fontSize: _footerFontSize,
+                                                          fontWeight: FontWeight.normal, // Controlled by Quill attributes now
+                                                          fontStyle: FontStyle.normal,
+                                                          decoration: TextDecoration.none,
+                                                        ),
+                                                        HorizontalSpacing.zero,
+                                                        VerticalSpacing.zero,
+                                                        VerticalSpacing.zero,
+                                                        null,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
                                             ),
                                           ),
-                                        ],
+                                        ),
                                       ),
-                                    ],
-                                  ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                  
-                  // 3. Change BG Indicator (Top Right) - 캡처에서 제외
-                  Positioned(
-                    top: 12, right: 12,
-                    child: GestureDetector(
-                      onTap: _showCategoryPicker,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.4),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: const Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.image, color: Colors.white, size: 14),
-                            SizedBox(width: 4),
-                            Text("배경", style: TextStyle(color: Colors.white, fontSize: 11)),
-                          ],
-                        ),
                       ),
-                    ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+                
+                // 3. Change BG / Frame Toggle (Top Right) - 캡처에서 제외
+                // 상단 고정으로 이동됨
+              ],
             ),
           ),
+        ),
+      ),
+        ),
         ),
       ),
     );
@@ -1027,6 +1838,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   
   // 툴바 (이미지와 썸네일 사이)
   Widget _buildToolbar() {
+    final bool isFooterForToolbar = _isFooterActive;
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
@@ -1061,12 +1873,16 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                   }).toList(),
                   onChanged: (value) {
                     if (value != null) {
-                      _applyFontSize(value);
+                      _applyFontSize(value, isFooterOverride: isFooterForToolbar);
                     }
                   },
                 ),
               ),
             ),
+            const SizedBox(width: 6),
+            // Undo / Redo
+            _buildToolbarButton(icon: Icons.undo, onTap: _undo),
+            _buildToolbarButton(icon: Icons.redo, onTap: _redo),
             const SizedBox(width: 6),
             // Bold
             _buildToolbarButton(icon: FontAwesomeIcons.bold, isActive: _isBold, onTap: _toggleBold),
@@ -1098,38 +1914,54 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   }
 
   Widget _buildTemplateSelector() {
+    final list = _isFrameMode ? _frameImages : _templates;
+    final isLoading = _isFrameMode ? _isLoadingFrames : false;
+
     // Show empty state if no templates
-    if (_templates.isEmpty) {
-        return const SizedBox(
+    if (list.isEmpty && !isLoading) {
+        return SizedBox(
             height: 100,
-            child: Center(child: Text("No card images found in assets."))
+            child: Center(child: Text(_isFrameMode ? "No frame images found." : "No card images found."))
         );
     }
 
     return SizedBox(
       height: 90,
       child: ListView.builder(
-        controller: _scrollController, // Added controller
+        controller: _scrollController,
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 20),
-        itemCount: _templates.length + 1,
+        itemCount: list.length + 1,
         itemBuilder: (context, index) {
-          if (index == _templates.length) {
-            // Upload button placeholder
+          if (index == list.length) {
+            // Upload button placeholder (only for background mode?)
+            // Or maybe "No Frame" button for frame mode
+            if (_isFrameMode) {
+               return _buildThumbItem(null, isNoFrame: true, isActive: _selectedFrame == null, onTap: () {
+                 setState(() => _selectedFrame = null);
+               });
+            }
             return _buildThumbItem(null, isUpload: true);
           }
           final idx = index;
-          return _buildThumbItem(_templates[idx], isActive: _selectedImage == _templates[idx], onTap: () {
-            setState(() => _selectedImage = _templates[idx]);
-            // Optional: Scroll to center when tapped manually? 
-            // Better not to disturb user action unless requested.
+          final imgPath = list[idx];
+          final isActive = _isFrameMode ? (_selectedFrame == imgPath) : (_selectedImage == imgPath);
+          
+          return _buildThumbItem(imgPath, isActive: isActive, onTap: () {
+            setState(() {
+              if (_isFrameMode) {
+                _selectedFrame = imgPath;
+              } else {
+                _selectedImage = imgPath;
+              }
+            });
           });
         },
       ),
     );
   }
 
-  Widget _buildThumbItem(String? imgUrl, {bool isActive = false, bool isUpload = false, VoidCallback? onTap}) {
+  Widget _buildThumbItem(String? imgUrl, {bool isActive = false, bool isUpload = false, bool isNoFrame = false, VoidCallback? onTap}) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -1157,7 +1989,18 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                       color: const Color(0xFFFFF0EB),
                       child: const Icon(Icons.add_photo_alternate, color: Color(0xFFF29D86), size: 30),
                     )
-                  : imgUrl != null ? _buildImage(imgUrl, fit: BoxFit.cover) : Container(color: Colors.grey[200]),
+                  : isNoFrame
+                    ? Container(
+                        color: Colors.grey[200],
+                        child: const Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                             Icon(Icons.block, color: Colors.grey, size: 24),
+                             Text("없음", style: TextStyle(fontSize: 10, color: Colors.grey)),
+                          ],
+                        ),
+                      )
+                    : imgUrl != null ? _buildImage(imgUrl, fit: BoxFit.cover) : Container(color: Colors.grey[200]),
               ),
             ),
           ],
@@ -1167,6 +2010,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   }
 
   void _showColorPicker() {
+    final bool isFooter = _isFooterActive;
     final colors = [
       const Color(0xFF1A1A1A), const Color(0xFFD81B60), const Color(0xFFC2185B), const Color(0xFF8E24AA),
       const Color(0xFF512DA8), const Color(0xFF1976D2), const Color(0xFF0288D1), const Color(0xFF0097A7),
@@ -1194,7 +2038,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                   final isSelected = _currentStyle.color?.value == color.value;
                   return GestureDetector(
                     onTap: () {
-                      _applyColor(color);
+                      _applyColor(color, isFooterOverride: isFooter);
                       Navigator.pop(context);
                     },
                     child: Container(
@@ -1203,7 +2047,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                         color: color,
                         shape: BoxShape.circle,
                         border: Border.all(color: isSelected ? const Color(0xFFF29D86) : Colors.grey.withOpacity(0.3), width: isSelected ? 3 : 1),
-                        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4)],
+                        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)],
                       ),
                       child: isSelected ? const Icon(Icons.check, color: Colors.white, size: 20) : null,
                     ),
@@ -1234,54 +2078,526 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     );
   }
   
-  // Footer 입력 영역
-  Widget _buildFooterInput() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      child: TextField(
-        controller: _footerController,
-        onChanged: (val) {
-          setState(() => _footerText = val);
-          _saveFooter(val);
-        },
-        decoration: InputDecoration(
-          labelText: "보낸 사람 (Footer)",
-          labelStyle: const TextStyle(fontSize: 12),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          filled: true,
-          fillColor: Colors.white,
-        ),
-        style: const TextStyle(fontSize: 14),
-      ),
-    );
-  }
+  // Footer 입력 영역 제거됨
+
+
+  // --- Sending Logic ---
 
   Future<void> _handleSend() async {
     if (_isSending) return;
     
-    setState(() => _isSending = true);
-    
-    try {
-      // 이미지 캡처 및 저장
-      final savedPath = await _saveCardImage();
-      
-      if (mounted) {
-        if (savedPath != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("카드가 저장되었습니다: $savedPath")),
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("카드가 생성되었습니다! 수신자 선택으로 이동합니다...")),
-          );
-        }
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isSending = false);
+    // 수신자가 없으면 초기화 (테스트용)
+    if (_recipients.isEmpty) {
+       for (int i = 1; i <= 20; i++) {
+        _recipients.add("수신자 $i (010-0000-${i.toString().padLeft(4, '0')})");
       }
     }
+
+    // 1. 발송 전 이미지 생성 및 확인
+    final savedPath = await _saveCardImage();
+    
+    if (savedPath == null) {
+      if (mounted) {
+         ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("카드 이미지 생성 실패")),
+        );
+      }
+      return;
+    }
+
+    if (!mounted) return;
+
+    // 2. 발송 확인 다이얼로그 (이미지 미리보기)
+    final confirmImage = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        final transformationController = TransformationController();
+        return Dialog(
+          backgroundColor: Colors.white,
+          insetPadding: const EdgeInsets.all(10),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          child: SizedBox(
+            width: double.infinity,
+            height: MediaQuery.of(context).size.height * 0.85,
+            child: Column(
+              children: [
+                // Header
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.check_circle_outline, color: Color(0xFFF29D86), size: 28),
+                      const SizedBox(width: 8),
+                      const Text("카드 이미지 확인", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+                    ],
+                  ),
+                ),
+                
+                // Content
+                Expanded(
+                  child: Column(
+                    children: [
+                      const Text(
+                        "수신자들에게 발송될 최종 이미지입니다.\n이대로 발송하시겠습니까?", 
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.grey, fontSize: 14)
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE0F7FA),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: const Color(0xFFB2EBF2)),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.touch_app, size: 14, color: Color(0xFF0097A7)),
+                            SizedBox(width: 6),
+                            Text(
+                              "💡 더블 클릭: 확대/축소  |  드래그: 이동",
+                              style: TextStyle(fontSize: 12, color: Color(0xFF006064), fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Expanded(
+                        child: Container(
+                          width: double.infinity,
+                          margin: const EdgeInsets.symmetric(horizontal: 10),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey.withOpacity(0.3)),
+                            borderRadius: BorderRadius.circular(8),
+                            color: Colors.grey[100],
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: GestureDetector(
+                              onDoubleTap: () {
+                                if (transformationController.value.getMaxScaleOnAxis() > 1.0) {
+                                  transformationController.value = Matrix4.identity();
+                                } else {
+                                  transformationController.value = Matrix4.identity()..scale(3.0);
+                                }
+                              },
+                              child: InteractiveViewer(
+                                transformationController: transformationController,
+                                minScale: 1.0,
+                                maxScale: 5.0,
+                                child: Image.file(File(savedPath), fit: BoxFit.contain),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                
+                // Actions
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, false),
+                        child: const Text("취소", style: TextStyle(color: Colors.grey, fontSize: 16)),
+                      ),
+                      const SizedBox(width: 10),
+                      ElevatedButton(
+                        onPressed: () => Navigator.pop(context, true),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFF29D86), 
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        ),
+                        child: const Text("확인 (다음 단계)"),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    if (confirmImage != true) return;
+
+    if (!mounted) return;
+
+    // 3. 수신자 관리 및 발송 팝업
+    _showRecipientManagerDialog(savedPath);
+  }
+
+  void _showRecipientManagerDialog(String savedPath) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            bool isSendingLocal = _isSending;
+            
+            return Dialog(
+              backgroundColor: Colors.white,
+              insetPadding: const EdgeInsets.all(10), // Maximize width
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              child: SizedBox(
+                width: double.infinity,
+                height: MediaQuery.of(context).size.height * 0.85, // Same height as image preview
+                child: Column(
+                  children: [
+                    // Header
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFF29D86),
+                        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Row(
+                            children: [
+                              Icon(Icons.people_alt_rounded, color: Colors.white),
+                              SizedBox(width: 10),
+                              Text("발송 대상 관리", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                            ],
+                          ),
+                          if (isSendingLocal)
+                             Container(
+                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                               decoration: BoxDecoration(color: Colors.white.withOpacity(0.3), borderRadius: BorderRadius.circular(20)),
+                               child: const Row(
+                                 children: [
+                                   SizedBox(width: 12, height: 12, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)),
+                                   SizedBox(width: 8),
+                                   Text("발송 중...", style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                                 ],
+                               ),
+                             ),
+                        ],
+                      ),
+                    ),
+
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.all(20.0),
+                        child: Column(
+                          children: [
+                            // 상단 정보 및 추가 버튼
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text("총 ${_recipients.length}명", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF5D4037))),
+                                if (!isSendingLocal)
+                                TextButton.icon(
+                                  onPressed: () {
+                                     final textController = TextEditingController();
+                                     showDialog(
+                                       context: context,
+                                       builder: (c) => AlertDialog(
+                                         title: const Text("수신자 추가"),
+                                         content: TextField(
+                                           controller: textController,
+                                           decoration: const InputDecoration(hintText: "이름 (전화번호)"),
+                                           autofocus: true,
+                                         ),
+                                         actions: [
+                                           TextButton(onPressed: () => Navigator.pop(c), child: const Text("취소")),
+                                           TextButton(
+                                             onPressed: () {
+                                               if (textController.text.isNotEmpty) {
+                                                 setDialogState(() {
+                                                   _recipients.add(textController.text);
+                                                 });
+                                               }
+                                               Navigator.pop(c);
+                                             },
+                                             child: const Text("추가"),
+                                           ),
+                                         ],
+                                       ),
+                                     );
+                                  },
+                                  icon: const Icon(Icons.person_add, size: 18, color: Color(0xFFF29D86)),
+                                  label: const Text("대상 추가", style: TextStyle(color: Color(0xFFF29D86))),
+                                ),
+                              ],
+                            ),
+                            const Divider(height: 20, thickness: 1),
+                            
+                            // 수신자 리스트
+                            Expanded(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.grey.withOpacity(0.2)),
+                                  borderRadius: BorderRadius.circular(8),
+                                  color: const Color(0xFFFAFAFA),
+                                ),
+                                child: ListView.separated(
+                                  padding: const EdgeInsets.all(8),
+                                  itemCount: _recipients.length,
+                                  separatorBuilder: (context, index) => const Divider(height: 1),
+                                  itemBuilder: (context, index) {
+                                    final recipient = _recipients[index];
+                                    final isPending = _pendingRecipients.contains(recipient);
+                                    // 발송 완료 여부는 _pendingRecipients에 없고 _isSending 이거나 _sentCount > 0 일때 판단
+                                    // 하지만 _pendingRecipients는 발송 전 리스트이므로, 여기에 없으면 발송 완료된 것으로 간주 (발송 시작 후)
+                                    final isSent = !isPending && (_sentCount > 0 || isSendingLocal); 
+
+                                    return ListTile(
+                                      dense: true,
+                                      leading: CircleAvatar(
+                                        backgroundColor: isSent ? Colors.green.withOpacity(0.1) : const Color(0xFFF29D86).withOpacity(0.1),
+                                        child: Icon(Icons.person, size: 20, color: isSent ? Colors.green : const Color(0xFFF29D86)),
+                                      ),
+                                      title: Text(recipient, style: TextStyle(color: isSent ? Colors.grey : Colors.black87, decoration: isSent ? TextDecoration.lineThrough : null)),
+                                      trailing: !isSendingLocal 
+                                        ? IconButton(
+                                            icon: const Icon(Icons.remove_circle_outline, size: 20, color: Colors.redAccent),
+                                            onPressed: () {
+                                              setDialogState(() {
+                                                _recipients.removeAt(index);
+                                                _pendingRecipients.remove(recipient);
+                                              });
+                                            },
+                                          )
+                                        : (isSent ? const Icon(Icons.check_circle, color: Colors.green, size: 20) : null),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ),
+                            
+                            if (isSendingLocal || _sentCount > 0) ...[
+                              const SizedBox(height: 16),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text("발송 진행률", style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                                      Text("$_sentCount / ${_recipients.length}", style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFFF29D86))),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 6),
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(4),
+                                    child: LinearProgressIndicator(
+                                      value: _recipients.isEmpty ? 0 : (_sentCount / _recipients.length),
+                                      backgroundColor: Colors.grey[200],
+                                      color: const Color(0xFFF29D86),
+                                      minHeight: 8,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                            
+                            const SizedBox(height: 16),
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFFF3E0),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: Colors.orange.withOpacity(0.3)),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 24),
+                                  const SizedBox(width: 12),
+                                  const Expanded(
+                                    child: Text(
+                                      "단시간 다량 발송은 스팸 정책에 의해 제한될 수 있습니다.\n안전을 위해 '자동 계속' 해제를 권장합니다.",
+                                      style: TextStyle(fontSize: 12, color: Color(0xFF8D6E63), height: 1.4),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    
+                    // Footer Actions
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[50],
+                        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
+                        border: Border(top: BorderSide(color: Colors.grey.withOpacity(0.2))),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          if (!isSendingLocal) ...[
+                            Row(
+                              children: [
+                                Checkbox(
+                                  value: _autoContinue,
+                                  activeColor: const Color(0xFFF29D86),
+                                  onChanged: (val) {
+                                    setDialogState(() => _autoContinue = val ?? false);
+                                  },
+                                ),
+                                GestureDetector(
+                                  onTap: () {
+                                    setDialogState(() => _autoContinue = !_autoContinue);
+                                  },
+                                  child: const Text("5건 발송 후 자동 계속", style: TextStyle(fontSize: 14)),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  style: TextButton.styleFrom(foregroundColor: Colors.grey),
+                                  child: const Text("닫기"),
+                                ),
+                                const SizedBox(width: 8),
+                                ElevatedButton.icon(
+                                  onPressed: () async {
+                                    setDialogState(() {
+                                       _isSending = true;
+                                       if (_pendingRecipients.isEmpty) {
+                                          _pendingRecipients = List.from(_recipients);
+                                          _sentCount = 0;
+                                       }
+                                    });
+
+                                    final database = ref.read(appDatabaseProvider);
+
+                                    // 실제 발송 루프
+                                    while (_pendingRecipients.isNotEmpty && _isSending) {
+                                      if (!mounted) break;
+                                      
+                                      int batchSize = 5;
+                                      if (_pendingRecipients.length < 5) batchSize = _pendingRecipients.length;
+                                      
+                                      final batch = _pendingRecipients.take(batchSize).toList();
+                                      
+                                      // 3초 딜레이
+                                      await Future.delayed(const Duration(milliseconds: 3000));
+                                      
+                                      if (mounted) {
+                                         // DB에 기록 저장
+                                         for (var item in batch) {
+                                            // Extract phone if possible
+                                            String? phone;
+                                            final phoneMatch = RegExp(r'\d{2,3}-\d{3,4}-\d{4}').firstMatch(item);
+                                            if (phoneMatch != null) {
+                                              phone = phoneMatch.group(0)?.replaceAll('-', '');
+                                            }
+
+                                            if (phone != null) {
+                                              // Try to find contact
+                                              // Phone in DB might be with or without dashes. 
+                                              // Let's assume DB stores plain numbers or we check both.
+                                              // Our dummy data has dashes.
+                                              // Let's try exact match first
+                                              var contact = await (database.select(database.contacts)..where((t) => t.phone.equals(phoneMatch!.group(0)!))).getSingleOrNull();
+                                              
+                                              // If not found, try without dashes? (Assuming dummy data has dashes)
+                                              
+                                              if (contact != null) {
+                                                await database.insertHistory(HistoryCompanion(
+                                                  contactId: Value(contact.id),
+                                                  type: const Value('SENT'),
+                                                  message: const Value('카드 발송'), 
+                                                  imagePath: Value(savedPath),
+                                                  eventDate: Value(DateTime.now()),
+                                                ));
+                                              } else {
+                                                // Create dummy contact for history test if it's one of our generated ones
+                                                if (item.contains("수신자")) {
+                                                   final newId = await database.insertContact(ContactsCompanion(
+                                                     name: Value(item.split('(')[0].trim()),
+                                                     phone: Value(phoneMatch!.group(0)!),
+                                                     groupTag: const Value('Test'),
+                                                   ));
+                                                   await database.insertHistory(HistoryCompanion(
+                                                      contactId: Value(newId),
+                                                      type: const Value('SENT'),
+                                                      message: const Value('카드 발송'), 
+                                                      imagePath: Value(savedPath),
+                                                      eventDate: Value(DateTime.now()),
+                                                    ));
+                                                }
+                                              }
+                                            }
+                                         }
+
+                                         setDialogState(() {
+                                           for (var item in batch) {
+                                             _pendingRecipients.remove(item);
+                                           }
+                                           _sentCount += batchSize;
+                                         });
+                                      }
+                                      
+                                      if (!_autoContinue && _pendingRecipients.isNotEmpty) {
+                                         setDialogState(() => _isSending = false);
+                                         break;
+                                      }
+                                    }
+                                    
+                                    if (_pendingRecipients.isEmpty && mounted && _isSending) {
+                                      setDialogState(() => _isSending = false);
+                                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("전체 발송 완료!")));
+                                    }
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFFF29D86),
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                  ),
+                                  icon: Icon(_sentCount > 0 && _pendingRecipients.isNotEmpty ? Icons.play_arrow : Icons.send, size: 18),
+                                  label: Text(_sentCount > 0 && _pendingRecipients.isNotEmpty ? "계속 발송" : "발송 시작"),
+                                ),
+                              ],
+                            ),
+                          ] else ...[
+                             SizedBox(
+                               width: double.infinity,
+                               child: OutlinedButton(
+                                 onPressed: () {
+                                    setDialogState(() => _isSending = false);
+                                 },
+                                 style: OutlinedButton.styleFrom(
+                                   foregroundColor: Colors.red,
+                                   side: const BorderSide(color: Colors.red),
+                                   padding: const EdgeInsets.symmetric(vertical: 16),
+                                 ),
+                                 child: const Text("발송 중지", style: TextStyle(fontWeight: FontWeight.bold)),
+                               ),
+                             ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    ).then((_) {
+       if (mounted) setState(() => _isSending = false);
+    });
   }
 
 
