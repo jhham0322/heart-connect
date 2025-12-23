@@ -2774,11 +2774,10 @@ class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
     _localRecipients = List.from(widget.recipients);
   }
 
-  /// 마우스 트래커 재진입 에러 방지를 위해 완전히 다른 이벤트 루프 턴에서 setState 실행
-  /// Future.delayed(Duration.zero)는 현재 이벤트 루프가 완전히 끝난 후 실행됨
+  /// 마우스 트래커 재진입 에러 방지: 충분한 딜레이로 마우스 이벤트 처리 완료 후 setState
   void _safeSetState(VoidCallback fn) {
     if (!mounted) return;
-    Future.delayed(Duration.zero, () {
+    Future.delayed(const Duration(milliseconds: 50), () {
       if (!mounted) return;
       setState(fn);
     });
@@ -2938,14 +2937,14 @@ class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
       }
       _sentCount += batchSize;
       
-      // UI 업데이트는 다음 프레임에서
-      WidgetsBinding.instance.addPostFrameCallback((_) {
+      // UI 업데이트 - 마우스 이벤트 처리 완료 후 실행되도록 딜레이 추가
+      await Future.delayed(const Duration(milliseconds: 50), () {
         if (mounted) setState(() {});
       });
 
       if (!_autoContinue && _pendingRecipients.isNotEmpty) {
         _isSending = false;
-        WidgetsBinding.instance.addPostFrameCallback((_) {
+        await Future.delayed(const Duration(milliseconds: 50), () {
           if (mounted) setState(() {});
         });
         break;
@@ -2954,7 +2953,7 @@ class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
     
     if (mounted && _isSending && _pendingRecipients.isEmpty) {
       _isSending = false;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
+      await Future.delayed(const Duration(milliseconds: 50), () {
         if (mounted) {
           setState(() {});
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("전체 발송 완료!")));
@@ -3081,6 +3080,8 @@ class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
                             color: const Color(0xFFFAFAFA),
                           ),
                           child: ListView.separated(
+                            // 발송 중에는 스크롤 비활성화하여 마우스 이벤트 충돌 방지
+                            physics: _isSending ? const NeverScrollableScrollPhysics() : null,
                             padding: const EdgeInsets.all(8),
                             itemCount: _localRecipients.length,
                             separatorBuilder: (context, index) => const Divider(height: 1),
