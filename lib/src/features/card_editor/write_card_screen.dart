@@ -2867,8 +2867,8 @@ class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
       _sentCount = 0;
     }
     
-    // 2. UI 업데이트는 다음 프레임에 예약
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    // 2. UI 업데이트 - 마우스 이벤트 처리 완료 후 실행되도록 딜레이 추가
+    Future.delayed(const Duration(milliseconds: 50), () {
       if (mounted) setState(() {});
     });
     
@@ -3240,8 +3240,12 @@ class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
                         ),
                         const SizedBox(width: 8),
                         // MouseTracker 에러 방지: ElevatedButton 대신 GestureDetector 사용
+                        // 중복 클릭 방지: _isSending 체크
                         GestureDetector(
-                          onTap: _startSending,
+                          onTap: () {
+                            if (_isSending) return; // 중복 클릭 방지
+                            _startSending();
+                          },
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                             decoration: BoxDecoration(
