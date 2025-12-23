@@ -14,3 +14,7 @@
 - [Feature] Added persistence of background transformation state (zoom/pan) in drafts.
 - [Fix] Resolved MouseTracker error by disabling the send button instead of removing it from the widget tree during sending.
 - [Fix] Resolved layout overflow in RecipientManagerDialog footer and improved UI responsiveness during sending.
+- [Fix] Fixed "Double Zoom" issue on saved/draft cards by ensuring original image is restored for editing while thumbnail is used for preview.
+- [Fix] Added safety checks in _loadCard and _loadDraft to reset transformation matrix if a thumbnail image is loaded.
+- [UI] Redesigned RecipientManagerDialog with modern styling (Gradient header, rounded corners, improved layout).
+- [Fix] Improved "Save Card" name generation to strictly use the first non-empty line.

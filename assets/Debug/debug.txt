@@ -1,8 +1,0 @@
-[2025-12-23] 발송 완료 시 결과 팝업 및 화면 종료 기능 추가
-- 기능: 발송 작업 완료 시 성공/실패 건수를 표시하는 팝업을 띄우고, 확인 버튼 클릭 시 발송 관리 다이얼로그까지 함께 종료되도록 구현.
-- 수정 파일: lib/src/features/card_editor/write_card_screen.dart
-- 상세 구현:
-  1. `_successCount`, `_failureCount` 멤버 변수 추가 및 `_startSending`에서 초기화.
-  2. `_executeSendingLoop` 내에서 `try-catch` 및 조건 분기를 통해 성공/실패 카운팅 로직 추가.
-  3. `_showResultPopup` 함수 구현: 성공/실패 건수 표시 및 확인 시 `Navigator.pop` 2회 호출 (팝업 닫기 + 다이얼로그 닫기).
-  4. 발송 루프 종료 시 `SnackBar` 대신 `_showResultPopup` 호출로 변경.
