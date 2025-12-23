@@ -2932,22 +2932,22 @@ class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
   Future<void> _startSending() async {
     if (_isSending) return;
     
-    // 1. 동기적으로 플래그만 먼저 설정 (이건 안전함)
-    _isSending = true;
-    if (_pendingRecipients.isEmpty) {
-      _pendingRecipients = List.from(_localRecipients);
-      _sentCount = 0;
-      _successCount = 0;
-      _failureCount = 0;
-    }
-    
-    // 2. UI 업데이트 - 마우스 이벤트 처리 완료 후 실행되도록 PostFrameCallback 사용
-    _safeSetState(() {});
-    
-    // 3. 실제 발송 로직은 별도의 마이크로태스크에서 실행
-    await Future.microtask(() async {
-      await _executeSendingLoop();
+    // 1. 즉시 상태 업데이트 (버튼 클릭 등 사용자 인터랙션에서는 setState 직접 호출이 반응성 좋음)
+    setState(() {
+      _isSending = true;
+      if (_pendingRecipients.isEmpty) {
+        _pendingRecipients = List.from(_localRecipients);
+        _sentCount = 0;
+        _successCount = 0;
+        _failureCount = 0;
+      }
     });
+    
+    // 2. 실제 발송 로직은 UI 렌더링 후 실행되도록 약간의 딜레이 부여
+    // 이렇게 하면 "발송 중..." 상태가 화면에 그려질 시간을 확보함
+    await Future.delayed(const Duration(milliseconds: 100));
+    
+    await _executeSendingLoop();
   }
   
   /// 실제 발송 루프 - UI 업데이트와 분리되어 실행됨
@@ -3275,43 +3275,58 @@ class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                    Row(
-                      children: [
-                        // MouseTracker 에러 방지: Checkbox 대신 GestureDetector 사용
-                        GestureDetector(
-                          onTap: _isSending ? null : () {
-                            _safeSetState(() => _autoContinue = !_autoContinue);
-                          },
-                          child: Container(
-                            width: 24,
-                            height: 24,
-                            margin: const EdgeInsets.symmetric(horizontal: 8),
-                            decoration: BoxDecoration(
-                              color: _autoContinue ? const Color(0xFFF29D86) : Colors.transparent,
-                              border: Border.all(
-                                color: _autoContinue ? const Color(0xFFF29D86) : Colors.grey,
-                                width: 2,
+                    Expanded(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // MouseTracker 에러 방지: Checkbox 대신 GestureDetector 사용
+                          GestureDetector(
+                            onTap: _isSending ? null : () {
+                              _safeSetState(() => _autoContinue = !_autoContinue);
+                            },
+                            child: Container(
+                              width: 24,
+                              height: 24,
+                              margin: const EdgeInsets.only(right: 8), // right margin only
+                              decoration: BoxDecoration(
+                                color: _autoContinue ? const Color(0xFFF29D86) : Colors.transparent,
+                                border: Border.all(
+                                  color: _autoContinue ? const Color(0xFFF29D86) : Colors.grey,
+                                  width: 2,
+                                ),
+                                borderRadius: BorderRadius.circular(4),
                               ),
-                              borderRadius: BorderRadius.circular(4),
+                              child: _autoContinue 
+                                ? const Icon(Icons.check, size: 16, color: Colors.white)
+                                : null,
                             ),
-                            child: _autoContinue 
-                              ? const Icon(Icons.check, size: 16, color: Colors.white)
-                              : null,
                           ),
-                        ),
-                        GestureDetector(
-                          onTap: _isSending ? null : () {
-                            _safeSetState(() => _autoContinue = !_autoContinue);
-                          },
-                          child: Text("5건 발송 후 자동 계속", style: TextStyle(fontSize: 14, color: _isSending ? Colors.grey : Colors.black)),
-                        ),
-                      ],
+                          Flexible(
+                            child: GestureDetector(
+                              onTap: _isSending ? null : () {
+                                _safeSetState(() => _autoContinue = !_autoContinue);
+                              },
+                              child: Text(
+                                "5건 발송 후 자동 계속", 
+                                style: TextStyle(fontSize: 14, color: _isSending ? Colors.grey : Colors.black),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
+                    const SizedBox(width: 8),
                     Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         TextButton(
                           onPressed: _isSending ? null : () => Navigator.pop(context),
-                          style: TextButton.styleFrom(foregroundColor: Colors.grey),
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.grey,
+                            minimumSize: Size.zero, // 최소 사이즈 제거
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), // 패딩 줄임
+                          ),
                           child: const Text("닫기"),
                         ),
                         const SizedBox(width: 8),
@@ -3322,7 +3337,7 @@ class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
                             _startSending();
                           },
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10), // 패딩 약간 줄임
                             decoration: BoxDecoration(
                               color: _isSending ? Colors.grey : const Color(0xFFF29D86),
                               borderRadius: BorderRadius.circular(8),
@@ -3332,22 +3347,25 @@ class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
                               children: [
                                 if (_isSending)
                                   const SizedBox(
-                                    width: 18, 
-                                    height: 18, 
+                                    width: 14, // 사이즈 줄임
+                                    height: 14, 
                                     child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)
                                   )
                                 else
                                   Icon(
                                     _sentCount > 0 && _pendingRecipients.isNotEmpty ? Icons.play_arrow : Icons.send, 
-                                    size: 18,
+                                    size: 16, // 사이즈 줄임
                                     color: Colors.white,
                                   ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  _isSending 
-                                    ? "발송 중..." 
-                                    : (_sentCount > 0 && _pendingRecipients.isNotEmpty ? "계속 발송" : "발송 시작"),
-                                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                const SizedBox(width: 6),
+                                Flexible( // 텍스트도 줄어들 수 있게
+                                  child: Text(
+                                    _isSending 
+                                      ? "발송 중..." 
+                                      : (_sentCount > 0 && _pendingRecipients.isNotEmpty ? "계속 발송" : "발송 시작"),
+                                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13), // 폰트 사이즈 조정
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
                               ],
                             ),
@@ -3360,12 +3378,12 @@ class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
                                _safeSetState(() => _isSending = false);
                              },
                              child: Container(
-                               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                                decoration: BoxDecoration(
                                  border: Border.all(color: Colors.red),
                                  borderRadius: BorderRadius.circular(8),
                                ),
-                               child: const Text("발송 중지", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red)),
+                               child: const Text("중지", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red, fontSize: 13)), // 텍스트 "발송 중지" -> "중지"로 단축
                              ),
                            ),
                         ],
