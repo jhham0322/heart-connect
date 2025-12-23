@@ -3163,12 +3163,27 @@ class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
                   if (!_isSending) ...[
                     Row(
                       children: [
-                        Checkbox(
-                          value: _autoContinue,
-                          activeColor: const Color(0xFFF29D86),
-                          onChanged: (val) {
-                            _safeSetState(() => _autoContinue = val ?? false);
+                        // MouseTracker 에러 방지: Checkbox 대신 GestureDetector 사용
+                        GestureDetector(
+                          onTap: () {
+                            _safeSetState(() => _autoContinue = !_autoContinue);
                           },
+                          child: Container(
+                            width: 24,
+                            height: 24,
+                            margin: const EdgeInsets.symmetric(horizontal: 8),
+                            decoration: BoxDecoration(
+                              color: _autoContinue ? const Color(0xFFF29D86) : Colors.transparent,
+                              border: Border.all(
+                                color: _autoContinue ? const Color(0xFFF29D86) : Colors.grey,
+                                width: 2,
+                              ),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: _autoContinue 
+                              ? const Icon(Icons.check, size: 16, color: Colors.white)
+                              : null,
+                          ),
                         ),
                         GestureDetector(
                           onTap: () {
@@ -3186,32 +3201,52 @@ class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
                           child: const Text("닫기"),
                         ),
                         const SizedBox(width: 8),
-                        ElevatedButton.icon(
-                          onPressed: _startSending,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFF29D86),
-                            foregroundColor: Colors.white,
+                        // MouseTracker 에러 방지: ElevatedButton 대신 GestureDetector 사용
+                        GestureDetector(
+                          onTap: _startSending,
+                          child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF29D86),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  _sentCount > 0 && _pendingRecipients.isNotEmpty ? Icons.play_arrow : Icons.send, 
+                                  size: 18,
+                                  color: Colors.white,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  _sentCount > 0 && _pendingRecipients.isNotEmpty ? "계속 발송" : "발송 시작",
+                                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            ),
                           ),
-                          icon: Icon(_sentCount > 0 && _pendingRecipients.isNotEmpty ? Icons.play_arrow : Icons.send, size: 18),
-                          label: Text(_sentCount > 0 && _pendingRecipients.isNotEmpty ? "계속 발송" : "발송 시작"),
                         ),
                       ],
                     ),
                   ] else ...[
+                     // MouseTracker 에러 방지: OutlinedButton 대신 GestureDetector 사용
                      SizedBox(
                        width: double.infinity,
-                       child: OutlinedButton(
-                         onPressed: () {
+                       child: GestureDetector(
+                         onTap: () {
                            _safeSetState(() => _isSending = false);
                          },
-                         style: OutlinedButton.styleFrom(
-                           foregroundColor: Colors.red,
-                           side: const BorderSide(color: Colors.red),
+                         child: Container(
                            padding: const EdgeInsets.symmetric(vertical: 16),
+                           decoration: BoxDecoration(
+                             border: Border.all(color: Colors.red),
+                             borderRadius: BorderRadius.circular(8),
+                           ),
+                           child: const Center(
+                             child: Text("발송 중지", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red)),
+                           ),
                          ),
-                         child: const Text("발송 중지", style: TextStyle(fontWeight: FontWeight.bold)),
                        ),
                      ),
                   ],
