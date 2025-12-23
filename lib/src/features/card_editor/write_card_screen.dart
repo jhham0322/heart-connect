@@ -3328,12 +3328,18 @@ class RecipientInputFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
     final cleaned = newValue.text.replaceAll(RegExp(r'[()]'), '');
+    
+    // 숫자가 없는 경우 (이름만 입력 중인 경우)
     final digitIndex = _firstDigitIndex(cleaned);
     if (digitIndex == -1) {
-      return newValue.copyWith(
-        text: cleaned,
-        selection: TextSelection.collapsed(offset: cleaned.length),
-      );
+      // 괄호 등 변경사항이 있다면 반영하되, 없다면 newValue 그대로 반환 (한글 조합 유지)
+      if (cleaned != newValue.text) {
+        return newValue.copyWith(
+          text: cleaned,
+          selection: TextSelection.collapsed(offset: cleaned.length),
+        );
+      }
+      return newValue; 
     }
 
     final name = cleaned.substring(0, digitIndex).trimRight();
@@ -3341,6 +3347,12 @@ class RecipientInputFormatter extends TextInputFormatter {
     final dashed = _formatPhoneDigits(digits);
 
     final resultText = name.isEmpty ? dashed : '$name $dashed';
+    
+    // 결과가 같다면 newValue 반환 (커서/조합 상태 보존)
+    if (resultText == newValue.text) {
+      return newValue;
+    }
+
     return newValue.copyWith(
       text: resultText,
       selection: TextSelection.collapsed(offset: resultText.length),
