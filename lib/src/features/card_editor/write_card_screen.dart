@@ -1424,6 +1424,20 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
               ],
             ),
           ),
+
+          // Undo/Redo Buttons (Fixed below Text Box button)
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 54, 
+            right: 16,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildSquareButton(Icons.undo, _undo),
+                const SizedBox(width: 8),
+                _buildSquareButton(Icons.redo, _redo),
+              ],
+            ),
+          ),
           
           // 하단 고정 전송 버튼 및 수신자 목록
           Positioned(
@@ -1502,6 +1516,28 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSquareButton(IconData icon, VoidCallback onTap) {
+    return Material(
+      color: Colors.white.withOpacity(0.9),
+      borderRadius: BorderRadius.circular(8),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.grey.withOpacity(0.3)),
+          ),
+          child: Center(
+            child: Icon(icon, size: 18, color: const Color(0xFF555555)),
+          ),
+        ),
       ),
     );
   }
@@ -1880,10 +1916,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
               ),
             ),
             const SizedBox(width: 6),
-            // Undo / Redo
-            _buildToolbarButton(icon: Icons.undo, onTap: _undo),
-            _buildToolbarButton(icon: Icons.redo, onTap: _redo),
-            const SizedBox(width: 6),
+
             // Bold
             _buildToolbarButton(icon: FontAwesomeIcons.bold, isActive: _isBold, onTap: _toggleBold),
             // Italic
