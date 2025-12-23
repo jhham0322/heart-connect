@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math' as math; // Import math with alias
 import 'dart:ui' as ui;
 import 'dart:typed_data';
 import '../ai/ai_service.dart';
@@ -24,7 +25,8 @@ import 'package:file_selector/file_selector.dart'; // File Picker
 
 class WriteCardScreen extends ConsumerStatefulWidget {
   final String? initialImage;
-  const WriteCardScreen({super.key, this.initialImage});
+  final Contact? initialContact; // Added initialContact parameter
+  const WriteCardScreen({super.key, this.initialImage, this.initialContact});
 
   @override
   ConsumerState<WriteCardScreen> createState() => _WriteCardScreenState();
@@ -69,6 +71,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
 
   // Text Box Style State (글상자 스타일)
   Color _boxColor = Colors.white;
+  String _boxShape = 'rounded'; // rounded, rectangle, circle, bubble, heart, star
   double _boxOpacity = 0.5; // 기본 투명도 약간 높임
   double _boxRadius = 12.0;
   bool _hasBorder = true;
@@ -198,6 +201,12 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     } else {
       print("[WriteCardScreen] InitialImage is NULL!");
     }
+
+    // Add initial contact if provided
+    if (widget.initialContact != null) {
+      _recipients.insert(0, "${widget.initialContact!.name} (${widget.initialContact!.phone})");
+    }
+
     _loadTemplateAssets();
     _loadFrameAssets();
     _loadDraft(); // Load full draft including footer
@@ -1330,12 +1339,13 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                               width: 200,
                               height: 120, // 높이 고정
                               padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
+                              decoration: ShapeDecoration(
                                 color: _boxColor.withOpacity(_boxOpacity),
-                                borderRadius: BorderRadius.circular(_boxRadius),
-                                border: _hasBorder 
-                                  ? Border.all(color: _borderColor.withOpacity(0.5), width: _borderWidth)
-                                  : null,
+                                shape: _getShapeBorder(
+                                  overrideSide: _hasBorder 
+                                    ? BorderSide(color: _borderColor.withOpacity(0.5), width: _borderWidth)
+                                    : BorderSide.none
+                                ),
                               ),
                               child: Stack(
                                 children: [
@@ -1385,6 +1395,71 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          // 0. 글상자 모양
+                          const Text("글상자 모양", style: TextStyle(fontWeight: FontWeight.w600)),
+                          const SizedBox(height: 10),
+                          SizedBox(
+                            height: 60,
+                            child: ListView(
+                              scrollDirection: Axis.horizontal,
+                              children: [
+                                {'type': 'rounded', 'icon': Icons.rounded_corner, 'label': '둥근'},
+                                {'type': 'rectangle', 'icon': Icons.crop_square, 'label': '직각'},
+                                {'type': 'beveled', 'icon': Icons.change_history, 'label': '모따기'},
+                                {'type': 'circle', 'icon': Icons.circle_outlined, 'label': '원형'},
+                                {'type': 'bubble_left', 'icon': Icons.chat_bubble_outline, 'label': '말풍선(좌)'},
+                                {'type': 'bubble_center', 'icon': Icons.chat_bubble_outline, 'label': '말풍선(중)'},
+                                {'type': 'bubble_right', 'icon': Icons.chat_bubble_outline, 'label': '말풍선(우)'},
+                                {'type': 'heart', 'icon': Icons.favorite_border, 'label': '하트'},
+                                {'type': 'star', 'icon': Icons.star_border, 'label': '별'},
+                                {'type': 'diamond', 'icon': FontAwesomeIcons.gem, 'label': '다이아'},
+                                {'type': 'hexagon', 'icon': FontAwesomeIcons.drawPolygon, 'label': '육각형'},
+                                {'type': 'cloud', 'icon': Icons.cloud_queue, 'label': '구름'},
+                              ].map((item) {
+                                final isSelected = _boxShape == item['type'] || (_boxShape == 'bubble' && item['type'] == 'bubble_right');
+                                
+                                Widget iconWidget = Icon(item['icon'] as IconData, color: isSelected ? const Color(0xFFF29D86) : Colors.grey, size: 24);
+                                
+                                // Flip icon for right bubble to show tail on right (assuming default is left)
+                                // or flip for left if default is right.
+                                // Material chat_bubble_outline has tail on bottom-left.
+                                if (item['type'] == 'bubble_right') {
+                                   iconWidget = Transform(
+                                     alignment: Alignment.center,
+                                     transform: Matrix4.rotationY(math.pi),
+                                     child: iconWidget,
+                                   );
+                                }
+                                
+                                return GestureDetector(
+                                  onTap: () {
+                                    setModalState(() => _boxShape = item['type'] as String);
+                                    this.setState(() {}); // 메인 화면 갱신
+                                    _saveDraft();
+                                  },
+                                  child: Container(
+                                    width: 60, 
+                                    margin: const EdgeInsets.only(right: 12),
+                                    decoration: BoxDecoration(
+                                      color: isSelected ? const Color(0xFFFFF0EB) : Colors.white,
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(color: isSelected ? const Color(0xFFF29D86) : Colors.grey[300]!),
+                                    ),
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        iconWidget,
+                                        const SizedBox(height: 4),
+                                        Text(item['label'] as String, style: TextStyle(fontSize: 10, color: isSelected ? const Color(0xFFF29D86) : Colors.grey)),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+
                           // 1. 배경 색상
                           const Text("배경 색상", style: TextStyle(fontWeight: FontWeight.w600)),
                           const SizedBox(height: 10),
@@ -1483,6 +1558,27 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                               ),
                             ],
                           ),
+                          if (_hasBorder) ...[
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text("테두리 두께", style: TextStyle(fontSize: 14, color: Colors.grey)),
+                                Text("${_borderWidth.toStringAsFixed(1)}px", style: const TextStyle(color: Colors.grey)),
+                              ],
+                            ),
+                            Slider(
+                              value: _borderWidth,
+                              min: 1.0,
+                              max: 10.0,
+                              activeColor: const Color(0xFFF29D86),
+                              inactiveColor: Colors.grey[200],
+                              onChanged: (val) {
+                                setModalState(() => _borderWidth = val);
+                                this.setState(() {});
+                                _saveDraft();
+                              },
+                            ),
+                          ],
 
                           const Divider(height: 30),
 
@@ -1985,6 +2081,83 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     );
   }
 
+  // Helper to get ShapeBorder for icon preview
+  OutlinedBorder _getShapeByType(String type, {Color color = Colors.grey}) {
+    final side = BorderSide(color: color, width: 1.5);
+    const radius = 8.0;
+    
+    switch (type) {
+      case 'rectangle':
+        return RoundedRectangleBorder(borderRadius: BorderRadius.zero, side: side);
+      case 'circle':
+        return EnclosingCircleBorder(side: side);
+      case 'bubble_right':
+        return BubbleBorder(side: side, borderRadius: radius, tailPosition: 'right');
+      case 'bubble_left':
+        return BubbleBorder(side: side, borderRadius: radius, tailPosition: 'left');
+      case 'bubble_center':
+        return BubbleBorder(side: side, borderRadius: radius, tailPosition: 'center');
+      case 'heart':
+        return HeartBorder(side: side);
+      case 'star':
+        return CustomStarBorder(side: side, points: 5, innerRadiusRatio: 0.4);
+      case 'diamond':
+        return DiamondBorder(side: side);
+      case 'hexagon':
+        return HexagonBorder(side: side);
+      case 'cloud':
+        return CloudBorder(side: side);
+      case 'beveled':
+        return BeveledRectangleBorder(borderRadius: BorderRadius.circular(radius), side: side);
+      case 'rounded':
+      default:
+        return RoundedRectangleBorder(borderRadius: BorderRadius.circular(radius), side: side);
+    }
+  }
+
+  // Helper to get ShapeBorder based on selection
+  OutlinedBorder _getShapeBorder({BorderSide? overrideSide}) {
+    BorderSide side;
+    if (overrideSide != null) {
+      side = overrideSide;
+    } else if (_selectedFrame == null && _hasBorder) {
+      side = BorderSide(color: _borderColor, width: _borderWidth);
+    } else if (!_isFooterActive && !_isCapturing) {
+      side = const BorderSide(color: Color(0xFFF29D86), width: 2.0);
+    } else {
+      side = BorderSide.none;
+    }
+
+    switch (_boxShape) {
+      case 'rectangle':
+        return RoundedRectangleBorder(borderRadius: BorderRadius.zero, side: side);
+      case 'circle':
+        return EnclosingCircleBorder(side: side);
+      case 'bubble': // default (right)
+      case 'bubble_right':
+        return BubbleBorder(side: side, borderRadius: _boxRadius, tailPosition: 'right');
+      case 'bubble_left':
+        return BubbleBorder(side: side, borderRadius: _boxRadius, tailPosition: 'left');
+      case 'bubble_center':
+        return BubbleBorder(side: side, borderRadius: _boxRadius, tailPosition: 'center');
+      case 'heart':
+        return HeartBorder(side: side);
+      case 'star':
+        return CustomStarBorder(side: side, points: 5, innerRadiusRatio: 0.4);
+      case 'diamond':
+        return DiamondBorder(side: side);
+      case 'hexagon':
+        return HexagonBorder(side: side);
+      case 'cloud':
+        return CloudBorder(side: side);
+      case 'beveled':
+        return BeveledRectangleBorder(borderRadius: BorderRadius.circular(_boxRadius), side: side);
+      case 'rounded':
+      default:
+        return RoundedRectangleBorder(borderRadius: BorderRadius.circular(_boxRadius), side: side);
+    }
+  }
+
   // Helper to load image securely (Asset, Network, or File)
   Widget _buildImage(String path, {BoxFit fit = BoxFit.cover, double? width, double? height}) {
     if (path.isEmpty) return Container(color: Colors.grey[200]);
@@ -2134,22 +2307,14 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                                   maxHeight: MediaQuery.of(context).size.width * 0.90 * 0.85,
                                 ),
                                 padding: const EdgeInsets.fromLTRB(20, 20, 30, 20),
-                                decoration: BoxDecoration(
+                                decoration: ShapeDecoration(
                                   // 프레임 이미지가 있으면 이미지 배경, 없으면 사용자 정의 스타일
                                   color: _selectedFrame != null ? null : _boxColor.withOpacity(_boxOpacity),
                                   image: _selectedFrame != null ? DecorationImage(
                                     image: AssetImage(_selectedFrame!),
                                     fit: BoxFit.fill, // 프레임은 늘려서 채움
                                   ) : null,
-                                  borderRadius: BorderRadius.circular(_selectedFrame != null ? 0 : _boxRadius),
-                                  border: _selectedFrame == null && _hasBorder
-                                      ? Border.all(
-                                          color: !_isFooterActive ? const Color(0xFFF29D86) : _borderColor.withOpacity(0.5), 
-                                          width: !_isFooterActive ? 2.0 : _borderWidth
-                                        )
-                                      : (!_isFooterActive && !_isCapturing) 
-                                          ? Border.all(color: const Color(0xFFF29D86), width: 2.0) // Visual indicator when active
-                                          : Border.all(color: Colors.transparent, width: 2.0),
+                                  shape: _getShapeBorder(),
                                 ),
                                 child: Stack(
                                   clipBehavior: Clip.none,
@@ -2770,6 +2935,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
       builder: (context) => RecipientManagerDialog(
         recipients: _recipients,
         savedPath: savedPath,
+        messageContent: _message,
         database: ref.read(appDatabaseProvider),
         onRecipientsChanged: (updatedList) {
           setState(() {
@@ -2940,6 +3106,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
 class RecipientManagerDialog extends StatefulWidget {
   final List<String> recipients;
   final String savedPath;
+  final String messageContent; // Added message content
   final AppDatabase database;
   final Function(List<String>) onRecipientsChanged;
 
@@ -2947,6 +3114,7 @@ class RecipientManagerDialog extends StatefulWidget {
     Key? key,
     required this.recipients,
     required this.savedPath,
+    required this.messageContent,
     required this.database,
     required this.onRecipientsChanged,
   }) : super(key: key);
@@ -3122,12 +3290,12 @@ class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
              
              if (contact != null) {
                await widget.database.insertHistory(HistoryCompanion(
-                 contactId: Value(contact.id),
-                 type: const Value('SENT'),
-                 message: const Value('카드 발송'), 
-                 imagePath: Value(widget.savedPath),
-                 eventDate: Value(DateTime.now()),
-               ));
+                  contactId: Value(contact.id),
+                  type: const Value('SENT'),
+                  message: Value(widget.messageContent), 
+                  imagePath: Value(widget.savedPath),
+                  eventDate: Value(DateTime.now()),
+                ));
                _successCount++;
              } else {
                // Create dummy contact for history test if it's one of our generated ones
@@ -3142,7 +3310,7 @@ class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
                   await widget.database.insertHistory(HistoryCompanion(
                      contactId: Value(newId),
                      type: const Value('SENT'),
-                     message: const Value('카드 발송'), 
+                     message: Value(widget.messageContent), 
                      imagePath: Value(widget.savedPath),
                      eventDate: Value(DateTime.now()),
                    ));
@@ -3614,4 +3782,494 @@ class RecipientInputFormatter extends TextInputFormatter {
     );
   }
 }
+
+class BubbleBorder extends OutlinedBorder {
+  final double arrowHeight;
+  final double arrowWidth;
+  final double borderRadius;
+  final String tailPosition; // 'left', 'center', 'right'
+
+  const BubbleBorder({
+    BorderSide side = BorderSide.none,
+    this.arrowHeight = 10.0,
+    this.arrowWidth = 15.0,
+    this.borderRadius = 12.0,
+    this.tailPosition = 'right',
+  }) : super(side: side);
+
+  @override
+  BubbleBorder copyWith({BorderSide? side, double? arrowHeight, double? arrowWidth, double? borderRadius, String? tailPosition}) {
+    return BubbleBorder(
+      side: side ?? this.side,
+      arrowHeight: arrowHeight ?? this.arrowHeight,
+      arrowWidth: arrowWidth ?? this.arrowWidth,
+      borderRadius: borderRadius ?? this.borderRadius,
+      tailPosition: tailPosition ?? this.tailPosition,
+    );
+  }
+
+  @override
+  Path getInnerPath(Rect rect, {TextDirection? textDirection}) {
+    return getOuterPath(rect.deflate(side.width), textDirection: textDirection);
+  }
+
+  @override
+  Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
+    // The main body rect (excluding the tail height at the bottom)
+    final r = Rect.fromPoints(rect.topLeft, rect.bottomRight - Offset(0, arrowHeight));
+    
+    double arrowX;
+    if (tailPosition == 'left') {
+      arrowX = r.left + 30.0;
+    } else if (tailPosition == 'center') {
+      arrowX = r.center.dx;
+    } else { // right
+      arrowX = r.right - 30.0;
+    }
+    
+    // Clamp arrowX to ensure it doesn't overlap with corners
+    final double minArrowX = r.left + borderRadius + arrowWidth / 2.0;
+    final double maxArrowX = r.right - borderRadius - arrowWidth / 2.0;
+    
+    if (minArrowX > maxArrowX) {
+        arrowX = r.center.dx;
+    } else {
+        arrowX = arrowX.clamp(minArrowX, maxArrowX);
+    }
+
+    final path = Path();
+    
+    // Top Left Corner
+    path.moveTo(r.left, r.top + borderRadius);
+    path.arcToPoint(Offset(r.left + borderRadius, r.top), radius: Radius.circular(borderRadius), clockwise: true);
+    
+    // Top Edge
+    path.lineTo(r.right - borderRadius, r.top);
+    
+    // Top Right Corner
+    path.arcToPoint(Offset(r.right, r.top + borderRadius), radius: Radius.circular(borderRadius), clockwise: true);
+    
+    // Right Edge
+    path.lineTo(r.right, r.bottom - borderRadius);
+    
+    // Bottom Right Corner
+    path.arcToPoint(Offset(r.right - borderRadius, r.bottom), radius: Radius.circular(borderRadius), clockwise: true);
+    
+    // Bottom Edge (Right to Left) with Tail
+    path.lineTo(arrowX + arrowWidth / 2, r.bottom);
+    path.lineTo(arrowX, r.bottom + arrowHeight); // Tail Tip
+    path.lineTo(arrowX - arrowWidth / 2, r.bottom);
+    path.lineTo(r.left + borderRadius, r.bottom);
+    
+    // Bottom Left Corner
+    path.arcToPoint(Offset(r.left, r.bottom - borderRadius), radius: Radius.circular(borderRadius), clockwise: true);
+    
+    // Left Edge
+    path.close(); 
+    
+    return path;
+  }
+
+  @override
+  void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {
+    if (side.style == BorderStyle.none) return;
+    final path = getOuterPath(rect, textDirection: textDirection);
+    canvas.drawPath(path, side.toPaint());
+  }
+
+  @override
+  ShapeBorder scale(double t) {
+    return BubbleBorder(
+      side: side.scale(t),
+      arrowHeight: arrowHeight * t,
+      arrowWidth: arrowWidth * t,
+      borderRadius: borderRadius * t,
+      tailPosition: tailPosition,
+    );
+  }
+}
+
+class HeartBorder extends OutlinedBorder {
+  const HeartBorder({BorderSide side = BorderSide.none}) : super(side: side);
+
+  @override
+  HeartBorder copyWith({BorderSide? side}) {
+    return HeartBorder(side: side ?? this.side);
+  }
+
+  @override
+  Path getInnerPath(Rect rect, {TextDirection? textDirection}) {
+    return getOuterPath(rect.deflate(side.width), textDirection: textDirection);
+  }
+
+  @override
+  Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
+    // 1:1 비율 유지하면서 텍스트(rect)를 포함하도록 크기 계산
+    // 텍스트 영역을 포함하는 가장 작은 1:1 사각형 계산 (단, width/height 중 큰 값 기준)
+    // 하지만 하트 모양 특성상 위쪽이 넓고 아래가 좁으므로 여백을 더 줘야 함
+    
+    // 단순하게 width, height 중 큰 값을 기준으로 정사각형을 만들고, 
+    // 그 정사각형을 rect의 중심에 배치
+    final double maxSize = math.max(rect.width, rect.height);
+    final double size = maxSize * 1.2; // 여백 확보
+    
+    final double width = size;
+    final double height = size; // 1:1 ratio
+    
+    // rect 중심
+    final double cx = rect.center.dx;
+    final double cy = rect.center.dy;
+    
+    final double x = cx - width / 2;
+    final double y = cy - height / 2;
+
+    final path = Path();
+    // Simplified Heart Shape
+    path.moveTo(x + width * 0.5, y + height * 0.25);
+    path.cubicTo(x + width * 0.1, y, x - width * 0.1, y + height * 0.5, x + width * 0.5, y + height);
+    path.moveTo(x + width * 0.5, y + height * 0.25);
+    path.cubicTo(x + width * 0.9, y, x + width * 1.1, y + height * 0.5, x + width * 0.5, y + height);
+    return path;
+  }
+
+  @override
+  void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {
+    if (side.style == BorderStyle.none) return;
+    final path = getOuterPath(rect, textDirection: textDirection);
+    canvas.drawPath(path, side.toPaint());
+  }
+
+  @override
+  ShapeBorder scale(double t) {
+    return HeartBorder(side: side.scale(t));
+  }
+}
+
+class CustomStarBorder extends OutlinedBorder {
+  final int points;
+  final double innerRadiusRatio;
+
+  const CustomStarBorder({
+    BorderSide side = BorderSide.none,
+    this.points = 5,
+    this.innerRadiusRatio = 0.4,
+  }) : super(side: side);
+
+  @override
+  CustomStarBorder copyWith({BorderSide? side, int? points, double? innerRadiusRatio}) {
+    return CustomStarBorder(
+      side: side ?? this.side,
+      points: points ?? this.points,
+      innerRadiusRatio: innerRadiusRatio ?? this.innerRadiusRatio,
+    );
+  }
+
+  @override
+  Path getInnerPath(Rect rect, {TextDirection? textDirection}) {
+    return getOuterPath(rect.deflate(side.width), textDirection: textDirection);
+  }
+
+  @override
+  Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
+    // 1:1 비율 유지
+    final double maxSize = math.max(rect.width, rect.height);
+    final double size = maxSize * 1.3; // 별은 뾰족하므로 여백 더 필요
+    
+    final double cx = rect.center.dx;
+    final double cy = rect.center.dy;
+    
+    // 외접원 반지름
+    final double outerRadius = size / 2;
+    final double innerRadius = outerRadius * innerRadiusRatio;
+
+    final path = Path();
+    double angle = -math.pi / 2;
+    final double angleStep = math.pi / points;
+
+    path.moveTo(
+      cx + outerRadius * math.cos(angle),
+      cy + outerRadius * math.sin(angle),
+    );
+
+    for (int i = 0; i < points; i++) {
+      angle += angleStep;
+      path.lineTo(
+        cx + innerRadius * math.cos(angle),
+        cy + innerRadius * math.sin(angle),
+      );
+      angle += angleStep;
+      path.lineTo(
+        cx + outerRadius * math.cos(angle),
+        cy + outerRadius * math.sin(angle),
+      );
+    }
+    path.close();
+    return path;
+  }
+
+  @override
+  void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {
+    if (side.style == BorderStyle.none) return;
+    final path = getOuterPath(rect, textDirection: textDirection);
+    canvas.drawPath(path, side.toPaint());
+  }
+
+  @override
+  ShapeBorder scale(double t) {
+    return CustomStarBorder(
+      side: side.scale(t),
+      points: points,
+      innerRadiusRatio: innerRadiusRatio,
+    );
+  }
+}
+
+class DiamondBorder extends OutlinedBorder {
+  const DiamondBorder({BorderSide side = BorderSide.none}) : super(side: side);
+
+  @override
+  DiamondBorder copyWith({BorderSide? side}) => DiamondBorder(side: side ?? this.side);
+
+  @override
+  Path getInnerPath(Rect rect, {TextDirection? textDirection}) => getOuterPath(rect.deflate(side.width), textDirection: textDirection);
+
+  @override
+  Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
+    // Gem (Diamond Icon) Shape
+    //   _______  (top width = 50% of full width)
+    //  /       \ (height = 30% of full height)
+    //  \       /
+    //   \     /  (height = 70% of full height)
+    //    \   /
+    //     \ /
+    
+    // 비율 유지하지 않고 꽉 채우되 Gem 모양으로 (사용자가 아이콘 같은 모양을 원함)
+    // 하지만 "아이콘의 비율을 그대로 만들어줘" 라고 했으므로 1:1 비율 유지 필요할 수도?
+    // "하트나 원형, 별 모양들은... 비율 유지" 라고 했고 다이아몬드는 별도 언급 없었으나 
+    // "다이아 아이콘 같은 모양" 이라 했으므로 비율 유지하는게 안전함.
+    
+    final double maxSize = math.max(rect.width, rect.height);
+    final double size = maxSize * 1.1;
+    
+    final double width = size;
+    final double height = size;
+    
+    final double cx = rect.center.dx;
+    final double cy = rect.center.dy;
+    
+    final double left = cx - width / 2;
+    final double right = cx + width / 2;
+    final double top = cy - height / 2;
+    final double bottom = cy + height / 2;
+    
+    // Gem shape
+    final double topFlatWidth = width * 0.5;
+    final double midY = top + height * 0.25; // 상단 25% 지점이 가장 넓은 부분
+    
+    final path = Path();
+    path.moveTo(cx - topFlatWidth / 2, top); // Top Left of flat top
+    path.lineTo(cx + topFlatWidth / 2, top); // Top Right of flat top
+    path.lineTo(right, midY); // Mid Right
+    path.lineTo(cx, bottom); // Bottom Point
+    path.lineTo(left, midY); // Mid Left
+    path.close();
+    
+    // Facet lines (optional detailed look) - let's keep outline simple for border
+    return path;
+  }
+
+  @override
+  void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {
+    if (side.style == BorderStyle.none) return;
+    canvas.drawPath(getOuterPath(rect, textDirection: textDirection), side.toPaint());
+  }
+
+  @override
+  ShapeBorder scale(double t) => DiamondBorder(side: side.scale(t));
+}
+
+class EnclosingCircleBorder extends OutlinedBorder {
+  const EnclosingCircleBorder({BorderSide side = BorderSide.none}) : super(side: side);
+
+  @override
+  EnclosingCircleBorder copyWith({BorderSide? side}) => EnclosingCircleBorder(side: side ?? this.side);
+
+  @override
+  Path getInnerPath(Rect rect, {TextDirection? textDirection}) => getOuterPath(rect.deflate(side.width), textDirection: textDirection);
+
+  @override
+  Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
+    // 텍스트를 모두 포함하는 가장 작은 원 (외접원)
+    // 직사각형의 외접원 지름 = sqrt(w^2 + h^2)
+    final double diameter = math.sqrt(rect.width * rect.width + rect.height * rect.height);
+    // 여백 약간 추가
+    final double size = diameter * 1.05;
+    
+    return Path()..addOval(Rect.fromCenter(center: rect.center, width: size, height: size));
+  }
+
+  @override
+  void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {
+    if (side.style == BorderStyle.none) return;
+    canvas.drawPath(getOuterPath(rect, textDirection: textDirection), side.toPaint());
+  }
+
+  @override
+  ShapeBorder scale(double t) => EnclosingCircleBorder(side: side.scale(t));
+}
+
+class HexagonBorder extends OutlinedBorder {
+  const HexagonBorder({BorderSide side = BorderSide.none}) : super(side: side);
+
+  @override
+  HexagonBorder copyWith({BorderSide? side}) => HexagonBorder(side: side ?? this.side);
+
+  @override
+  Path getInnerPath(Rect rect, {TextDirection? textDirection}) => getOuterPath(rect.deflate(side.width), textDirection: textDirection);
+
+  @override
+  Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
+    final path = Path();
+    final width = rect.width;
+    final height = rect.height;
+    final x = rect.left;
+    final y = rect.top;
+    
+    path.moveTo(x + width * 0.25, y);
+    path.lineTo(x + width * 0.75, y);
+    path.lineTo(x + width, y + height * 0.5);
+    path.lineTo(x + width * 0.75, y + height);
+    path.lineTo(x + width * 0.25, y + height);
+    path.lineTo(x, y + height * 0.5);
+    path.close();
+    return path;
+  }
+
+  @override
+  void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {
+    if (side.style == BorderStyle.none) return;
+    canvas.drawPath(getOuterPath(rect, textDirection: textDirection), side.toPaint());
+  }
+
+  @override
+  ShapeBorder scale(double t) => HexagonBorder(side: side.scale(t));
+}
+
+class CloudBorder extends OutlinedBorder {
+  const CloudBorder({BorderSide side = BorderSide.none}) : super(side: side);
+
+  @override
+  CloudBorder copyWith({BorderSide? side}) => CloudBorder(side: side ?? this.side);
+
+  @override
+  Path getInnerPath(Rect rect, {TextDirection? textDirection}) => getOuterPath(rect.deflate(side.width), textDirection: textDirection);
+
+  @override
+  Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
+    // Cloud Icon Shape: Flat bottom with rounded corners, and puffy top.
+    // Ensure 1.5 aspect ratio to look like the icon
+    final double maxSize = math.max(rect.width, rect.height);
+    // Expand size to ensure text fits
+    final double width = maxSize * 1.4;
+    final double height = width * 0.65; // Approx cloud aspect ratio
+    
+    final double cx = rect.center.dx;
+    final double cy = rect.center.dy;
+    
+    // Cloud bounding box
+    final double left = cx - width / 2;
+    final double right = cx + width / 2;
+    final double top = cy - height / 2;
+    final double bottom = cy + height / 2;
+    
+    // Geometry based on standard cloud icon
+    final double bottomFlatY = bottom;
+    final double sideRadius = height * 0.25; // Radius for bottom corners
+    final double topRadius = height * 0.35; // Radius for top puff
+    
+    final path = Path();
+    
+    // Start at bottom-left corner (start of flat line)
+    path.moveTo(left + sideRadius, bottomFlatY);
+    
+    // Bottom flat line to bottom-right corner
+    path.lineTo(right - sideRadius, bottomFlatY);
+    
+    // Bottom-right corner arc (up to side)
+    path.arcToPoint(Offset(right, bottomFlatY - sideRadius), radius: Radius.circular(sideRadius), clockwise: false);
+    
+    // Right Puff (Small)
+    // From (right, bottom-sideRadius) to somewhere up
+    // Actually, let's use circle centers for cleaner arcs.
+    
+    // Re-approaching with Circle Centers to emulate the icon exactly:
+    // 1. Bottom-Left Circle
+    // 2. Top-Left (Main) Circle
+    // 3. Top-Right Circle
+    // 4. Bottom-Right Circle
+    // But the icon has a FLAT bottom.
+    
+    // Improved Path Construction:
+    // 1. Flat bottom line
+    // 2. Right arc (semicircle-ish)
+    // 3. Top right arc
+    // 4. Top left arc
+    // 5. Left arc
+    
+    final double r1 = height * 0.25; // Side radius
+    final double r2 = height * 0.38; // Top big radius
+    
+    // Bottom Line
+    path.moveTo(left + r1, bottom);
+    path.lineTo(right - r1, bottom);
+    
+    // Right Arc (Small) - goes from bottom to mid-right
+    // Center at (right - r1, bottom - r1)
+    path.arcTo(
+      Rect.fromCircle(center: Offset(right - r1, bottom - r1), radius: r1),
+      math.pi / 2, // Start at bottom (90 deg)
+      -math.pi,    // Sweep 180 deg counter-clockwise to top
+      false
+    );
+    
+    // Now at (right - r1, bottom - 2*r1)
+    // We need a top puff.
+    // Let's create a big arc on top.
+    // Center roughly at (cx, top + r2)
+    // But let's just use cubicTo for smooth connection if circles don't align perfectly.
+    
+    // Alternative: explicit arcs for "Cloud Queue" look
+    // The icon is basically a big circle on top-left, smaller on top-right, connected to a flat rounded rect base.
+    
+    // Let's use a standard vector path approximation
+    final p = Path();
+    p.moveTo(left + width * 0.15, bottom);
+    p.lineTo(right - width * 0.15, bottom);
+    
+    // Right rounded corner + side
+    p.cubicTo(right + width * 0.05, bottom, right + width * 0.05, bottom - height * 0.5, right - width * 0.1, bottom - height * 0.5);
+    
+    // Top right bump
+    p.cubicTo(right, top, cx + width * 0.1, top, cx, top + height * 0.1);
+    
+    // Top left bump (Main)
+    p.cubicTo(cx - width * 0.1, top - height * 0.1, left, top, left + width * 0.1, bottom - height * 0.4);
+    
+    // Left side
+    p.cubicTo(left - width * 0.05, bottom - height * 0.4, left - width * 0.05, bottom, left + width * 0.15, bottom);
+    
+    p.close();
+    return p;
+  }
+
+  @override
+  void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {
+    if (side.style == BorderStyle.none) return;
+    canvas.drawPath(getOuterPath(rect, textDirection: textDirection), side.toPaint());
+  }
+
+  @override
+  ShapeBorder scale(double t) => CloudBorder(side: side.scale(t));
+}
+
 

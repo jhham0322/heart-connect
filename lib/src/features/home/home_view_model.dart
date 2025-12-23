@@ -103,8 +103,22 @@ class HomeViewModel extends StateNotifier<HomeState> {
         }
       }
     }
+
+    // B. App Database Holidays
+    final dbHolidays = await db.getHolidays(today, endCalc);
+    for (var h in dbHolidays) {
+      final diff = h.date.difference(today).inDays;
+      allEvents.add(EventItem(
+        title: h.name,
+        dateLabel: _getLabel(diff),
+        icon: FontAwesomeIcons.flag,
+        color: Colors.redAccent,
+        source: 'Public Holiday',
+        daysAway: diff,
+      ));
+    }
     
-    // B. Calendar Events
+    // C. Calendar Events
     final calEvents = await calendarService.getEvents(today, endCalc);
     
     for (var e in calEvents) {
@@ -112,26 +126,32 @@ class HomeViewModel extends StateNotifier<HomeState> {
        final diff = eDate.difference(today).inDays;
        if (diff < 0) continue; // Past
        
-       // Check for Merge
-       // If same day + Birthday + name match
+       // Check for Merge (Deduplication)
        bool merged = false;
-       if (e.type == 'Birthday') {
-           for (int i = 0; i < allEvents.length; i++) {
-               final existing = allEvents[i];
-               // Check if same day (diff) AND title similarity
-               if (existing.daysAway == diff && e.title.contains(existing.title)) {
-                   // MERGE
-                   allEvents[i] = EventItem(
-                       title: existing.title, // Keep simple name
-                       dateLabel: existing.dateLabel,
-                       icon: existing.icon,
-                       color: existing.color, // Keep Contact color preference
-                       source: 'Contacts + ${e.source}', // Combine sources
-                       daysAway: existing.daysAway
-                   );
-                   merged = true;
-                   break;
-               }
+       for (int i = 0; i < allEvents.length; i++) {
+           final existing = allEvents[i];
+           // If same day AND similar title, merge/skip
+           if (existing.daysAway == diff) {
+             // 1. Birthday Merge
+             if (e.type == 'Birthday' && e.title.contains(existing.title)) {
+                 allEvents[i] = EventItem(
+                     title: existing.title, 
+                     dateLabel: existing.dateLabel,
+                     icon: existing.icon,
+                     color: existing.color,
+                     source: 'Contacts + ${e.source}',
+                     daysAway: existing.daysAway
+                 );
+                 merged = true;
+                 break;
+             }
+             // 2. Holiday Merge (DB Holiday vs Calendar Holiday)
+             if ((existing.source == 'Public Holiday' || e.type == 'Holiday') && 
+                 (existing.title == e.title || e.title.contains(existing.title) || existing.title.contains(e.title))) {
+                 // Prefer DB Holiday title usually, or just skip adding this one
+                 merged = true;
+                 break; 
+             }
            }
        }
        

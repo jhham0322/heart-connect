@@ -18,3 +18,19 @@
 - [Fix] Added safety checks in _loadCard and _loadDraft to reset transformation matrix if a thumbnail image is loaded.
 - [UI] Redesigned RecipientManagerDialog with modern styling (Gradient header, rounded corners, improved layout).
 - [Fix] Improved "Save Card" name generation to strictly use the first non-empty line.
+- [UI] Moved send button position further down (bottom padding reduced from 20 to 5).
+- [Fix] Fixed issue where canceling and resuming sending would send duplicates and exceed total count; added immediate completion popup trigger.
+- [Feature] Added 'savedCardId' to History table to link sent messages with the specific saved card version.
+- [Fix] Added missing `dart:math` import in `write_card_screen.dart` to fix build errors (`pi`, `cos`, `sin` undefined).
+- [Feature] Updated border shapes: Diamond (gem style), Cloud (icon style), Bubble (tail positions: Left/Center/Right).
+- [Fix] Fixed BubbleBorder tail connection issue (continuous path).
+- [UI] Reverted Box Style Picker icons to simple Material icons (with flip for right bubble).
+- [Feature] Added border width control slider (visible only when border is enabled).
+- [Fix] Ensured Heart/Star/Circle shapes preserve aspect ratio and enclose all text.
+- [Fix] Redesigned CloudBorder to exactly match the Material Cloud Icon (flat bottom, rounded corners, puffy top).
+- [Feature] Implemented 'Memory Record' tab in ContactsScreen displaying a timeline-style list of recent interactions.
+- [Feature] Enhanced Memory Record UI: Added card thumbnail display, first-line message preview, distinct icons (Plane/Envelope), and conditional 'Write Card' button for received messages.
+- [Fix] Resolved compilation error `No named parameter with the name 'initialContact'` by updating `WriteCardScreen` to accept `initialContact` and pre-filling the recipient list.
+- [UI] Improved Memory Record icons: Used colored icons (Orange Paper Plane for Sent, Green Envelope for Received) for better distinction.
+- [Fix] Fixed message preview in Memory Record: Now correctly saves and displays the first line of the actual sent message instead of generic "Card Sent" text.
+- [Fix] Updated Memory Record to display the actual sent card snapshot as a thumbnail.

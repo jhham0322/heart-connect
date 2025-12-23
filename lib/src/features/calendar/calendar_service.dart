@@ -47,7 +47,7 @@ class CalendarService {
                              title: e.title ?? 'Event',
                              date: date,
                              type: _guessType(cal.name, e.title),
-                             source: cal.accountName ?? 'Phone'
+                             source: _determineSource(cal)
                           ));
                       }
                    }
@@ -68,6 +68,29 @@ class CalendarService {
     // Sort
     events.sort((a, b) => a.date.compareTo(b.date));
     return events;
+  }
+
+  String _determineSource(Calendar cal) {
+    // Try to determine source from account info
+    // Note: device_calendar 4.x Calendar object has 'accountName' and 'accountType' (Android)
+    final type = (cal.accountType ?? '').toLowerCase();
+    final name = (cal.accountName ?? '').toLowerCase();
+    final calName = (cal.name ?? '').toLowerCase();
+
+    if (type.contains('google') || name.contains('gmail') || calName.contains('google')) {
+      return 'Google Calendar';
+    }
+    if (type.contains('naver') || name.contains('naver') || calName.contains('naver')) {
+      return 'Naver Calendar';
+    }
+    if (type.contains('icloud') || calName.contains('icloud')) {
+      return 'iCloud';
+    }
+    if (name.contains('outlook') || name.contains('hotmail')) {
+      return 'Outlook';
+    }
+    
+    return cal.accountName ?? 'Phone';
   }
 
   String _guessType(String? calName, String? title) {

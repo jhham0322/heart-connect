@@ -27,6 +27,7 @@ class History extends Table {
   DateTimeColumn get eventDate => dateTime().withDefault(currentDateAndTime)();
   TextColumn get message => text().nullable()();
   TextColumn get imagePath => text().nullable()(); // Path to sent/received image
+  IntColumn get savedCardId => integer().nullable().references(SavedCards, #id)(); // Reference to SavedCard
 }
 
 // 3. Templates Table
@@ -61,17 +62,27 @@ class SavedCards extends Table {
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 }
 
-@DriftDatabase(tables: [Contacts, History, Templates, GalleryFavorites, SavedCards])
+// 6. Holidays Table
+class Holidays extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get name => text().withLength(min: 1, max: 50)();
+  DateTimeColumn get date => dateTime()(); // YYYY-MM-DD
+  TextColumn get type => text().withDefault(const Constant('Holiday'))(); // Holiday, Election, etc.
+  BoolColumn get isLunar => boolean().withDefault(const Constant(false))();
+}
+
+@DriftDatabase(tables: [Contacts, History, Templates, GalleryFavorites, SavedCards, Holidays])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 4; // Incremented for new table
+  int get schemaVersion => 6; // Incremented for Holidays table
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (Migrator m) async {
       await m.createAll();
+      await _insertDefaultHolidays(this);
     },
     onUpgrade: (Migrator m, int from, int to) async {
       if (from < 2) {
@@ -89,8 +100,46 @@ class AppDatabase extends _$AppDatabase {
         await m.addColumn(savedCards, savedCards.mainStyle);
         await m.addColumn(savedCards, savedCards.isFooterActive);
       }
+      if (from < 5) {
+        await m.addColumn(history, history.savedCardId);
+      }
+      if (from < 6) {
+        await m.createTable(holidays);
+        await _insertDefaultHolidays(this);
+      }
+    },
+    beforeOpen: (details) async {
+      final count = await select(holidays).get();
+      if (count.isEmpty) {
+        await _insertDefaultHolidays(this);
+      }
     },
   );
+
+  Future<void> _insertDefaultHolidays(AppDatabase db) async {
+    final list = [
+      HolidaysCompanion.insert(name: '신정', date: DateTime(2025, 1, 1), type: const Value('Holiday')),
+      HolidaysCompanion.insert(name: '설날 연휴', date: DateTime(2025, 1, 28), type: const Value('Holiday')),
+      HolidaysCompanion.insert(name: '설날', date: DateTime(2025, 1, 29), type: const Value('Holiday')),
+      HolidaysCompanion.insert(name: '설날 연휴', date: DateTime(2025, 1, 30), type: const Value('Holiday')),
+      HolidaysCompanion.insert(name: '삼일절', date: DateTime(2025, 3, 1), type: const Value('Holiday')),
+      HolidaysCompanion.insert(name: '어린이날', date: DateTime(2025, 5, 5), type: const Value('Holiday')),
+      HolidaysCompanion.insert(name: '부처님오신날', date: DateTime(2025, 5, 5), type: const Value('Holiday')),
+      HolidaysCompanion.insert(name: '대체공휴일(어린이날)', date: DateTime(2025, 5, 6), type: const Value('Holiday')),
+      HolidaysCompanion.insert(name: '현충일', date: DateTime(2025, 6, 6), type: const Value('Holiday')),
+      HolidaysCompanion.insert(name: '광복절', date: DateTime(2025, 8, 15), type: const Value('Holiday')),
+      HolidaysCompanion.insert(name: '추석 연휴', date: DateTime(2025, 10, 5), type: const Value('Holiday')),
+      HolidaysCompanion.insert(name: '추석', date: DateTime(2025, 10, 6), type: const Value('Holiday')),
+      HolidaysCompanion.insert(name: '추석 연휴', date: DateTime(2025, 10, 7), type: const Value('Holiday')),
+      HolidaysCompanion.insert(name: '개천절', date: DateTime(2025, 10, 3), type: const Value('Holiday')),
+      HolidaysCompanion.insert(name: '한글날', date: DateTime(2025, 10, 9), type: const Value('Holiday')),
+      HolidaysCompanion.insert(name: '성탄절', date: DateTime(2025, 12, 25), type: const Value('Holiday')),
+    ];
+    
+    await db.batch((batch) {
+      batch.insertAll(holidays, list);
+    });
+  }
 
   // READ: Contacts
   Future<List<Contact>> getAllContacts() => select(contacts).get();
@@ -108,7 +157,48 @@ class AppDatabase extends _$AppDatabase {
     return (select(history)..where((t) => t.contactId.equals(contactId))).get();
   }
   
+  // HOLIDAYS methods
+  Future<List<Holiday>> getHolidays(DateTime start, DateTime end) {
+    return (select(holidays)
+      ..where((t) => t.date.isBiggerOrEqualValue(start) & t.date.isSmallerOrEqualValue(end))
+    ).get();
+  }
+  
   Future<int> insertHistory(HistoryCompanion entry) => into(history).insert(entry);
+
+  Stream<List<RecentContactData>> watchRecentContacts() {
+    return customSelect(
+      'SELECT c.*, h.event_date as latest_date, h.message as latest_message, h.type as latest_type, h.image_path as card_thumbnail '
+      'FROM contacts c '
+      'JOIN history h ON h.contact_id = c.id '
+      'WHERE h.event_date = ('
+      '  SELECT MAX(h2.event_date) '
+      '  FROM history h2 '
+      '  WHERE h2.contact_id = c.id'
+      ') '
+      'ORDER BY latest_date DESC',
+      readsFrom: {contacts, history},
+    ).map((row) {
+      final contact = Contact(
+        id: row.read<int>('id'),
+        phone: row.read<String>('phone'),
+        name: row.read<String>('name'),
+        birthday: row.readNullable<DateTime>('birthday'),
+        groupTag: row.readNullable<String>('group_tag'),
+        lastSentDate: row.readNullable<DateTime>('last_sent_date'),
+        lastReceivedDate: row.readNullable<DateTime>('last_received_date'),
+        photoData: row.readNullable<String>('photo_data'),
+        isFavorite: row.read<bool>('is_favorite'),
+      );
+      return RecentContactData(
+        contact: contact,
+        lastDate: row.read<DateTime>('latest_date'),
+        lastMessage: row.readNullable<String>('latest_message'),
+        lastType: row.read<String>('latest_type'),
+        cardThumbnail: row.readNullable<String>('card_thumbnail'),
+      );
+    }).watch();
+  }
 
   // GALLERY FAVORITES
   Future<int> addGalleryFavorite(String path) {
@@ -149,5 +239,21 @@ LazyDatabase _openConnection() {
     final dbFolder = await getApplicationDocumentsDirectory();
     final file = File(p.join(dbFolder.path, 'db.sqlite'));
     return NativeDatabase.createInBackground(file, logStatements: true);
+  });
+}
+
+class RecentContactData {
+  final Contact contact;
+  final DateTime lastDate;
+  final String? lastMessage;
+  final String? lastType; // 'SENT' or 'RECEIVED'
+  final String? cardThumbnail;
+
+  RecentContactData({
+    required this.contact,
+    required this.lastDate,
+    this.lastMessage,
+    this.lastType,
+    this.cardThumbnail,
   });
 }
