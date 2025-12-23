@@ -2777,7 +2777,7 @@ class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
   /// 마우스 트래커 재진입 에러 방지: 충분한 딜레이로 마우스 이벤트 처리 완료 후 setState
   void _safeSetState(VoidCallback fn) {
     if (!mounted) return;
-    Future.delayed(const Duration(milliseconds: 50), () {
+    Future.delayed(const Duration(milliseconds: 100), () {
       if (!mounted) return;
       setState(fn);
     });
@@ -2868,7 +2868,7 @@ class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
     }
     
     // 2. UI 업데이트 - 마우스 이벤트 처리 완료 후 실행되도록 딜레이 추가
-    Future.delayed(const Duration(milliseconds: 50), () {
+    Future.delayed(const Duration(milliseconds: 100), () {
       if (mounted) setState(() {});
     });
     
@@ -2938,13 +2938,13 @@ class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
       _sentCount += batchSize;
       
       // UI 업데이트 - 마우스 이벤트 처리 완료 후 실행되도록 딜레이 추가
-      await Future.delayed(const Duration(milliseconds: 50), () {
+      await Future.delayed(const Duration(milliseconds: 100), () {
         if (mounted) setState(() {});
       });
 
       if (!_autoContinue && _pendingRecipients.isNotEmpty) {
         _isSending = false;
-        await Future.delayed(const Duration(milliseconds: 50), () {
+        await Future.delayed(const Duration(milliseconds: 100), () {
           if (mounted) setState(() {});
         });
         break;
@@ -2953,7 +2953,7 @@ class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
     
     if (mounted && _isSending && _pendingRecipients.isEmpty) {
       _isSending = false;
-      await Future.delayed(const Duration(milliseconds: 50), () {
+      await Future.delayed(const Duration(milliseconds: 100), () {
         if (mounted) {
           setState(() {});
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("전체 발송 완료!")));
@@ -2968,11 +2968,12 @@ class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
       backgroundColor: Colors.white,
       insetPadding: const EdgeInsets.all(10),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: SizedBox(
-        width: double.infinity,
-        height: MediaQuery.of(context).size.height * 0.85,
-        child: Column(
-          children: [
+      child: RepaintBoundary(
+        child: SizedBox(
+          width: double.infinity,
+          height: MediaQuery.of(context).size.height * 0.85,
+          child: Column(
+            children: [
             // Header
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -3297,6 +3298,7 @@ class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
             ),
           ],
         ),
+      ),
       ),
     );
   }
