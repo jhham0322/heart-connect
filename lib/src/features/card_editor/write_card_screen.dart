@@ -159,6 +159,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   
   // GlobalKey for RepaintBoundary (이미지 캡처용)
   final GlobalKey _captureKey = GlobalKey();
+  final GlobalKey _backgroundKey = GlobalKey(); // Background Zoom/Pan Capture Key
   final GlobalKey _textBoxKey = GlobalKey(); // Main Message Box Key
   final GlobalKey _footerKey = GlobalKey(); // Footer Box Key
 
@@ -248,6 +249,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
           'fontSize': _fontSize,
           'color': _defaultColor.value,
           'textAlign': _textAlign.name,
+          'transformMatrix': _transformationController.value.storage.toList(), // Save Zoom/Pan State
         },
         'isFooterActive': _isFooterActive,
         'timestamp': DateTime.now().toIso8601String(),
@@ -327,6 +329,11 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
             _textAlign = TextAlign.values.firstWhere((e) => e.name == main['textAlign'], orElse: () => TextAlign.center);
             _defaultTextAlign = _textAlign;
             
+            if (main['transformMatrix'] != null) {
+              final List<dynamic> matrixList = main['transformMatrix'];
+              _transformationController.value = Matrix4.fromList(matrixList.map((e) => (e as num).toDouble()).toList());
+            }
+
             // Reconstruct current style
             try {
               _currentStyle = GoogleFonts.getFont(_fontName, fontSize: _fontSize, color: _defaultColor);
@@ -886,7 +893,13 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   }
 
   Future<void> _saveCurrentCard() async {
-    final nameController = TextEditingController(text: _message.length > 20 ? "${_message.substring(0, 20)}..." : _message);
+    // 저장 이름 기본값 로직 수정: 첫 줄만 추출
+    String defaultName = "제목 없음";
+    if (_message.trim().isNotEmpty) {
+      defaultName = _message.trim().split('\n').first;
+      if (defaultName.length > 20) defaultName = "${defaultName.substring(0, 20)}...";
+    }
+    final nameController = TextEditingController(text: defaultName);
     
     final proceed = await showDialog<bool>(
       context: context,
@@ -905,6 +918,24 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
 
     if (proceed != true) return;
 
+    // 배경 이미지 확대/이동 상태가 있으면 캡처하여 저장
+    String imagePathToSave = _selectedImage;
+    if (_transformationController.value != Matrix4.identity()) {
+       final bgBytes = await _captureBackground();
+       if (bgBytes != null) {
+          try {
+            final directory = await getApplicationDocumentsDirectory();
+            final fileName = 'card_bg_${DateTime.now().millisecondsSinceEpoch}.png';
+            final savedPath = '${directory.path}/$fileName';
+            final file = File(savedPath);
+            await file.writeAsBytes(bgBytes);
+            imagePathToSave = savedPath;
+          } catch (e) {
+            print("배경 이미지 저장 실패: $e");
+          }
+       }
+    }
+
     final db = ref.read(appDatabaseProvider);
     final html = _convertToHtml(_message);
     final footerJson = jsonEncode(_footerQuillController.document.toDelta().toJson());
@@ -913,7 +944,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
       name: Value(nameController.text),
       htmlContent: html,
       footerText: Value(footerJson),
-      imagePath: Value(_selectedImage),
+      imagePath: Value(imagePathToSave),
     ));
     
     await _fetchAllSavedCards();
@@ -1465,6 +1496,20 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     }
   }
 
+  // 배경 이미지 캡처 (Zoom/Pan 상태 저장용)
+  Future<Uint8List?> _captureBackground() async {
+    try {
+      if (_backgroundKey.currentContext == null) return null;
+      RenderRepaintBoundary boundary = _backgroundKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+      ui.Image image = await boundary.toImage(pixelRatio: 3.0);
+      ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      return byteData?.buffer.asUint8List();
+    } catch (e) {
+      print("배경 캡처 오류: $e");
+      return null;
+    }
+  }
+
   // 이미지 캡처 함수 - 배경이미지 + 글씨박스 + 글씨만 캡처
   Future<Uint8List?> _captureCardImage() async {
     try {
@@ -1877,13 +1922,16 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                       children: [
                         // 1. Full Background Image with InteractiveViewer (Zoom/Pan Background Only)
                         Positioned.fill(
-                          child: InteractiveViewer(
-                            transformationController: _transformationController,
-                            minScale: 1.0,
-                            maxScale: 4.0,
-                            panEnabled: true,
-                            scaleEnabled: true,
-                            child: _buildImage(_selectedImage, fit: BoxFit.cover),
+                          child: RepaintBoundary(
+                            key: _backgroundKey,
+                            child: InteractiveViewer(
+                              transformationController: _transformationController,
+                              minScale: 1.0,
+                              maxScale: 4.0,
+                              panEnabled: true,
+                              scaleEnabled: true,
+                              child: _buildImage(_selectedImage, fit: BoxFit.cover),
+                            ),
                           ),
                         ),
 
@@ -2763,6 +2811,8 @@ class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
   List<String> _pendingRecipients = [];
   bool _isSending = false;
   int _sentCount = 0;
+  int _successCount = 0;
+  int _failureCount = 0;
   bool _autoContinue = false;
   
   // Local list to manage UI before sync
@@ -2774,13 +2824,33 @@ class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
     _localRecipients = List.from(widget.recipients);
   }
 
-  /// 마우스 트래커 재진입 에러 방지: 충분한 딜레이로 마우스 이벤트 처리 완료 후 setState
+  /// 마우스 트래커 재진입 에러 방지: addPostFrameCallback 사용
   void _safeSetState(VoidCallback fn) {
     if (!mounted) return;
-    Future.delayed(const Duration(milliseconds: 100), () {
-      if (!mounted) return;
-      setState(fn);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(fn);
     });
+  }
+
+  void _showResultPopup() {
+    if (!mounted) return;
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text("발송 완료"),
+        content: Text("성공: $_successCount건\n실패: $_failureCount건"),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context); // 팝업 닫기
+              if (mounted) Navigator.pop(context); // 발송 관리 화면 닫기
+            },
+            child: const Text("확인"),
+          ),
+        ],
+      ),
+    );
   }
 
   int _firstDigitIndex(String text) {
@@ -2836,7 +2906,9 @@ class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
   }
 
   void _updateRecipients() {
-    widget.onRecipientsChanged(_localRecipients);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) widget.onRecipientsChanged(_localRecipients);
+    });
   }
 
   void _addRecipient(String name) {
@@ -2865,12 +2937,12 @@ class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
     if (_pendingRecipients.isEmpty) {
       _pendingRecipients = List.from(_localRecipients);
       _sentCount = 0;
+      _successCount = 0;
+      _failureCount = 0;
     }
     
-    // 2. UI 업데이트 - 마우스 이벤트 처리 완료 후 실행되도록 딜레이 추가
-    Future.delayed(const Duration(milliseconds: 100), () {
-      if (mounted) setState(() {});
-    });
+    // 2. UI 업데이트 - 마우스 이벤트 처리 완료 후 실행되도록 PostFrameCallback 사용
+    _safeSetState(() {});
     
     // 3. 실제 발송 로직은 별도의 마이크로태스크에서 실행
     await Future.microtask(() async {
@@ -2894,38 +2966,49 @@ class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
 
       // Process batch (DB inserts)
       for (var item in batch) {
-         final dashedPhone = _extractDashedPhone(item);
-         if (dashedPhone != null) {
-           // Try to find contact
-           var contact = await (widget.database.select(widget.database.contacts)..where((t) => t.phone.equals(dashedPhone))).getSingleOrNull();
-           
-           if (contact != null) {
-             await widget.database.insertHistory(HistoryCompanion(
-               contactId: Value(contact.id),
-               type: const Value('SENT'),
-               message: const Value('카드 발송'), 
-               imagePath: Value(widget.savedPath),
-               eventDate: Value(DateTime.now()),
-             ));
-           } else {
-             // Create dummy contact for history test if it's one of our generated ones
-              if (item.contains("수신자")) {
-                final phoneStartIndex = item.indexOf(dashedPhone);
-                final dummyName = phoneStartIndex > 0 ? item.substring(0, phoneStartIndex).trimRight() : item;
-                final newId = await widget.database.insertContact(ContactsCompanion(
-                  name: Value(dummyName.trim()),
-                  phone: Value(dashedPhone),
-                  groupTag: const Value('Test'),
-                ));
-                await widget.database.insertHistory(HistoryCompanion(
-                   contactId: Value(newId),
-                   type: const Value('SENT'),
-                   message: const Value('카드 발송'), 
-                   imagePath: Value(widget.savedPath),
-                   eventDate: Value(DateTime.now()),
-                 ));
+         try {
+           final dashedPhone = _extractDashedPhone(item);
+           if (dashedPhone != null) {
+             // Try to find contact
+             var contact = await (widget.database.select(widget.database.contacts)..where((t) => t.phone.equals(dashedPhone))).getSingleOrNull();
+             
+             if (contact != null) {
+               await widget.database.insertHistory(HistoryCompanion(
+                 contactId: Value(contact.id),
+                 type: const Value('SENT'),
+                 message: const Value('카드 발송'), 
+                 imagePath: Value(widget.savedPath),
+                 eventDate: Value(DateTime.now()),
+               ));
+               _successCount++;
+             } else {
+               // Create dummy contact for history test if it's one of our generated ones
+                if (item.contains("수신자")) {
+                  final phoneStartIndex = item.indexOf(dashedPhone);
+                  final dummyName = phoneStartIndex > 0 ? item.substring(0, phoneStartIndex).trimRight() : item;
+                  final newId = await widget.database.insertContact(ContactsCompanion(
+                    name: Value(dummyName.trim()),
+                    phone: Value(dashedPhone),
+                    groupTag: const Value('Test'),
+                  ));
+                  await widget.database.insertHistory(HistoryCompanion(
+                     contactId: Value(newId),
+                     type: const Value('SENT'),
+                     message: const Value('카드 발송'), 
+                     imagePath: Value(widget.savedPath),
+                     eventDate: Value(DateTime.now()),
+                   ));
+                   _successCount++;
+               } else {
+                 _failureCount++;
+               }
              }
+           } else {
+             _failureCount++;
            }
+         } catch (e) {
+           _failureCount++;
+           debugPrint("Send Error: $e");
          }
       }
 
@@ -2937,27 +3020,20 @@ class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
       }
       _sentCount += batchSize;
       
-      // UI 업데이트 - 마우스 이벤트 처리 완료 후 실행되도록 딜레이 추가
-      await Future.delayed(const Duration(milliseconds: 100), () {
-        if (mounted) setState(() {});
-      });
+      // UI 업데이트
+      _safeSetState(() {});
 
       if (!_autoContinue && _pendingRecipients.isNotEmpty) {
         _isSending = false;
-        await Future.delayed(const Duration(milliseconds: 100), () {
-          if (mounted) setState(() {});
-        });
+        _safeSetState(() {});
         break;
       }
     }
     
     if (mounted && _isSending && _pendingRecipients.isEmpty) {
       _isSending = false;
-      await Future.delayed(const Duration(milliseconds: 100), () {
-        if (mounted) {
-          setState(() {});
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("전체 발송 완료!")));
-        }
+      _safeSetState(() {
+        _showResultPopup();
       });
     }
   }

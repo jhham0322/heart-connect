@@ -6,3 +6,9 @@
 - [Feature] Implemented local image selection using file_selector.
 - [Feature] Refactored card editor to allow background-only zoom/pan (1x-4x) using InteractiveViewer.
 - [Feature] Added boundary constraints for text box dragging to prevent it from moving outside the card area.
+- [System] Updated SVN to revision 14 as requested.
+- [Fix] Refactored _safeSetState to use addPostFrameCallback to permanently fix MouseTracker error during sending loop.
+- [Feature] Added result summary popup (success/failure counts) and auto-close dialog upon completion of sending.
+- [Fix] Fixed background image zoom/pan not being saved to thumbnail (implemented background capture).
+- [Fix] Corrected save name default value logic to use only the first line of text.
+- [Feature] Added persistence of background transformation state (zoom/pan) in drafts.
