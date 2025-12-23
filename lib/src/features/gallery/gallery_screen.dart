@@ -171,12 +171,12 @@ class _GalleryScreenState extends State<GalleryScreen> {
                   color: Colors.redAccent,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: Colors.white, width: 2),
-                  boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 4)],
+                  boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 4)],
                 ),
-                child: Row(
+                child: const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text("N", style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                    Text("N", style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
                   ],
                 ),
               ),
@@ -314,13 +314,13 @@ class _GalleryDetailScreenState extends ConsumerState<GalleryDetailScreen> {
                           ),
                         ),
                         if (isFavorite)
-                          Positioned(
+                          const Positioned(
                             top: 8,
                             left: 8,
                             child: Stack(
                               children: [
-                                const Icon(FontAwesomeIcons.solidHeart, color: Color(0xFFFF7043), size: 18),
-                                const Icon(FontAwesomeIcons.heart, color: Colors.white, size: 18),
+                                Icon(FontAwesomeIcons.solidHeart, color: Color(0xFFFF7043), size: 18),
+                                Icon(FontAwesomeIcons.heart, color: Colors.white, size: 18),
                               ],
                             ),
                           ),
@@ -407,10 +407,10 @@ class _FullScreenViewerState extends ConsumerState<_FullScreenViewer> {
               
               return IconButton(
                 icon: isFav
-                    ? Stack(
+                    ? const Stack(
                         children: [
-                          const Icon(FontAwesomeIcons.solidHeart, color: Color(0xFFFF7043), size: 24),
-                          const Icon(FontAwesomeIcons.heart, color: Colors.white, size: 24),
+                          Icon(FontAwesomeIcons.solidHeart, color: Color(0xFFFF7043), size: 24),
+                          Icon(FontAwesomeIcons.heart, color: Colors.white, size: 24),
                         ],
                       )
                     : const Icon(FontAwesomeIcons.heart, color: Colors.white, size: 24),

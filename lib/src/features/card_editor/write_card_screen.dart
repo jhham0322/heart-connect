@@ -20,6 +20,7 @@ import 'package:flutter_quill_extensions/flutter_quill_extensions.dart';
 import 'package:vsc_quill_delta_to_html/vsc_quill_delta_to_html.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:file_selector/file_selector.dart'; // File Picker
 
 class WriteCardScreen extends ConsumerStatefulWidget {
   final String? initialImage;
@@ -94,7 +95,8 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   Offset _footerOffset = Offset.zero; // Relative to bottom-right
 
   // 발송 관련 상태
-  final List<String> _recipients = [];
+  List<String> _recipients = []; // Modified to non-final to allow reassignment
+  final Set<String> _sentRecipients = {}; // 이미 발송된 수신자 목록
   List<String> _pendingRecipients = [];
   int _sentCount = 0;
   bool _autoContinue = false; // 자동 발송 여부
@@ -145,12 +147,20 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   late QuillController _quillController;
   late QuillController _footerQuillController;
   
+  // Document Default Styles (for HTML wrapper and "Apply All" logic)
+  String _defaultFontName = 'Great Vibes';
+  double _defaultFontSize = 24.0;
+  Color _defaultColor = const Color(0xFF1A1A1A);
+  TextAlign _defaultTextAlign = TextAlign.center;
+
   // Focus Node for Quill Editor
   final FocusNode _editorFocusNode = FocusNode();
   final FocusNode _footerFocusNode = FocusNode(); // 푸터 포커스 노드 추가
   
   // GlobalKey for RepaintBoundary (이미지 캡처용)
   final GlobalKey _captureKey = GlobalKey();
+  final GlobalKey _textBoxKey = GlobalKey(); // Main Message Box Key
+  final GlobalKey _footerKey = GlobalKey(); // Footer Box Key
 
   // List of saved cards for swipe navigation
   List<SavedCard> _savedCards = [];
@@ -189,16 +199,154 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     }
     _loadTemplateAssets();
     _loadFrameAssets();
-    _loadSavedFooter(); // Load saved footer
+    _loadDraft(); // Load full draft including footer
 
     // 더미 수신자 데이터 생성 (20명)
     for (int i = 1; i <= 20; i++) {
-      _recipients.add("수신자 $i (010-0000-${i.toString().padLeft(4, '0')})");
+      _recipients.add("수신자 $i 010-0000-${i.toString().padLeft(4, '0')}");
     }
     _pendingRecipients = List.from(_recipients);
   }
   
-  // Load footer from SharedPreferences
+  // --- Draft Persistence ---
+
+  Future<void> _saveDraft() async {
+    if (!mounted) return;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final draftData = {
+        'message': _quillController.document.toDelta().toJson(),
+        'footer': _footerQuillController.document.toDelta().toJson(),
+        'image': _selectedImage,
+        'frame': _selectedFrame,
+        'isFrameMode': _isFrameMode,
+        'boxStyle': {
+          'color': _boxColor.value,
+          'opacity': _boxOpacity,
+          'radius': _boxRadius,
+          'hasBorder': _hasBorder,
+          'borderColor': _borderColor.value,
+          'borderWidth': _borderWidth,
+        },
+        'footerStyle': {
+          'bgColor': _footerBgColor.value,
+          'bgOpacity': _footerBgOpacity,
+          'radius': _footerRadius,
+          'color': _footerColor.value,
+          'fontSize': _footerFontSize,
+          'font': _footerFont,
+          'isBold': _isFooterBold,
+          'isItalic': _isFooterItalic,
+          'isUnderline': _isFooterUnderline,
+          'offsetX': _footerOffset.dx,
+          'offsetY': _footerOffset.dy,
+        },
+        'mainStyle': {
+          'dragOffsetX': _dragOffset.dx,
+          'dragOffsetY': _dragOffset.dy,
+          'fontName': _fontName,
+          'fontSize': _fontSize,
+          'color': _defaultColor.value,
+          'textAlign': _textAlign.name,
+        },
+        'isFooterActive': _isFooterActive,
+        'timestamp': DateTime.now().toIso8601String(),
+      };
+      
+      await prefs.setString('card_draft_v2', jsonEncode(draftData));
+      // print("[Draft] Saved draft successfully.");
+    } catch (e) {
+      print("[Draft] Error saving draft: $e");
+    }
+  }
+
+  Future<void> _loadDraft() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final draftJson = prefs.getString('card_draft_v2');
+      
+      if (draftJson == null || draftJson.isEmpty) {
+        _loadSavedFooter(); // Fallback to old footer save if no full draft
+        return;
+      }
+
+      final data = jsonDecode(draftJson) as Map<String, dynamic>;
+      
+      if (mounted) {
+        setState(() {
+          // Restore simple values
+          if (data['image'] != null) _selectedImage = data['image'];
+          _selectedFrame = data['frame'];
+          _isFrameMode = data['isFrameMode'] ?? false;
+          _isFooterActive = data['isFooterActive'] ?? false;
+
+          // Restore Quill
+          if (data['message'] != null) {
+            _quillController.document = Document.fromJson(data['message']);
+            // Update plain text message for length check
+            _message = _quillController.document.toPlainText().trim();
+          }
+          if (data['footer'] != null) {
+            _footerQuillController.document = Document.fromJson(data['footer']);
+            _footerText = _footerQuillController.document.toPlainText().trim();
+          }
+
+          // Restore Box Style
+          final box = data['boxStyle'];
+          if (box != null) {
+            _boxColor = Color(box['color']);
+            _boxOpacity = box['opacity'];
+            _boxRadius = box['radius'];
+            _hasBorder = box['hasBorder'];
+            _borderColor = Color(box['borderColor']);
+            _borderWidth = box['borderWidth'];
+          }
+
+          // Restore Footer Style
+          final footer = data['footerStyle'];
+          if (footer != null) {
+            _footerBgColor = Color(footer['bgColor']);
+            _footerBgOpacity = footer['bgOpacity'];
+            _footerRadius = footer['radius'];
+            _footerColor = Color(footer['color']);
+            _footerFontSize = footer['fontSize'];
+            _footerFont = footer['font'];
+            _isFooterBold = footer['isBold'];
+            _isFooterItalic = footer['isItalic'];
+            _isFooterUnderline = footer['isUnderline'];
+            _footerOffset = Offset(footer['offsetX'], footer['offsetY']);
+          }
+
+          // Restore Main Style
+          final main = data['mainStyle'];
+          if (main != null) {
+            _dragOffset = Offset(main['dragOffsetX'], main['dragOffsetY']);
+            _fontName = main['fontName'];
+            _fontSize = main['fontSize'];
+            _defaultColor = Color(main['color']);
+            _textAlign = TextAlign.values.firstWhere((e) => e.name == main['textAlign'], orElse: () => TextAlign.center);
+            _defaultTextAlign = _textAlign;
+            
+            // Reconstruct current style
+            try {
+              _currentStyle = GoogleFonts.getFont(_fontName, fontSize: _fontSize, color: _defaultColor);
+            } catch (e) {
+              _currentStyle = GoogleFonts.greatVibes(fontSize: _fontSize, color: _defaultColor);
+            }
+          }
+        });
+        
+        // Ensure UI reflects state
+        _updateToolbarState();
+      }
+    } catch (e) {
+      print("[Draft] Error loading draft: $e");
+      _loadSavedFooter();
+    }
+  }
+
+
+  // Fallback for legacy footer save
   Future<void> _loadSavedFooter() async {
     final prefs = await SharedPreferences.getInstance();
     final savedFooter = prefs.getString('footer_text');
@@ -293,16 +441,14 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     );
   }
   
-  // Save footer to SharedPreferences
-  Future<void> _saveFooter(String value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('footer_text', value);
-  }
+  // _saveFooter removed in favor of _saveDraft
+
 
   void _onQuillChanged() {
     setState(() {
       _message = _quillController.document.toPlainText().trim();
     });
+    _saveDraft();
   }
 
   @override
@@ -334,7 +480,9 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   }
 
   void _onFocusChanged() {
-    if (mounted) {
+    // Prevent setState during build/layout by deferring to post frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       setState(() {
          // Focus change tracking
          if (_footerFocusNode.hasFocus) {
@@ -348,27 +496,30 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
          }
          _updateToolbarState();
       });
-    }
+    });
   }
 
   QuillController get _activeController => _isFooterActive ? _footerQuillController : _quillController;
 
   void _onEditorChanged() {
-    _onQuillChanged();
-    _updateToolbarState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _updateToolbarState();
+      _onQuillChanged();
+    });
   }
 
   void _onFooterEditorChanged() {
-    setState(() {
-      // Delta를 일반 텍스트로 변환하여 저장 (미리보기 등에서 사용)
-      // 실제 저장은 Delta JSON으로 해야 스타일이 유지됨
-      _footerText = _footerQuillController.document.toPlainText().trim();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _updateToolbarState();
+      setState(() {
+        // Delta를 일반 텍스트로 변환하여 저장 (미리보기 등에서 사용)
+        _footerText = _footerQuillController.document.toPlainText().trim();
+      });
+      // 전체 상태 저장
+      _saveDraft();
     });
-    // JSON 저장
-    final jsonStr = jsonEncode(_footerQuillController.document.toDelta().toJson());
-    _saveFooter(jsonStr);
-    
-    _updateToolbarState();
   }
 
   // 커서 위치나 선택 영역 변경 시 툴바 상태 업데이트
@@ -432,6 +583,22 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
+    }
+  }
+
+  Future<void> _pickImage() async {
+    const XTypeGroup typeGroup = XTypeGroup(
+      label: 'images',
+      extensions: <String>['jpg', 'jpeg', 'png', 'gif'],
+    );
+    final XFile? file = await openFile(acceptedTypeGroups: <XTypeGroup>[typeGroup]);
+    if (file != null) {
+      setState(() {
+        _selectedImage = file.path.replaceAll('\\', '/');
+        // Reset zoom when new image loaded
+        _transformationController.value = Matrix4.identity();
+        _saveDraft();
+      });
     }
   }
 
@@ -501,11 +668,11 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     String html = converter.convert();
 
     // Apply custom styles not directly handled by Quill (like text alignment for the whole block)
-    final colorHex = (_currentStyle.color ?? Colors.black).value.toRadixString(16).padLeft(8, '0').substring(2);
-    final align = _textAlign.name;
-    // Use _fontName instead of _currentStyle.fontFamily to ensure canonical name is saved
-    final fontFamily = _fontName; 
-    final fontSize = _currentStyle.fontSize ?? 22.0;
+    final colorHex = _defaultColor.value.toRadixString(16).padLeft(8, '0').substring(2);
+    final align = _defaultTextAlign.name;
+    // Use _defaultFontName to ensure canonical name is saved as wrapper
+    final fontFamily = _defaultFontName; 
+    final fontSize = _defaultFontSize;
     
     // Wrap the generated HTML in a div with overall styles
     return '<div style="font-family: \'$fontFamily\'; font-size: ${fontSize}px; color: #$colorHex; text-align: $align;">$html</div>';
@@ -536,6 +703,12 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
       final double fontSize = double.tryParse(sizeMatch?.group(1) ?? '24.0') ?? 24.0;
       final Color textColor = Color(int.parse("FF${colorMatch?.group(1) ?? '1A1A1A'}", radix: 16));
       
+      // Set Defaults
+      _defaultFontName = fontFamily;
+      _defaultFontSize = fontSize;
+      _defaultColor = textColor;
+
+      // Set Toolbar UI State
       _fontName = fontFamily;
       _fontSize = fontSize;
       try {
@@ -549,7 +722,9 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
 
       if (alignMatch != null) {
         final alignStr = alignMatch.group(1);
-        _textAlign = TextAlign.values.firstWhere((e) => e.name == alignStr, orElse: () => TextAlign.center);
+        final align = TextAlign.values.firstWhere((e) => e.name == alignStr, orElse: () => TextAlign.center);
+        _defaultTextAlign = align;
+        _textAlign = align;
       }
       
       _message = plainText;
@@ -601,45 +776,77 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
       default:
         alignAttr = Attribute.leftAlignment;
     }
-    controller.formatSelection(alignAttr);
+    
+    // Apply Logic:
+    // If No Selection -> Apply to Whole Doc & Update Defaults
+    // If Selection -> Apply to Selection Only (Mixed alignment in one card is rare but possible)
+    if (controller.selection.isCollapsed) {
+       final len = controller.document.length;
+       controller.formatText(0, len, alignAttr);
+       setState(() {
+         _defaultTextAlign = align;
+         _textAlign = align;
+       });
+    } else {
+       controller.formatSelection(alignAttr);
+       // Do not update defaults
+    }
+    _saveDraft();
   }
 
   // 폰트 변경
   void _applyFont(String fontName, {bool? isFooterOverride}) {
     final isFooter = isFooterOverride ?? _isFooterActive;
     final controller = isFooter ? _footerQuillController : _quillController;
-    controller.formatSelection(Attribute.fromKeyValue('font', fontName));
     
-    setState(() {
-      if (isFooter) {
-         _footerFont = fontName;
-      } else {
-         _fontName = fontName;
-         // Update current style for non-rich text parts if any
-         try {
-            _currentStyle = GoogleFonts.getFont(fontName, fontSize: _fontSize, color: _currentStyle.color);
-         } catch (e) {
-            // Fallback
-            _currentStyle = GoogleFonts.greatVibes(fontSize: _fontSize, color: _currentStyle.color);
-         }
-      }
-    });
+    // Logic: No Selection -> Apply All & Update Default. Selection -> Apply Selection Only.
+    if (controller.selection.isCollapsed) {
+       final len = controller.document.length;
+       controller.formatText(0, len, Attribute.fromKeyValue('font', fontName));
+       
+       setState(() {
+          if (isFooter) {
+             _footerFont = fontName;
+          } else {
+             _defaultFontName = fontName;
+             _fontName = fontName;
+             try {
+                _currentStyle = GoogleFonts.getFont(fontName, fontSize: _fontSize, color: _currentStyle.color);
+             } catch (e) {
+                _currentStyle = GoogleFonts.greatVibes(fontSize: _fontSize, color: _currentStyle.color);
+             }
+          }
+       });
+    } else {
+       controller.formatSelection(Attribute.fromKeyValue('font', fontName));
+       // For selection, we rely on _updateToolbarState to update UI (_fontName), 
+       // but we do NOT update _defaultFontName.
+    }
+    _saveDraft();
   }
   
   // 폰트 사이즈 변경
   void _applyFontSize(double size, {bool? isFooterOverride}) {
     final isFooter = isFooterOverride ?? _isFooterActive;
     final controller = isFooter ? _footerQuillController : _quillController;
-    controller.formatSelection(Attribute.fromKeyValue('size', size.toString()));
     
-    setState(() {
-      if (isFooter) {
-         _footerFontSize = size;
-      } else {
-         _fontSize = size;
-         _currentStyle = _currentStyle.copyWith(fontSize: size);
-      }
-    });
+    if (controller.selection.isCollapsed) {
+       final len = controller.document.length;
+       controller.formatText(0, len, Attribute.fromKeyValue('size', size.toString()));
+       
+       setState(() {
+          if (isFooter) {
+             _footerFontSize = size;
+          } else {
+             _defaultFontSize = size;
+             _fontSize = size;
+             _currentStyle = _currentStyle.copyWith(fontSize: size);
+          }
+       });
+    } else {
+       controller.formatSelection(Attribute.fromKeyValue('size', size.toString()));
+    }
+    _saveDraft();
   }
   
   // 색상 변경
@@ -647,15 +854,23 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     final isFooter = isFooterOverride ?? _isFooterActive;
     final controller = isFooter ? _footerQuillController : _quillController;
     final hex = '#${color.value.toRadixString(16).padLeft(8, '0').substring(2).toUpperCase()}';
-    controller.formatSelection(Attribute.fromKeyValue('color', hex));
     
-    setState(() {
-      if (isFooter) {
-         _footerColor = color;
-      } else {
-         _currentStyle = _currentStyle.copyWith(color: color);
-      }
-    });
+    if (controller.selection.isCollapsed) {
+       final len = controller.document.length;
+       controller.formatText(0, len, Attribute.fromKeyValue('color', hex));
+       
+       setState(() {
+          if (isFooter) {
+             _footerColor = color;
+          } else {
+             _defaultColor = color;
+             _currentStyle = _currentStyle.copyWith(color: color);
+          }
+       });
+    } else {
+       controller.formatSelection(Attribute.fromKeyValue('color', hex));
+    }
+    _saveDraft();
   }
 
   // 되돌리기
@@ -1008,6 +1223,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                                   onTap: () {
                                     setModalState(() => _boxColor = color);
                                     this.setState(() {}); // 메인 화면 갱신
+                                    _saveDraft();
                                   },
                                   child: Container(
                                     width: 40, height: 40,
@@ -1046,6 +1262,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                             onChanged: (val) {
                               setModalState(() => _boxOpacity = val);
                               this.setState(() {});
+                              _saveDraft();
                             },
                           ),
                           
@@ -1066,6 +1283,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                             onChanged: (val) {
                               setModalState(() => _boxRadius = val);
                               this.setState(() {});
+                              _saveDraft();
                             },
                           ),
 
@@ -1081,6 +1299,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                                 onChanged: (val) {
                                   setModalState(() => _hasBorder = val);
                                   this.setState(() {});
+                                  _saveDraft();
                                 },
                               ),
                             ],
@@ -1127,6 +1346,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                                   onTap: () {
                                     setModalState(() => _footerBgColor = color);
                                     this.setState(() {}); // 메인 화면 갱신
+                                    _saveDraft();
                                   },
                                   child: Container(
                                     width: 40, height: 40,
@@ -1165,6 +1385,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                             onChanged: (val) {
                               setModalState(() => _footerBgOpacity = val);
                               this.setState(() {});
+                              _saveDraft();
                             },
                           ),
 
@@ -1185,6 +1406,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                             onChanged: (val) {
                               setModalState(() => _footerRadius = val);
                               this.setState(() {});
+                              _saveDraft();
                             },
                           ),
                           
@@ -1645,40 +1867,73 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
               onHorizontalDragEnd: _handleSwipeNavigation,
               onDoubleTapDown: (details) => _doubleTapDetails = details,
               onDoubleTap: _handleDoubleTap,
-              child: InteractiveViewer(
-                transformationController: _transformationController,
-                minScale: 1.0,
-                maxScale: 4.0,
-                panEnabled: true,
-                scaleEnabled: true,
-                child: Stack(
-                  children: [
-                    // RepaintBoundary로 캡처 영역 감싸기 (버튼 제외)
-                    RepaintBoundary(
-                      key: _captureKey,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      // 1. Full Background Image
-                      Positioned.fill(
-                        child: _buildImage(_selectedImage, fit: BoxFit.cover),
-                      ),
+              child: Stack(
+                children: [
+                  // RepaintBoundary로 캡처 영역 감싸기 (버튼 제외)
+                  RepaintBoundary(
+                    key: _captureKey,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        // 1. Full Background Image with InteractiveViewer (Zoom/Pan Background Only)
+                        Positioned.fill(
+                          child: InteractiveViewer(
+                            transformationController: _transformationController,
+                            minScale: 1.0,
+                            maxScale: 4.0,
+                            panEnabled: true,
+                            scaleEnabled: true,
+                            child: _buildImage(_selectedImage, fit: BoxFit.cover),
+                          ),
+                        ),
 
-                      // 2. Draggable Text Area (위치 유지됨)
-                      // 이미지가 짤리지 않게 글자 수정 아이콘을 배경 이미지 크기에 맞게 내리라는 요청에 따라
-                      // Positioned.fill 대신 중앙에 배치하거나, 이미지 크기에 맞춤
-                      Positioned.fill(
-                        child: Center(
-                          child: Transform.translate(
-                            offset: _dragOffset,
-                            child: GestureDetector(
-                              onPanUpdate: (details) {
-                                setState(() {
-                                  _dragOffset += details.delta;
-                                });
-                              },
-                              child: Container(
-                                width: MediaQuery.of(context).size.width * 0.78,
+                        // 2. Draggable Text Area (위치 유지됨)
+                        Positioned.fill(
+                          child: Center(
+                            child: Transform.translate(
+                              offset: _dragOffset,
+                              child: GestureDetector(
+                                onPanUpdate: (details) {
+                                  // Calculate constraints
+                                  final cardW = MediaQuery.of(context).size.width * 0.92;
+                                  final cardH = cardW * (4 / 3); // AspectRatio 3/4 => H = W / 0.75
+
+                                  final boxContext = _textBoxKey.currentContext;
+                                  double boxW = MediaQuery.of(context).size.width * 0.78;
+                                  double boxH = 0;
+
+                                  if (boxContext != null) {
+                                    final RenderBox box = boxContext.findRenderObject() as RenderBox;
+                                    boxH = box.size.height;
+                                    boxW = box.size.width;
+                                  }
+
+                                  // Calculate Max Offsets (from center)
+                                  final maxDx = (cardW - boxW) / 2;
+                                  final maxDy = (cardH - boxH) / 2;
+
+                                  setState(() {
+                                    final newOffset = _dragOffset + details.delta;
+                                    _dragOffset = Offset(
+                                      newOffset.dx.clamp(-maxDx.abs(), maxDx.abs()),
+                                      newOffset.dy.clamp(-maxDy.abs(), maxDy.abs()),
+                                    );
+                                  });
+                                },
+                                onPanEnd: (details) {
+                                  _saveDraft();
+                                },
+                                onTap: () {
+                                  _editorFocusNode.requestFocus();
+                                  setState(() {
+                                    _isFooterActive = false;
+                                  });
+                                  _updateToolbarState();
+                                  _saveDraft();
+                                },
+                                child: Container(
+                                  key: _textBoxKey,
+                                  width: MediaQuery.of(context).size.width * 0.78,
                                 constraints: BoxConstraints(
                                   maxHeight: MediaQuery.of(context).size.width * 0.90 * 0.85,
                                 ),
@@ -1692,8 +1947,13 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                                   ) : null,
                                   borderRadius: BorderRadius.circular(_selectedFrame != null ? 0 : _boxRadius),
                                   border: _selectedFrame == null && _hasBorder
-                                      ? Border.all(color: _borderColor.withOpacity(0.5), width: _borderWidth)
-                                      : null,
+                                      ? Border.all(
+                                          color: !_isFooterActive ? const Color(0xFFF29D86) : _borderColor.withOpacity(0.5), 
+                                          width: !_isFooterActive ? 2.0 : _borderWidth
+                                        )
+                                      : (!_isFooterActive && !_isCapturing) 
+                                          ? Border.all(color: const Color(0xFFF29D86), width: 2.0) // Visual indicator when active
+                                          : Border.all(color: Colors.transparent, width: 2.0),
                                 ),
                                 child: Stack(
                                   clipBehavior: Clip.none,
@@ -1796,12 +2056,26 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                                                 _footerOffset += details.delta;
                                               });
                                             },
+                                            onPanEnd: (details) {
+                                              _saveDraft();
+                                            },
+                                            onTap: () {
+                                              _footerFocusNode.requestFocus();
+                                              setState(() {
+                                                _isFooterActive = true;
+                                              });
+                                              _updateToolbarState();
+                                              _saveDraft();
+                                            },
                                             child: IntrinsicWidth(
                                               child: Container(
                                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                                 decoration: BoxDecoration(
                                                   color: _footerBgColor.withOpacity(_footerBgOpacity),
                                                   borderRadius: BorderRadius.circular(_footerRadius),
+                                                  border: (_isFooterActive && !_isCapturing)
+                                                      ? Border.all(color: const Color(0xFFF29D86), width: 2.0)
+                                                      : Border.all(color: Colors.transparent, width: 2.0),
                                                 ),
                                                 child: QuillEditor(
                                                   controller: _footerQuillController,
@@ -1867,11 +2141,10 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
         ),
       ),
         ),
-        ),
       ),
     );
   }
-  
+
   // 툴바 (이미지와 썸네일 사이)
   Widget _buildToolbar() {
     final bool isFooterForToolbar = _isFooterActive;
@@ -1971,10 +2244,13 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
             // Or maybe "No Frame" button for frame mode
             if (_isFrameMode) {
                return _buildThumbItem(null, isNoFrame: true, isActive: _selectedFrame == null, onTap: () {
-                 setState(() => _selectedFrame = null);
+                 setState(() {
+                    _selectedFrame = null;
+                    _saveDraft();
+                 });
                });
             }
-            return _buildThumbItem(null, isUpload: true);
+            return _buildThumbItem(null, isUpload: true, onTap: _pickImage);
           }
           final idx = index;
           final imgPath = list[idx];
@@ -1987,6 +2263,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
               } else {
                 _selectedImage = imgPath;
               }
+              _saveDraft();
             });
           });
         },
@@ -2044,6 +2321,26 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
 
   void _showColorPicker() {
     final bool isFooter = _isFooterActive;
+    
+    // Get current selection color logic
+    final controller = isFooter ? _footerQuillController : _quillController;
+    Color? currentColor;
+    
+    if (controller.selection.isCollapsed) {
+       currentColor = isFooter ? _footerColor : _defaultColor;
+    } else {
+       final style = controller.getSelectionStyle();
+       final colorAttr = style.attributes['color'];
+       if (colorAttr != null && colorAttr.value != null) {
+          try {
+             String hex = colorAttr.value;
+             if (hex.startsWith('#')) hex = hex.substring(1);
+             currentColor = Color(int.parse("FF$hex", radix: 16));
+          } catch (_) {}
+       }
+       currentColor ??= (isFooter ? _footerColor : _defaultColor);
+    }
+
     final colors = [
       const Color(0xFF1A1A1A), const Color(0xFFD81B60), const Color(0xFFC2185B), const Color(0xFF8E24AA),
       const Color(0xFF512DA8), const Color(0xFF1976D2), const Color(0xFF0288D1), const Color(0xFF0097A7),
@@ -2062,13 +2359,13 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text("글자색 선택", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Text("글자색 선택 (${isFooter ? '푸터' : '내용'})", style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 20),
               Wrap(
                 spacing: 12,
                 runSpacing: 12,
                 children: colors.map((color) {
-                  final isSelected = _currentStyle.color?.value == color.value;
+                  final isSelected = currentColor?.value == color.value;
                   return GestureDetector(
                     onTap: () {
                       _applyColor(color, isFooterOverride: isFooter);
@@ -2274,363 +2571,17 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            bool isSendingLocal = _isSending;
-            
-            return Dialog(
-              backgroundColor: Colors.white,
-              insetPadding: const EdgeInsets.all(10), // Maximize width
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              child: SizedBox(
-                width: double.infinity,
-                height: MediaQuery.of(context).size.height * 0.85, // Same height as image preview
-                child: Column(
-                  children: [
-                    // Header
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFF29D86),
-                        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Row(
-                            children: [
-                              Icon(Icons.people_alt_rounded, color: Colors.white),
-                              SizedBox(width: 10),
-                              Text("발송 대상 관리", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-                            ],
-                          ),
-                          if (isSendingLocal)
-                             Container(
-                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                               decoration: BoxDecoration(color: Colors.white.withOpacity(0.3), borderRadius: BorderRadius.circular(20)),
-                               child: const Row(
-                                 children: [
-                                   SizedBox(width: 12, height: 12, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)),
-                                   SizedBox(width: 8),
-                                   Text("발송 중...", style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
-                                 ],
-                               ),
-                             ),
-                        ],
-                      ),
-                    ),
-
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.all(20.0),
-                        child: Column(
-                          children: [
-                            // 상단 정보 및 추가 버튼
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text("총 ${_recipients.length}명", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF5D4037))),
-                                if (!isSendingLocal)
-                                TextButton.icon(
-                                  onPressed: () {
-                                     final textController = TextEditingController();
-                                     showDialog(
-                                       context: context,
-                                       builder: (c) => AlertDialog(
-                                         title: const Text("수신자 추가"),
-                                         content: TextField(
-                                           controller: textController,
-                                           decoration: const InputDecoration(hintText: "이름 (전화번호)"),
-                                           autofocus: true,
-                                         ),
-                                         actions: [
-                                           TextButton(onPressed: () => Navigator.pop(c), child: const Text("취소")),
-                                           TextButton(
-                                             onPressed: () {
-                                               if (textController.text.isNotEmpty) {
-                                                 setDialogState(() {
-                                                   _recipients.add(textController.text);
-                                                 });
-                                               }
-                                               Navigator.pop(c);
-                                             },
-                                             child: const Text("추가"),
-                                           ),
-                                         ],
-                                       ),
-                                     );
-                                  },
-                                  icon: const Icon(Icons.person_add, size: 18, color: Color(0xFFF29D86)),
-                                  label: const Text("대상 추가", style: TextStyle(color: Color(0xFFF29D86))),
-                                ),
-                              ],
-                            ),
-                            const Divider(height: 20, thickness: 1),
-                            
-                            // 수신자 리스트
-                            Expanded(
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  border: Border.all(color: Colors.grey.withOpacity(0.2)),
-                                  borderRadius: BorderRadius.circular(8),
-                                  color: const Color(0xFFFAFAFA),
-                                ),
-                                child: ListView.separated(
-                                  padding: const EdgeInsets.all(8),
-                                  itemCount: _recipients.length,
-                                  separatorBuilder: (context, index) => const Divider(height: 1),
-                                  itemBuilder: (context, index) {
-                                    final recipient = _recipients[index];
-                                    final isPending = _pendingRecipients.contains(recipient);
-                                    // 발송 완료 여부는 _pendingRecipients에 없고 _isSending 이거나 _sentCount > 0 일때 판단
-                                    // 하지만 _pendingRecipients는 발송 전 리스트이므로, 여기에 없으면 발송 완료된 것으로 간주 (발송 시작 후)
-                                    final isSent = !isPending && (_sentCount > 0 || isSendingLocal); 
-
-                                    return ListTile(
-                                      dense: true,
-                                      leading: CircleAvatar(
-                                        backgroundColor: isSent ? Colors.green.withOpacity(0.1) : const Color(0xFFF29D86).withOpacity(0.1),
-                                        child: Icon(Icons.person, size: 20, color: isSent ? Colors.green : const Color(0xFFF29D86)),
-                                      ),
-                                      title: Text(recipient, style: TextStyle(color: isSent ? Colors.grey : Colors.black87, decoration: isSent ? TextDecoration.lineThrough : null)),
-                                      trailing: !isSendingLocal 
-                                        ? IconButton(
-                                            icon: const Icon(Icons.remove_circle_outline, size: 20, color: Colors.redAccent),
-                                            onPressed: () {
-                                              setDialogState(() {
-                                                _recipients.removeAt(index);
-                                                _pendingRecipients.remove(recipient);
-                                              });
-                                            },
-                                          )
-                                        : (isSent ? const Icon(Icons.check_circle, color: Colors.green, size: 20) : null),
-                                    );
-                                  },
-                                ),
-                              ),
-                            ),
-                            
-                            if (isSendingLocal || _sentCount > 0) ...[
-                              const SizedBox(height: 16),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text("발송 진행률", style: TextStyle(fontSize: 12, color: Colors.grey[600])),
-                                      Text("$_sentCount / ${_recipients.length}", style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFFF29D86))),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 6),
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(4),
-                                    child: LinearProgressIndicator(
-                                      value: _recipients.isEmpty ? 0 : (_sentCount / _recipients.length),
-                                      backgroundColor: Colors.grey[200],
-                                      color: const Color(0xFFF29D86),
-                                      minHeight: 8,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                            
-                            const SizedBox(height: 16),
-                            Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFFFF3E0),
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: Colors.orange.withOpacity(0.3)),
-                              ),
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 24),
-                                  const SizedBox(width: 12),
-                                  const Expanded(
-                                    child: Text(
-                                      "단시간 다량 발송은 스팸 정책에 의해 제한될 수 있습니다.\n안전을 위해 '자동 계속' 해제를 권장합니다.",
-                                      style: TextStyle(fontSize: 12, color: Color(0xFF8D6E63), height: 1.4),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    
-                    // Footer Actions
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[50],
-                        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
-                        border: Border(top: BorderSide(color: Colors.grey.withOpacity(0.2))),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          if (!isSendingLocal) ...[
-                            Row(
-                              children: [
-                                Checkbox(
-                                  value: _autoContinue,
-                                  activeColor: const Color(0xFFF29D86),
-                                  onChanged: (val) {
-                                    setDialogState(() => _autoContinue = val ?? false);
-                                  },
-                                ),
-                                GestureDetector(
-                                  onTap: () {
-                                    setDialogState(() => _autoContinue = !_autoContinue);
-                                  },
-                                  child: const Text("5건 발송 후 자동 계속", style: TextStyle(fontSize: 14)),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  style: TextButton.styleFrom(foregroundColor: Colors.grey),
-                                  child: const Text("닫기"),
-                                ),
-                                const SizedBox(width: 8),
-                                ElevatedButton.icon(
-                                  onPressed: () async {
-                                    setDialogState(() {
-                                       _isSending = true;
-                                       if (_pendingRecipients.isEmpty) {
-                                          _pendingRecipients = List.from(_recipients);
-                                          _sentCount = 0;
-                                       }
-                                    });
-
-                                    final database = ref.read(appDatabaseProvider);
-
-                                    // 실제 발송 루프
-                                    while (_pendingRecipients.isNotEmpty && _isSending) {
-                                      if (!mounted) break;
-                                      
-                                      int batchSize = 5;
-                                      if (_pendingRecipients.length < 5) batchSize = _pendingRecipients.length;
-                                      
-                                      final batch = _pendingRecipients.take(batchSize).toList();
-                                      
-                                      // 3초 딜레이
-                                      await Future.delayed(const Duration(milliseconds: 3000));
-                                      
-                                      if (mounted) {
-                                         // DB에 기록 저장
-                                         for (var item in batch) {
-                                            // Extract phone if possible
-                                            String? phone;
-                                            final phoneMatch = RegExp(r'\d{2,3}-\d{3,4}-\d{4}').firstMatch(item);
-                                            if (phoneMatch != null) {
-                                              phone = phoneMatch.group(0)?.replaceAll('-', '');
-                                            }
-
-                                            if (phone != null) {
-                                              // Try to find contact
-                                              // Phone in DB might be with or without dashes. 
-                                              // Let's assume DB stores plain numbers or we check both.
-                                              // Our dummy data has dashes.
-                                              // Let's try exact match first
-                                              var contact = await (database.select(database.contacts)..where((t) => t.phone.equals(phoneMatch!.group(0)!))).getSingleOrNull();
-                                              
-                                              // If not found, try without dashes? (Assuming dummy data has dashes)
-                                              
-                                              if (contact != null) {
-                                                await database.insertHistory(HistoryCompanion(
-                                                  contactId: Value(contact.id),
-                                                  type: const Value('SENT'),
-                                                  message: const Value('카드 발송'), 
-                                                  imagePath: Value(savedPath),
-                                                  eventDate: Value(DateTime.now()),
-                                                ));
-                                              } else {
-                                                // Create dummy contact for history test if it's one of our generated ones
-                                                if (item.contains("수신자")) {
-                                                   final newId = await database.insertContact(ContactsCompanion(
-                                                     name: Value(item.split('(')[0].trim()),
-                                                     phone: Value(phoneMatch!.group(0)!),
-                                                     groupTag: const Value('Test'),
-                                                   ));
-                                                   await database.insertHistory(HistoryCompanion(
-                                                      contactId: Value(newId),
-                                                      type: const Value('SENT'),
-                                                      message: const Value('카드 발송'), 
-                                                      imagePath: Value(savedPath),
-                                                      eventDate: Value(DateTime.now()),
-                                                    ));
-                                                }
-                                              }
-                                            }
-                                         }
-
-                                         setDialogState(() {
-                                           for (var item in batch) {
-                                             _pendingRecipients.remove(item);
-                                           }
-                                           _sentCount += batchSize;
-                                         });
-                                      }
-                                      
-                                      if (!_autoContinue && _pendingRecipients.isNotEmpty) {
-                                         setDialogState(() => _isSending = false);
-                                         break;
-                                      }
-                                    }
-                                    
-                                    if (_pendingRecipients.isEmpty && mounted && _isSending) {
-                                      setDialogState(() => _isSending = false);
-                                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("전체 발송 완료!")));
-                                    }
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFFF29D86),
-                                    foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                  ),
-                                  icon: Icon(_sentCount > 0 && _pendingRecipients.isNotEmpty ? Icons.play_arrow : Icons.send, size: 18),
-                                  label: Text(_sentCount > 0 && _pendingRecipients.isNotEmpty ? "계속 발송" : "발송 시작"),
-                                ),
-                              ],
-                            ),
-                          ] else ...[
-                             SizedBox(
-                               width: double.infinity,
-                               child: OutlinedButton(
-                                 onPressed: () {
-                                    setDialogState(() => _isSending = false);
-                                 },
-                                 style: OutlinedButton.styleFrom(
-                                   foregroundColor: Colors.red,
-                                   side: const BorderSide(color: Colors.red),
-                                   padding: const EdgeInsets.symmetric(vertical: 16),
-                                 ),
-                                 child: const Text("발송 중지", style: TextStyle(fontWeight: FontWeight.bold)),
-                               ),
-                             ),
-                          ],
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-      },
-    ).then((_) {
-       if (mounted) setState(() => _isSending = false);
-    });
+      builder: (context) => RecipientManagerDialog(
+        recipients: _recipients,
+        savedPath: savedPath,
+        database: ref.read(appDatabaseProvider),
+        onRecipientsChanged: (updatedList) {
+          setState(() {
+            _recipients = updatedList;
+          });
+        },
+      ),
+    );
   }
 
 
@@ -2769,6 +2720,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                           onTap: () {
                             setState(() {
                               _selectedImage = categoryImages[index];
+                              _saveDraft();
                             });
                             Navigator.pop(context);
                             WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToSelected());
@@ -2787,3 +2739,538 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     );
   }
 }
+
+
+class RecipientManagerDialog extends StatefulWidget {
+  final List<String> recipients;
+  final String savedPath;
+  final AppDatabase database;
+  final Function(List<String>) onRecipientsChanged;
+
+  const RecipientManagerDialog({
+    Key? key,
+    required this.recipients,
+    required this.savedPath,
+    required this.database,
+    required this.onRecipientsChanged,
+  }) : super(key: key);
+
+  @override
+  State<RecipientManagerDialog> createState() => _RecipientManagerDialogState();
+}
+
+class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
+  List<String> _pendingRecipients = [];
+  bool _isSending = false;
+  int _sentCount = 0;
+  bool _autoContinue = false;
+  
+  // Local list to manage UI before sync
+  late List<String> _localRecipients;
+
+  @override
+  void initState() {
+    super.initState();
+    _localRecipients = List.from(widget.recipients);
+  }
+
+  void _safeSetState(VoidCallback fn) {
+    if (!mounted) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      setState(fn);
+    });
+  }
+
+  int _firstDigitIndex(String text) {
+    for (int i = 0; i < text.length; i++) {
+      final c = text.codeUnitAt(i);
+      if (c >= 48 && c <= 57) return i;
+    }
+    return -1;
+  }
+
+  String _extractPhoneDigits(String text) {
+    final dashed = _extractDashedPhone(text);
+    if (dashed != null) return dashed.replaceAll('-', '');
+    final digits = text.replaceAll(RegExp(r'[^0-9]'), '');
+    if (digits.length > 11) return digits.substring(digits.length - 11);
+    return digits;
+  }
+
+  String _formatPhoneDigits(String digits) {
+    if (digits.isEmpty) return '';
+    if (digits.length <= 3) return digits;
+    if (digits.length <= 7) return '${digits.substring(0, 3)}-${digits.substring(3)}';
+    final clipped = digits.length > 11 ? digits.substring(0, 11) : digits;
+    final midLen = clipped.length == 10 ? 3 : 4;
+    final first = clipped.substring(0, 3);
+    final mid = clipped.substring(3, 3 + midLen);
+    final last = clipped.substring(3 + midLen);
+    if (last.isEmpty) return '$first-$mid';
+    return '$first-$mid-$last';
+  }
+
+  Map<String, String>? _parseRecipient(String input) {
+    final cleaned = input.replaceAll(RegExp(r'[()]'), '').trim();
+    final digitIndex = _firstDigitIndex(cleaned);
+    if (digitIndex <= 0) return null;
+    final name = cleaned.substring(0, digitIndex).trimRight();
+    if (name.isEmpty) return null;
+    final digits = _extractPhoneDigits(cleaned.substring(digitIndex));
+    if (digits.length != 11) return null;
+    final dashed = _formatPhoneDigits(digits);
+    if (!RegExp(r'^\d{2,3}-\d{3,4}-\d{4}$').hasMatch(dashed)) return null;
+    return {
+      'name': name,
+      'digits': digits,
+      'dashed': dashed,
+      'display': '$name $dashed',
+    };
+  }
+
+  String? _extractDashedPhone(String text) {
+    final match = RegExp(r'\d{2,3}-\d{3,4}-\d{4}').firstMatch(text);
+    return match?.group(0);
+  }
+
+  void _updateRecipients() {
+    widget.onRecipientsChanged(_localRecipients);
+  }
+
+  void _addRecipient(String name) {
+    _safeSetState(() {
+      _localRecipients.add(name);
+    });
+    _updateRecipients();
+  }
+
+  void _removeRecipient(int index) {
+    _safeSetState(() {
+      final item = _localRecipients[index];
+      _localRecipients.removeAt(index);
+      if (_pendingRecipients.contains(item)) {
+        _pendingRecipients.remove(item);
+      }
+    });
+    _updateRecipients();
+  }
+
+  Future<void> _startSending() async {
+    if (_isSending) return;
+    
+    // MouseTracker 에러 방지: 버튼 클릭 이벤트 처리가 완전히 끝난 후에 발송 로직 실행
+    // 이렇게 하면 마우스 트래커 업데이트 중에 setState가 호출되는 충돌을 방지함
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      
+      setState(() {
+        _isSending = true;
+        if (_pendingRecipients.isEmpty) {
+          _pendingRecipients = List.from(_localRecipients);
+          _sentCount = 0;
+        }
+      });
+
+      while (_pendingRecipients.isNotEmpty && _isSending) {
+        if (!mounted) break;
+
+        int batchSize = 5;
+        if (_pendingRecipients.length < batchSize) batchSize = _pendingRecipients.length;
+        final batch = _pendingRecipients.take(batchSize).toList();
+
+        // Wait 3 seconds
+        await Future.delayed(const Duration(seconds: 3));
+        
+        if (!mounted || !_isSending) break;
+
+        // Process batch (DB inserts)
+        for (var item in batch) {
+           final dashedPhone = _extractDashedPhone(item);
+           if (dashedPhone != null) {
+             // Try to find contact
+             var contact = await (widget.database.select(widget.database.contacts)..where((t) => t.phone.equals(dashedPhone))).getSingleOrNull();
+             
+             if (contact != null) {
+               await widget.database.insertHistory(HistoryCompanion(
+                 contactId: Value(contact.id),
+                 type: const Value('SENT'),
+                 message: const Value('카드 발송'), 
+                 imagePath: Value(widget.savedPath),
+                 eventDate: Value(DateTime.now()),
+               ));
+             } else {
+               // Create dummy contact for history test if it's one of our generated ones
+                if (item.contains("수신자")) {
+                  final phoneStartIndex = item.indexOf(dashedPhone);
+                  final dummyName = phoneStartIndex > 0 ? item.substring(0, phoneStartIndex).trimRight() : item;
+                  final newId = await widget.database.insertContact(ContactsCompanion(
+                    name: Value(dummyName.trim()),
+                    phone: Value(dashedPhone),
+                    groupTag: const Value('Test'),
+                  ));
+                  await widget.database.insertHistory(HistoryCompanion(
+                     contactId: Value(newId),
+                     type: const Value('SENT'),
+                     message: const Value('카드 발송'), 
+                     imagePath: Value(widget.savedPath),
+                     eventDate: Value(DateTime.now()),
+                   ));
+               }
+             }
+           }
+        }
+
+        if (!mounted) break;
+
+        // 안전한 setState - mounted 체크 후 직접 호출 (이미 post-frame 안에 있음)
+        if (mounted) {
+          setState(() {
+            for (var item in batch) {
+              _pendingRecipients.remove(item);
+            }
+            _sentCount += batchSize;
+          });
+        }
+
+        if (!_autoContinue && _pendingRecipients.isNotEmpty) {
+          if (mounted) setState(() => _isSending = false);
+          break;
+        }
+      }
+      
+      if (mounted && _isSending && _pendingRecipients.isEmpty) {
+        setState(() => _isSending = false);
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("전체 발송 완료!")));
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: Colors.white,
+      insetPadding: const EdgeInsets.all(10),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: SizedBox(
+        width: double.infinity,
+        height: MediaQuery.of(context).size.height * 0.85,
+        child: Column(
+          children: [
+            // Header
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              decoration: const BoxDecoration(
+                color: Color(0xFFF29D86),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Row(
+                    children: [
+                      Icon(Icons.people_alt_rounded, color: Colors.white),
+                      SizedBox(width: 10),
+                      Text("발송 대상 관리", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                  if (_isSending)
+                     Container(
+                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                       decoration: BoxDecoration(color: Colors.white.withOpacity(0.3), borderRadius: BorderRadius.circular(20)),
+                       child: const Row(
+                         children: [
+                           SizedBox(width: 12, height: 12, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)),
+                           SizedBox(width: 8),
+                           Text("발송 중...", style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                         ],
+                       ),
+                     ),
+                ],
+              ),
+            ),
+
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  children: [
+                    // Top Info & Add Button
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text("총 ${_localRecipients.length}명", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF5D4037))),
+                        if (!_isSending)
+                        TextButton.icon(
+                          onPressed: () {
+                             final textController = TextEditingController();
+                             showDialog(
+                               context: context,
+                               builder: (c) => AlertDialog(
+                                 title: const Text("수신자 추가"),
+                                 content: TextField(
+                                   controller: textController,
+                                   decoration: const InputDecoration(hintText: "이름 010-0000-0000"),
+                                   autofocus: true,
+                                   inputFormatters: [RecipientInputFormatter()],
+                                 ),
+                                 actions: [
+                                   TextButton(onPressed: () => Navigator.pop(c), child: const Text("취소")),
+                                   TextButton(
+                                     onPressed: () {
+                                       final raw = textController.text.trim();
+                                       if (raw.isEmpty) {
+                                         Navigator.pop(c);
+                                         return;
+                                       }
+
+                                       final parsed = _parseRecipient(raw);
+                                       if (parsed == null) {
+                                         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("형식이 올바르지 않습니다. 예: 홍길동 010-1234-5678")));
+                                         return;
+                                       }
+
+                                       final newDigits = parsed['digits']!;
+                                       final isDuplicate = _localRecipients.any((r) => _extractPhoneDigits(r) == newDigits);
+                                       if (isDuplicate) {
+                                         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("이미 존재하는 수신자입니다.")));
+                                         return;
+                                       }
+
+                                       _addRecipient(parsed['display']!);
+                                       Navigator.pop(c);
+                                     },
+                                     child: const Text("추가"),
+                                   ),
+                                 ],
+                               ),
+                             );
+                          },
+                          icon: const Icon(Icons.person_add, size: 18, color: Color(0xFFF29D86)),
+                          label: const Text("대상 추가", style: TextStyle(color: Color(0xFFF29D86))),
+                        ),
+                      ],
+                    ),
+                    const Divider(height: 20, thickness: 1),
+                    
+                    // List
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey.withOpacity(0.2)),
+                          borderRadius: BorderRadius.circular(8),
+                          color: const Color(0xFFFAFAFA),
+                        ),
+                        child: ListView.separated(
+                          padding: const EdgeInsets.all(8),
+                          itemCount: _localRecipients.length,
+                          separatorBuilder: (context, index) => const Divider(height: 1),
+                          itemBuilder: (context, index) {
+                            final recipient = _localRecipients[index];
+                            // Logic: if sending, check if pending. 
+                            // If sending started and not in pending, it's sent.
+                            // If sending not started, nothing is sent.
+                            
+                            bool isSent = false;
+                            if (_isSending || _sentCount > 0) {
+                                isSent = !_pendingRecipients.contains(recipient);
+                            }
+
+                            return ListTile(
+                              dense: true,
+                              leading: CircleAvatar(
+                                backgroundColor: isSent ? Colors.green.withOpacity(0.1) : const Color(0xFFF29D86).withOpacity(0.1),
+                                child: Icon(Icons.person, size: 20, color: isSent ? Colors.green : const Color(0xFFF29D86)),
+                              ),
+                              title: Text(recipient, style: TextStyle(color: isSent ? Colors.grey : Colors.black87, decoration: isSent ? TextDecoration.lineThrough : null)),
+                              trailing: !_isSending 
+                                ? IconButton(
+                                    icon: const Icon(Icons.remove_circle_outline, size: 20, color: Colors.redAccent),
+                                    onPressed: () => _removeRecipient(index),
+                                  )
+                                : (isSent ? const Icon(Icons.check_circle, color: Colors.green, size: 20) : null),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                    
+                    if (_isSending || _sentCount > 0) ...[
+                      const SizedBox(height: 16),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text("발송 진행률", style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                              Text("$_sentCount / ${_localRecipients.length}", style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFFF29D86))),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(4),
+                            child: LinearProgressIndicator(
+                              value: _localRecipients.isEmpty ? 0 : (_sentCount / _localRecipients.length),
+                              backgroundColor: Colors.grey[200],
+                              color: const Color(0xFFF29D86),
+                              minHeight: 8,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                    
+                    const SizedBox(height: 16),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFF3E0),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.orange.withOpacity(0.3)),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 24),
+                          const SizedBox(width: 12),
+                          const Expanded(
+                            child: Text(
+                              "단시간 다량 발송은 스팸 정책에 의해 제한될 수 있습니다.\n안전을 위해 '자동 계속' 해제를 권장합니다.",
+                              style: TextStyle(fontSize: 12, color: Color(0xFF8D6E63), height: 1.4),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            
+            // Footer Actions
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.grey[50],
+                borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
+                border: Border(top: BorderSide(color: Colors.grey.withOpacity(0.2))),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  if (!_isSending) ...[
+                    Row(
+                      children: [
+                        Checkbox(
+                          value: _autoContinue,
+                          activeColor: const Color(0xFFF29D86),
+                          onChanged: (val) {
+                            _safeSetState(() => _autoContinue = val ?? false);
+                          },
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            _safeSetState(() => _autoContinue = !_autoContinue);
+                          },
+                          child: const Text("5건 발송 후 자동 계속", style: TextStyle(fontSize: 14)),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          style: TextButton.styleFrom(foregroundColor: Colors.grey),
+                          child: const Text("닫기"),
+                        ),
+                        const SizedBox(width: 8),
+                        ElevatedButton.icon(
+                          onPressed: _startSending,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFF29D86),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          ),
+                          icon: Icon(_sentCount > 0 && _pendingRecipients.isNotEmpty ? Icons.play_arrow : Icons.send, size: 18),
+                          label: Text(_sentCount > 0 && _pendingRecipients.isNotEmpty ? "계속 발송" : "발송 시작"),
+                        ),
+                      ],
+                    ),
+                  ] else ...[
+                     SizedBox(
+                       width: double.infinity,
+                       child: OutlinedButton(
+                         onPressed: () {
+                           _safeSetState(() => _isSending = false);
+                         },
+                         style: OutlinedButton.styleFrom(
+                           foregroundColor: Colors.red,
+                           side: const BorderSide(color: Colors.red),
+                           padding: const EdgeInsets.symmetric(vertical: 16),
+                         ),
+                         child: const Text("발송 중지", style: TextStyle(fontWeight: FontWeight.bold)),
+                       ),
+                     ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class RecipientInputFormatter extends TextInputFormatter {
+  int _firstDigitIndex(String text) {
+    for (int i = 0; i < text.length; i++) {
+      final c = text.codeUnitAt(i);
+      if (c >= 48 && c <= 57) return i;
+    }
+    return -1;
+  }
+
+  String _extractPhoneDigits(String text) {
+    final digits = text.replaceAll(RegExp(r'[^0-9]'), '');
+    if (digits.length > 11) return digits.substring(0, 11);
+    return digits;
+  }
+
+  String _formatPhoneDigits(String digits) {
+    if (digits.isEmpty) return '';
+    if (digits.length <= 3) return digits;
+    if (digits.length <= 7) return '${digits.substring(0, 3)}-${digits.substring(3)}';
+    final clipped = digits.length > 11 ? digits.substring(0, 11) : digits;
+    final midLen = clipped.length == 10 ? 3 : 4;
+    final first = clipped.substring(0, 3);
+    final mid = clipped.substring(3, 3 + midLen);
+    final last = clipped.substring(3 + midLen);
+    if (last.isEmpty) return '$first-$mid';
+    return '$first-$mid-$last';
+  }
+
+  @override
+  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
+    final cleaned = newValue.text.replaceAll(RegExp(r'[()]'), '');
+    final digitIndex = _firstDigitIndex(cleaned);
+    if (digitIndex == -1) {
+      return newValue.copyWith(
+        text: cleaned,
+        selection: TextSelection.collapsed(offset: cleaned.length),
+      );
+    }
+
+    final name = cleaned.substring(0, digitIndex).trimRight();
+    final digits = _extractPhoneDigits(cleaned.substring(digitIndex));
+    final dashed = _formatPhoneDigits(digits);
+
+    final resultText = name.isEmpty ? dashed : '$name $dashed';
+    return newValue.copyWith(
+      text: resultText,
+      selection: TextSelection.collapsed(offset: resultText.length),
+    );
+  }
+}
+

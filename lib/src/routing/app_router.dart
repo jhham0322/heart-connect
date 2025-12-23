@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../features/home/home_screen.dart';
-import '../features/contacts/contacts_screen.dart';
-import '../features/gallery/gallery_screen.dart';
-import '../features/card_editor/write_card_screen.dart';
-import '../features/settings/settings_screen.dart';
+import 'package:heart_connect/src/features/home/home_screen.dart';
+import 'package:heart_connect/src/features/contacts/contacts_screen.dart';
+import 'package:heart_connect/src/features/gallery/gallery_screen.dart';
+import 'package:heart_connect/src/features/card_editor/write_card_screen.dart';
+import 'package:heart_connect/src/features/settings/settings_screen.dart';
+import 'package:heart_connect/src/features/alarm/alarm_screen.dart';
 import '../shell/scaffold_with_nav.dart';
 
 // Private navigator keys
@@ -45,6 +46,20 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           return const MaterialPage(
             fullscreenDialog: true,
             child: SettingsScreen(),
+          );
+        },
+      ),
+      // Alarm Screen - 독립적인 전체 화면
+      GoRoute(
+        path: '/alarm',
+        parentNavigatorKey: _rootNavigatorKey,
+        pageBuilder: (context, state) {
+          final message = state.uri.queryParameters['message'];
+          return MaterialPage(
+            fullscreenDialog: true,
+            child: AlarmScreen(
+              message: message,
+            ),
           );
         },
       ),

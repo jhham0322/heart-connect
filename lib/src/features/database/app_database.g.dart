@@ -1318,6 +1318,39 @@ class $SavedCardsTable extends SavedCards
   late final GeneratedColumn<String> imagePath = GeneratedColumn<String>(
       'image_path', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _frameMeta = const VerificationMeta('frame');
+  @override
+  late final GeneratedColumn<String> frame = GeneratedColumn<String>(
+      'frame', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _boxStyleMeta =
+      const VerificationMeta('boxStyle');
+  @override
+  late final GeneratedColumn<String> boxStyle = GeneratedColumn<String>(
+      'box_style', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _footerStyleMeta =
+      const VerificationMeta('footerStyle');
+  @override
+  late final GeneratedColumn<String> footerStyle = GeneratedColumn<String>(
+      'footer_style', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _mainStyleMeta =
+      const VerificationMeta('mainStyle');
+  @override
+  late final GeneratedColumn<String> mainStyle = GeneratedColumn<String>(
+      'main_style', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _isFooterActiveMeta =
+      const VerificationMeta('isFooterActive');
+  @override
+  late final GeneratedColumn<bool> isFooterActive = GeneratedColumn<bool>(
+      'is_footer_active', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("is_footer_active" IN (0, 1))'),
+      defaultValue: const Constant(false));
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
@@ -1327,8 +1360,19 @@ class $SavedCardsTable extends SavedCards
       requiredDuringInsert: false,
       defaultValue: currentDateAndTime);
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, name, htmlContent, footerText, imagePath, createdAt];
+  List<GeneratedColumn> get $columns => [
+        id,
+        name,
+        htmlContent,
+        footerText,
+        imagePath,
+        frame,
+        boxStyle,
+        footerStyle,
+        mainStyle,
+        isFooterActive,
+        createdAt
+      ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -1364,6 +1408,30 @@ class $SavedCardsTable extends SavedCards
       context.handle(_imagePathMeta,
           imagePath.isAcceptableOrUnknown(data['image_path']!, _imagePathMeta));
     }
+    if (data.containsKey('frame')) {
+      context.handle(
+          _frameMeta, frame.isAcceptableOrUnknown(data['frame']!, _frameMeta));
+    }
+    if (data.containsKey('box_style')) {
+      context.handle(_boxStyleMeta,
+          boxStyle.isAcceptableOrUnknown(data['box_style']!, _boxStyleMeta));
+    }
+    if (data.containsKey('footer_style')) {
+      context.handle(
+          _footerStyleMeta,
+          footerStyle.isAcceptableOrUnknown(
+              data['footer_style']!, _footerStyleMeta));
+    }
+    if (data.containsKey('main_style')) {
+      context.handle(_mainStyleMeta,
+          mainStyle.isAcceptableOrUnknown(data['main_style']!, _mainStyleMeta));
+    }
+    if (data.containsKey('is_footer_active')) {
+      context.handle(
+          _isFooterActiveMeta,
+          isFooterActive.isAcceptableOrUnknown(
+              data['is_footer_active']!, _isFooterActiveMeta));
+    }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
@@ -1387,6 +1455,16 @@ class $SavedCardsTable extends SavedCards
           .read(DriftSqlType.string, data['${effectivePrefix}footer_text']),
       imagePath: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}image_path']),
+      frame: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}frame']),
+      boxStyle: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}box_style']),
+      footerStyle: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}footer_style']),
+      mainStyle: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}main_style']),
+      isFooterActive: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_footer_active'])!,
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
     );
@@ -1404,6 +1482,11 @@ class SavedCard extends DataClass implements Insertable<SavedCard> {
   final String htmlContent;
   final String? footerText;
   final String? imagePath;
+  final String? frame;
+  final String? boxStyle;
+  final String? footerStyle;
+  final String? mainStyle;
+  final bool isFooterActive;
   final DateTime createdAt;
   const SavedCard(
       {required this.id,
@@ -1411,6 +1494,11 @@ class SavedCard extends DataClass implements Insertable<SavedCard> {
       required this.htmlContent,
       this.footerText,
       this.imagePath,
+      this.frame,
+      this.boxStyle,
+      this.footerStyle,
+      this.mainStyle,
+      required this.isFooterActive,
       required this.createdAt});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1424,6 +1512,19 @@ class SavedCard extends DataClass implements Insertable<SavedCard> {
     if (!nullToAbsent || imagePath != null) {
       map['image_path'] = Variable<String>(imagePath);
     }
+    if (!nullToAbsent || frame != null) {
+      map['frame'] = Variable<String>(frame);
+    }
+    if (!nullToAbsent || boxStyle != null) {
+      map['box_style'] = Variable<String>(boxStyle);
+    }
+    if (!nullToAbsent || footerStyle != null) {
+      map['footer_style'] = Variable<String>(footerStyle);
+    }
+    if (!nullToAbsent || mainStyle != null) {
+      map['main_style'] = Variable<String>(mainStyle);
+    }
+    map['is_footer_active'] = Variable<bool>(isFooterActive);
     map['created_at'] = Variable<DateTime>(createdAt);
     return map;
   }
@@ -1439,6 +1540,18 @@ class SavedCard extends DataClass implements Insertable<SavedCard> {
       imagePath: imagePath == null && nullToAbsent
           ? const Value.absent()
           : Value(imagePath),
+      frame:
+          frame == null && nullToAbsent ? const Value.absent() : Value(frame),
+      boxStyle: boxStyle == null && nullToAbsent
+          ? const Value.absent()
+          : Value(boxStyle),
+      footerStyle: footerStyle == null && nullToAbsent
+          ? const Value.absent()
+          : Value(footerStyle),
+      mainStyle: mainStyle == null && nullToAbsent
+          ? const Value.absent()
+          : Value(mainStyle),
+      isFooterActive: Value(isFooterActive),
       createdAt: Value(createdAt),
     );
   }
@@ -1452,6 +1565,11 @@ class SavedCard extends DataClass implements Insertable<SavedCard> {
       htmlContent: serializer.fromJson<String>(json['htmlContent']),
       footerText: serializer.fromJson<String?>(json['footerText']),
       imagePath: serializer.fromJson<String?>(json['imagePath']),
+      frame: serializer.fromJson<String?>(json['frame']),
+      boxStyle: serializer.fromJson<String?>(json['boxStyle']),
+      footerStyle: serializer.fromJson<String?>(json['footerStyle']),
+      mainStyle: serializer.fromJson<String?>(json['mainStyle']),
+      isFooterActive: serializer.fromJson<bool>(json['isFooterActive']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
     );
   }
@@ -1464,6 +1582,11 @@ class SavedCard extends DataClass implements Insertable<SavedCard> {
       'htmlContent': serializer.toJson<String>(htmlContent),
       'footerText': serializer.toJson<String?>(footerText),
       'imagePath': serializer.toJson<String?>(imagePath),
+      'frame': serializer.toJson<String?>(frame),
+      'boxStyle': serializer.toJson<String?>(boxStyle),
+      'footerStyle': serializer.toJson<String?>(footerStyle),
+      'mainStyle': serializer.toJson<String?>(mainStyle),
+      'isFooterActive': serializer.toJson<bool>(isFooterActive),
       'createdAt': serializer.toJson<DateTime>(createdAt),
     };
   }
@@ -1474,6 +1597,11 @@ class SavedCard extends DataClass implements Insertable<SavedCard> {
           String? htmlContent,
           Value<String?> footerText = const Value.absent(),
           Value<String?> imagePath = const Value.absent(),
+          Value<String?> frame = const Value.absent(),
+          Value<String?> boxStyle = const Value.absent(),
+          Value<String?> footerStyle = const Value.absent(),
+          Value<String?> mainStyle = const Value.absent(),
+          bool? isFooterActive,
           DateTime? createdAt}) =>
       SavedCard(
         id: id ?? this.id,
@@ -1481,6 +1609,11 @@ class SavedCard extends DataClass implements Insertable<SavedCard> {
         htmlContent: htmlContent ?? this.htmlContent,
         footerText: footerText.present ? footerText.value : this.footerText,
         imagePath: imagePath.present ? imagePath.value : this.imagePath,
+        frame: frame.present ? frame.value : this.frame,
+        boxStyle: boxStyle.present ? boxStyle.value : this.boxStyle,
+        footerStyle: footerStyle.present ? footerStyle.value : this.footerStyle,
+        mainStyle: mainStyle.present ? mainStyle.value : this.mainStyle,
+        isFooterActive: isFooterActive ?? this.isFooterActive,
         createdAt: createdAt ?? this.createdAt,
       );
   SavedCard copyWithCompanion(SavedCardsCompanion data) {
@@ -1492,6 +1625,14 @@ class SavedCard extends DataClass implements Insertable<SavedCard> {
       footerText:
           data.footerText.present ? data.footerText.value : this.footerText,
       imagePath: data.imagePath.present ? data.imagePath.value : this.imagePath,
+      frame: data.frame.present ? data.frame.value : this.frame,
+      boxStyle: data.boxStyle.present ? data.boxStyle.value : this.boxStyle,
+      footerStyle:
+          data.footerStyle.present ? data.footerStyle.value : this.footerStyle,
+      mainStyle: data.mainStyle.present ? data.mainStyle.value : this.mainStyle,
+      isFooterActive: data.isFooterActive.present
+          ? data.isFooterActive.value
+          : this.isFooterActive,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
   }
@@ -1504,14 +1645,19 @@ class SavedCard extends DataClass implements Insertable<SavedCard> {
           ..write('htmlContent: $htmlContent, ')
           ..write('footerText: $footerText, ')
           ..write('imagePath: $imagePath, ')
+          ..write('frame: $frame, ')
+          ..write('boxStyle: $boxStyle, ')
+          ..write('footerStyle: $footerStyle, ')
+          ..write('mainStyle: $mainStyle, ')
+          ..write('isFooterActive: $isFooterActive, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, name, htmlContent, footerText, imagePath, createdAt);
+  int get hashCode => Object.hash(id, name, htmlContent, footerText, imagePath,
+      frame, boxStyle, footerStyle, mainStyle, isFooterActive, createdAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1521,6 +1667,11 @@ class SavedCard extends DataClass implements Insertable<SavedCard> {
           other.htmlContent == this.htmlContent &&
           other.footerText == this.footerText &&
           other.imagePath == this.imagePath &&
+          other.frame == this.frame &&
+          other.boxStyle == this.boxStyle &&
+          other.footerStyle == this.footerStyle &&
+          other.mainStyle == this.mainStyle &&
+          other.isFooterActive == this.isFooterActive &&
           other.createdAt == this.createdAt);
 }
 
@@ -1530,6 +1681,11 @@ class SavedCardsCompanion extends UpdateCompanion<SavedCard> {
   final Value<String> htmlContent;
   final Value<String?> footerText;
   final Value<String?> imagePath;
+  final Value<String?> frame;
+  final Value<String?> boxStyle;
+  final Value<String?> footerStyle;
+  final Value<String?> mainStyle;
+  final Value<bool> isFooterActive;
   final Value<DateTime> createdAt;
   const SavedCardsCompanion({
     this.id = const Value.absent(),
@@ -1537,6 +1693,11 @@ class SavedCardsCompanion extends UpdateCompanion<SavedCard> {
     this.htmlContent = const Value.absent(),
     this.footerText = const Value.absent(),
     this.imagePath = const Value.absent(),
+    this.frame = const Value.absent(),
+    this.boxStyle = const Value.absent(),
+    this.footerStyle = const Value.absent(),
+    this.mainStyle = const Value.absent(),
+    this.isFooterActive = const Value.absent(),
     this.createdAt = const Value.absent(),
   });
   SavedCardsCompanion.insert({
@@ -1545,6 +1706,11 @@ class SavedCardsCompanion extends UpdateCompanion<SavedCard> {
     required String htmlContent,
     this.footerText = const Value.absent(),
     this.imagePath = const Value.absent(),
+    this.frame = const Value.absent(),
+    this.boxStyle = const Value.absent(),
+    this.footerStyle = const Value.absent(),
+    this.mainStyle = const Value.absent(),
+    this.isFooterActive = const Value.absent(),
     this.createdAt = const Value.absent(),
   }) : htmlContent = Value(htmlContent);
   static Insertable<SavedCard> custom({
@@ -1553,6 +1719,11 @@ class SavedCardsCompanion extends UpdateCompanion<SavedCard> {
     Expression<String>? htmlContent,
     Expression<String>? footerText,
     Expression<String>? imagePath,
+    Expression<String>? frame,
+    Expression<String>? boxStyle,
+    Expression<String>? footerStyle,
+    Expression<String>? mainStyle,
+    Expression<bool>? isFooterActive,
     Expression<DateTime>? createdAt,
   }) {
     return RawValuesInsertable({
@@ -1561,6 +1732,11 @@ class SavedCardsCompanion extends UpdateCompanion<SavedCard> {
       if (htmlContent != null) 'html_content': htmlContent,
       if (footerText != null) 'footer_text': footerText,
       if (imagePath != null) 'image_path': imagePath,
+      if (frame != null) 'frame': frame,
+      if (boxStyle != null) 'box_style': boxStyle,
+      if (footerStyle != null) 'footer_style': footerStyle,
+      if (mainStyle != null) 'main_style': mainStyle,
+      if (isFooterActive != null) 'is_footer_active': isFooterActive,
       if (createdAt != null) 'created_at': createdAt,
     });
   }
@@ -1571,6 +1747,11 @@ class SavedCardsCompanion extends UpdateCompanion<SavedCard> {
       Value<String>? htmlContent,
       Value<String?>? footerText,
       Value<String?>? imagePath,
+      Value<String?>? frame,
+      Value<String?>? boxStyle,
+      Value<String?>? footerStyle,
+      Value<String?>? mainStyle,
+      Value<bool>? isFooterActive,
       Value<DateTime>? createdAt}) {
     return SavedCardsCompanion(
       id: id ?? this.id,
@@ -1578,6 +1759,11 @@ class SavedCardsCompanion extends UpdateCompanion<SavedCard> {
       htmlContent: htmlContent ?? this.htmlContent,
       footerText: footerText ?? this.footerText,
       imagePath: imagePath ?? this.imagePath,
+      frame: frame ?? this.frame,
+      boxStyle: boxStyle ?? this.boxStyle,
+      footerStyle: footerStyle ?? this.footerStyle,
+      mainStyle: mainStyle ?? this.mainStyle,
+      isFooterActive: isFooterActive ?? this.isFooterActive,
       createdAt: createdAt ?? this.createdAt,
     );
   }
@@ -1600,6 +1786,21 @@ class SavedCardsCompanion extends UpdateCompanion<SavedCard> {
     if (imagePath.present) {
       map['image_path'] = Variable<String>(imagePath.value);
     }
+    if (frame.present) {
+      map['frame'] = Variable<String>(frame.value);
+    }
+    if (boxStyle.present) {
+      map['box_style'] = Variable<String>(boxStyle.value);
+    }
+    if (footerStyle.present) {
+      map['footer_style'] = Variable<String>(footerStyle.value);
+    }
+    if (mainStyle.present) {
+      map['main_style'] = Variable<String>(mainStyle.value);
+    }
+    if (isFooterActive.present) {
+      map['is_footer_active'] = Variable<bool>(isFooterActive.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -1614,6 +1815,11 @@ class SavedCardsCompanion extends UpdateCompanion<SavedCard> {
           ..write('htmlContent: $htmlContent, ')
           ..write('footerText: $footerText, ')
           ..write('imagePath: $imagePath, ')
+          ..write('frame: $frame, ')
+          ..write('boxStyle: $boxStyle, ')
+          ..write('footerStyle: $footerStyle, ')
+          ..write('mainStyle: $mainStyle, ')
+          ..write('isFooterActive: $isFooterActive, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
@@ -2503,6 +2709,11 @@ typedef $$SavedCardsTableCreateCompanionBuilder = SavedCardsCompanion Function({
   required String htmlContent,
   Value<String?> footerText,
   Value<String?> imagePath,
+  Value<String?> frame,
+  Value<String?> boxStyle,
+  Value<String?> footerStyle,
+  Value<String?> mainStyle,
+  Value<bool> isFooterActive,
   Value<DateTime> createdAt,
 });
 typedef $$SavedCardsTableUpdateCompanionBuilder = SavedCardsCompanion Function({
@@ -2511,6 +2722,11 @@ typedef $$SavedCardsTableUpdateCompanionBuilder = SavedCardsCompanion Function({
   Value<String> htmlContent,
   Value<String?> footerText,
   Value<String?> imagePath,
+  Value<String?> frame,
+  Value<String?> boxStyle,
+  Value<String?> footerStyle,
+  Value<String?> mainStyle,
+  Value<bool> isFooterActive,
   Value<DateTime> createdAt,
 });
 
@@ -2537,6 +2753,22 @@ class $$SavedCardsTableFilterComposer
 
   ColumnFilters<String> get imagePath => $composableBuilder(
       column: $table.imagePath, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get frame => $composableBuilder(
+      column: $table.frame, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get boxStyle => $composableBuilder(
+      column: $table.boxStyle, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get footerStyle => $composableBuilder(
+      column: $table.footerStyle, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get mainStyle => $composableBuilder(
+      column: $table.mainStyle, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get isFooterActive => $composableBuilder(
+      column: $table.isFooterActive,
+      builder: (column) => ColumnFilters(column));
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnFilters(column));
@@ -2566,6 +2798,22 @@ class $$SavedCardsTableOrderingComposer
   ColumnOrderings<String> get imagePath => $composableBuilder(
       column: $table.imagePath, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get frame => $composableBuilder(
+      column: $table.frame, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get boxStyle => $composableBuilder(
+      column: $table.boxStyle, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get footerStyle => $composableBuilder(
+      column: $table.footerStyle, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get mainStyle => $composableBuilder(
+      column: $table.mainStyle, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get isFooterActive => $composableBuilder(
+      column: $table.isFooterActive,
+      builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
 }
@@ -2593,6 +2841,21 @@ class $$SavedCardsTableAnnotationComposer
 
   GeneratedColumn<String> get imagePath =>
       $composableBuilder(column: $table.imagePath, builder: (column) => column);
+
+  GeneratedColumn<String> get frame =>
+      $composableBuilder(column: $table.frame, builder: (column) => column);
+
+  GeneratedColumn<String> get boxStyle =>
+      $composableBuilder(column: $table.boxStyle, builder: (column) => column);
+
+  GeneratedColumn<String> get footerStyle => $composableBuilder(
+      column: $table.footerStyle, builder: (column) => column);
+
+  GeneratedColumn<String> get mainStyle =>
+      $composableBuilder(column: $table.mainStyle, builder: (column) => column);
+
+  GeneratedColumn<bool> get isFooterActive => $composableBuilder(
+      column: $table.isFooterActive, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -2626,6 +2889,11 @@ class $$SavedCardsTableTableManager extends RootTableManager<
             Value<String> htmlContent = const Value.absent(),
             Value<String?> footerText = const Value.absent(),
             Value<String?> imagePath = const Value.absent(),
+            Value<String?> frame = const Value.absent(),
+            Value<String?> boxStyle = const Value.absent(),
+            Value<String?> footerStyle = const Value.absent(),
+            Value<String?> mainStyle = const Value.absent(),
+            Value<bool> isFooterActive = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
           }) =>
               SavedCardsCompanion(
@@ -2634,6 +2902,11 @@ class $$SavedCardsTableTableManager extends RootTableManager<
             htmlContent: htmlContent,
             footerText: footerText,
             imagePath: imagePath,
+            frame: frame,
+            boxStyle: boxStyle,
+            footerStyle: footerStyle,
+            mainStyle: mainStyle,
+            isFooterActive: isFooterActive,
             createdAt: createdAt,
           ),
           createCompanionCallback: ({
@@ -2642,6 +2915,11 @@ class $$SavedCardsTableTableManager extends RootTableManager<
             required String htmlContent,
             Value<String?> footerText = const Value.absent(),
             Value<String?> imagePath = const Value.absent(),
+            Value<String?> frame = const Value.absent(),
+            Value<String?> boxStyle = const Value.absent(),
+            Value<String?> footerStyle = const Value.absent(),
+            Value<String?> mainStyle = const Value.absent(),
+            Value<bool> isFooterActive = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
           }) =>
               SavedCardsCompanion.insert(
@@ -2650,6 +2928,11 @@ class $$SavedCardsTableTableManager extends RootTableManager<
             htmlContent: htmlContent,
             footerText: footerText,
             imagePath: imagePath,
+            frame: frame,
+            boxStyle: boxStyle,
+            footerStyle: footerStyle,
+            mainStyle: mainStyle,
+            isFooterActive: isFooterActive,
             createdAt: createdAt,
           ),
           withReferenceMapper: (p0) => p0

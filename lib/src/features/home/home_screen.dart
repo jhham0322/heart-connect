@@ -106,7 +106,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
+              const Text(
                 "Today's Warmth",
                 style: TextStyle(
                   fontSize: 15,

@@ -1,0 +1,8 @@
+2025-12-23:
+- [Windows] Fixed build failure by ensuring cpp_client_wrapper files are present (flutter clean/build).
+- [Feature] Added RecipientInputFormatter for 3-4-4 phone number formatting without parentheses.
+- [Fix] Fixed MouseTracker assertion error by isolating RecipientManagerDialog and using post-frame callbacks.
+- [Fix] Fixed NotificationService test initialization error.
+- [Feature] Implemented local image selection using file_selector.
+- [Feature] Refactored card editor to allow background-only zoom/pan (1x-4x) using InteractiveViewer.
+- [Feature] Added boundary constraints for text box dragging to prevent it from moving outside the card area.

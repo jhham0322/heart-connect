@@ -1,0 +1,29 @@
+[33mcommit d905c4781e32db02daf87543464af8a6504dc0a5[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m
+Author: jhham0322 <ham0322@gmail.com>
+Date:   Mon Dec 22 22:38:57 2025 +0900
+
+    카드 에디터 부분 편집 기능 추가: QuillSelection 스타일 적용 및 툴바 동기화
+
+[33mcommit 49812703b4e81424b1e9d8e0dee3c3d29d671e87[m
+Author: jhham0322 <ham0322@gmail.com>
+Date:   Mon Dec 22 22:01:41 2025 +0900
+
+    UI 개선: Hero 애니메이션 적용 및 상단 여백 제거
+
+[33mcommit 1b34fa845227ccf861229bf3693b027f26f45555[m
+Author: jhham0322 <ham0322@gmail.com>
+Date:   Mon Dec 22 19:42:59 2025 +0900
+
+    WriteCard 독립 화면 전환, FAB 중복 제거, 스타일 버튼 오류 수정, 상단 여백 조정
+
+[33mcommit 001a922d8b29aadc9b105543fe64e15ee32e76e8[m
+Author: jhham0322 <ham0322@gmail.com>
+Date:   Mon Dec 22 19:29:52 2025 +0900
+
+    카드 에디터 UI 대폭 개선: 드래그 위치 유지, 툴바 동작 연결, 이미지 위 직접 편집, RepaintBoundary 캡처 기능 추가
+
+[33mcommit 026c1bb8968c5487e0b6bc3120af12e1b12be75e[m
+Author: jhham0322 <ham0322@gmail.com>
+Date:   Mon Dec 22 19:08:08 2025 +0900
+
+    UI 개선: 카드 미리보기 영역 확대, 중복 버튼 제거, 줄간격 축소, 글자크기 콤보박스(6-32), Footer 자동 저장/로드

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
+import 'package:heart_connect/src/features/alarm/notification_service.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -30,7 +31,21 @@ class SettingsScreen extends StatelessWidget {
                     children: [
                       const Text("Set Time\n9:00 AM", textAlign: TextAlign.right, style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
                       const SizedBox(height: 4),
-                      Switch(value: true, activeColor: const Color(0xFFA5D6A7), onChanged: (v){}),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          TextButton(
+                            onPressed: () {
+                              NotificationService.showNotification(
+                                title: "테스트 알림",
+                                body: "알람 화면이 호출되었습니다! 메시지를 확인하세요.",
+                              );
+                            },
+                            child: const Text("Test", style: TextStyle(fontSize: 10)),
+                          ),
+                          Switch(value: true, activeThumbColor: const Color(0xFFA5D6A7), onChanged: (v){}),
+                        ],
+                      ),
                     ],
                   ),
                 ),
@@ -41,7 +56,7 @@ class SettingsScreen extends StatelessWidget {
                   title: "Design & Sending",
                   desc: "카드 하단 브랜딩",
                   descIcon: FontAwesomeIcons.heart,
-                  action: Switch(value: true, activeColor: const Color(0xFFA5D6A7), onChanged: (v){}),
+                  action: Switch(value: true, activeThumbColor: const Color(0xFFA5D6A7), onChanged: (v){}),
                 ),
                 const SizedBox(height: 16),
                 _buildSettingCard(
@@ -87,7 +102,7 @@ class SettingsScreen extends StatelessWidget {
                 border: Border.all(color: const Color(0xFF5D4037)),
                 boxShadow: [BoxShadow(color: const Color(0xFF5D4037).withOpacity(0.1), offset: const Offset(0, 4))],
               ),
-              child: Row(
+              child: const Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   _FooterItem(icon: FontAwesomeIcons.user, label: "Account"),
@@ -122,9 +137,9 @@ class SettingsScreen extends StatelessWidget {
         children: [
           Container(
             width: 70,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: Colors.white, // In scan, it was transparent but here for layout
-              border: const Border(right: BorderSide(color: Color(0xFF5D4037), width: 2)),
+              border: Border(right: BorderSide(color: Color(0xFF5D4037), width: 2)),
             ),
             child: Container(
               color: iconBg, // Actually the whole left side has bg

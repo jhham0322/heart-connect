@@ -4,6 +4,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../database/app_database.dart';
 import '../database/database_provider.dart';
 import '../../theme/app_theme.dart';
+import 'contact_detail_screen.dart';
 
 class ContactsScreen extends ConsumerWidget {
   const ContactsScreen({super.key});
@@ -110,16 +111,16 @@ class ContactsScreen extends ConsumerWidget {
              ),
            ),
            const SizedBox(height: 12),
-           SingleChildScrollView(
+           const SingleChildScrollView(
              scrollDirection: Axis.horizontal,
              child: Row(
                children: [
                  _FilterChip(label: "전체", isActive: true),
-                 const SizedBox(width: 8),
+                 SizedBox(width: 8),
                  _FilterChip(label: "즐겨찾기"),
-                 const SizedBox(width: 8),
+                 SizedBox(width: 8),
                  _FilterChip(label: "최근 연락"),
-                 const SizedBox(width: 8),
+                 SizedBox(width: 8),
                  _FilterChip(label: "가족"),
                ],
              ),
@@ -130,47 +131,55 @@ class ContactsScreen extends ConsumerWidget {
   }
 
   Widget _buildContactCard(BuildContext context, Contact contact) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF5D4037).withOpacity(0.05)),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.03), offset: const Offset(0, 4), blurRadius: 10)
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 50, height: 50,
-            decoration: BoxDecoration(
-              color: const Color(0xFFFFF59D),
-              shape: BoxShape.circle,
-              border: Border.all(color: const Color(0xFF5D4037)),
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => ContactDetailScreen(contact: contact)),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFF5D4037).withOpacity(0.05)),
+          boxShadow: [
+            BoxShadow(color: Colors.black.withOpacity(0.03), offset: const Offset(0, 4), blurRadius: 10)
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 50, height: 50,
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFF59D),
+                shape: BoxShape.circle,
+                border: Border.all(color: const Color(0xFF5D4037)),
+              ),
+              child: const Center(child: Text("👩🏻", style: TextStyle(fontSize: 24))),
             ),
-            child: const Center(child: Text("👩🏻", style: TextStyle(fontSize: 24))),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(contact.name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Color(0xFF3E2723))),
-                const SizedBox(height: 2),
-                Text(contact.phone, style: const TextStyle(fontSize: 12, color: Color(0xFF795548), fontWeight: FontWeight.w500)),
-              ],
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(contact.name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Color(0xFF3E2723))),
+                  const SizedBox(height: 2),
+                  Text(contact.phone, style: const TextStyle(fontSize: 12, color: Color(0xFF795548), fontWeight: FontWeight.w500)),
+                ],
+              ),
             ),
-          ),
-          IconButton(
-            icon: Icon(
-              contact.isFavorite ? FontAwesomeIcons.solidHeart : FontAwesomeIcons.heart,
-              color: const Color(0xFFFF8A65),
-            ),
-            onPressed: () {}, // TODO: Toggle favorite
-          )
-        ],
+            IconButton(
+              icon: Icon(
+                contact.isFavorite ? FontAwesomeIcons.solidHeart : FontAwesomeIcons.heart,
+                color: const Color(0xFFFF8A65),
+              ),
+              onPressed: () {}, // TODO: Toggle favorite
+            )
+          ],
+        ),
       ),
     );
   }

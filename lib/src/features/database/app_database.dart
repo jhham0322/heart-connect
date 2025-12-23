@@ -53,6 +53,11 @@ class SavedCards extends Table {
   TextColumn get htmlContent => text()(); // HTML format for rich text support
   TextColumn get footerText => text().nullable()();
   TextColumn get imagePath => text().nullable()();
+  TextColumn get frame => text().nullable()();
+  TextColumn get boxStyle => text().nullable()();
+  TextColumn get footerStyle => text().nullable()();
+  TextColumn get mainStyle => text().nullable()();
+  BoolColumn get isFooterActive => boolean().withDefault(const Constant(false))();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 }
 
@@ -61,7 +66,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 3; // Incremented for new table
+  int get schemaVersion => 4; // Incremented for new table
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -76,6 +81,13 @@ class AppDatabase extends _$AppDatabase {
       if (from < 3) {
         // Create SavedCards table for version 3
         await m.createTable(savedCards);
+      }
+      if (from < 4) {
+        await m.addColumn(savedCards, savedCards.frame);
+        await m.addColumn(savedCards, savedCards.boxStyle);
+        await m.addColumn(savedCards, savedCards.footerStyle);
+        await m.addColumn(savedCards, savedCards.mainStyle);
+        await m.addColumn(savedCards, savedCards.isFooterActive);
       }
     },
   );

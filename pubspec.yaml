@@ -58,6 +58,8 @@ dependencies:
   flutter_quill: ^11.5.0
   flutter_quill_extensions: ^11.0.0
   vsc_quill_delta_to_html: ^1.0.5
+  file_selector: ^1.1.0
+  file_selector_windows: ^0.9.3+5
 
 dev_dependencies:
   flutter_test:
@@ -89,3 +91,4 @@ flutter:
     - assets/images/cards/my_photos/
     - assets/images/cards/favorites/
     - assets/images/cards/letters/
+    - assets/images/frame/

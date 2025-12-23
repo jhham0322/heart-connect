@@ -73,10 +73,10 @@ class ContactService extends AsyncNotifier<void> {
         groupTag: const Value('Family'),
         birthday: Value(now.add(const Duration(days: 30))), // Next Month
       ),
-      ContactsCompanion( // No birthday
-        name: const Value('하동훈'), 
-        phone: const Value('01077778888'), 
-        groupTag: const Value('Work')
+      const ContactsCompanion( // No birthday
+        name: Value('하동훈'), 
+        phone: Value('01077778888'), 
+        groupTag: Value('Work')
       ),
     ];
 

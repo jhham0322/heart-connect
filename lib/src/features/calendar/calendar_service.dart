@@ -75,7 +75,9 @@ class CalendarService {
     final t = (title ?? '').toLowerCase();
     
     if (c.contains('holiday') || t.contains('holiday') || t.contains('국경일') 
-        || t.contains('광복절') || t.contains('christmas') || t.contains('신정') || t.contains('설날')) return 'Holiday';
+        || t.contains('광복절') || t.contains('christmas') || t.contains('신정') || t.contains('설날')) {
+      return 'Holiday';
+    }
     if (c.contains('birthday') || t.contains('birthday') || t.contains('생일')) return 'Birthday';
     if (t.contains('anniversary') || t.contains('기념일') || t.contains('d-day') || t.contains('결혼')) return 'Anniversary';
     return 'Schedule';
