@@ -3070,44 +3070,66 @@ class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
                     ),
                     const Divider(height: 20, thickness: 1),
                     
-                    // List
+                    // List - MouseTracker 에러 방지: 발송 중에는 IgnorePointer로 감싸기
                     Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey.withOpacity(0.2)),
-                          borderRadius: BorderRadius.circular(8),
-                          color: const Color(0xFFFAFAFA),
-                        ),
-                        child: ListView.separated(
-                          padding: const EdgeInsets.all(8),
-                          itemCount: _localRecipients.length,
-                          separatorBuilder: (context, index) => const Divider(height: 1),
-                          itemBuilder: (context, index) {
-                            final recipient = _localRecipients[index];
-                            // Logic: if sending, check if pending. 
-                            // If sending started and not in pending, it's sent.
-                            // If sending not started, nothing is sent.
-                            
-                            bool isSent = false;
-                            if (_isSending || _sentCount > 0) {
-                                isSent = !_pendingRecipients.contains(recipient);
-                            }
+                      child: IgnorePointer(
+                        ignoring: _isSending, // 발송 중에만 마우스 이벤트 무시
+                        child: Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey.withOpacity(0.2)),
+                            borderRadius: BorderRadius.circular(8),
+                            color: const Color(0xFFFAFAFA),
+                          ),
+                          child: ListView.separated(
+                            padding: const EdgeInsets.all(8),
+                            itemCount: _localRecipients.length,
+                            separatorBuilder: (context, index) => const Divider(height: 1),
+                            itemBuilder: (context, index) {
+                              final recipient = _localRecipients[index];
+                              // Logic: if sending, check if pending. 
+                              // If sending started and not in pending, it's sent.
+                              // If sending not started, nothing is sent.
+                              
+                              bool isSent = false;
+                              if (_isSending || _sentCount > 0) {
+                                  isSent = !_pendingRecipients.contains(recipient);
+                              }
 
-                            return ListTile(
-                              dense: true,
-                              leading: CircleAvatar(
-                                backgroundColor: isSent ? Colors.green.withOpacity(0.1) : const Color(0xFFF29D86).withOpacity(0.1),
-                                child: Icon(Icons.person, size: 20, color: isSent ? Colors.green : const Color(0xFFF29D86)),
-                              ),
-                              title: Text(recipient, style: TextStyle(color: isSent ? Colors.grey : Colors.black87, decoration: isSent ? TextDecoration.lineThrough : null)),
-                              trailing: !_isSending 
-                                ? IconButton(
-                                    icon: const Icon(Icons.remove_circle_outline, size: 20, color: Colors.redAccent),
-                                    onPressed: () => _removeRecipient(index),
-                                  )
-                                : (isSent ? const Icon(Icons.check_circle, color: Colors.green, size: 20) : null),
-                            );
-                          },
+                              // MouseTracker 에러 방지: ListTile 대신 일반 Container 사용
+                              return Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+                                child: Row(
+                                  children: [
+                                    CircleAvatar(
+                                      radius: 18,
+                                      backgroundColor: isSent ? Colors.green.withOpacity(0.1) : const Color(0xFFF29D86).withOpacity(0.1),
+                                      child: Icon(Icons.person, size: 20, color: isSent ? Colors.green : const Color(0xFFF29D86)),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Text(
+                                        recipient, 
+                                        style: TextStyle(
+                                          color: isSent ? Colors.grey : Colors.black87, 
+                                          decoration: isSent ? TextDecoration.lineThrough : null,
+                                        ),
+                                      ),
+                                    ),
+                                    if (!_isSending)
+                                      GestureDetector(
+                                        onTap: () => _removeRecipient(index),
+                                        child: const Padding(
+                                          padding: EdgeInsets.all(8.0),
+                                          child: Icon(Icons.remove_circle_outline, size: 20, color: Colors.redAccent),
+                                        ),
+                                      )
+                                    else if (isSent)
+                                      const Icon(Icons.check_circle, color: Colors.green, size: 20),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
                         ),
                       ),
                     ),
