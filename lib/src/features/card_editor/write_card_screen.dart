@@ -3275,12 +3275,11 @@ class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  if (!_isSending) ...[
                     Row(
                       children: [
                         // MouseTracker 에러 방지: Checkbox 대신 GestureDetector 사용
                         GestureDetector(
-                          onTap: () {
+                          onTap: _isSending ? null : () {
                             _safeSetState(() => _autoContinue = !_autoContinue);
                           },
                           child: Container(
@@ -3301,74 +3300,77 @@ class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
                           ),
                         ),
                         GestureDetector(
-                          onTap: () {
+                          onTap: _isSending ? null : () {
                             _safeSetState(() => _autoContinue = !_autoContinue);
                           },
-                          child: const Text("5건 발송 후 자동 계속", style: TextStyle(fontSize: 14)),
+                          child: Text("5건 발송 후 자동 계속", style: TextStyle(fontSize: 14, color: _isSending ? Colors.grey : Colors.black)),
                         ),
                       ],
                     ),
                     Row(
                       children: [
                         TextButton(
-                          onPressed: () => Navigator.pop(context),
+                          onPressed: _isSending ? null : () => Navigator.pop(context),
                           style: TextButton.styleFrom(foregroundColor: Colors.grey),
                           child: const Text("닫기"),
                         ),
                         const SizedBox(width: 8),
-                        // MouseTracker 에러 방지: ElevatedButton 대신 GestureDetector 사용
-                        // 중복 클릭 방지: _isSending 체크
+                        // 발송 버튼: 발송 중일 때는 '발송 중...'으로 텍스트 변경하고 클릭 무시
                         GestureDetector(
                           onTap: () {
-                            if (_isSending) return; // 중복 클릭 방지
+                            if (_isSending) return; // 중복 클릭 방지 및 발송 중 클릭 방지
                             _startSending();
                           },
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFF29D86),
+                              color: _isSending ? Colors.grey : const Color(0xFFF29D86),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(
-                                  _sentCount > 0 && _pendingRecipients.isNotEmpty ? Icons.play_arrow : Icons.send, 
-                                  size: 18,
-                                  color: Colors.white,
-                                ),
+                                if (_isSending)
+                                  const SizedBox(
+                                    width: 18, 
+                                    height: 18, 
+                                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)
+                                  )
+                                else
+                                  Icon(
+                                    _sentCount > 0 && _pendingRecipients.isNotEmpty ? Icons.play_arrow : Icons.send, 
+                                    size: 18,
+                                    color: Colors.white,
+                                  ),
                                 const SizedBox(width: 8),
                                 Text(
-                                  _sentCount > 0 && _pendingRecipients.isNotEmpty ? "계속 발송" : "발송 시작",
+                                  _isSending 
+                                    ? "발송 중..." 
+                                    : (_sentCount > 0 && _pendingRecipients.isNotEmpty ? "계속 발송" : "발송 시작"),
                                   style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                                 ),
                               ],
                             ),
                           ),
                         ),
+                        if (_isSending) ...[
+                           const SizedBox(width: 8),
+                           GestureDetector(
+                             onTap: () {
+                               _safeSetState(() => _isSending = false);
+                             },
+                             child: Container(
+                               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                               decoration: BoxDecoration(
+                                 border: Border.all(color: Colors.red),
+                                 borderRadius: BorderRadius.circular(8),
+                               ),
+                               child: const Text("발송 중지", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red)),
+                             ),
+                           ),
+                        ],
                       ],
                     ),
-                  ] else ...[
-                     // MouseTracker 에러 방지: OutlinedButton 대신 GestureDetector 사용
-                     SizedBox(
-                       width: double.infinity,
-                       child: GestureDetector(
-                         onTap: () {
-                           _safeSetState(() => _isSending = false);
-                         },
-                         child: Container(
-                           padding: const EdgeInsets.symmetric(vertical: 16),
-                           decoration: BoxDecoration(
-                             border: Border.all(color: Colors.red),
-                             borderRadius: BorderRadius.circular(8),
-                           ),
-                           child: const Center(
-                             child: Text("발송 중지", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red)),
-                           ),
-                         ),
-                       ),
-                     ),
-                  ],
                 ],
               ),
             ),

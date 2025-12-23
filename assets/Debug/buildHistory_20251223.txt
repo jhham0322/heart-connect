@@ -12,3 +12,4 @@
 - [Fix] Fixed background image zoom/pan not being saved to thumbnail (implemented background capture).
 - [Fix] Corrected save name default value logic to use only the first line of text.
 - [Feature] Added persistence of background transformation state (zoom/pan) in drafts.
+- [Fix] Resolved MouseTracker error by disabling the send button instead of removing it from the widget tree during sending.
