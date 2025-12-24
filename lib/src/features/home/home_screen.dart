@@ -627,7 +627,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 8),
+              // Edit 버튼 (New)
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () {
+                    _showEditPlanDialog(context, plan);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.accentCoral.withOpacity(0.1),
+                    foregroundColor: AppTheme.accentCoral,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(50),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: const Icon(FontAwesomeIcons.penToSquare, size: 18),
+                ),
+              ),
+              const SizedBox(width: 8),
               // Option 버튼 (제거/연기)
               Expanded(
                 child: ElevatedButton(
@@ -1357,35 +1376,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  void _showContactPicker(BuildContext context, Function(List<Map<String, String>>) onSelected) async {
-    final db = ref.read(appDatabaseProvider);
-    final contacts = await db.getAllContacts();
-
+  void _showContactPicker(BuildContext context, Function(List<Map<String, String>>) onSelected) {
     showDialog(
       context: context,
-      builder: (dialogContext) => _ContactPickerDialog(
-        contacts: contacts,
+      builder: (context) => _ContactPickerDialog(
         onSelected: onSelected,
-        onAddNew: () async {
-          Navigator.pop(dialogContext);
-          final newContact = await _showManualContactDialog(context);
-          if (newContact != null) {
-            // newContact returns name only in previous implementation. 
-            // We need to fetch the contact or return Map.
-            // Let's modify _showManualContactDialog to return Map or just fetch latest contact.
-            final all = await db.getAllContacts();
-            final created = all.firstWhere((c) => c.name == newContact, orElse: () => all.last);
-            onSelected([{'name': created.name, 'phone': created.phone}]);
-          }
-        },
       ),
     );
   }
 
-  Future<String?> _showManualContactDialog(BuildContext context) async {
+  static Future<String?> _showManualContactDialog(BuildContext context, AppDatabase db) async {
     final nameController = TextEditingController();
     final phoneController = TextEditingController();
-    final db = ref.read(appDatabaseProvider);
 
     return showDialog<String>(
       context: context,
@@ -1438,29 +1440,58 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 }
 
-class _ContactPickerDialog extends StatefulWidget {
-  final List<Contact> contacts;
+class _ContactPickerDialog extends ConsumerStatefulWidget {
   final Function(List<Map<String, String>>) onSelected;
-  final VoidCallback onAddNew;
 
   const _ContactPickerDialog({
     Key? key,
-    required this.contacts,
     required this.onSelected,
-    required this.onAddNew,
   }) : super(key: key);
 
   @override
-  State<_ContactPickerDialog> createState() => _ContactPickerDialogState();
+  ConsumerState<_ContactPickerDialog> createState() => _ContactPickerDialogState();
 }
 
-class _ContactPickerDialogState extends State<_ContactPickerDialog> {
+class _ContactPickerDialogState extends ConsumerState<_ContactPickerDialog> {
   String _searchQuery = "";
   final Set<String> _selectedPhones = {};
+  List<Contact> _contacts = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadContacts();
+  }
+
+  Future<void> _loadContacts() async {
+    final db = ref.read(appDatabaseProvider);
+    final contacts = await db.getAllContacts();
+    if (mounted) {
+      setState(() {
+        _contacts = contacts;
+      });
+    }
+  }
+
+  Future<void> _handleAddNew() async {
+    final db = ref.read(appDatabaseProvider);
+    final newName = await _HomeScreenState._showManualContactDialog(context, db);
+    if (newName != null) {
+      await _loadContacts();
+      // Auto-select the new contact
+      final newContact = _contacts.firstWhere(
+        (c) => c.name == newName, 
+        orElse: () => _contacts.isNotEmpty ? _contacts.last : _contacts.first
+      );
+      setState(() {
+        _selectedPhones.add(newContact.phone);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final filtered = widget.contacts.where((c) => 
+    final filtered = _contacts.where((c) => 
       c.name.contains(_searchQuery) || c.phone.contains(_searchQuery)
     ).toList();
 
@@ -1503,28 +1534,27 @@ class _ContactPickerDialogState extends State<_ContactPickerDialog> {
                 },
               ),
             ),
-            const SizedBox(height: 10),
-            ElevatedButton.icon(
-              onPressed: widget.onAddNew,
-              icon: const Icon(Icons.person_add),
-              label: const Text("Add New Contact"),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFF29D86),
-                foregroundColor: Colors.white,
-                minimumSize: const Size(double.infinity, 45),
-              ),
-            ),
           ],
         ),
       ),
       actions: [
+        ElevatedButton.icon(
+          onPressed: _handleAddNew,
+          icon: const Icon(Icons.person_add, size: 16),
+          label: const Text("Add New"),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFFF29D86),
+            foregroundColor: Colors.white,
+            elevation: 0,
+          ),
+        ),
         TextButton(
           onPressed: () => Navigator.pop(context),
           child: const Text("Cancel"),
         ),
         ElevatedButton(
              onPressed: () {
-                 final selected = widget.contacts.where((c) => _selectedPhones.contains(c.phone)).map((c) => {
+                 final selected = _contacts.where((c) => _selectedPhones.contains(c.phone)).map((c) => {
                      'name': c.name,
                      'phone': c.phone,
                  }).toList();
