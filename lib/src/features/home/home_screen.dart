@@ -398,21 +398,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             });
                           },
                         )),
-                        ActionChip(
-                          avatar: const Icon(Icons.add, size: 16),
-                          label: const Text("Add"),
-                          onPressed: () {
-                            _showContactPicker(context, (selected) {
-                              setDialogState(() {
-                                for (var s in selected) {
-                                  if (!selectedRecipients.any((existing) => existing['phone'] == s['phone'])) {
-                                    selectedRecipients.add(s);
-                                  }
-                                }
-                              });
-                            });
-                          },
-                        ),
                       ],
                     ),
                     const SizedBox(height: 16),
@@ -825,19 +810,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   child: const Text("Cancel"),
                 ),
                 ElevatedButton(
-                  onPressed: () {
-                    if (titleController.text.isNotEmpty) {
-                       ref.read(homeViewModelProvider.notifier).updateScheduleDetails(
-                         plan.id,
-                         titleController.text,
-                         selectedDate,
-                         selectedType,
-                         recipients: selectedRecipients,
-                       );
-                       Navigator.pop(context);
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
+                    onPressed: () {
+                      print('Save Button Clicked');
+                      if (titleController.text.isNotEmpty) {
+                         print('Updating plan ${plan.id} with recipients: $selectedRecipients');
+                         ref.read(homeViewModelProvider.notifier).updateScheduleDetails(
+                           plan.id,
+                           titleController.text,
+                           selectedDate,
+                           selectedType,
+                           recipients: selectedRecipients,
+                         );
+                         Navigator.pop(context);
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.accentCoral,
                     foregroundColor: Colors.white,
                   ),
@@ -1538,31 +1525,43 @@ class _ContactPickerDialogState extends ConsumerState<_ContactPickerDialog> {
         ),
       ),
       actions: [
-        ElevatedButton.icon(
-          onPressed: _handleAddNew,
-          icon: const Icon(Icons.person_add, size: 16),
-          label: const Text("Add New"),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFFF29D86),
-            foregroundColor: Colors.white,
-            elevation: 0,
-          ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            // Add New Button
+            ElevatedButton.icon(
+              onPressed: _handleAddNew,
+              icon: const Icon(Icons.person_add, size: 16),
+              label: const Text("Add New"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFF29D86),
+                foregroundColor: Colors.white,
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+              ),
+            ),
+            const SizedBox(width: 8),
+            // Cancel Button
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Cancel"),
+            ),
+            const SizedBox(width: 8),
+            // Select Button
+            ElevatedButton(
+              onPressed: () {
+                final selected = _contacts.where((c) => _selectedPhones.contains(c.phone)).map((c) => {
+                  'name': c.name,
+                  'phone': c.phone,
+                }).toList();
+                print('ContactPicker: Selected ${selected.length} contacts');
+                widget.onSelected(selected);
+                Navigator.pop(context);
+              },
+              child: Text("Select (${_selectedPhones.length})"),
+            ),
+          ],
         ),
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text("Cancel"),
-        ),
-        ElevatedButton(
-             onPressed: () {
-                 final selected = _contacts.where((c) => _selectedPhones.contains(c.phone)).map((c) => {
-                     'name': c.name,
-                     'phone': c.phone,
-                 }).toList();
-                 widget.onSelected(selected);
-                 Navigator.pop(context);
-             },
-             child: Text("Select (${_selectedPhones.length})"),
-         )
       ],
     );
   }

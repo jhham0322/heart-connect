@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io'; // Added for File and FileMode
 import 'dart:convert'; // Added for JSON
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -104,65 +105,106 @@ class HomeViewModel extends StateNotifier<HomeState> {
     
     bool newPlansAdded = false;
     for (var e in calEvents) {
-       // AI Extraction Logic
+       // AI Extraction Logic & Direct Matching
        // "스캐줄에 포함된 이름을 인공지능이 타이틀 및 내용에서 사람 이름을 가져오는 기능"
-       // "사람의 내 핸드폰에 등록된 연락처와 일치하는 정보는 가져오고... 일치하지 않으면 발송 스캐줄에 등록하지 않는다"
        
        final extractedNames = await aiService.extractNames(e.title);
-       List<Map<String, String>> recipientList = [];
+       final Set<String> matchedPhones = {};
+       final List<Map<String, String>> recipientList = [];
        
-       bool isMatch = false;
-       if (extractedNames.isNotEmpty) {
+       // 1. Process AI Extracted Names
+       if (extractedNames.isNotEmpty && extractedNames != "NOTHING") {
            final names = extractedNames.split(',').map((s) => s.trim()).toList();
            for (var name in names) {
+               if (name.isEmpty) continue;
                // Find contacts matching name (LIKE search logic)
-               final matches = contacts.where((c) => c.name.contains(name)).toList();
-               if (matches.isNotEmpty) {
-                   isMatch = true;
-                   for (var match in matches) {
-                       // Avoid duplicates
-                       if (!recipientList.any((r) => r['phone'] == match.phone)) {
-                           recipientList.add({'name': match.name, 'phone': match.phone});
-                       }
-                   }
-               }
-           }
-       } else {
-           // Fallback: Check if title itself contains any contact name
-           final matches = contacts.where((c) => e.title.contains(c.name)).toList();
-           if (matches.isNotEmpty) {
-               isMatch = true;
+               // Normalize for matching: remove spaces
+               final cleanName = name.replaceAll(' ', '');
+               final matches = contacts.where((c) {
+                  final cleanContactName = c.name.replaceAll(' ', '');
+                  return cleanContactName.contains(cleanName) || cleanName.contains(cleanContactName);
+               }).toList();
+               
                for (var match in matches) {
-                   if (!recipientList.any((r) => r['phone'] == match.phone)) {
+                   if (matchedPhones.add(match.phone)) {
                        recipientList.add({'name': match.name, 'phone': match.phone});
                    }
                }
            }
+       } 
+
+       // 2. Direct String Matching (Fallback & Complementary)
+       // Check if title itself contains any contact name explicitly
+       // Also normalize spaces to handle "김 종 국" matching "김종국생일"
+       final cleanTitle = e.title.replaceAll(' ', '');
+       final directMatches = contacts.where((c) {
+           final cleanContactName = c.name.replaceAll(' ', '');
+           if (cleanContactName.isEmpty) return false;
+           return cleanTitle.contains(cleanContactName);
+       }).toList();
+
+       for (var match in directMatches) {
+           if (matchedPhones.add(match.phone)) {
+               recipientList.add({'name': match.name, 'phone': match.phone});
+           }
        }
 
-       if (!isMatch) continue;
+       if (recipientList.isEmpty) {
+          // Even if no recipients, check if we need to insert the calendar event
+          // But continue if we only want to sync events with recipients? 
+          // User said "events have names but no recipients saved", implying events exist.
+          // Let's proceed to check existence.
+       }
 
        final eDate = DateTime(e.date.year, e.date.month, e.date.day);
-       // Check if this event already exists in plans
-       final exists = plans.any((p) => 
-          p.date.year == eDate.year && 
-          p.date.month == eDate.month && 
-          p.date.day == eDate.day && 
-          (p.content == e.title || p.content.contains(e.title)) // Simple duplicate check
-       );
        
-       if (!exists) {
+       // Check if this event already exists in plans
+       DailyPlan? existingPlan;
+       try {
+         existingPlan = plans.firstWhere((p) => 
+            p.date.year == eDate.year && 
+            p.date.month == eDate.month && 
+            p.date.day == eDate.day && 
+            (p.content == e.title || p.content.contains(e.title))
+         );
+       } catch (_) {
+         existingPlan = null;
+       }
+       
+       if (existingPlan == null) {
+          if (recipientList.isEmpty) continue; // If forcing only recipient-events to be synced, keep this. 
+          // But likely we want all events. For now, let's keep existing behavior of filtering?
+          // No, if user sees the event, it must be in DB. 
+          // If it is NOT in DB, then it is not shown (since futureEvents comes from plans).
+          // So if user sees it, existingPlan is NOT null.
+          
           await db.insertPlan(DailyPlansCompanion.insert(
              date: eDate,
              content: e.title,
              type: Value(e.type),
-             goalCount: Value(5), // Standard goal for calendar events
-             isGenerated: Value(false), // Mark as external/manual
+             goalCount: Value(5),
+             isGenerated: Value(false),
              sortOrder: Value(0),
              isCompleted: Value(false),
-             recipients: Value(jsonEncode(recipientList)),
+             recipients: Value(recipientList.isEmpty ? null : jsonEncode(recipientList)),
           ));
           newPlansAdded = true;
+       } else {
+          // UPDATE: If plan exists but has no recipients (NULL), and we found some now.
+          // Note: We do NOT update if recipients is '[]' (empty list), as that implies user manually cleared it.
+          // Also check if recipients is empty string or "null" string just in case
+          final currentRecipients = existingPlan.recipients;
+          final isRecipientsNull = currentRecipients == null;
+          
+          if (isRecipientsNull && recipientList.isNotEmpty) {
+              print('[HomeViewModel] Auto-updating recipients for plan ${existingPlan.id} (${existingPlan.content}): $recipientList');
+              await db.updatePlanRecipients(existingPlan.id, jsonEncode(recipientList));
+              newPlansAdded = true; // Trigger reload
+          } else {
+              if (recipientList.isNotEmpty) {
+                 print('[HomeViewModel] Skipped auto-update for plan ${existingPlan.id}. Current recipients: $currentRecipients');
+              }
+          }
        }
     }
     
@@ -194,13 +236,13 @@ class HomeViewModel extends StateNotifier<HomeState> {
        // Parse recipients
        List<Map<String, String>> recipients = [];
        if (plan.recipients != null) {
-           try {
-               final List<dynamic> list = jsonDecode(plan.recipients!);
-               recipients = list.map((e) => Map<String, String>.from(e)).toList();
-           } catch (e) {
-               // ignore error
-           }
-       }
+        try {
+          final List<dynamic> list = jsonDecode(plan.recipients!);
+          recipients = list.map((e) => Map<String, String>.from(e)).toList();
+        } catch (e) {
+          print('[HomeViewModel] Error parsing recipients for plan ${plan.id}: $e');
+        }
+      }
 
        // Today Plans & Extended Range (D-5)
        // "내일이 성탄절 D-5 까지 오늘의 카드로 올려줘"
@@ -332,19 +374,60 @@ class HomeViewModel extends StateNotifier<HomeState> {
 
   Future<void> updateScheduleDetails(int id, String title, DateTime date, String type, {List<Map<String, String>> recipients = const []}) async {
     final db = ref.read(appDatabaseProvider);
-    // Update Local DB
-    await db.updatePlanDetailsWithRecipients(id, title, date, type, jsonEncode(recipients));
+    final jsonRecipients = jsonEncode(recipients);
+    final logMsg = '[HomeViewModel] Updating schedule $id with recipients: $jsonRecipients';
+    print(logMsg);
+    _logToDebugFile(logMsg);
+    
+    await db.updatePlanDetailsWithRecipients(id, title, date, type, jsonRecipients);
+    
+    // Verify update
+    final updatedPlan = await db.getPlan(id);
+    _logToDebugFile('[HomeViewModel] Verified update for plan $id. New recipients in DB: ${updatedPlan.recipients}');
+    
     loadData();
   }
 
   Future<void> addSchedule(String title, DateTime date, {String type = 'Schedule', List<Map<String, String>> recipients = const []}) async {
     final db = ref.read(appDatabaseProvider);
     final calendarService = ref.read(calendarServiceProvider);
+    final aiService = AiService();
 
-    // 1. Add to Device Calendar
+    // 1. AI Name Extraction if recipients are empty
+    List<Map<String, String>> finalRecipients = [...recipients];
+    if (finalRecipients.isEmpty) {
+      try {
+        final extractedNames = await aiService.extractNames(title);
+        if (extractedNames.isNotEmpty && extractedNames != "NOTHING") {
+           final contacts = await db.getAllContacts();
+           final names = extractedNames.split(',').map((s) => s.trim()).toList();
+           final Set<String> matchedPhones = {};
+           
+           for (var name in names) {
+               if (name.isEmpty) continue;
+               final cleanName = name.replaceAll(' ', '');
+               final matches = contacts.where((c) {
+                  final cleanContactName = c.name.replaceAll(' ', '');
+                  return cleanContactName.contains(cleanName) || cleanName.contains(cleanContactName);
+               }).toList();
+               
+               for (var match in matches) {
+                   if (matchedPhones.add(match.phone)) {
+                       finalRecipients.add({'name': match.name, 'phone': match.phone});
+                   }
+               }
+           }
+           _logToDebugFile('[HomeViewModel] AI extracted recipients for "$title": $finalRecipients');
+        }
+      } catch (e) {
+        _logToDebugFile('[HomeViewModel] AI extraction error: $e');
+      }
+    }
+
+    // 2. Add to Device Calendar
     await calendarService.addEvent(title, date);
 
-    // 2. Add to Local DB
+    // 3. Add to Local DB
     await db.insertPlan(DailyPlansCompanion.insert(
       date: date,
       content: title,
@@ -353,11 +436,30 @@ class HomeViewModel extends StateNotifier<HomeState> {
       isGenerated: const Value(false),
       sortOrder: const Value(0),
       isCompleted: const Value(false),
-      recipients: Value(jsonEncode(recipients)),
+      recipients: Value(jsonEncode(finalRecipients)),
     ));
 
-    // 3. Refresh
+    // 4. Refresh
     loadData();
+  }
+
+  Future<void> _logToDebugFile(String message) async {
+    try {
+      final file = File('Assets/Debug/debug.txt');
+      if (!await file.exists()) {
+        await file.create(recursive: true);
+      }
+      final timestamp = DateTime.now().toString();
+      final logLine = '$timestamp: $message\n';
+      
+      // Write to file
+      await file.writeAsString(logLine, mode: FileMode.append);
+      
+      // Also print to console for immediate visibility if user is monitoring console
+      print('DEBUG_LOG: $logLine');
+    } catch (e) {
+      print('Failed to write to debug file: $e');
+    }
   }
 
   Future<void> activateFuturePlan(int id) async {

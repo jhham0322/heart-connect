@@ -11,3 +11,20 @@
 10. AI Extraction: Verified AiService.extractNames() with Gemini.
 11. Recipient UI: Verified Multi-selection UI in _showAddEventDialog/_showEditEventDialog.
 12. Logic: Verified LIKE search and auto-population in HomeViewModel.
+13. Button Layout: Fixed 'Add New' button in contact picker to be horizontal and next to 'Cancel'.
+14. Recipient Saving: Fixed schema migration (v9 -> v10) and added explicit DB repair logic. Verified logs.
+15. Name Extraction: Switched to "Offline-First Strategy". 
+    - Priority 1: Embedded Lightweight Logic (Instant, works on all devices).
+    - Priority 2: On-Device AI (Gemini Nano) for compatible Android devices.
+    - Disabled Server AI fallback completely (Privacy/Offline focused).
+2025-12-24 22:20:09.847713: [AppDatabase] Executing UPDATE DailyPlans: id=2, title=성탄절, recipients=[{"name":"유재석","phone":"01012345678"},{"name":"김종국","phone":"01098765432"},{"name":"송지효","phone":"01055554444"},{"name":"하동훈","phone":"01077778888"},{"name":"수신자 1","phone":"010-0000-0001"},{"name":"수신자 2","phone":"010-0000-0002"},{"name":"수신자 3","phone":"010-0000-0003"},{"name":"수신자 4","phone":"010-0000-0004"},{"name":"수신자 5","phone":"010-0000-0005"},{"name":"수신자 6","phone":"010-0000-0006"},{"name":"수신자 7","phone":"010-0000-0007"},{"name":"수신자 8","phone":"010-0000-0008"},{"name":"수신자 9","phone":"010-0000-0009"},{"name":"수신자 10","phone":"010-0000-0010"},{"name":"수신자 11","phone":"010-0000-0011"},{"name":"수신자 12","phone":"010-0000-0012"},{"name":"수신자 13","phone":"010-0000-0013"},{"name":"수신자 14","phone":"010-0000-0014"}]
+2025-12-24 22:20:09.870957: [HomeViewModel] Verified update for plan 2. New recipients in DB: [{"name":"유재석","phone":"01012345678"},{"name":"김종국","phone":"01098765432"},{"name":"송지효","phone":"01055554444"},{"name":"하동훈","phone":"01077778888"},{"name":"수신자 1","phone":"010-0000-0001"},{"name":"수신자 2","phone":"010-0000-0002"},{"name":"수신자 3","phone":"010-0000-0003"},{"name":"수신자 4","phone":"010-0000-0004"},{"name":"수신자 5","phone":"010-0000-0005"},{"name":"수신자 6","phone":"010-0000-0006"},{"name":"수신자 7","phone":"010-0000-0007"},{"name":"수신자 8","phone":"010-0000-0008"},{"name":"수신자 9","phone":"010-0000-0009"},{"name":"수신자 10","phone":"010-0000-0010"},{"name":"수신자 11","phone":"010-0000-0011"},{"name":"수신자 12","phone":"010-0000-0012"},{"name":"수신자 13","phone":"010-0000-0013"},{"name":"수신자 14","phone":"010-0000-0014"}]
+2025-12-24 22:20:45.180364: [HomeViewModel] Updating schedule 6 with recipients: [{"name":"김종국","phone":"01098765432"}]
+�종국","phone":"01098765432"}]
+2025-12-24 22:20:45.198903: [HomeViewModel] Verified update for plan 6. New recipients in DB: [{"name":"김종국","phone":"01098765432"}]
+2025-12-24 22:22:30.817324: [HomeViewModel] Updating schedule 6 with recipients: []
+��종국 Birthday, recipients=[]
+2025-12-24 22:22:30.835364: [HomeViewModel] Verified update for plan 6. New recipients in DB: []
+2025-12-24 22:49:40.871895: [AppDatabase] Executing UPDATE DailyPlans: id=6, title=김종국 Birthday, recipients=[{"name":"송지효","phone":"01055554444"},{"name":"하동훈","phone":"01077778888"}]
+2025-12-24 22:49:40.878507: [AppDatabase] Update Result: 1 rows affected for plan 6
+2025-12-24 22:49:40.881410: [HomeViewModel] Verified update for plan 6. New recipients in DB: [{"name":"송지효","phone":"01055554444"},{"name":"하동훈","phone":"01077778888"}]

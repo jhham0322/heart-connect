@@ -91,7 +91,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(QueryExecutor e) : super(e);
 
   @override
-  int get schemaVersion => 9; // Incremented for DailyPlans recipients update
+  int get schemaVersion => 10; // Incremented to force migration check
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -129,11 +129,32 @@ class AppDatabase extends _$AppDatabase {
         await m.addColumn(dailyPlans, dailyPlans.isCompleted);
         await m.addColumn(dailyPlans, dailyPlans.sortOrder);
       }
+      if (from < 9) {
+        await m.addColumn(dailyPlans, dailyPlans.recipients);
+      }
+      if (from < 10) {
+        // Version 10: Ensure recipients column exists (re-run of 9 if needed, but Drift handles versioning)
+        // No new schema changes, just a bump to trigger migration logic if it was missed.
+      }
     },
     beforeOpen: (details) async {
       final count = await select(holidays).get();
       if (count.isEmpty) {
         await _insertDefaultHolidays(this);
+      }
+
+      // FIX: Ensure 'recipients' column exists in daily_plans (Manual repair)
+      try {
+        final columns = await customSelect('PRAGMA table_info(daily_plans)').get();
+        final hasRecipients = columns.any((row) => row.read<String>('name') == 'recipients');
+        if (!hasRecipients) {
+          print('[AppDatabase] Repairing DB: Adding missing recipients column to daily_plans');
+          await customStatement('ALTER TABLE daily_plans ADD COLUMN recipients TEXT NULL');
+        } else {
+           print('[AppDatabase] recipients column exists.');
+        }
+      } catch (e) {
+        print('[AppDatabase] Error checking/repairing schema: $e');
       }
     },
   );
@@ -276,12 +297,37 @@ class AppDatabase extends _$AppDatabase {
   }
 
   Future<void> updatePlanDetailsWithRecipients(int id, String title, DateTime date, String type, String? recipients) {
+    print('[AppDatabase] Executing UPDATE DailyPlans: id=$id, title=$title, recipients=$recipients');
+    _logToDebugFile('[AppDatabase] Executing UPDATE DailyPlans: id=$id, title=$title, recipients=$recipients');
     return (update(dailyPlans)..where((t) => t.id.equals(id))).write(
       DailyPlansCompanion(
         content: Value(title),
         date: Value(date),
         type: Value(type),
-        recipients: recipients != null ? Value(recipients) : const Value.absent(),
+        recipients: Value(recipients),
+      )
+    ).then((rows) {
+      _logToDebugFile('[AppDatabase] Update Result: $rows rows affected for plan $id');
+      print('[AppDatabase] Update Result: $rows rows affected for plan $id');
+    });
+  }
+
+  Future<void> _logToDebugFile(String message) async {
+    try {
+      final file = File('Assets/Debug/debug.txt');
+      if (!await file.exists()) {
+        await file.create(recursive: true);
+      }
+      await file.writeAsString('${DateTime.now()}: $message\n', mode: FileMode.append);
+    } catch (e) {
+      print('Failed to write to debug file: $e');
+    }
+  }
+
+  Future<void> updatePlanRecipients(int id, String? recipients) {
+    return (update(dailyPlans)..where((t) => t.id.equals(id))).write(
+      DailyPlansCompanion(
+        recipients: Value(recipients),
       )
     );
   }
