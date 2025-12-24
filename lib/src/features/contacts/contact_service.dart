@@ -56,24 +56,24 @@ class ContactService extends AsyncNotifier<void> {
     final now = DateTime.now();
     final mockContacts = [
       ContactsCompanion(
-        name: const Value('유재석'), 
-        phone: const Value('01012345678'), 
-        groupTag: const Value('Friend'),
+        name: Value('유재석'), 
+        phone: Value('01012345678'), 
+        groupTag: Value('Friend'),
         birthday: Value(now.add(const Duration(days: 1))), // Tomorrow
       ),
       ContactsCompanion(
-        name: const Value('김종국'), 
-        phone: const Value('01098765432'), 
-        groupTag: const Value('Gym'),
+        name: Value('김종국'), 
+        phone: Value('01098765432'), 
+        groupTag: Value('Gym'),
         birthday: Value(now.add(const Duration(days: 7))), // D-7
       ),
       ContactsCompanion(
-        name: const Value('송지효'), 
-        phone: const Value('01055554444'), 
-        groupTag: const Value('Family'),
+        name: Value('송지효'), 
+        phone: Value('01055554444'), 
+        groupTag: Value('Family'),
         birthday: Value(now.add(const Duration(days: 30))), // Next Month
       ),
-      const ContactsCompanion( // No birthday
+      ContactsCompanion( // No birthday
         name: Value('하동훈'), 
         phone: Value('01077778888'), 
         groupTag: Value('Work')
@@ -96,16 +96,16 @@ class ContactService extends AsyncNotifier<void> {
        if (contact.name == '유재석') {
           await db.insertHistory(HistoryCompanion(
             contactId: Value(contact.id),
-            type: const Value('RECEIVED'),
-            message: const Value('이번 주 촬영 어때?'),
+            type: Value('RECEIVED'),
+            message: Value('이번 주 촬영 어때?'),
             eventDate: Value(DateTime.now().subtract(const Duration(days: 1))),
           ));
        }
        if (contact.name == '송지효') {
           await db.insertHistory(HistoryCompanion(
              contactId: Value(contact.id),
-             type: const Value('RECEIVED'),
-             message: const Value('오빠, 생일 축하해! 🎂'),
+             type: Value('RECEIVED'),
+             message: Value('오빠, 생일 축하해! 🎂'),
              eventDate: Value(DateTime.now().subtract(const Duration(hours: 5))),
           ));
        }

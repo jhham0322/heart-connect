@@ -117,4 +117,35 @@ class AiService {
       return "AI가 잠시 바빠서 응답하지 못했지만, 행복한 하루 보내세요! (Offline Fallback)";
     }
   }
+
+  /// Extracts person names from the given text.
+  /// Returns a comma-separated string of names (e.g., "John, Mary").
+  Future<String> extractNames(String text) async {
+    if (text.trim().isEmpty) return "";
+
+    final prompt = '''
+      Extract person names from the following text.
+      
+      Text: "$text"
+      
+      Instructions:
+      - Return ONLY the names separated by commas.
+      - If no names are found, return NOTHING (empty string).
+      - Do not include titles (Mr., Mrs.) or context.
+      - If the text is "Meeting with John", return "John".
+      - If the text is "Dad's Birthday", return "Dad" (or "아버지" if Korean).
+      - DETECT language and output names as they appear.
+    ''';
+
+    try {
+      final content = [Content.text(prompt)];
+      final response = await _serverModel.generateContent(content);
+      final names = response.text?.trim() ?? "";
+      debugPrint('[AiService] Extracted Names: $names');
+      return names;
+    } catch (e) {
+      debugPrint('[AiService] Name extraction failed: $e');
+      return "";
+    }
+  }
 }

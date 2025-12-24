@@ -1,0 +1,13 @@
+[Verification Log - 2025-12-24]
+1. Recipient Count Display: Verified logic in write_card_screen.dart (lines 2900+). Shows "0/1" dynamically.
+2. Original Message: Verified BottomSheet implementation in write_card_screen.dart. Shows full content in dialog.
+3. Frame Button: Verified visibility toggle (commented out in write_card_screen.dart).
+4. Phone Formatting: Verified PhoneInputFormatter class and formatPhone utility. 01012345678 -> 010-1234-5678.
+5. Calendar Filtering: Verified logic in home_view_model.dart (lines 100-104). Filters by contact name match.
+6. Edit Plan Dialog: Verified _showEditPlanDialog in home_screen.dart. Includes contact search.
+7. Build Errors: Resolved G4020727C (const Value) errors.
+8. Context Issue: Fixed Navigator.pop context in _showContactPicker.
+9. Database Schema: Added 'recipients' column to DailyPlans table (v9).
+10. AI Extraction: Verified AiService.extractNames() with Gemini.
+11. Recipient UI: Verified Multi-selection UI in _showAddEventDialog/_showEditEventDialog.
+12. Logic: Verified LIKE search and auto-population in HomeViewModel.

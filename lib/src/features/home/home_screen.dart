@@ -1,19 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Added for TextInputFormatter
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
+import 'package:drift/drift.dart' hide Column; // Added for Value
 import '../../theme/app_theme.dart';
 import '../contacts/contact_service.dart';
 import 'home_view_model.dart';
-
-// 템플릿 카드용 모델
-class TemplateCard {
-  final String emoji;
-  final String title;
-  final String subtitle;
-
-  const TemplateCard({required this.emoji, required this.title, this.subtitle = ''});
-}
+import '../database/app_database.dart'; // Import for DailyPlan
+import '../database/database_provider.dart'; // Added for appDatabaseProvider
+import '../../utils/phone_formatter.dart'; // Added phone formatter utility
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -27,14 +24,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   late PageController _pageController;
   int _currentPage = 0;
   
-  // 템플릿 데이터 (하드코딩)
-  final List<TemplateCard> _cards = const [
-    TemplateCard(emoji: '🎂', title: 'Birthday', subtitle: 'Classic'),
-    TemplateCard(emoji: '🎓', title: 'Graduation', subtitle: 'Celebration'),
-    TemplateCard(emoji: '🎄', title: 'Christmas', subtitle: 'Season'),
-    TemplateCard(emoji: '💖', title: 'Love', subtitle: 'Romantic'),
-  ];
-
   @override
   void initState() {
     super.initState();
@@ -69,31 +58,33 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final progress = (homeState.totalGoal > 0) 
         ? (homeState.sentCount / homeState.totalGoal).clamp(0.0, 1.0)
         : 0.0;
+    
+    // Today Plans (Filtered by completion status already in VM)
+    final todayPlans = homeState.todayPlans;
 
-    return SingleChildScrollView(
-      physics: const BouncingScrollPhysics(),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 16),
+    return Column(
+      children: [
+        const SizedBox(height: 16),
 
-          // B. 온도 섹션 (Warmth Meter)
-          _buildWarmthSection(homeState.sentCount, homeState.totalGoal, progress),
-          
-          const SizedBox(height: 24),
+        // B. 온도 섹션 (Warmth Meter)
+        if (homeState.totalGoal > 0)
+           _buildWarmthSection(homeState.sentCount, homeState.totalGoal, progress)
+        else 
+           const SizedBox(height: 10), // Minimal spacing if no goal
+        
+        if (homeState.totalGoal > 0) const SizedBox(height: 24),
 
-          // C. 카드 캐러셀
-          _buildCardCarousel(),
+        // C. 카드 캐러셀 (오늘 계획)
+        if (todayPlans.isNotEmpty)
+          _buildCardCarousel(todayPlans)
+        else
+          _buildEmptyTodayState(), 
 
-          const SizedBox(height: 32),
+        if (todayPlans.isNotEmpty) const SizedBox(height: 32),
 
-          // D. 다가오는 일정
-          _buildUpcomingEvents(homeState.upcomingEvents),
-          
-          // 하단 네비게이션 여백
-          const SizedBox(height: 120),
-        ],
-      ),
+        // D. 다가오는 일정
+        Expanded(child: _buildUpcomingEvents(homeState.upcomingEvents)),
+      ],
     );
   }
 
@@ -177,8 +168,72 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  /// C. 카드 캐러셀 (템플릿 선택)
-  Widget _buildCardCarousel() {
+  Widget _buildEmptyTodayState() {
+     return Center(
+       child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: AppTheme.white,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: AppTheme.grayLight),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.03),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+             mainAxisSize: MainAxisSize.min,
+             children: [
+                const Icon(FontAwesomeIcons.calendarCheck, size: 40, color: AppTheme.accentCoral),
+                const SizedBox(height: 16),
+                const Text(
+                   "No plans for today",
+                   style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.textPrimary,
+                   ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                   "Check upcoming events or create a new plan.",
+                   style: TextStyle(
+                      fontSize: 14,
+                      color: AppTheme.textSecondary,
+                   ),
+                   textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                   onPressed: () {
+                      // Navigate to calendar or show create dialog
+                      // For now, let's just show a simple snackbar or navigate to write if that's the intention
+                      // Or ideally, open a 'Create Plan' dialog.
+                      // Since we don't have a dedicated 'Create Plan' screen yet, we can open the Calendar page if available,
+                      // or just show a message.
+                      // Let's assume navigating to Calendar is a good option.
+                      context.go('/calendar'); 
+                   },
+                   style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.accentCoral,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                   ),
+                   child: const Text("Check Calendar"),
+                )
+             ],
+          ),
+       ),
+     );
+  }
+
+  /// C. 카드 캐러셀 (오늘 계획)
+  Widget _buildCardCarousel(List<DailyPlan> plans) {
     return SizedBox(
       height: 340,
       child: PageView.builder(
@@ -188,12 +243,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             _currentPage = index;
           });
         },
-        itemCount: _cards.length,
+        // +1 for the "Add Schedule" card at the end
+        itemCount: plans.length + 1,
         physics: const BouncingScrollPhysics(),
         itemBuilder: (context, index) {
-          final card = _cards[index];
           final isActive = index == _currentPage;
+
+          // If last item, show Add Schedule Card
+          if (index == plans.length) {
+            return AnimatedScale(
+              scale: isActive ? 1.0 : 0.92,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOutCubic,
+              child: AnimatedOpacity(
+                opacity: isActive ? 1.0 : 0.6,
+                duration: const Duration(milliseconds: 300),
+                child: _buildAddScheduleCard(isActive),
+              ),
+            );
+          }
           
+          final plan = plans[index];
           return AnimatedScale(
             scale: isActive ? 1.0 : 0.92,
             duration: const Duration(milliseconds: 300),
@@ -201,7 +271,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             child: AnimatedOpacity(
               opacity: isActive ? 1.0 : 0.6,
               duration: const Duration(milliseconds: 300),
-              child: _buildTemplateCard(card, isActive),
+              child: _buildDailyPlanCard(plan, isActive),
             ),
           );
         },
@@ -209,7 +279,275 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Widget _buildTemplateCard(TemplateCard card, bool isActive) {
+  Widget _buildAddScheduleCard(bool isActive) {
+    return GestureDetector(
+      onTap: () {
+        _showAddEventDialog(context);
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: isActive ? AppTheme.cardBg : AppTheme.white,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: isActive ? AppTheme.accentCoral : AppTheme.grayBtn,
+            width: isActive ? 2 : 1,
+            style: BorderStyle.solid
+          ),
+          boxShadow: isActive
+              ? [
+                  BoxShadow(
+                    color: AppTheme.textPrimary.withOpacity(0.08),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                  ),
+                ]
+              : [],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              FontAwesomeIcons.plus,
+              size: 50,
+              color: isActive ? AppTheme.accentCoral : AppTheme.grayBtn,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              "Add Schedule",
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: isActive ? AppTheme.textPrimary : AppTheme.textSecondary,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              "Add to Calendar & App",
+              style: TextStyle(
+                fontSize: 14,
+                color: AppTheme.textSecondary.withOpacity(0.8),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showAddEventDialog(BuildContext context) {
+    final titleController = TextEditingController();
+    DateTime selectedDate = DateTime.now();
+    String selectedType = 'Normal'; // Default
+    List<Map<String, String>> selectedRecipients = [];
+
+    // Icons map for selection
+    final Map<String, IconData> typeIcons = {
+      'Normal': FontAwesomeIcons.calendarDay,
+      'Holiday': FontAwesomeIcons.flag,
+      'Birthday': FontAwesomeIcons.cakeCandles,
+      'Anniversary': FontAwesomeIcons.heart,
+      'Work': FontAwesomeIcons.briefcase,
+      'Personal': FontAwesomeIcons.user,
+      'Important': FontAwesomeIcons.star,
+    };
+
+    final Map<String, Color> typeColors = {
+      'Normal': Colors.blue,
+      'Holiday': Colors.redAccent,
+      'Birthday': Colors.orangeAccent,
+      'Anniversary': Colors.pinkAccent,
+      'Work': Colors.brown,
+      'Personal': Colors.green,
+      'Important': Colors.amber,
+    };
+    
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Text("Add New Schedule"),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TextField(
+                      controller: titleController,
+                      decoration: const InputDecoration(
+                        labelText: "Title",
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text("Recipients", style: TextStyle(fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        ...selectedRecipients.map((r) => Chip(
+                          label: Text(r['name'] ?? ''),
+                          onDeleted: () {
+                            setDialogState(() {
+                              selectedRecipients.remove(r);
+                            });
+                          },
+                        )),
+                        ActionChip(
+                          avatar: const Icon(Icons.add, size: 16),
+                          label: const Text("Add"),
+                          onPressed: () {
+                            _showContactPicker(context, (selected) {
+                              setDialogState(() {
+                                for (var s in selected) {
+                                  if (!selectedRecipients.any((existing) => existing['phone'] == s['phone'])) {
+                                    selectedRecipients.add(s);
+                                  }
+                                }
+                              });
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    ListTile(
+                      title: Text("Date: ${DateFormat('yyyy-MM-dd').format(selectedDate)}"),
+                      trailing: const Icon(FontAwesomeIcons.calendar),
+                      onTap: () async {
+                        final picked = await showDatePicker(
+                          context: context,
+                          initialDate: selectedDate,
+                          firstDate: DateTime.now(),
+                          lastDate: DateTime.now().add(const Duration(days: 365)),
+                        );
+                        if (picked != null) {
+                          setDialogState(() {
+                            selectedDate = picked;
+                          });
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    const Text("Icon Type", style: TextStyle(fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 12,
+                      runSpacing: 12,
+                      children: typeIcons.entries.map((entry) {
+                        final isSelected = selectedType == entry.key;
+                        return GestureDetector(
+                          onTap: () {
+                            setDialogState(() {
+                              selectedType = entry.key;
+                            });
+                          },
+                          child: Column(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: isSelected 
+                                      ? typeColors[entry.key]!.withOpacity(0.2) 
+                                      : Colors.grey.withOpacity(0.1),
+                                  shape: BoxShape.circle,
+                                  border: isSelected 
+                                      ? Border.all(color: typeColors[entry.key]!, width: 2) 
+                                      : null,
+                                ),
+                                child: Icon(
+                                  entry.value, 
+                                  size: 20, 
+                                  color: isSelected ? typeColors[entry.key] : Colors.grey,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                entry.key, 
+                                style: TextStyle(
+                                  fontSize: 10, 
+                                  color: isSelected ? typeColors[entry.key] : Colors.grey
+                                )
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("Cancel"),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    if (titleController.text.isNotEmpty) {
+                      ref.read(homeViewModelProvider.notifier).addSchedule(
+                        titleController.text,
+                        selectedDate,
+                        type: selectedType,
+                        recipients: selectedRecipients,
+                      );
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("Schedule added to Calendar & App!")),
+                      );
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(backgroundColor: AppTheme.accentCoral, foregroundColor: Colors.white),
+                  child: const Text("Add"),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildDailyPlanCard(DailyPlan plan, bool isActive) {
+    // Determine Icon and Emoji based on plan type
+    String emoji = '📅';
+    String subtitle = 'Event';
+    
+    switch(plan.type) {
+       case 'Birthday': 
+          emoji = '🎂'; 
+          subtitle = 'Birthday';
+          break;
+       case 'Holiday': 
+          emoji = '🎉'; 
+          subtitle = 'Holiday';
+          break;
+       case 'Anniversary': 
+          emoji = '💖'; 
+          subtitle = 'Anniversary';
+          break;
+       case 'Work':
+          emoji = '💼';
+          subtitle = 'Work';
+          break;
+       case 'Personal':
+          emoji = '🏠';
+          subtitle = 'Personal';
+          break;
+       case 'Important':
+          emoji = '⭐';
+          subtitle = 'Important';
+          break;
+       case 'Normal':
+          emoji = '📝';
+          subtitle = 'Daily Task';
+          break;
+    }
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
       padding: const EdgeInsets.all(24),
@@ -235,15 +573,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         children: [
           // 이모지
           Text(
-            card.emoji,
+            emoji,
             style: const TextStyle(fontSize: 72),
           ),
           const SizedBox(height: 16),
           // 제목
           Text(
-            card.subtitle.isNotEmpty 
-                ? "${card.title}\n(${card.subtitle})" 
-                : card.title,
+            "${plan.content}\n($subtitle)",
             style: const TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.w800,
@@ -251,6 +587,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               height: 1.2
             ),
             textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 24),
           // 버튼들
@@ -261,7 +599,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 flex: 2,
                 child: ElevatedButton(
                   onPressed: () {
-                    // 선택된 템플릿 정보를 가지고 이동 (나중에 arguments로 넘길 수 있음)
                     context.push('/write');
                   },
                   style: ElevatedButton.styleFrom(
@@ -290,16 +627,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ),
               const SizedBox(width: 12),
-              // Skip 버튼 (다음 카드)
+              // Option 버튼 (제거/연기)
               Expanded(
                 child: ElevatedButton(
                   onPressed: () {
-                    if (_currentPage < _cards.length - 1) {
-                      _pageController.nextPage(
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeOutCubic,
-                      );
-                    }
+                    _showPlanOptions(context, plan);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.grayBtn,
@@ -310,7 +642,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                     elevation: 0,
                   ),
-                  child: const Icon(FontAwesomeIcons.chevronRight, size: 18),
+                  child: const Icon(FontAwesomeIcons.ellipsis, size: 18),
                 ),
               ),
             ],
@@ -318,6 +650,306 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ],
       ),
     );
+  }
+
+  void _showEditPlanDialog(BuildContext context, DailyPlan plan) {
+    final titleController = TextEditingController(text: plan.content);
+    DateTime selectedDate = plan.date;
+    String selectedType = plan.type; 
+
+    // Icons map for selection (Same as Add)
+    final Map<String, IconData> typeIcons = {
+      'Normal': FontAwesomeIcons.calendarDay,
+      'Holiday': FontAwesomeIcons.flag,
+      'Birthday': FontAwesomeIcons.cakeCandles,
+      'Anniversary': FontAwesomeIcons.heart,
+      'Work': FontAwesomeIcons.briefcase,
+      'Personal': FontAwesomeIcons.user,
+      'Important': FontAwesomeIcons.star,
+    };
+
+    final Map<String, Color> typeColors = {
+      'Normal': Colors.blue,
+      'Holiday': Colors.redAccent,
+      'Birthday': Colors.orangeAccent,
+      'Anniversary': Colors.pinkAccent,
+      'Work': Colors.brown,
+      'Personal': Colors.green,
+      'Important': Colors.amber,
+    };
+    
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Text("Edit Schedule"),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: titleController,
+                            decoration: const InputDecoration(
+                              labelText: "Title",
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        IconButton(
+                          icon: const Icon(Icons.person_search, color: AppTheme.accentCoral),
+                          onPressed: () => _showContactPicker(context, (name) {
+                            titleController.text = name;
+                          }),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    ListTile(
+                      title: Text("Date: ${DateFormat('yyyy-MM-dd').format(selectedDate)}"),
+                      trailing: const Icon(FontAwesomeIcons.calendar),
+                      onTap: () async {
+                        final picked = await showDatePicker(
+                          context: context,
+                          initialDate: selectedDate,
+                          firstDate: DateTime(2000),
+                          lastDate: DateTime(2100),
+                        );
+                        if (picked != null) {
+                          setDialogState(() {
+                            selectedDate = picked;
+                          });
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    const Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text("Icon Type", style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 12,
+                      runSpacing: 12,
+                      children: typeIcons.entries.map((entry) {
+                        final isSelected = selectedType == entry.key;
+                        return GestureDetector(
+                          onTap: () {
+                            setDialogState(() {
+                              selectedType = entry.key;
+                            });
+                          },
+                          child: Column(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: isSelected 
+                                      ? typeColors[entry.key]!.withOpacity(0.2) 
+                                      : Colors.grey.withOpacity(0.1),
+                                  shape: BoxShape.circle,
+                                  border: isSelected 
+                                      ? Border.all(color: typeColors[entry.key]!, width: 2) 
+                                      : null,
+                                ),
+                                child: Icon(
+                                  entry.value, 
+                                  size: 20, 
+                                  color: isSelected ? typeColors[entry.key] : Colors.grey,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(entry.key, style: const TextStyle(fontSize: 10)),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("Cancel"),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    if (titleController.text.isNotEmpty) {
+                       final updated = plan.copyWith(
+                         content: titleController.text,
+                         date: selectedDate,
+                         type: selectedType,
+                       );
+                       ref.read(appDatabaseProvider).updatePlan(updated);
+                       ref.read(homeViewModelProvider.notifier).loadData(); // Refresh
+                       Navigator.pop(context);
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.accentCoral,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text("Save"),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showPlanOptions(BuildContext context, DailyPlan plan) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(FontAwesomeIcons.pen),
+                title: const Text('Edit Plan'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _showEditPlanDialog(context, plan);
+                },
+              ),
+              ListTile(
+                leading: const Icon(FontAwesomeIcons.trash, color: Colors.redAccent),
+                title: const Text('Delete Plan', style: TextStyle(color: Colors.redAccent)),
+                onTap: () {
+                  Navigator.pop(context);
+                  _confirmDelete(context, plan);
+                },
+              ),
+              ListTile(
+                leading: const Icon(FontAwesomeIcons.arrowDown),
+                title: const Text('Move to End of Today'),
+                onTap: () {
+                  Navigator.pop(context);
+                  ref.read(homeViewModelProvider.notifier).movePlanToEnd(plan.id);
+                },
+              ),
+              ListTile(
+                leading: const Icon(FontAwesomeIcons.calendarDays),
+                title: const Text('Reschedule Date'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickNewDate(context, plan);
+                },
+              ),
+              ListTile(
+                leading: const Icon(FontAwesomeIcons.icons),
+                title: const Text('Change Icon'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickNewIcon(context, plan);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _pickNewIcon(BuildContext context, DailyPlan plan) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Text('Select Icon', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              ),
+              Wrap(
+                spacing: 20,
+                runSpacing: 20,
+                children: [
+                  _iconOption(context, plan, 'Normal', FontAwesomeIcons.calendarDay, Colors.blue),
+                  _iconOption(context, plan, 'Holiday', FontAwesomeIcons.flag, Colors.redAccent),
+                  _iconOption(context, plan, 'Birthday', FontAwesomeIcons.cakeCandles, Colors.orangeAccent),
+                  _iconOption(context, plan, 'Anniversary', FontAwesomeIcons.heart, Colors.pinkAccent),
+                  _iconOption(context, plan, 'Work', FontAwesomeIcons.briefcase, Colors.brown),
+                  _iconOption(context, plan, 'Personal', FontAwesomeIcons.user, Colors.green),
+                  _iconOption(context, plan, 'Important', FontAwesomeIcons.star, Colors.amber),
+                ],
+              ),
+              const SizedBox(height: 20),
+            ],
+          ),
+        );
+      },
+    );
+  }
+  
+  Widget _iconOption(BuildContext context, DailyPlan plan, String type, IconData icon, Color color) {
+    return GestureDetector(
+      onTap: () {
+        ref.read(homeViewModelProvider.notifier).updatePlanIcon(plan.id, type);
+        Navigator.pop(context);
+      },
+      child: Column(
+        children: [
+          CircleAvatar(
+            backgroundColor: color.withOpacity(0.1),
+            child: Icon(icon, color: color),
+          ),
+          const SizedBox(height: 4),
+          Text(type, style: const TextStyle(fontSize: 12)),
+        ],
+      ),
+    );
+  }
+
+  void _confirmDelete(BuildContext context, DailyPlan plan) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Plan'),
+        content: Text('Are you sure you want to delete "${plan.content}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              ref.read(homeViewModelProvider.notifier).deletePlan(plan.id);
+              Navigator.pop(context);
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _pickNewDate(BuildContext context, DailyPlan plan) async {
+    final now = DateTime.now();
+    final newDate = await showDatePicker(
+      context: context,
+      initialDate: plan.date.isBefore(now) ? now : plan.date,
+      firstDate: now,
+      lastDate: now.add(const Duration(days: 365)),
+    );
+
+    if (newDate != null) {
+      ref.read(homeViewModelProvider.notifier).reschedulePlan(plan.id, newDate);
+    }
   }
 
   /// D. 다가오는 일정 섹션 (Real Data)
@@ -327,103 +959,555 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            "Upcoming Events",
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: AppTheme.textPrimary,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                "Upcoming Events",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.textPrimary,
+                ),
+              ),
+              IconButton(
+                onPressed: () => _showAddEventDialog(context),
+                icon: const Icon(FontAwesomeIcons.plus, size: 18, color: AppTheme.textSecondary),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+              ),
+            ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           
-          if (events.isEmpty)
-             const Center(
-               child: Padding(
-                 padding: EdgeInsets.all(20.0),
-                 child: Text("No upcoming events.", style: TextStyle(color: AppTheme.textSecondary)),
-               ),
-             )
-          else 
-            ...events.map((event) => _buildEventItem(event)),
+          Expanded(
+            child: events.isEmpty
+              ? const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(20.0),
+                    child: Text("No upcoming events.", style: TextStyle(color: AppTheme.textSecondary)),
+                  ),
+                )
+              : ListView.builder(
+                  padding: const EdgeInsets.only(bottom: 80),
+                  physics: const BouncingScrollPhysics(),
+                  itemCount: events.length,
+                  itemBuilder: (context, index) {
+                    return _buildEventItem(events[index]);
+                  },
+                ),
+          ),
         ],
       ),
     );
   }
 
   Widget _buildEventItem(EventItem event) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppTheme.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: event.color.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
+    return GestureDetector(
+      onTap: () async {
+        // 1. Capture current state before update
+        final homeState = ref.read(homeViewModelProvider);
+        final currentPlans = homeState.todayPlans;
+        int? currentPlanId;
+        
+        if (_currentPage < currentPlans.length) {
+          currentPlanId = currentPlans[_currentPage].id;
+        } else {
+          // We are at Add Card (last index)
+          currentPlanId = null; 
+        }
+        
+        // 2. Perform Action (Update State)
+        await ref.read(homeViewModelProvider.notifier).activateFuturePlan(event.id);
+        
+        // 3. Post-Update Animation Logic
+        if (_pageController.hasClients) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!_pageController.hasClients) return;
+
+            // Get updated state
+            final newHomeState = ref.read(homeViewModelProvider);
+            final newPlans = newHomeState.todayPlans;
+            
+            int targetJumpIndex = 0;
+            
+            if (currentPlanId != null) {
+              // Find where the previously visible plan went
+              final newIndex = newPlans.indexWhere((p) => p.id == currentPlanId);
+              if (newIndex != -1) {
+                targetJumpIndex = newIndex;
+              } else {
+                // Plan disappeared? Fallback to safely stay near current
+                targetJumpIndex = _currentPage.clamp(0, newPlans.length);
+              }
+            } else {
+              // We were at Add Card. Add Card is now at newPlans.length
+              targetJumpIndex = newPlans.length;
+            }
+            
+            // Jump to maintain visual stability of what user was looking at
+             _pageController.jumpToPage(targetJumpIndex);
+             
+             // Animate to the activated plan
+             WidgetsBinding.instance.addPostFrameCallback((_) {
+               if (_pageController.hasClients) {
+                 // Find the index of the activated plan in the new list
+                 final activatedPlanIndex = newPlans.indexWhere((p) => p.id == event.id);
+                 final targetIndex = activatedPlanIndex != -1 ? activatedPlanIndex : 0;
+
+                 _pageController.animateToPage(
+                   targetIndex, 
+                   duration: const Duration(milliseconds: 600), 
+                   curve: Curves.easeInOutCubic
+                 );
+               }
+             });
+          });
+        }
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 8), // Reduced from 12
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10), // Reduced vertical padding from 16
+        decoration: BoxDecoration(
+          color: AppTheme.white,
+          borderRadius: BorderRadius.circular(12), // Slightly reduced radius
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.02),
+              blurRadius: 5,
+              offset: const Offset(0, 2),
             ),
-            child: Center(
-              child: Icon(event.icon, color: event.color, size: 18),
-            ),
-          ),
-          const SizedBox(width: 16),
-          // 구분선
-          Container(
-            width: 2,
-            height: 24,
-            decoration: BoxDecoration(
-              color: AppTheme.grayLight,
-              borderRadius: BorderRadius.circular(1),
-            ),
-          ),
-          const SizedBox(width: 16),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                event.dateLabel,
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.accentCoral,
-                ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 36, // Reduced from 40
+              height: 36, // Reduced from 40
+              decoration: BoxDecoration(
+                color: event.color.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(10),
               ),
-              const SizedBox(height: 2),
-              Text(
-                event.title,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                  color: AppTheme.textPrimary,
-                ),
+              child: Center(
+                child: Icon(event.icon, color: event.color, size: 16),
               ),
-              if (event.source.isNotEmpty) ...[
-                const SizedBox(height: 2),
-                Text(
-                  event.source,
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: AppTheme.textSecondary.withOpacity(0.7),
+            ),
+            const SizedBox(width: 12), // Reduced from 16
+            // 구분선
+            Container(
+              width: 2,
+              height: 20, // Reduced from 24
+              decoration: BoxDecoration(
+                color: AppTheme.grayLight,
+                borderRadius: BorderRadius.circular(1),
+              ),
+              child: Center(child: Container()), // Empty center to satisfy widget tree
+            ),
+            const SizedBox(width: 12), // Reduced from 16
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                       Text(
+                        event.dateLabel,
+                        style: const TextStyle(
+                          fontSize: 11, // Reduced from 12
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.accentCoral,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      if (event.source.isNotEmpty) 
+                        Text(
+                          event.source,
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: AppTheme.textSecondary.withOpacity(0.7),
+                          ),
+                        ),
+                    ],
                   ),
+                  const SizedBox(height: 2),
+                  Text(
+                    event.title,
+                    style: const TextStyle(
+                      fontSize: 14, // Reduced from 15
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.textPrimary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Edit Button
+            IconButton(
+              icon: const Icon(FontAwesomeIcons.penToSquare, size: 16, color: AppTheme.textSecondary),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+              onPressed: () {
+                // TODO: Show edit dialog
+                _showEditEventDialog(context, event);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showEditEventDialog(BuildContext context, EventItem event) {
+    final titleController = TextEditingController(text: event.title);
+    DateTime selectedDate = event.date;
+    String selectedType = event.type;
+    List<Map<String, String>> selectedRecipients = List.from(event.recipients);
+
+    // Reuse maps (ideally these should be constants or in ViewModel)
+    final Map<String, IconData> typeIcons = {
+      'Normal': FontAwesomeIcons.calendarDay,
+      'Holiday': FontAwesomeIcons.flag,
+      'Birthday': FontAwesomeIcons.cakeCandles,
+      'Anniversary': FontAwesomeIcons.heart,
+      'Work': FontAwesomeIcons.briefcase,
+      'Personal': FontAwesomeIcons.user,
+      'Important': FontAwesomeIcons.star,
+    };
+
+    final Map<String, Color> typeColors = {
+      'Normal': Colors.blue,
+      'Holiday': Colors.redAccent,
+      'Birthday': Colors.orangeAccent,
+      'Anniversary': Colors.pinkAccent,
+      'Work': Colors.brown,
+      'Personal': Colors.green,
+      'Important': Colors.amber,
+    };
+    
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Text("Edit Schedule"),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TextField(
+                      controller: titleController,
+                      decoration: const InputDecoration(
+                        labelText: "Title",
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text("Recipients", style: TextStyle(fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        ...selectedRecipients.map((r) => Chip(
+                          label: Text(r['name'] ?? ''),
+                          onDeleted: () {
+                            setDialogState(() {
+                              selectedRecipients.remove(r);
+                            });
+                          },
+                        )),
+                        ActionChip(
+                          avatar: const Icon(Icons.add, size: 16),
+                          label: const Text("Add"),
+                          onPressed: () {
+                            _showContactPicker(context, (selected) {
+                              setDialogState(() {
+                                for (var s in selected) {
+                                  if (!selectedRecipients.any((existing) => existing['phone'] == s['phone'])) {
+                                    selectedRecipients.add(s);
+                                  }
+                                }
+                              });
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    ListTile(
+                      title: Text("Date: ${DateFormat('yyyy-MM-dd').format(selectedDate)}"),
+                      trailing: const Icon(FontAwesomeIcons.calendar),
+                      onTap: () async {
+                        final picked = await showDatePicker(
+                          context: context,
+                          initialDate: selectedDate,
+                          firstDate: DateTime.now().subtract(const Duration(days: 365)),
+                          lastDate: DateTime.now().add(const Duration(days: 365)),
+                        );
+                        if (picked != null) {
+                          setDialogState(() {
+                            selectedDate = picked;
+                          });
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    const Text("Icon Type", style: TextStyle(fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 12,
+                      runSpacing: 12,
+                      children: typeIcons.entries.map((entry) {
+                        final isSelected = selectedType == entry.key;
+                        return GestureDetector(
+                          onTap: () {
+                            setDialogState(() {
+                              selectedType = entry.key;
+                            });
+                          },
+                          child: Column(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: isSelected 
+                                      ? typeColors[entry.key]!.withOpacity(0.2) 
+                                      : Colors.grey.withOpacity(0.1),
+                                  shape: BoxShape.circle,
+                                  border: isSelected 
+                                      ? Border.all(color: typeColors[entry.key]!, width: 2) 
+                                      : null,
+                                ),
+                                child: Icon(
+                                  entry.value, 
+                                  size: 20, 
+                                  color: isSelected ? typeColors[entry.key] : Colors.grey,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                entry.key, 
+                                style: TextStyle(
+                                  fontSize: 10, 
+                                  color: isSelected ? typeColors[entry.key] : Colors.grey
+                                )
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("Cancel"),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    if (titleController.text.isNotEmpty) {
+                      ref.read(homeViewModelProvider.notifier).updateScheduleDetails(
+                        event.id, 
+                        titleController.text,
+                        selectedDate,
+                        selectedType,
+                        recipients: selectedRecipients,
+                      );
+                      Navigator.pop(context);
+                    }
+                  },
+                  child: const Text("Save"),
                 ),
               ],
-            ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showContactPicker(BuildContext context, Function(List<Map<String, String>>) onSelected) async {
+    final db = ref.read(appDatabaseProvider);
+    final contacts = await db.getAllContacts();
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) => _ContactPickerDialog(
+        contacts: contacts,
+        onSelected: onSelected,
+        onAddNew: () async {
+          Navigator.pop(dialogContext);
+          final newContact = await _showManualContactDialog(context);
+          if (newContact != null) {
+            // newContact returns name only in previous implementation. 
+            // We need to fetch the contact or return Map.
+            // Let's modify _showManualContactDialog to return Map or just fetch latest contact.
+            final all = await db.getAllContacts();
+            final created = all.firstWhere((c) => c.name == newContact, orElse: () => all.last);
+            onSelected([{'name': created.name, 'phone': created.phone}]);
+          }
+        },
+      ),
+    );
+  }
+
+  Future<String?> _showManualContactDialog(BuildContext context) async {
+    final nameController = TextEditingController();
+    final phoneController = TextEditingController();
+    final db = ref.read(appDatabaseProvider);
+
+    return showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Add New Contact"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameController,
+              decoration: const InputDecoration(labelText: "Name"),
+            ),
+            TextField(
+              controller: phoneController,
+              decoration: const InputDecoration(labelText: "Phone"),
+              keyboardType: TextInputType.phone,
+              inputFormatters: [PhoneInputFormatter()],
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final name = nameController.text.trim();
+              final phone = phoneController.text.replaceAll('-', '').trim();
+              if (name.isNotEmpty && phone.isNotEmpty) {
+                await db.insertContact(
+                  ContactsCompanion.insert(
+                    phone: phone,
+                    name: name,
+                    isFavorite: Value(false),
+                  ),
+                );
+                Navigator.pop(context, name);
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFF29D86),
+              foregroundColor: Colors.white,
+            ),
+            child: const Text("Add"),
           ),
         ],
       ),
     );
   }
 }
+
+class _ContactPickerDialog extends StatefulWidget {
+  final List<Contact> contacts;
+  final Function(List<Map<String, String>>) onSelected;
+  final VoidCallback onAddNew;
+
+  const _ContactPickerDialog({
+    Key? key,
+    required this.contacts,
+    required this.onSelected,
+    required this.onAddNew,
+  }) : super(key: key);
+
+  @override
+  State<_ContactPickerDialog> createState() => _ContactPickerDialogState();
+}
+
+class _ContactPickerDialogState extends State<_ContactPickerDialog> {
+  String _searchQuery = "";
+  final Set<String> _selectedPhones = {};
+
+  @override
+  Widget build(BuildContext context) {
+    final filtered = widget.contacts.where((c) => 
+      c.name.contains(_searchQuery) || c.phone.contains(_searchQuery)
+    ).toList();
+
+    return AlertDialog(
+      title: const Text("Select Contacts"),
+      content: SizedBox(
+        width: double.maxFinite,
+        height: 400,
+        child: Column(
+          children: [
+            TextField(
+              decoration: const InputDecoration(
+                labelText: "Search",
+                prefixIcon: Icon(Icons.search),
+                border: OutlineInputBorder(),
+              ),
+              onChanged: (val) => setState(() => _searchQuery = val),
+            ),
+            const SizedBox(height: 10),
+            Expanded(
+              child: ListView.builder(
+                itemCount: filtered.length,
+                itemBuilder: (context, index) {
+                  final contact = filtered[index];
+                  final isSelected = _selectedPhones.contains(contact.phone);
+                  return CheckboxListTile(
+                    value: isSelected,
+                    title: Text(contact.name),
+                    subtitle: Text(formatPhone(contact.phone)),
+                    onChanged: (val) {
+                       setState(() {
+                          if (val == true) {
+                             _selectedPhones.add(contact.phone);
+                          } else {
+                             _selectedPhones.remove(contact.phone);
+                          }
+                       });
+                    },
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 10),
+            ElevatedButton.icon(
+              onPressed: widget.onAddNew,
+              icon: const Icon(Icons.person_add),
+              label: const Text("Add New Contact"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFF29D86),
+                foregroundColor: Colors.white,
+                minimumSize: const Size(double.infinity, 45),
+              ),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text("Cancel"),
+        ),
+        ElevatedButton(
+             onPressed: () {
+                 final selected = widget.contacts.where((c) => _selectedPhones.contains(c.phone)).map((c) => {
+                     'name': c.name,
+                     'phone': c.phone,
+                 }).toList();
+                 widget.onSelected(selected);
+                 Navigator.pop(context);
+             },
+             child: Text("Select (${_selectedPhones.length})"),
+         )
+      ],
+    );
+  }
+}
+

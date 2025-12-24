@@ -6,6 +6,7 @@ import 'dart:io';
 import '../database/app_database.dart';
 import '../database/database_provider.dart';
 import '../card_editor/write_card_screen.dart';
+import '../../utils/phone_formatter.dart';
 
 class ContactDetailScreen extends ConsumerStatefulWidget {
   final Contact contact;
@@ -92,7 +93,7 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(contact.phone, style: const TextStyle(fontSize: 16, color: Color(0xFF795548), fontWeight: FontWeight.w500)),
+                      Text(formatPhone(contact.phone), style: const TextStyle(fontSize: 16, color: Color(0xFF795548), fontWeight: FontWeight.w500)),
                       const SizedBox(height: 8),
                       Row(
                         children: [

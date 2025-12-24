@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:async'; // Added for Timer
 import 'dart:io';
 import 'dart:math' as math; // Import math with alias
 import 'dart:ui' as ui;
@@ -11,6 +12,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../utils/phone_formatter.dart';
 import '../gallery/gallery_data.dart'; // Import gallery data
 import '../gallery/favorites_provider.dart'; // Import favorites provider
 import 'package:drift/drift.dart' hide Column;
@@ -23,10 +25,100 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:file_selector/file_selector.dart'; // File Picker
 
+class AutoScrollingText extends StatefulWidget {
+  final String text;
+  final TextStyle style;
+  final int maxLines;
+  final double height;
+
+  const AutoScrollingText({
+    Key? key,
+    required this.text,
+    required this.style,
+    this.maxLines = 3,
+    this.height = 60,
+  }) : super(key: key);
+
+  @override
+  State<AutoScrollingText> createState() => _AutoScrollingTextState();
+}
+
+class _AutoScrollingTextState extends State<AutoScrollingText> {
+  final ScrollController _scrollController = ScrollController();
+  late Timer _timer;
+  bool _isScrolling = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _startAutoScroll();
+    });
+  }
+
+  void _startAutoScroll() {
+    if (_scrollController.hasClients &&
+        _scrollController.position.maxScrollExtent > 0) {
+      _isScrolling = true;
+      _timer = Timer.periodic(const Duration(milliseconds: 50), (timer) {
+        if (!mounted || !_scrollController.hasClients) {
+          timer.cancel();
+          return;
+        }
+        double newOffset = _scrollController.offset + 1.0;
+        if (newOffset >= _scrollController.position.maxScrollExtent) {
+          // Reached bottom, pause and reset
+          timer.cancel();
+          Future.delayed(const Duration(seconds: 2), () {
+            if (mounted && _scrollController.hasClients) {
+              _scrollController.animateTo(
+                0,
+                duration: const Duration(milliseconds: 1000),
+                curve: Curves.easeOut,
+              ).then((_) {
+                Future.delayed(const Duration(seconds: 2), () {
+                   if (mounted) _startAutoScroll();
+                });
+              });
+            }
+          });
+        } else {
+          _scrollController.jumpTo(newOffset);
+        }
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    if (_isScrolling) _timer.cancel();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: widget.height,
+      child: SingleChildScrollView(
+        controller: _scrollController,
+        physics: const NeverScrollableScrollPhysics(), // Disable manual scroll during auto-scroll
+        child: Text(
+          widget.text,
+          style: widget.style,
+          textAlign: TextAlign.right,
+        ),
+      ),
+    );
+  }
+}
+
+
 class WriteCardScreen extends ConsumerStatefulWidget {
   final String? initialImage;
   final Contact? initialContact; // Added initialContact parameter
-  const WriteCardScreen({super.key, this.initialImage, this.initialContact});
+  final String? originalMessage; // Added originalMessage parameter
+  const WriteCardScreen({super.key, this.initialImage, this.initialContact, this.originalMessage});
 
   @override
   ConsumerState<WriteCardScreen> createState() => _WriteCardScreenState();
@@ -211,10 +303,10 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     _loadFrameAssets();
     _loadDraft(); // Load full draft including footer
 
-    // 더미 수신자 데이터 생성 (20명)
-    for (int i = 1; i <= 20; i++) {
-      _recipients.add("수신자 $i 010-0000-${i.toString().padLeft(4, '0')}");
-    }
+    // 더미 수신자 데이터 생성 삭제 (사용자 요청: 1명만 있어야 함)
+    // for (int i = 1; i <= 20; i++) {
+    //   _recipients.add("수신자 $i 010-0000-${i.toString().padLeft(4, '0')}");
+    // }
     _pendingRecipients = List.from(_recipients);
   }
   
@@ -1884,6 +1976,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                     ),
                   ),
                 ),
+                /* 
                 const SizedBox(width: 8),
                 // 프레임 버튼 (상단 고정)
                 GestureDetector(
@@ -1911,6 +2004,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                     ),
                   ),
                 ),
+                */
                 const SizedBox(width: 8),
                 // 글상자 스타일 버튼 (상단 고정)
                 GestureDetector(
@@ -1952,7 +2046,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
           
           // 하단 고정 전송 버튼 및 수신자 목록
           Positioned(
-            bottom: 20,
+            bottom: 5, // 전송 버튼을 더 아래로 내림
             left: 0,
             right: 0,
             child: Column(
@@ -1963,8 +2057,42 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // 중앙 정렬을 위한 Spacer (왼쪽)
-                    const SizedBox(width: 80), 
+                    // 중앙 정렬을 위한 Spacer (왼쪽) 또는 원본 메시지
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.only(right: 16),
+                        alignment: Alignment.centerRight,
+                        child: widget.originalMessage != null 
+                          ? GestureDetector(
+                              onTap: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    title: const Text("받은 메시지"),
+                                    content: SingleChildScrollView(child: Text(widget.originalMessage!)),
+                                    actions: [
+                                      TextButton(onPressed: () => Navigator.pop(context), child: const Text("닫기")),
+                                    ],
+                                  ),
+                                );
+                              },
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Text("받은 메시지", style: TextStyle(fontSize: 11, color: Colors.grey)),
+                                  const SizedBox(height: 2),
+                                  AutoScrollingText(
+                                    text: widget.originalMessage!,
+                                    style: const TextStyle(fontSize: 15, color: Color(0xFF555555), height: 1.3),
+                                    height: 60, // 약 3줄 높이
+                                  ),
+                                ],
+                              ),
+                            )
+                          : const SizedBox.shrink(),
+                      ),
+                    ), 
 
                     Hero(
                       tag: 'write-fab',
@@ -2005,18 +2133,45 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                     ),
                     
                     // 발송 대상 카운터 (오른쪽)
-                    Container(
-                      width: 80,
-                      padding: const EdgeInsets.only(left: 16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text("발송대상", style: TextStyle(fontSize: 11, color: Colors.grey)),
-                          Text(
-                            "$_sentCount / ${_recipients.length}",
-                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFFF29D86)),
-                          ),
-                        ],
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.only(left: 16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text("발송대상", style: TextStyle(fontSize: 11, color: Colors.grey)),
+                            if (_recipients.isEmpty)
+                              InkWell(
+                                onTap: _showRecipientPicker,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFF29D86),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: const Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.person_add, size: 14, color: Colors.white),
+                                      SizedBox(width: 4),
+                                      Text(
+                                        "대상 추가",
+                                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              )
+                            else
+                              GestureDetector(
+                                onTap: _showRecipientPicker, // Allow adding more even if not empty
+                                child: Text(
+                                  "$_sentCount / ${_recipients.length}",
+                                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFFF29D86)),
+                                ),
+                              ),
+                          ],
+                        ),
                       ),
                     ),
                   ],
@@ -2777,12 +2932,12 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   Future<void> _handleSend() async {
     if (_isSending) return;
     
-    // 수신자가 없으면 초기화 (테스트용)
-    if (_recipients.isEmpty) {
-       for (int i = 1; i <= 20; i++) {
-        _recipients.add("수신자 $i (010-0000-${i.toString().padLeft(4, '0')})");
-      }
-    }
+    // 수신자가 없으면 초기화 (테스트용) - 삭제
+    // if (_recipients.isEmpty) {
+    //    for (int i = 1; i <= 20; i++) {
+    //     _recipients.add("수신자 $i (010-0000-${i.toString().padLeft(4, '0')})");
+    //   }
+    // }
 
     // 1. 발송 전 이미지 생성 및 확인
     final savedPath = await _saveCardImage();
@@ -3100,8 +3255,196 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
       ),
     );
   }
-}
 
+  void _showRecipientPicker() async {
+    final db = ref.read(appDatabaseProvider);
+    // Fetch fresh contacts
+    final contacts = await db.getAllContacts();
+    
+    // Helper to extract phone from "Name (Phone)" format
+    String getPhone(String r) {
+      final match = RegExp(r'\(([^)]+)\)').firstMatch(r);
+      return match?.group(1) ?? '';
+    }
+
+    // Current selected phones
+    final currentPhones = _recipients.map(getPhone).toSet();
+    final selectedPhones = Set<String>.from(currentPhones);
+    
+    if (!mounted) return;
+
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Text("발송 대상 선택"),
+              content: SizedBox(
+                width: double.maxFinite,
+                height: 400,
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: contacts.isEmpty
+                          ? const Center(child: Text("저장된 연락처가 없습니다."))
+                          : ListView.builder(
+                              itemCount: contacts.length,
+                              itemBuilder: (context, index) {
+                                final contact = contacts[index];
+                                final isSelected = selectedPhones.contains(contact.phone);
+                                return CheckboxListTile(
+                                  value: isSelected,
+                                  title: Text(contact.name),
+                                  subtitle: Text(formatPhone(contact.phone)),
+                                  activeColor: const Color(0xFFF29D86),
+                                  onChanged: (bool? value) {
+                                    setDialogState(() {
+                                      if (value == true) {
+                                        selectedPhones.add(contact.phone);
+                                      } else {
+                                        selectedPhones.remove(contact.phone);
+                                      }
+                                    });
+                                  },
+                                );
+                              },
+                            ),
+                    ),
+                    const SizedBox(height: 16),
+                    OutlinedButton.icon(
+                      onPressed: () async {
+                        final result = await _showManualRecipientDialog();
+                        if (result != null) {
+                           // Refresh contact list
+                           final newContacts = await db.getAllContacts();
+                           
+                           // Extract phone from result to auto-select
+                           final match = RegExp(r'\(([^)]+)\)').firstMatch(result);
+                           if (match != null) {
+                              final newPhone = match.group(1)!;
+                              setDialogState(() {
+                                contacts.clear();
+                                contacts.addAll(newContacts);
+                                selectedPhones.add(newPhone);
+                              });
+                           }
+                        }
+                      },
+                      icon: const Icon(Icons.person_add, size: 18),
+                      label: const Text("새 연락처 추가"),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: const Color(0xFFF29D86),
+                        side: const BorderSide(color: Color(0xFFF29D86)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("취소", style: TextStyle(color: Colors.grey)),
+                ),
+                TextButton(
+                  onPressed: () {
+                    // Update main state
+                    setState(() {
+                      _recipients.clear();
+                      for (var contact in contacts) {
+                        if (selectedPhones.contains(contact.phone)) {
+                          _recipients.add("${contact.name} (${contact.phone})");
+                        }
+                      }
+                    });
+                    Navigator.pop(context);
+                  },
+                  child: const Text("확인", style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFF29D86))),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<String?> _showManualRecipientDialog() async {
+    final nameController = TextEditingController();
+    final phoneController = TextEditingController();
+    
+    return showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("새 연락처 추가"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameController,
+              decoration: const InputDecoration(
+                labelText: "이름",
+                focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFFF29D86))),
+              ),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: phoneController,
+              decoration: const InputDecoration(
+                labelText: "전화번호",
+                focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFFF29D86))),
+              ),
+              keyboardType: TextInputType.phone,
+              inputFormatters: [PhoneInputFormatter()], 
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("취소", style: TextStyle(color: Colors.grey)),
+          ),
+          TextButton(
+            onPressed: () async {
+              final name = nameController.text.trim();
+              final phone = phoneController.text.trim();
+              
+              if (name.isEmpty || phone.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("이름과 전화번호를 모두 입력해주세요.")),
+                );
+                return;
+              }
+
+              try {
+                final db = ref.read(appDatabaseProvider);
+                await db.insertContact(ContactsCompanion.insert(
+                  name: name,
+                  phone: phone,
+                  isFavorite: Value(false),
+                ));
+                
+                if (context.mounted) {
+                  Navigator.pop(context, "$name ($phone)");
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("연락처가 추가되었습니다.")),
+                  );
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("추가 실패: $e")),
+                  );
+                }
+              }
+            },
+            child: const Text("추가", style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFF29D86))),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 class RecipientManagerDialog extends StatefulWidget {
   final List<String> recipients;
@@ -3718,6 +4061,7 @@ class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
       ),
     );
   }
+
 }
 
 class RecipientInputFormatter extends TextInputFormatter {
@@ -3782,6 +4126,8 @@ class RecipientInputFormatter extends TextInputFormatter {
     );
   }
 }
+
+
 
 class BubbleBorder extends OutlinedBorder {
   final double arrowHeight;

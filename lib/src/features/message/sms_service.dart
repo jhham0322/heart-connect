@@ -1,0 +1,139 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
+import 'package:permission_handler/permission_handler.dart';
+import '../database/database_provider.dart';
+
+/// Custom wrapper for SMS Message to allow mocking and platform independence
+class AppSmsMessage {
+  final int? id;
+  final String? address;
+  final String? body;
+  final DateTime? date;
+  final bool? read;
+  final String kind; 
+
+  AppSmsMessage({
+    this.id,
+    this.address,
+    this.body,
+    this.date,
+    this.read,
+    this.kind = 'inbox',
+  });
+}
+
+class SmsService {
+  final Ref ref;
+
+  SmsService(this.ref);
+
+  Future<List<AppSmsMessage>> getFilteredMessages() async {
+    final db = ref.read(appDatabaseProvider);
+    final contacts = await db.getAllContacts();
+    
+    // Normalize contact numbers for comparison
+    final contactNumbers = contacts.map((c) => _normalizeNumber(c.phone)).toSet();
+
+    if (kIsWeb || Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
+      // Return mock data for non-mobile platforms
+      return _getMockMessages(contactNumbers);
+    }
+
+    // Mobile: Request permissions and fetch SMS
+    final permission = await Permission.sms.status;
+    if (!permission.isGranted) {
+      final result = await Permission.sms.request();
+      if (!result.isGranted) {
+        throw Exception('SMS permission denied');
+      }
+    }
+
+    final SmsQuery query = SmsQuery();
+    final List<SmsMessage> messages = await query.querySms(
+      kinds: [SmsQueryKind.inbox],
+      sort: true, // Sorts by date desc by default
+    );
+
+    // Filter by contact numbers
+    final filtered = messages.where((msg) {
+      if (msg.address == null) return false;
+      final normalizedSender = _normalizeNumber(msg.address!);
+      return contactNumbers.any((cNum) => _isMatch(normalizedSender, cNum));
+    }).map((m) => AppSmsMessage(
+      id: m.id,
+      address: m.address,
+      body: m.body,
+      date: m.date,
+      read: m.isRead,
+      kind: m.kind.toString(),
+    )).toList();
+
+    return filtered;
+  }
+
+  String _normalizeNumber(String phone) {
+    return phone.replaceAll(RegExp(r'\D'), '');
+  }
+
+  bool _isMatch(String sender, String contact) {
+    // Check if one ends with the other (handling country codes)
+    if (sender == contact) return true;
+    if (sender.length > contact.length) return sender.endsWith(contact);
+    if (contact.length > sender.length) return contact.endsWith(sender);
+    return false;
+  }
+
+  List<AppSmsMessage> _getMockMessages(Set<String> contactNumbers) {
+    final now = DateTime.now();
+    
+    return [
+      AppSmsMessage(
+        body: "이번 주 촬영 시간 확인 부탁해~",
+        date: now.subtract(const Duration(minutes: 10)),
+        address: "01012345678", // Yu Jae-seok
+        read: false, 
+        kind: 'inbox',
+        id: 1, 
+      ),
+      AppSmsMessage(
+        body: "운동 가자!",
+        date: now.subtract(const Duration(hours: 2)),
+        address: "01098765432", // Kim Jong-kook
+        read: true, 
+        kind: 'inbox',
+        id: 2, 
+      ),
+      AppSmsMessage(
+        body: "다음 주 스케줄 나왔어?",
+        date: now.subtract(const Duration(days: 1)),
+        address: "01012345678",
+        read: true, 
+        kind: 'inbox',
+        id: 3, 
+      ),
+      AppSmsMessage(
+        body: "광고 전화입니다.",
+        date: now.subtract(const Duration(hours: 5)),
+        address: "01000000000", // Unknown
+        read: false, 
+        kind: 'inbox',
+        id: 4, 
+      ),
+    ].where((msg) {
+      if (msg.address == null) return false;
+      final normalizedSender = _normalizeNumber(msg.address!);
+      return contactNumbers.any((cNum) => _isMatch(normalizedSender, cNum));
+    }).toList();
+  }
+}
+
+final smsServiceProvider = Provider<SmsService>((ref) {
+  return SmsService(ref);
+});
+
+final smsMessagesProvider = FutureProvider<List<AppSmsMessage>>((ref) async {
+  final service = ref.watch(smsServiceProvider);
+  return service.getFilteredMessages();
+});

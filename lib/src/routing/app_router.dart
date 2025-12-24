@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../features/database/app_database.dart'; // Import Contact type
 import 'package:heart_connect/src/features/home/home_screen.dart';
 import 'package:heart_connect/src/features/contacts/contacts_screen.dart';
 import 'package:heart_connect/src/features/gallery/gallery_screen.dart';
 import 'package:heart_connect/src/features/card_editor/write_card_screen.dart';
 import 'package:heart_connect/src/features/settings/settings_screen.dart';
 import 'package:heart_connect/src/features/alarm/alarm_screen.dart';
+import 'package:heart_connect/src/features/message/message_screen.dart';
 import '../shell/scaffold_with_nav.dart';
 
 // Private navigator keys
@@ -28,12 +30,29 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         parentNavigatorKey: _rootNavigatorKey,
         pageBuilder: (context, state) {
           final initialImage = state.uri.queryParameters['image'];
+          final extra = state.extra;
+          Contact? initialContact;
+          String? originalMessage;
+
+          if (extra is Contact) {
+            initialContact = extra;
+          } else if (extra is Map<String, dynamic>) {
+            if (extra['contact'] is Contact) {
+              initialContact = extra['contact'] as Contact;
+            }
+            if (extra['originalMessage'] is String) {
+              originalMessage = extra['originalMessage'] as String;
+            }
+          }
+          
           print("[AppRouter] /write route (standalone). Param: $initialImage");
           return MaterialPage(
             fullscreenDialog: true,
             child: WriteCardScreen(
               key: ValueKey(initialImage),
               initialImage: initialImage,
+              initialContact: initialContact,
+              originalMessage: originalMessage,
             ),
           );
         },
@@ -100,7 +119,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/mailbox',
-                pageBuilder: (context, state) => const NoTransitionPage(child: Scaffold(body: Center(child: Text("Mailbox Construction")))),
+                pageBuilder: (context, state) => const NoTransitionPage(child: MessageScreen()),
               ),
             ],
           ),

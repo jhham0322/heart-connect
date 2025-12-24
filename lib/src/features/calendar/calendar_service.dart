@@ -1,6 +1,9 @@
+import 'package:timezone/timezone.dart';
+import 'package:timezone/data/latest.dart' as tz;
 import 'dart:io';
 import 'package:device_calendar/device_calendar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/foundation.dart';
 
 class CalendarEventData {
   final String title;
@@ -18,6 +21,14 @@ class CalendarEventData {
 
 class CalendarService {
   final DeviceCalendarPlugin _deviceCalendar = DeviceCalendarPlugin();
+  bool _isTimezoneInitialized = false;
+
+  Future<void> _initTimezone() async {
+    if (!_isTimezoneInitialized) {
+      tz.initializeTimeZones();
+      _isTimezoneInitialized = true;
+    }
+  }
 
   Future<List<CalendarEventData>> getEvents(DateTime start, DateTime end) async {
     final events = <CalendarEventData>[];
@@ -56,6 +67,7 @@ class CalendarService {
          }
        } catch (e) {
          // Silently ignore errors on unsupported platforms or permission issues
+         debugPrint("Calendar Sync Error: $e");
        }
     } 
     
@@ -68,6 +80,48 @@ class CalendarService {
     // Sort
     events.sort((a, b) => a.date.compareTo(b.date));
     return events;
+  }
+
+  Future<bool> addEvent(String title, DateTime date) async {
+    if (Platform.isWindows) {
+        debugPrint("Windows: Event added to calendar (simulated): $title at $date");
+        return true;
+    }
+
+    try {
+      await _initTimezone();
+
+      var permissions = await _deviceCalendar.hasPermissions();
+      if (permissions.isSuccess && !permissions.data!) {
+        permissions = await _deviceCalendar.requestPermissions();
+      }
+
+      if (permissions.isSuccess && permissions.data!) {
+        final calendars = await _deviceCalendar.retrieveCalendars();
+        if (calendars.isSuccess && calendars.data != null && calendars.data!.isNotEmpty) {
+           // Use the first writable calendar or just the first one
+           final calendar = calendars.data!.firstWhere((c) => c.isReadOnly == false, orElse: () => calendars.data!.first);
+           
+           // Use local location (default from timezone package)
+           final location = local;
+           final tzDate = TZDateTime.from(date, location);
+           
+           final event = Event(
+              calendar.id,
+              title: title,
+              start: tzDate,
+              end: tzDate.add(const Duration(hours: 1)),
+              allDay: true,
+           );
+           
+           final result = await _deviceCalendar.createOrUpdateEvent(event);
+           return result?.isSuccess ?? false;
+        }
+      }
+    } catch (e) {
+      debugPrint("Error adding event to device calendar: $e");
+    }
+    return false;
   }
 
   String _determineSource(Calendar cal) {

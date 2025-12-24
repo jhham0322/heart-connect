@@ -8,6 +8,7 @@ import '../database/app_database.dart';
 import '../database/database_provider.dart';
 import '../../theme/app_theme.dart';
 import 'contact_detail_screen.dart';
+import '../../utils/phone_formatter.dart';
 
 class ContactsScreen extends ConsumerStatefulWidget {
   const ContactsScreen({super.key});
@@ -232,7 +233,7 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
                 children: [
                   Text(contact.name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Color(0xFF3E2723))),
                   const SizedBox(height: 2),
-                  Text(contact.phone, style: const TextStyle(fontSize: 12, color: Color(0xFF795548), fontWeight: FontWeight.w500)),
+                  Text(formatPhone(contact.phone), style: const TextStyle(fontSize: 12, color: Color(0xFF795548), fontWeight: FontWeight.w500)),
                 ],
               ),
             ),

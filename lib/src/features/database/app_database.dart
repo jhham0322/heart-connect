@@ -71,12 +71,27 @@ class Holidays extends Table {
   BoolColumn get isLunar => boolean().withDefault(const Constant(false))();
 }
 
-@DriftDatabase(tables: [Contacts, History, Templates, GalleryFavorites, SavedCards, Holidays])
+class DailyPlans extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  DateTimeColumn get date => dateTime()();
+  TextColumn get content => text()();
+  TextColumn get type => text().withDefault(const Constant('Normal'))(); // Normal, Birthday, Holiday
+  IntColumn get goalCount => integer().withDefault(const Constant(5))();
+  BoolColumn get isGenerated => boolean().withDefault(const Constant(true))();
+  BoolColumn get isCompleted => boolean().withDefault(const Constant(false))();
+  IntColumn get sortOrder => integer().withDefault(const Constant(0))();
+  TextColumn get recipients => text().nullable()(); // JSON list of recipients: [{"name":"Kim","phone":"010..."}]
+}
+
+@DriftDatabase(tables: [Contacts, History, Templates, GalleryFavorites, SavedCards, Holidays, DailyPlans])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
+  
+  // Constructor for testing
+  AppDatabase.forTesting(QueryExecutor e) : super(e);
 
   @override
-  int get schemaVersion => 6; // Incremented for Holidays table
+  int get schemaVersion => 9; // Incremented for DailyPlans recipients update
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -106,6 +121,13 @@ class AppDatabase extends _$AppDatabase {
       if (from < 6) {
         await m.createTable(holidays);
         await _insertDefaultHolidays(this);
+      }
+      if (from < 7) {
+        await m.createTable(dailyPlans);
+      }
+      if (from < 8) {
+        await m.addColumn(dailyPlans, dailyPlans.isCompleted);
+        await m.addColumn(dailyPlans, dailyPlans.sortOrder);
       }
     },
     beforeOpen: (details) async {
@@ -165,6 +187,186 @@ class AppDatabase extends _$AppDatabase {
   }
   
   Future<int> insertHistory(HistoryCompanion entry) => into(history).insert(entry);
+
+  // --- Daily Plans Methods ---
+  Future<List<DailyPlan>> getPlansForRange(DateTime start, DateTime end) {
+    return (select(dailyPlans)
+      ..where((t) => t.date.isBiggerOrEqualValue(start) & t.date.isSmallerOrEqualValue(end))
+      ..orderBy([
+        (t) => OrderingTerm(expression: t.date),
+        (t) => OrderingTerm(expression: t.sortOrder),
+      ])
+    ).get();
+  }
+  
+  Future<List<DailyPlan>> getFuturePlans(DateTime start) {
+     return (select(dailyPlans)
+      ..where((t) => t.date.isBiggerOrEqualValue(start))
+      ..orderBy([
+        (t) => OrderingTerm(expression: t.date),
+        (t) => OrderingTerm(expression: t.sortOrder),
+      ])
+    ).get();
+  }
+
+  Future<List<DailyPlan>> getTodayPlans(DateTime today) {
+    return (select(dailyPlans)
+      ..where((t) => t.date.equals(today) & t.isCompleted.equals(false))
+      ..orderBy([(t) => OrderingTerm(expression: t.sortOrder)])
+    ).get();
+  }
+
+  Future<DailyPlan> getPlan(int id) {
+    return (select(dailyPlans)..where((t) => t.id.equals(id))).getSingle();
+  }
+
+  Future<int> insertPlan(DailyPlansCompanion entry) => into(dailyPlans).insert(entry);
+  
+  Future<bool> updatePlan(DailyPlan entry) => update(dailyPlans).replace(entry);
+  
+  Future<int> deletePlan(int id) => (delete(dailyPlans)..where((t) => t.id.equals(id))).go();
+
+  Future<void> reschedulePlan(int id, DateTime newDate) {
+    return (update(dailyPlans)..where((t) => t.id.equals(id))).write(
+      DailyPlansCompanion(date: Value(newDate), sortOrder: const Value(0))
+    );
+  }
+
+  Future<void> updatePlanType(int id, String newType) {
+    return (update(dailyPlans)..where((t) => t.id.equals(id))).write(
+      DailyPlansCompanion(type: Value(newType))
+    );
+  }
+
+
+
+  Future<void> completePlan(int id) {
+    return (update(dailyPlans)..where((t) => t.id.equals(id))).write(
+      const DailyPlansCompanion(isCompleted: Value(true))
+    );
+  }
+
+  Future<void> movePlanToEnd(int id, DateTime date) async {
+    // Get max sortOrder for the date
+    final maxOrder = await (select(dailyPlans)
+      ..where((t) => t.date.equals(date))
+      ..orderBy([(t) => OrderingTerm.desc(t.sortOrder)])
+      ..limit(1)
+    ).map((row) => row.sortOrder).getSingleOrNull() ?? 0;
+    
+    await (update(dailyPlans)..where((t) => t.id.equals(id))).write(
+      DailyPlansCompanion(sortOrder: Value(maxOrder + 1))
+    );
+  }
+  
+  Future<void> updatePlanContent(int id, String newContent) {
+    return (update(dailyPlans)..where((t) => t.id.equals(id))).write(
+      DailyPlansCompanion(content: Value(newContent))
+    );
+  }
+
+  Future<void> updatePlanDetails(int id, String title, DateTime date, String type) {
+    return (update(dailyPlans)..where((t) => t.id.equals(id))).write(
+      DailyPlansCompanion(
+        content: Value(title),
+        date: Value(date),
+        type: Value(type),
+      )
+    );
+  }
+
+  Future<void> updatePlanDetailsWithRecipients(int id, String title, DateTime date, String type, String? recipients) {
+    return (update(dailyPlans)..where((t) => t.id.equals(id))).write(
+      DailyPlansCompanion(
+        content: Value(title),
+        date: Value(date),
+        type: Value(type),
+        recipients: recipients != null ? Value(recipients) : const Value.absent(),
+      )
+    );
+  }
+
+  Future<void> deleteOldPlans(DateTime cutoff) {
+    return (delete(dailyPlans)..where((t) => t.date.isSmallerThanValue(cutoff))).go();
+  }
+
+  // --- Plan Generation Logic ---
+  Future<void> generateWeeklyPlans() async {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    
+    // Cleanup old plans (keep last 30 days for reference)
+    await deleteOldPlans(today.subtract(const Duration(days: 30)));
+    
+    // Check next 7 days
+    for (int i = 0; i <= 7; i++) {
+       final targetDate = today.add(Duration(days: i));
+       
+       // Check if plan exists
+       final existing = await (select(dailyPlans)..where((t) => t.date.equals(targetDate))).get();
+       // Only skip if we have already GENERATED plans for this day. 
+       // If only manual/calendar plans exist, we should still generate base plans.
+       if (existing.any((e) => e.isGenerated)) continue; 
+       
+       // Generate Plan
+       // 1. Check Holidays
+       final holidayList = await (select(holidays)..where((t) => t.date.equals(targetDate))).get();
+       
+       // 2. Check Birthdays
+       final contactList = await getAllContacts();
+       final birthdayContacts = contactList.where((c) {
+          if (c.birthday == null) return false;
+          final bday = c.birthday!;
+          // Simple check for same month/day (ignoring year for now or matching current year)
+          // Since we are generating for specific targetDate (year included), we need to check if birthday falls on this day in THIS year.
+          // Note: getAllContacts returns birthday with original year.
+          final nextBday = DateTime(targetDate.year, bday.month, bday.day);
+          return nextBday.month == targetDate.month && nextBday.day == targetDate.day;
+       }).toList();
+       
+       // 3. Create Plan Items
+       // If multiple events, we create multiple rows? Or one main row?
+       // The user prompt implies "Plan Table" -> "Upcoming Events".
+       // If we create multiple rows, we can display them all.
+       
+       bool hasEvent = false;
+       
+       // Holidays
+       for (var h in holidayList) {
+          await into(dailyPlans).insert(DailyPlansCompanion(
+             date: Value(targetDate),
+             content: Value(h.name),
+             type: Value('Holiday'),
+             goalCount: Value(10), // Higher goal for holidays?
+             isGenerated: const Value(true),
+          ));
+          hasEvent = true;
+       }
+       
+       // Birthdays
+       for (var c in birthdayContacts) {
+          await into(dailyPlans).insert(DailyPlansCompanion(
+             date: Value(targetDate),
+             content: Value('${c.name} Birthday'),
+             type: Value('Birthday'),
+             goalCount: Value(10),
+             isGenerated: const Value(true),
+          ));
+          hasEvent = true;
+       }
+       
+       // If no events, create default plan
+       if (!hasEvent) {
+          await into(dailyPlans).insert(DailyPlansCompanion(
+             date: Value(targetDate),
+             content: Value('Daily Warmth'),
+             type: Value('Normal'),
+             goalCount: Value(5),
+             isGenerated: const Value(true),
+          ));
+       }
+    }
+  }
 
   Stream<List<RecentContactData>> watchRecentContacts() {
     return customSelect(
@@ -231,7 +433,10 @@ class AppDatabase extends _$AppDatabase {
   // SAVED CARDS (DRAFTS) methods
   Future<List<SavedCard>> getAllSavedCards() => (select(savedCards)..orderBy([(t) => OrderingTerm.desc(t.createdAt)])).get();
   Future<int> insertSavedCard(SavedCardsCompanion entry) => into(savedCards).insert(entry);
+  Future<bool> updateSavedCard(SavedCard entry) => update(savedCards).replace(entry);
   Future<int> deleteSavedCard(int id) => (delete(savedCards)..where((t) => t.id.equals(id))).go();
+
+
 }
 
 LazyDatabase _openConnection() {
