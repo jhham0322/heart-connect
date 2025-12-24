@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Added for TextInputFormatter
+import 'dart:convert'; // Added for JSON decoding
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
@@ -655,7 +656,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   void _showEditPlanDialog(BuildContext context, DailyPlan plan) {
     final titleController = TextEditingController(text: plan.content);
     DateTime selectedDate = plan.date;
-    String selectedType = plan.type; 
+    String selectedType = plan.type;
+    List<Map<String, String>> selectedRecipients = [];
+    if (plan.recipients != null) {
+      try {
+        final decoded = jsonDecode(plan.recipients!) as List;
+        selectedRecipients = decoded.map((e) => Map<String, String>.from(e)).toList();
+      } catch (e) {
+        debugPrint('Error parsing recipients: $e');
+      }
+    }
 
     // Icons map for selection (Same as Add)
     final Map<String, IconData> typeIcons = {
@@ -688,24 +698,44 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
+                    TextField(
+                      controller: titleController,
+                      decoration: const InputDecoration(
+                        labelText: "Title",
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text("Recipients", style: TextStyle(fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
                       children: [
-                        Expanded(
-                          child: TextField(
-                            controller: titleController,
-                            decoration: const InputDecoration(
-                              labelText: "Title",
-                              border: OutlineInputBorder(),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        IconButton(
-                          icon: const Icon(Icons.person_search, color: AppTheme.accentCoral),
-                          onPressed: () => _showContactPicker(context, (name) {
-                            titleController.text = name;
-                          }),
+                        ...selectedRecipients.map((r) => Chip(
+                          label: Text(r['name'] ?? ''),
+                          onDeleted: () {
+                            setDialogState(() {
+                              selectedRecipients.remove(r);
+                            });
+                          },
+                        )),
+                        ActionChip(
+                          avatar: const Icon(Icons.add, size: 16),
+                          label: const Text("Add"),
+                          onPressed: () {
+                            _showContactPicker(context, (selected) {
+                              setDialogState(() {
+                                for (var s in selected) {
+                                  if (!selectedRecipients.any((existing) => existing['phone'] == s['phone'])) {
+                                    selectedRecipients.add(s);
+                                  }
+                                }
+                              });
+                            });
+                          },
                         ),
                       ],
                     ),
@@ -728,10 +758,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       },
                     ),
                     const SizedBox(height: 16),
-                    const Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text("Icon Type", style: TextStyle(fontWeight: FontWeight.bold)),
-                    ),
+                    const Text("Icon Type", style: TextStyle(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 10),
                     Wrap(
                       spacing: 12,
@@ -781,13 +808,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ElevatedButton(
                   onPressed: () {
                     if (titleController.text.isNotEmpty) {
-                       final updated = plan.copyWith(
-                         content: titleController.text,
-                         date: selectedDate,
-                         type: selectedType,
+                       ref.read(homeViewModelProvider.notifier).updateScheduleDetails(
+                         plan.id,
+                         titleController.text,
+                         selectedDate,
+                         selectedType,
+                         recipients: selectedRecipients,
                        );
-                       ref.read(appDatabaseProvider).updatePlan(updated);
-                       ref.read(homeViewModelProvider.notifier).loadData(); // Refresh
                        Navigator.pop(context);
                     }
                   },
