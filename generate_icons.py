@@ -105,10 +105,35 @@ def main():
     logo.save(logo_path, "PNG")
     print(f"  생성됨: {logo_path} (1024x1024)")
     
+    # 4. WindowUI FlutterControlPanel 아이콘 생성
+    print("\n=== WindowUI FlutterControlPanel 아이콘 생성 ===")
+    windowui_path = r"e:\work2025\App\ConnectHeart\WindowUI\FlutterControlPanel"
+    
+    # PNG 아이콘 (256x256)
+    windowui_icon_png = create_high_quality_icon(original, 256)
+    windowui_png_path = os.path.join(windowui_path, "icon.png")
+    windowui_icon_png.save(windowui_png_path, "PNG")
+    print(f"  생성됨: {windowui_png_path} (256x256)")
+    
+    # ICO 아이콘 (멀티 해상도)
+    windowui_icon_images = []
+    for size in windows_sizes:
+        icon = create_high_quality_icon(original, size)
+        windowui_icon_images.append(icon)
+    
+    windowui_ico_path = os.path.join(windowui_path, "icon.ico")
+    windowui_icon_images[0].save(
+        windowui_ico_path,
+        format='ICO',
+        sizes=[(s, s) for s in windows_sizes]
+    )
+    print(f"  생성됨: {windowui_ico_path}")
+    
     print("\n✅ 모든 아이콘 생성 완료!")
     print("\n생성된 아이콘:")
     print("  - 안드로이드: mipmap-mdpi ~ mipmap-xxxhdpi (48~192px)")
-    print("  - 윈도우: app_icon.ico (16~256px 멀티 해상도)")
+    print("  - 윈도우 Flutter: app_icon.ico (16~256px 멀티 해상도)")
+    print("  - 윈도우 컨트롤러: icon.ico, icon.png")
     print("  - 웹/앱: icon-192, icon-512, favicon, apple-touch-icon, app_logo")
 
 if __name__ == "__main__":
