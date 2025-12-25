@@ -24,6 +24,7 @@ import 'package:vsc_quill_delta_to_html/vsc_quill_delta_to_html.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:file_selector/file_selector.dart'; // File Picker
+import 'package:image/image.dart' as img; // JPEG 변환용
 
 class AutoScrollingText extends StatefulWidget {
   final String text;
@@ -1862,32 +1863,66 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     }
   }
 
-  // 이미지 캡처 함수 - 배경이미지 + 글씨박스 + 글씨만 캡처
+  // 이미지 캐처 함수 - 배경이미지 + 글씨박스 + 글씨만 캐처
   Future<Uint8List?> _captureCardImage() async {
     try {
       RenderRepaintBoundary boundary = _captureKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
-      ui.Image image = await boundary.toImage(pixelRatio: 3.0);
-      ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      // MMS 전송을 위해 pixelRatio를 1.5로 낮춤 (파일 크기 최적화)
+      ui.Image image = await boundary.toImage(pixelRatio: 1.5);
+      ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
       return byteData?.buffer.asUint8List();
     } catch (e) {
-      print("캡처 오류: $e");
+      print("캐처 오류: $e");
       return null;
     }
   }
   
-  // 캡처한 이미지 저장
+  // 캐처한 이미지를 JPEG로 변환하여 저장 (MMS 전송용 파일 크기 최적화)
+  Future<Uint8List?> _convertToJpeg(Uint8List rawRgba, int width, int height) async {
+    try {
+      // RGBA 데이터를 image 패키지의 Image 객체로 변환
+      final image = img.Image.fromBytes(
+        width: width,
+        height: height,
+        bytes: rawRgba.buffer,
+        format: img.Format.uint8,
+        numChannels: 4,
+      );
+      
+      // JPEG로 인코딩 (품질 85% - 파일 크기와 화질 균형)
+      final jpegBytes = img.encodeJpg(image, quality: 85);
+      return Uint8List.fromList(jpegBytes);
+    } catch (e) {
+      print("JPEG 변환 오류: $e");
+      return null;
+    }
+  }
+  
+  // 캐처한 이미지 저장 (JPEG로 변환하여 MMS 전송 가능한 파일 크기로 최적화)
   Future<String?> _saveCardImage() async {
     if (!mounted) return null;
 
-    // 캡쳐 전에 UI 요소 숨기기
+    // 캐쳐 전에 UI 요소 숨기기
     setState(() => _isCapturing = true);
     
     // UI 업데이트 및 리페인트를 위해 충분히 대기
     await Future.delayed(const Duration(milliseconds: 500));
 
+    // 캐처 영역의 크기 가져오기
+    final RenderRepaintBoundary? boundary = _captureKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+    if (boundary == null) {
+      if (mounted) setState(() => _isCapturing = false);
+      return null;
+    }
+    
+    // pixelRatio 1.5로 캐처한 이미지 크기 계산
+    final size = boundary.size;
+    final int width = (size.width * 1.5).round();
+    final int height = (size.height * 1.5).round();
+
     final imageBytes = await _captureCardImage();
 
-    // 캡쳐 후 UI 복구
+    // 캐쳐 후 UI 복구
     if (mounted) {
       setState(() => _isCapturing = false);
     }
@@ -1895,11 +1930,23 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     if (imageBytes == null) return null;
     
     try {
+      // JPEG로 변환 (MMS 전송을 위해 파일 크기 최적화)
+      final jpegBytes = await _convertToJpeg(imageBytes, width, height);
+      if (jpegBytes == null) return null;
+      
       final directory = await getApplicationDocumentsDirectory();
-      final fileName = 'card_${DateTime.now().millisecondsSinceEpoch}.png';
+      final fileName = 'card_${DateTime.now().millisecondsSinceEpoch}.jpg';
       final filePath = '${directory.path}/$fileName';
       final file = File(filePath);
-      await file.writeAsBytes(imageBytes);
+      await file.writeAsBytes(jpegBytes);
+      
+      // 파일 크기 로깅 (MMS 전송 가능 여부 확인용)
+      final fileSize = await file.length();
+      print("[카드 이미지 저장] JPEG 파일 크기: ${(fileSize / 1024).toStringAsFixed(1)}KB");
+      if (fileSize > 1024 * 1024) {
+        print("⚠️ 경고: 파일 크기가 1MB를 초과합니다. MMS 전송이 어려울 수 있습니다.");
+      }
+      
       return filePath;
     } catch (e) {
       print("저장 오류: $e");
