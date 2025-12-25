@@ -41,11 +41,26 @@ namespace FlutterControlPanel
             this.BackColor = Color.FromArgb(245, 245, 245);
 
             try {
-                string iconPath = Path.Combine(projectRoot, "assets", "icons", "app_icon.png");
-                if (File.Exists(iconPath)) {
-                    using (Bitmap bmp = new Bitmap(iconPath)) {
-                        this.Icon = Icon.FromHandle(bmp.GetHicon());
+                // 1. 실행 파일과 같은 폴더에서 icon.ico 찾기
+                string exeDir = Path.GetDirectoryName(Application.ExecutablePath) ?? "";
+                string iconPath = Path.Combine(exeDir, "icon.ico");
+                
+                // 2. 없으면 프로젝트 소스 폴더에서 찾기
+                if (!File.Exists(iconPath)) {
+                    iconPath = Path.Combine(projectRoot, "WindowUI", "FlutterControlPanel", "icon.ico");
+                }
+                
+                // 3. 없으면 assets에서 PNG로 찾기
+                if (!File.Exists(iconPath)) {
+                    string pngPath = Path.Combine(projectRoot, "assets", "icons", "app_icon.png");
+                    if (File.Exists(pngPath)) {
+                        using (Bitmap bmp = new Bitmap(pngPath)) {
+                            this.Icon = Icon.FromHandle(bmp.GetHicon());
+                        }
                     }
+                } else {
+                    // ICO 파일로 직접 로드
+                    this.Icon = new Icon(iconPath);
                 }
             } catch { /* Ignore icon errors */ }
 
