@@ -67,7 +67,7 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
           Expanded(
             child: _TabPill(
               text: "내 사람들",
-              icon: FontAwesomeIcons.heart,
+              iconWidget: Image.asset('assets/icons/heart_icon.png', width: 16, height: 16),
               isActive: _selectedTabIndex == 0,
               onTap: () => setState(() => _selectedTabIndex = 0),
             ),
@@ -238,9 +238,11 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
               ),
             ),
             IconButton(
-              icon: Icon(
-                contact.isFavorite ? FontAwesomeIcons.solidHeart : FontAwesomeIcons.heart,
-                color: const Color(0xFFFF8A65),
+              icon: Image.asset(
+                'assets/icons/heart_icon.png',
+                width: 24,
+                height: 24,
+                color: contact.isFavorite ? const Color(0xFFFF8A65) : const Color(0xFFFF8A65).withOpacity(0.4),
               ),
               onPressed: () {
                 Navigator.push(
@@ -451,9 +453,10 @@ class _TabPill extends StatelessWidget {
   final String text;
   final bool isActive;
   final IconData? icon;
+  final Widget? iconWidget;
   final VoidCallback onTap;
 
-  const _TabPill({required this.text, required this.isActive, this.icon, required this.onTap});
+  const _TabPill({required this.text, required this.isActive, this.icon, this.iconWidget, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -470,7 +473,8 @@ class _TabPill extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if (icon != null) ...[Icon(icon, size: 16, color: const Color(0xFF3E2723)), const SizedBox(width: 6)],
+            if (iconWidget != null) ...[iconWidget!, const SizedBox(width: 6)]
+            else if (icon != null) ...[Icon(icon, size: 16, color: const Color(0xFF3E2723)), const SizedBox(width: 6)],
             Text(text, style: const TextStyle(fontWeight: FontWeight.w700, color: Color(0xFF3E2723))),
           ],
         ),

@@ -46,7 +46,11 @@ class ScaffoldWithNav extends ConsumerWidget {
                 children: [
                   const Row(
                     children: [
-                      Icon(FontAwesomeIcons.heart, color: Color(0xFFFF7043), size: 20),
+                      Image(
+                        image: AssetImage('assets/icons/heart_icon.png'),
+                        width: 24,
+                        height: 24,
+                      ),
                       SizedBox(width: 8),
                       Text(
                         "Heart-Connect",

@@ -57,9 +57,11 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
         title: Text(contact.name, style: const TextStyle(color: Color(0xFF5D4037), fontWeight: FontWeight.bold)),
         actions: [
           IconButton(
-            icon: Icon(
-              contact.isFavorite ? FontAwesomeIcons.solidHeart : FontAwesomeIcons.heart,
-              color: const Color(0xFFFF8A65),
+            icon: Image.asset(
+              'assets/icons/heart_icon.png',
+              width: 24,
+              height: 24,
+              color: contact.isFavorite ? const Color(0xFFFF8A65) : const Color(0xFFFF8A65).withOpacity(0.4),
             ),
             onPressed: () {
               // Toggle favorite
