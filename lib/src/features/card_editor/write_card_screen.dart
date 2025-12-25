@@ -2165,9 +2165,22 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                             else
                               GestureDetector(
                                 onTap: _showRecipientPicker, // Allow adding more even if not empty
-                                child: Text(
-                                  "$_sentCount / ${_recipients.length}",
-                                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFFF29D86)),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    // 수신자 이름 표시 (1명이면 이름만, 여러명이면 "이름 외 N명")
+                                    Flexible(
+                                      child: Text(
+                                        _recipients.length == 1
+                                            ? _recipients.first.split(' (')[0] // 이름만 추출
+                                            : "${_recipients.first.split(' (')[0]} 외 ${_recipients.length - 1}명",
+                                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFFF29D86)),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    const Icon(Icons.edit, size: 14, color: Color(0xFFF29D86)),
+                                  ],
                                 ),
                               ),
                           ],
