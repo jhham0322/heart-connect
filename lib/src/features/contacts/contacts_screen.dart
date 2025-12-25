@@ -67,7 +67,7 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
           Expanded(
             child: _TabPill(
               text: "내 사람들",
-              iconWidget: Image.asset('assets/icons/heart_icon.png', width: 16, height: 16),
+              iconWidget: Image.asset('assets/icons/heart_icon.png', width: 20, height: 20),
               isActive: _selectedTabIndex == 0,
               onTap: () => setState(() => _selectedTabIndex = 0),
             ),
@@ -240,8 +240,8 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
             IconButton(
               icon: Image.asset(
                 'assets/icons/heart_icon.png',
-                width: 24,
-                height: 24,
+                width: 28,
+                height: 28,
                 color: contact.isFavorite ? const Color(0xFFFF8A65) : const Color(0xFFFF8A65).withOpacity(0.4),
               ),
               onPressed: () {

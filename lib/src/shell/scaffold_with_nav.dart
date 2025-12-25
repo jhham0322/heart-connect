@@ -48,8 +48,8 @@ class ScaffoldWithNav extends ConsumerWidget {
                     children: [
                       Image(
                         image: AssetImage('assets/icons/heart_icon.png'),
-                        width: 24,
-                        height: 24,
+                        width: 28,
+                        height: 28,
                       ),
                       SizedBox(width: 8),
                       Text(

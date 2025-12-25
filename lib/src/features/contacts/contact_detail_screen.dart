@@ -59,8 +59,8 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
           IconButton(
             icon: Image.asset(
               'assets/icons/heart_icon.png',
-              width: 24,
-              height: 24,
+              width: 28,
+              height: 28,
               color: contact.isFavorite ? const Color(0xFFFF8A65) : const Color(0xFFFF8A65).withOpacity(0.4),
             ),
             onPressed: () {
