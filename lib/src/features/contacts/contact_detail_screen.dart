@@ -7,6 +7,7 @@ import '../database/app_database.dart';
 import '../database/database_provider.dart';
 import '../card_editor/write_card_screen.dart';
 import '../../utils/phone_formatter.dart';
+import 'current_contact_provider.dart';
 
 class ContactDetailScreen extends ConsumerStatefulWidget {
   final Contact contact;
@@ -25,11 +26,17 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
   void initState() {
     super.initState();
     _searchController = TextEditingController();
+    // 현재 보고 있는 연락처를 Provider에 설정
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(currentContactProvider.notifier).state = widget.contact;
+    });
   }
 
   @override
   void dispose() {
     _searchController.dispose();
+    // 화면을 떠날 때 현재 연락처 초기화
+    ref.read(currentContactProvider.notifier).state = null;
     super.dispose();
   }
 
@@ -64,6 +71,7 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
+          print("[ContactDetailScreen] FAB pressed for contact: ${contact.name}");
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => WriteCardScreen(initialContact: contact)),

@@ -585,7 +585,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 flex: 2,
                 child: ElevatedButton(
                   onPressed: () {
-                    context.push('/write');
+                    // 일정의 수신자 목록을 파싱하여 전달
+                    List<Map<String, String>> recipients = [];
+                    if (plan.recipients != null) {
+                      try {
+                        final decoded = jsonDecode(plan.recipients!) as List;
+                        recipients = decoded.map((e) => Map<String, String>.from(e)).toList();
+                      } catch (e) {
+                        debugPrint('Error parsing recipients: $e');
+                      }
+                    }
+                    context.push('/write', extra: {'recipients': recipients});
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.accentCoral,

@@ -20,11 +20,66 @@
 2025-12-24 22:20:09.847713: [AppDatabase] Executing UPDATE DailyPlans: id=2, title=성탄절, recipients=[{"name":"유재석","phone":"01012345678"},{"name":"김종국","phone":"01098765432"},{"name":"송지효","phone":"01055554444"},{"name":"하동훈","phone":"01077778888"},{"name":"수신자 1","phone":"010-0000-0001"},{"name":"수신자 2","phone":"010-0000-0002"},{"name":"수신자 3","phone":"010-0000-0003"},{"name":"수신자 4","phone":"010-0000-0004"},{"name":"수신자 5","phone":"010-0000-0005"},{"name":"수신자 6","phone":"010-0000-0006"},{"name":"수신자 7","phone":"010-0000-0007"},{"name":"수신자 8","phone":"010-0000-0008"},{"name":"수신자 9","phone":"010-0000-0009"},{"name":"수신자 10","phone":"010-0000-0010"},{"name":"수신자 11","phone":"010-0000-0011"},{"name":"수신자 12","phone":"010-0000-0012"},{"name":"수신자 13","phone":"010-0000-0013"},{"name":"수신자 14","phone":"010-0000-0014"}]
 2025-12-24 22:20:09.870957: [HomeViewModel] Verified update for plan 2. New recipients in DB: [{"name":"유재석","phone":"01012345678"},{"name":"김종국","phone":"01098765432"},{"name":"송지효","phone":"01055554444"},{"name":"하동훈","phone":"01077778888"},{"name":"수신자 1","phone":"010-0000-0001"},{"name":"수신자 2","phone":"010-0000-0002"},{"name":"수신자 3","phone":"010-0000-0003"},{"name":"수신자 4","phone":"010-0000-0004"},{"name":"수신자 5","phone":"010-0000-0005"},{"name":"수신자 6","phone":"010-0000-0006"},{"name":"수신자 7","phone":"010-0000-0007"},{"name":"수신자 8","phone":"010-0000-0008"},{"name":"수신자 9","phone":"010-0000-0009"},{"name":"수신자 10","phone":"010-0000-0010"},{"name":"수신자 11","phone":"010-0000-0011"},{"name":"수신자 12","phone":"010-0000-0012"},{"name":"수신자 13","phone":"010-0000-0013"},{"name":"수신자 14","phone":"010-0000-0014"}]
 2025-12-24 22:20:45.180364: [HomeViewModel] Updating schedule 6 with recipients: [{"name":"김종국","phone":"01098765432"}]
-�종국","phone":"01098765432"}]
+�종국","phone":"01098765432"}]
 2025-12-24 22:20:45.198903: [HomeViewModel] Verified update for plan 6. New recipients in DB: [{"name":"김종국","phone":"01098765432"}]
 2025-12-24 22:22:30.817324: [HomeViewModel] Updating schedule 6 with recipients: []
-��종국 Birthday, recipients=[]
+��종국 Birthday, recipients=[]
 2025-12-24 22:22:30.835364: [HomeViewModel] Verified update for plan 6. New recipients in DB: []
 2025-12-24 22:49:40.871895: [AppDatabase] Executing UPDATE DailyPlans: id=6, title=김종국 Birthday, recipients=[{"name":"송지효","phone":"01055554444"},{"name":"하동훈","phone":"01077778888"}]
 2025-12-24 22:49:40.878507: [AppDatabase] Update Result: 1 rows affected for plan 6
 2025-12-24 22:49:40.881410: [HomeViewModel] Verified update for plan 6. New recipients in DB: [{"name":"송지효","phone":"01055554444"},{"name":"하동훈","phone":"01077778888"}]
+2025-12-25 11:59:32.712402: [AppDatabase] Executing UPDATE DailyPlans: id=6, title=김종국 Birthday, recipients=[{"name":"하동훈","phone":"01077778888"}]
+2025-12-25 11:59:32.724540: [HomeViewModel] Verified update for plan 6. New recipients in DB: [{"name":"하동훈","phone":"01077778888"}]
+2025-12-25 11:59:38.785533: [AppDatabase] Executing UPDATE DailyPlans: id=6, title=김종국 Birthday, recipients=[{"name":"송지효","phone":"01055554444"}]
+2025-12-25 11:59:38.802342: [AppDatabase] Update Result: 1 rows affected for plan 6
+2025-12-25 11:59:38.804891: [HomeViewModel] Verified update for plan 6. New recipients in DB: [{"name":"송지효","phone":"01055554444"}]
+2025-12-25 12:00:03.795904: [HomeViewModel] Updating schedule 6 with recipients: [{"name":"송지효","phone":"01055554444"},{"name":"하동훈","phone":"01077778888"}]
+�동훈","phone":"01077778888"}]
+2025-12-25 12:00:03.813885: [AppDatabase] Update Result: 1 rows affected for plan 6
+2025-12-25 12:00:03.814925: [HomeViewModel] Verified update for plan 6. New recipients in DB: [{"name":"송지효","phone":"01055554444"},{"name":"하동훈","phone":"01077778888"}]
+2025-12-25 12:00:09.555217: [AppDatabase] Executing UPDATE DailyPlans: id=6, title=김종국 Birthday, recipients=[{"name":"송지효","phone":"01055554444"}]
+2025-12-25 12:00:09.568022: [AppDatabase] Update Result: 1 rows affected for plan 6
+ts in DB: [{"name":"송지효","phone":"01055554444"}]
+2025-12-25 12:00:12.871459: [AppDatabase] Executing UPDATE DailyPlans: id=6, title=김종국 Birthday, recipients=[{"name":"송지효","phone":"01055554444"},{"name":"하동훈","phone":"01077778888"}]
+2025-12-25 12:00:12.884855: [AppDatabase] Update Result: 1 rows affected for plan 6
+2025-12-25 12:00:12.886916: [HomeViewModel] Verified update for plan 6. New recipients in DB: [{"name":"송지효","phone":"01055554444"},{"name":"하동훈","phone":"01077778888"}]
+2025-12-25 12:00:16.288371: [HomeViewModel] Updating schedule 6 with recipients: [{"name":"송지효","phone":"01055554444"}]
+�지효","phone":"01055554444"}]
+2025-12-25 12:00:16.304393: [HomeViewModel] Verified update for plan 6. New recipients in DB: [{"name":"송지효","phone":"01055554444"}]
+2025-12-25 12:00:18.780768: [AppDatabase] Executing UPDATE DailyPlans: id=6, title=김종국 Birthday, recipients=[{"name":"송지효","phone":"01055554444"},{"name":"하동훈","phone":"01077778888"}]
+2025-12-25 12:00:18.792520: [AppDatabase] Update Result: 1 rows affected for plan 6
+2025-12-25 12:00:18.794040: [HomeViewModel] Verified update for plan 6. New recipients in DB: [{"name":"송지효","phone":"01055554444"},{"name":"하동훈","phone":"01077778888"}]
+2025-12-25 12:00:21.648212: [AppDatabase] Executing UPDATE DailyPlans: id=6, title=김종국 Birthday, recipients=[{"name":"송지효","phone":"01055554444"}]
+2025-12-25 12:00:21.665249: [AppDatabase] Update Result: 1 rows affected for plan 6
+2025-12-25 12:00:21.666256: [HomeViewModel] Verified update for plan 6. New recipients in DB: [{"name":"송지효","phone":"01055554444"}]
+2025-12-25 12:00:41.819791: [AppDatabase] Executing UPDATE DailyPlans: id=6, title=김종국 Birthday, recipients=[{"name":"송지효","phone":"01055554444"},{"name":"하동훈","phone":"01077778888"}]
+2025-12-25 12:00:41.836531: [AppDatabase] Update Result: 1 rows affected for plan 6
+2025-12-25 12:00:41.836531: [HomeViewModel] Verified update for plan 6. New recipients in DB: [{"name":"송지효","phone":"01055554444"},{"name":"하동훈","phone":"01077778888"}]
+2025-12-25 12:00:47.131630: [AppDatabase] Executing UPDATE DailyPlans: id=6, title=김종국 Birthday, recipients=[{"name":"송지효","phone":"01055554444"}]
+2025-12-25 12:00:47.143894: [AppDatabase] Update Result: 1 rows affected for plan 6
+2025-12-25 12:00:47.143894: [HomeViewModel] Verified update for plan 6. New recipients in DB: [{"name":"송지효","phone":"01055554444"}]
+2025-12-25 12:00:50.248369: [AppDatabase] Executing UPDATE DailyPlans: id=6, title=김종국 Birthday, recipients=[{"name":"송지효","phone":"01055554444"},{"name":"하동훈","phone":"01077778888"}]
+2025-12-25 12:00:50.260752: [AppDatabase] Update Result: 1 rows affected for plan 6
+2025-12-25 12:00:50.261258: [HomeViewModel] Verified update for plan 6. New recipients in DB: [{"name":"송지효","phone":"01055554444"},{"name":"하동훈","phone":"01077778888"}]
+2025-12-25 12:00:53.284129: [HomeViewModel] Updating schedule 6 with recipients: [{"name":"송지효","phone":"01055554444"}]
+�지효","phone":"01055554444"}]
+2025-12-25 12:00:53.302295: [AppDatabase] Update Result: 1 rows affected for plan 6
+2025-12-25 12:00:53.303806: [HomeViewModel] Verified update for plan 6. New recipients in DB: [{"name":"송지효","phone":"01055554444"}]
+2025-12-25 12:02:16.832201: [HomeViewModel] Updating schedule 6 with recipients: [{"name":"송지효","phone":"01055554444"}]
+�지효","phone":"01055554444"}]
+2025-12-25 12:02:16.833816: [AppDatabase] Update Result: 1 rows affected for plan 6
+ts in DB: [{"name":"송지효","phone":"01055554444"}]
+2025-12-25 12:02:30.953358: [HomeViewModel] Updating schedule 6 with recipients: [{"name":"송지효","phone":"01055554444"}]
+�지효","phone":"01055554444"}]
+2025-12-25 12:02:30.956436: [HomeViewModel] Verified update for plan 6. New recipients in DB: [{"name":"송지효","phone":"01055554444"}]
+2025-12-25 12:02:41.986585: [AppDatabase] Executing UPDATE DailyPlans: id=6, title=김종국 Birthday, recipients=[{"name":"송지효","phone":"01055554444"},{"name":"유재석","phone":"01012345678"}]
+2025-12-25 12:02:41.994378: [AppDatabase] Update Result: 1 rows affected for plan 6
+ts in DB: [{"name":"송지효","phone":"01055554444"},{"name":"유재석","phone":"01012345678"}]
+2025-12-25 12:04:58.083287: [AppDatabase] Executing UPDATE DailyPlans: id=6, title=김종국 Birthday, recipients=[{"name":"송지효","phone":"01055554444"}]
+2025-12-25 12:04:58.106059: [HomeViewModel] Verified update for plan 6. New recipients in DB: [{"name":"송지효","phone":"01055554444"}]
+2025-12-25 12:05:10.029215: [AppDatabase] Executing UPDATE DailyPlans: id=6, title=김종국 Birthday, recipients=[{"name":"송지효","phone":"01055554444"},{"name":"수신자 1","phone":"010-0000-0001"}]
+2025-12-25 12:05:10.039137: [AppDatabase] Update Result: 1 rows affected for plan 6
+ts in DB: [{"name":"송지효","phone":"01055554444"},{"name":"수신자 1","phone":"010-0000-0001"}]
+2025-12-25 12:05:20.390865: [AppDatabase] Executing UPDATE DailyPlans: id=6, title=김종국 Birthday, recipients=[{"name":"송지효","phone":"01055554444"}]
+2025-12-25 12:05:20.414090: [AppDatabase] Update Result: 1 rows affected for plan 6
+2025-12-25 12:05:20.416123: [HomeViewModel] Verified update for plan 6. New recipients in DB: [{"name":"송지효","phone":"01055554444"}]

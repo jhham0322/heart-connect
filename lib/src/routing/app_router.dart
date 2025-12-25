@@ -33,6 +33,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           final extra = state.extra;
           Contact? initialContact;
           String? originalMessage;
+          List<Map<String, String>>? initialRecipients;
 
           if (extra is Contact) {
             initialContact = extra;
@@ -43,9 +44,15 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             if (extra['originalMessage'] is String) {
               originalMessage = extra['originalMessage'] as String;
             }
+            // 일정에서 전달받은 수신자 목록 처리
+            if (extra['recipients'] is List) {
+              initialRecipients = (extra['recipients'] as List)
+                  .map((e) => Map<String, String>.from(e as Map))
+                  .toList();
+            }
           }
           
-          print("[AppRouter] /write route (standalone). Param: $initialImage");
+          print("[AppRouter] /write route. contact: ${initialContact?.name}, recipients: ${initialRecipients?.length ?? 0}");
           return MaterialPage(
             fullscreenDialog: true,
             child: WriteCardScreen(
@@ -53,6 +60,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               initialImage: initialImage,
               initialContact: initialContact,
               originalMessage: originalMessage,
+              initialRecipients: initialRecipients,
             ),
           );
         },

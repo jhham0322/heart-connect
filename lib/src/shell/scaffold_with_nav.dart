@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../theme/app_theme.dart';
 import '../features/gallery/gallery_selection_provider.dart';
+import '../features/contacts/current_contact_provider.dart';
 
 class ScaffoldWithNav extends ConsumerWidget {
   const ScaffoldWithNav({
@@ -99,7 +100,13 @@ class ScaffoldWithNav extends ConsumerWidget {
           heroTag: 'write-fab',
           onPressed: () {
             final selectedImage = ref.read(currentSelectionProvider);
-            if (selectedImage != null) {
+            final currentContact = ref.read(currentContactProvider);
+            
+            if (currentContact != null) {
+              // 연락처 상세화면에서 FAB를 누른 경우 - 해당 연락처를 수신자로 설정
+              print("[ScaffoldWithNav] Navigating to Write with contact: ${currentContact.name}");
+              context.push('/write', extra: currentContact);
+            } else if (selectedImage != null) {
                print("[ScaffoldWithNav] Navigating to Write with image: $selectedImage");
                final uri = Uri(path: '/write', queryParameters: {'image': selectedImage});
                context.push(uri.toString());

@@ -118,7 +118,8 @@ class WriteCardScreen extends ConsumerStatefulWidget {
   final String? initialImage;
   final Contact? initialContact; // Added initialContact parameter
   final String? originalMessage; // Added originalMessage parameter
-  const WriteCardScreen({super.key, this.initialImage, this.initialContact, this.originalMessage});
+  final List<Map<String, String>>? initialRecipients; // 일정에서 전달받은 수신자 목록
+  const WriteCardScreen({super.key, this.initialImage, this.initialContact, this.originalMessage, this.initialRecipients});
 
   @override
   ConsumerState<WriteCardScreen> createState() => _WriteCardScreenState();
@@ -297,6 +298,21 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     // Add initial contact if provided
     if (widget.initialContact != null) {
       _recipients.insert(0, "${widget.initialContact!.name} (${widget.initialContact!.phone})");
+      print("[WriteCardScreen] Added initialContact: ${widget.initialContact!.name} to _recipients");
+      print("[WriteCardScreen] _recipients now: $_recipients");
+    } else if (widget.initialRecipients != null && widget.initialRecipients!.isNotEmpty) {
+      // 일정에서 전달받은 수신자 목록 처리
+      for (var r in widget.initialRecipients!) {
+        final name = r['name'] ?? '';
+        final phone = r['phone'] ?? '';
+        if (name.isNotEmpty) {
+          _recipients.add("$name ($phone)");
+        }
+      }
+      print("[WriteCardScreen] Added initialRecipients: ${widget.initialRecipients} to _recipients");
+      print("[WriteCardScreen] _recipients now: $_recipients");
+    } else {
+      print("[WriteCardScreen] initialContact is NULL");
     }
 
     _loadTemplateAssets();
