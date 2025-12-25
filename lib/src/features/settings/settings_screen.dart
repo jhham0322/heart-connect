@@ -127,7 +127,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Future<void> _contactUs() async {
     final Uri emailLaunchUri = Uri(
       scheme: 'mailto',
-      path: 'support@connectheart.com',
+      path: 'joenbympray@gmail.com',
       query: 'subject=ConnectHeart 문의&body=문의 내용을 입력해주세요.',
     );
     if (await canLaunchUrl(emailLaunchUri)) {

@@ -83,3 +83,5 @@ ts in DB: [{"name":"송지효","phone":"01055554444"},{"name":"수신자 1","pho
 2025-12-25 12:05:20.390865: [AppDatabase] Executing UPDATE DailyPlans: id=6, title=김종국 Birthday, recipients=[{"name":"송지효","phone":"01055554444"}]
 2025-12-25 12:05:20.414090: [AppDatabase] Update Result: 1 rows affected for plan 6
 2025-12-25 12:05:20.416123: [HomeViewModel] Verified update for plan 6. New recipients in DB: [{"name":"송지효","phone":"01055554444"}]
+2025-12-26 04:20:30.833295: [HomeViewModel] AI extracted recipients for "김종국과 노래연습": [{name: 김종국, phone: 01098765432}]
+2025-12-26 04:21:46.268137: [HomeViewModel] AI extracted recipients for "유재석과 김종국의 콘서트": [{name: 유재석, phone: 01012345678}, {name: 김종국, phone: 01098765432}]
