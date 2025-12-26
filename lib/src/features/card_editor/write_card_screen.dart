@@ -165,6 +165,10 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   bool _isZoomMode = false; // 줌 모드 (배경 이미지 편집 중)
   bool _isDragMode = false; // 글상자 이동 모드 (롱프레스 시)
   bool _showZoomHint = false; // 줌 모드 안내 문구 표시
+  bool _showInitialHint = true; // 첫 진입 시 더블탭 안내
+  bool _isPanning = false; // 이미지 드래그 중
+  bool _isPinching = false; // 이미지 핀치(확대/축소) 중
+  String _currentHintMessage = ''; // 현재 표시할 안내 메시지
 
   // Text Box Style State (글상자 스타일)
   Color _boxColor = Colors.white;
@@ -2150,28 +2154,96 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
               ),
             ),
           
-          // 줌 모드 안내 문구 (정적 텍스트로 변경, 여러 줄)
-          if (_showZoomHint)
+          // 안내 메시지 영역 (undo/redo 버튼 영역 침범 방지)
+          // - 초기: 더블탭 안내
+          // - 줌 모드: 드래그/확대축소 방법 안내
+          // - 드래그 중: 이동 가능 표시
+          // - 핀치 중: 확대/축소 가능 표시
+          if (_showInitialHint && !_isZoomMode)
             Positioned(
               top: MediaQuery.of(context).padding.top + 50,
               left: 16,
-              right: 16,
+              right: 80, // undo/redo 버튼 영역 피함
+              child: GestureDetector(
+                onTap: () => setState(() => _showInitialHint = false),
+                child: Container(
+                  height: 32,
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF29D86).withOpacity(0.95),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  clipBehavior: Clip.hardEdge,
+                  child: const Center(
+                    child: Text(
+                      "💡 이미지를 더블탭하면 줌 모드가 됩니다",
+                      style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w500),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          
+          if (_showZoomHint && _isZoomMode)
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 50,
+              left: 16,
+              right: 80, // undo/redo 버튼 영역 피함
               child: Container(
-                height: 36,
+                height: 32,
+                padding: const EdgeInsets.symmetric(horizontal: 12),
                 decoration: BoxDecoration(
                   color: const Color(0xFFF29D86).withOpacity(0.95),
-                  borderRadius: BorderRadius.circular(18),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
+                  borderRadius: BorderRadius.circular(16),
                 ),
                 clipBehavior: Clip.hardEdge,
                 child: const _MarqueeText(
-                  text: "✨ 환영합니다! 두 손가락으로 벌리거나 줄여서 이미지 크기를 조정하실 수 있습니다. 화면을 드래그하시면 이미지를 이동하실 수 있습니다. 편집이 완료되시면 더블클릭 또는 줌 모드 버튼을 눌러 종료해 주세요. ✨",
+                  text: "🤏 두 손가락 핀치로 확대/축소  |  👆 드래그로 이동  |  더블탭 또는 줌 버튼으로 종료",
+                ),
+              ),
+            ),
+          
+          // 드래그 중 안내
+          if (_isPanning && _isZoomMode)
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 50,
+              left: 16,
+              right: 80,
+              child: Container(
+                height: 32,
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                decoration: BoxDecoration(
+                  color: Colors.blue.withOpacity(0.9),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Center(
+                  child: Text(
+                    "👆 드래그 중 - 이미지 이동 가능",
+                    style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+            ),
+          
+          // 핀치(확대/축소) 중 안내
+          if (_isPinching && _isZoomMode)
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 50,
+              left: 16,
+              right: 80,
+              child: Container(
+                height: 32,
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                decoration: BoxDecoration(
+                  color: Colors.green.withOpacity(0.9),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Center(
+                  child: Text(
+                    "🤏 핀치 중 - 확대/축소 가능",
+                    style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                  ),
                 ),
               ),
             ),
@@ -2503,6 +2575,9 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
       // 줌 모드 토글 (이미지 크기는 유지, 사용자가 직접 조절)
       _isZoomMode = !_isZoomMode;
       
+      // 초기 안내 숨기기
+      _showInitialHint = false;
+      
       // 줌 모드 진입 시 안내 문구 표시
       if (_isZoomMode) {
         _showZoomHint = true;
@@ -2561,7 +2636,25 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                               maxScale: 5.0,
                               panEnabled: _isZoomMode, // 줌 모드일 때만 이동 가능
                               scaleEnabled: _isZoomMode, // 줌 모드일 때만 줌 가능
+                              onInteractionStart: (details) {
+                                if (_isZoomMode) {
+                                  setState(() {
+                                    // 터치 포인트 수로 드래그/핀치 구분
+                                    if (details.pointerCount == 1) {
+                                      _isPanning = true;
+                                      _isPinching = false;
+                                    } else if (details.pointerCount >= 2) {
+                                      _isPanning = false;
+                                      _isPinching = true;
+                                    }
+                                  });
+                                }
+                              },
                               onInteractionEnd: (details) {
+                                setState(() {
+                                  _isPanning = false;
+                                  _isPinching = false;
+                                });
                                 _saveDraft(); // 줌/이동 후 저장
                               },
                               child: _buildImage(_selectedImage, fit: BoxFit.cover),
