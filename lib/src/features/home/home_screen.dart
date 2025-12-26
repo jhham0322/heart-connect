@@ -57,16 +57,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   // 캘린더 권한 확인 및 요청
   Future<void> _checkCalendarPermission() async {
     final status = await Permission.calendar.status;
+    debugPrint('[HomeScreen] Calendar permission status: $status');
     
-    if (status.isDenied || status.isPermanentlyDenied) {
+    if (status.isGranted) {
+      setState(() => _hasCalendarPermission = true);
+      debugPrint('[HomeScreen] Calendar permission already granted');
+    } else {
       setState(() => _hasCalendarPermission = false);
       
-      // 첫 실행 시 권한 요청 다이얼로그 표시
-      if (status.isDenied && mounted) {
+      // 권한이 허용되지 않았으면 다이얼로그 표시
+      if (mounted) {
+        debugPrint('[HomeScreen] Showing calendar permission dialog');
         _showCalendarPermissionDialog();
       }
-    } else if (status.isGranted) {
-      setState(() => _hasCalendarPermission = true);
     }
   }
   
