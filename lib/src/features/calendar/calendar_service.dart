@@ -33,34 +33,42 @@ class CalendarService {
   Future<List<CalendarEventData>> getEvents(DateTime start, DateTime end) async {
     final events = <CalendarEventData>[];
 
+    debugPrint('[CalendarService] Getting events from $start to $end');
+    debugPrint('[CalendarService] Platform: ${Platform.isAndroid ? "Android" : Platform.isIOS ? "iOS" : "Other"}');
+
     // Mobile Integration - 실제 디바이스 캘린더 연동
-    // device_calendar 패키지가 구글 캘린더, 네이버 캘린더, Samsung 캘린더 등
-    // 디바이스에 등록된 모든 캘린더 계정을 자동으로 읽어옵니다.
     if (Platform.isAndroid || Platform.isIOS) {
        try {
          var permissions = await _deviceCalendar.hasPermissions();
+         debugPrint('[CalendarService] Has permissions: ${permissions.isSuccess ? permissions.data : "error"}');
+         
          if (permissions.isSuccess && !permissions.data!) {
+             debugPrint('[CalendarService] Requesting calendar permissions...');
              permissions = await _deviceCalendar.requestPermissions();
          }
          
          if (permissions.isSuccess && permissions.data!) {
+            debugPrint('[CalendarService] Calendar permission GRANTED');
             final calendars = await _deviceCalendar.retrieveCalendars();
-            debugPrint('[CalendarService] Found ${calendars.data?.length ?? 0} calendars');
             
             if (calendars.isSuccess && calendars.data != null) {
+               debugPrint('[CalendarService] ====== Found ${calendars.data!.length} calendars ======');
+               
                for (var cal in calendars.data!) {
-                   debugPrint('[CalendarService] Reading calendar: ${cal.name} (${cal.accountName}) - ${_determineSource(cal)}');
+                   debugPrint('[CalendarService] Calendar: ${cal.name} | Account: ${cal.accountName} | ID: ${cal.id}');
                    
                    final evResult = await _deviceCalendar.retrieveEvents(
                       cal.id, 
                       RetrieveEventsParams(startDate: start, endDate: end)
                    );
+                   
                    if (evResult.isSuccess && evResult.data != null) {
-                      debugPrint('[CalendarService] Found ${evResult.data!.length} events in ${cal.name}');
+                      debugPrint('[CalendarService] --> ${evResult.data!.length} events in "${cal.name}"');
                       
                       for (var e in evResult.data!) {
                           if (e.start == null) continue;
                           final date = DateTime.fromMillisecondsSinceEpoch(e.start!.millisecondsSinceEpoch);
+                          debugPrint('[CalendarService]    Event: "${e.title}" on $date');
                           
                           events.add(CalendarEventData(
                              title: e.title ?? 'Event',
@@ -69,14 +77,19 @@ class CalendarService {
                              source: _determineSource(cal)
                           ));
                       }
+                   } else {
+                      debugPrint('[CalendarService] --> Error reading events from "${cal.name}"');
                    }
                }
+            } else {
+               debugPrint('[CalendarService] Error retrieving calendars: ${calendars.errorMessages}');
             }
          } else {
-            debugPrint('[CalendarService] Calendar permission denied');
+            debugPrint('[CalendarService] Calendar permission DENIED');
          }
-       } catch (e) {
+       } catch (e, stack) {
          debugPrint("[CalendarService] Calendar Sync Error: $e");
+         debugPrint("[CalendarService] Stack: $stack");
        }
     } 
     
@@ -87,7 +100,7 @@ class CalendarService {
     
     // Sort by date
     events.sort((a, b) => a.date.compareTo(b.date));
-    debugPrint('[CalendarService] Total events loaded: ${events.length}');
+    debugPrint('[CalendarService] ====== Total events loaded: ${events.length} ======');
     return events;
   }
 
