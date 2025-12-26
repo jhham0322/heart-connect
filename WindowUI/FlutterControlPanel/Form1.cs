@@ -229,7 +229,7 @@ namespace FlutterControlPanel
             GroupBox grpAuto = new GroupBox();
             grpAuto.Text = "Auto Reload / Build";
             grpAuto.Location = new Point(460, 5); // Shifted right
-            grpAuto.Size = new Size(340, 60); // Compact height
+            grpAuto.Size = new Size(180, 60); // Build 버튼과 겹치지 않게 조정
             controlPanel.Controls.Add(grpAuto);
 
             chkAutoReload = new CheckBox();
@@ -254,15 +254,15 @@ namespace FlutterControlPanel
             lblSec.AutoSize = true;
             grpAuto.Controls.Add(lblSec);
             
-            // Auto Build (Android) 체크박스
+            // Auto Build (Android) 체크박스 - 그룹박스 밖에 배치
             chkAutoBuild = new CheckBox();
             chkAutoBuild.Text = "📱 Auto Build";
-            chkAutoBuild.Location = new Point(200, 25);
+            chkAutoBuild.Location = new Point(650, 55);
             chkAutoBuild.AutoSize = true;
             chkAutoBuild.ForeColor = Color.FromArgb(0, 150, 136);
             chkAutoBuild.Font = new Font("Segoe UI", 9, FontStyle.Bold);
             chkAutoBuild.CheckedChanged += ChkAutoBuild_CheckedChanged;
-            grpAuto.Controls.Add(chkAutoBuild);
+            controlPanel.Controls.Add(chkAutoBuild);
             toolTip.SetToolTip(chkAutoBuild, "파일 변경 시 자동으로 Android 빌드 → 설치 → 실행");
 
             // Row 2: Reinstall & Gen buttons
