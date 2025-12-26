@@ -214,6 +214,15 @@ class AppDatabase extends _$AppDatabase {
       return into(contacts).insert(entry);
     }
   }
+  
+  // 통화 기록 기반 연락처 업데이트
+  Future<void> updateContactCallDate(int contactId, DateTime? lastSent, DateTime? lastReceived) async {
+    final companion = ContactsCompanion(
+      lastSentDate: lastSent != null ? Value(lastSent) : const Value.absent(),
+      lastReceivedDate: lastReceived != null ? Value(lastReceived) : const Value.absent(),
+    );
+    await (update(contacts)..where((t) => t.id.equals(contactId))).write(companion);
+  }
 
   // HISTORY methods
   Future<List<HistoryData>> getHistoryForContact(int contactId) {

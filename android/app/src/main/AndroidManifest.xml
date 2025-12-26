@@ -5,6 +5,9 @@
     <!-- Required for Contacts sync -->
     <uses-permission android:name="android.permission.READ_CONTACTS"/>
     
+    <!-- Required for Call log (recent contacts) -->
+    <uses-permission android:name="android.permission.READ_CALL_LOG"/>
+    
     <application
         android:label="heart_connect"
         android:name="${applicationName}"

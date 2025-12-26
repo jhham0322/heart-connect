@@ -5,6 +5,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_contacts/flutter_contacts.dart' as fc;
 import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:call_log/call_log.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../database/app_database.dart';
 import '../database/database_provider.dart';
 
@@ -21,9 +23,9 @@ class ContactService extends AsyncNotifier<void> {
     
     // Check Platform
     if (Platform.isAndroid || Platform.isIOS) {
-      // 1. Request Permission
+      // 1. Request Contact Permission
       if (!await fc.FlutterContacts.requestPermission(readonly: true)) {
-        throw Exception('Permission denied');
+        throw Exception('Contact permission denied');
       }
 
       // 2. Fetch Device Contacts (with accounts to get starred info)
@@ -46,7 +48,7 @@ class ContactService extends AsyncNotifier<void> {
         debugPrint('Error getting my name: $e');
       }
 
-      // 4. Sync to DB
+      // 4. Sync contacts to DB
       for (var c in deviceContacts) {
         if (c.phones.isEmpty) continue;
         
@@ -85,9 +87,80 @@ class ContactService extends AsyncNotifier<void> {
 
         await db.upsertContact(companion);
       }
+      
+      // 5. 통화 기록 동기화 (최근 6개월)
+      await _syncCallLog(db);
+      
     } else {
       // Windows/Web/Mac: Seed Mock Data
       await _seedMockData(db);
+    }
+  }
+  
+  /// 통화 기록을 읽어서 연락처의 최근 연락 날짜 업데이트
+  Future<void> _syncCallLog(AppDatabase db) async {
+    try {
+      // 통화 기록 권한 요청
+      final status = await Permission.phone.request();
+      if (!status.isGranted) {
+        debugPrint('Call log permission denied');
+        return;
+      }
+      
+      // 6개월 전 날짜
+      final sixMonthsAgo = DateTime.now().subtract(const Duration(days: 180));
+      
+      // 통화 기록 가져오기
+      final Iterable<CallLogEntry> entries = await CallLog.query(
+        dateFrom: sixMonthsAgo.millisecondsSinceEpoch,
+        dateTo: DateTime.now().millisecondsSinceEpoch,
+      );
+      
+      // 전화번호별 최근 통화 날짜 맵 생성
+      final Map<String, DateTime> lastCallDates = {};
+      final Map<String, String> lastCallTypes = {}; // 'outgoing' or 'incoming'
+      
+      for (var entry in entries) {
+        if (entry.number == null) continue;
+        
+        final normalizedPhone = entry.number!.replaceAll(RegExp(r'\D'), '');
+        final callDate = DateTime.fromMillisecondsSinceEpoch(entry.timestamp ?? 0);
+        
+        // 이미 기록된 날짜보다 최근이면 업데이트
+        if (!lastCallDates.containsKey(normalizedPhone) || 
+            callDate.isAfter(lastCallDates[normalizedPhone]!)) {
+          lastCallDates[normalizedPhone] = callDate;
+          
+          // 발신/수신 구분
+          if (entry.callType == CallType.outgoing) {
+            lastCallTypes[normalizedPhone] = 'outgoing';
+          } else {
+            lastCallTypes[normalizedPhone] = 'incoming';
+          }
+        }
+      }
+      
+      // DB의 연락처 업데이트
+      final contacts = await db.getAllContacts();
+      for (var contact in contacts) {
+        final normalizedPhone = contact.phone.replaceAll(RegExp(r'\D'), '');
+        
+        if (lastCallDates.containsKey(normalizedPhone)) {
+          final callDate = lastCallDates[normalizedPhone]!;
+          final callType = lastCallTypes[normalizedPhone];
+          
+          // 발신이면 lastSentDate, 수신이면 lastReceivedDate 업데이트
+          await db.updateContactCallDate(
+            contact.id,
+            callType == 'outgoing' ? callDate : null,
+            callType == 'incoming' ? callDate : null,
+          );
+        }
+      }
+      
+      debugPrint('Call log sync completed: ${lastCallDates.length} entries');
+    } catch (e) {
+      debugPrint('Error syncing call log: $e');
     }
   }
 
