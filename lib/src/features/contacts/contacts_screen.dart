@@ -123,36 +123,69 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
              ),
            ),
            const SizedBox(height: 12),
-           // Filter chips can be dynamic based on tab
-           SingleChildScrollView(
-             scrollDirection: Axis.horizontal,
-             child: Row(
-               children: [
-                 _FilterChip(
-                   label: "전체",
-                   isActive: _selectedFilter == '전체',
-                   onTap: () => setState(() => _selectedFilter = '전체'),
+           // Filter chips + Sync button
+           Row(
+             children: [
+               Expanded(
+                 child: SingleChildScrollView(
+                   scrollDirection: Axis.horizontal,
+                   child: Row(
+                     children: [
+                       _FilterChip(
+                         label: "전체",
+                         isActive: _selectedFilter == '전체',
+                         onTap: () => setState(() => _selectedFilter = '전체'),
+                       ),
+                       const SizedBox(width: 8),
+                       _FilterChip(
+                         label: "즐겨찾기",
+                         isActive: _selectedFilter == '즐겨찾기',
+                         onTap: () => setState(() => _selectedFilter = '즐겨찾기'),
+                       ),
+                       const SizedBox(width: 8),
+                       _FilterChip(
+                         label: "최근 연락",
+                         isActive: _selectedFilter == '최근 연락',
+                         onTap: () => setState(() => _selectedFilter = '최근 연락'),
+                       ),
+                       const SizedBox(width: 8),
+                       _FilterChip(
+                         label: "가족",
+                         isActive: _selectedFilter == '가족',
+                         onTap: () => setState(() => _selectedFilter = '가족'),
+                       ),
+                     ],
+                   ),
                  ),
-                 const SizedBox(width: 8),
-                 _FilterChip(
-                   label: "즐겨찾기",
-                   isActive: _selectedFilter == '즐겨찾기',
-                   onTap: () => setState(() => _selectedFilter = '즐겨찾기'),
+               ),
+               // 동기화 버튼
+               GestureDetector(
+                 onTap: () async {
+                   try {
+                     await ref.read(contactServiceProvider.notifier).syncContacts();
+                     if (mounted) {
+                       ScaffoldMessenger.of(context).showSnackBar(
+                         const SnackBar(content: Text("연락처 동기화 완료!")),
+                       );
+                     }
+                   } catch (e) {
+                     if (mounted) {
+                       ScaffoldMessenger.of(context).showSnackBar(
+                         SnackBar(content: Text("동기화 실패: $e")),
+                       );
+                     }
+                   }
+                 },
+                 child: Container(
+                   padding: const EdgeInsets.all(8),
+                   decoration: BoxDecoration(
+                     color: const Color(0xFF5D4037),
+                     borderRadius: BorderRadius.circular(20),
+                   ),
+                   child: const Icon(FontAwesomeIcons.arrowsRotate, color: Colors.white, size: 16),
                  ),
-                 const SizedBox(width: 8),
-                 _FilterChip(
-                   label: "최근 연락",
-                   isActive: _selectedFilter == '최근 연락',
-                   onTap: () => setState(() => _selectedFilter = '최근 연락'),
-                 ),
-                 const SizedBox(width: 8),
-                 _FilterChip(
-                   label: "가족",
-                   isActive: _selectedFilter == '가족',
-                   onTap: () => setState(() => _selectedFilter = '가족'),
-                 ),
-               ],
-             ),
+               ),
+             ],
            )
         ],
       ),
