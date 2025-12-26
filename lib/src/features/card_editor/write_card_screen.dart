@@ -2165,10 +2165,10 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
               left: 16,
               right: 110, // undo/redo 버튼 영역 피함
               child: Container(
-                height: 28,
+                height: 36,
                 decoration: BoxDecoration(
                   color: const Color(0xFFF29D86).withOpacity(0.95),
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(18),
                 ),
                 clipBehavior: Clip.hardEdge,
                 child: _MarqueeText(
@@ -2187,10 +2187,10 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
               left: 16,
               right: 110, // undo/redo 버튼 영역 피함
               child: Container(
-                height: 28,
+                height: 36,
                 decoration: BoxDecoration(
                   color: const Color(0xFFF29D86).withOpacity(0.95),
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(18),
                 ),
                 clipBehavior: Clip.hardEdge,
                 child: _MarqueeText(
@@ -2210,10 +2210,10 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
               left: 16,
               right: 110,
               child: Container(
-                height: 28,
+                height: 36,
                 decoration: BoxDecoration(
                   color: Colors.blue.withOpacity(0.9),
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(18),
                 ),
                 clipBehavior: Clip.hardEdge,
                 child: const _MarqueeText(
@@ -2230,10 +2230,10 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
               left: 16,
               right: 110,
               child: Container(
-                height: 28,
+                height: 36,
                 decoration: BoxDecoration(
                   color: Colors.green.withOpacity(0.9),
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(18),
                 ),
                 clipBehavior: Clip.hardEdge,
                 child: const _MarqueeText(
@@ -5008,7 +5008,8 @@ class _MarqueeTextState extends State<_MarqueeText> with SingleTickerProviderSta
       vsync: this,
     );
     
-    _animation = Tween<double>(begin: 1.0, end: -1.5).animate(
+    // 0.0 (오른쪽 끝) ~ 1.0 (왼쪽 끝)
+    _animation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _controller, curve: Curves.linear),
     );
     
@@ -5031,30 +5032,50 @@ class _MarqueeTextState extends State<_MarqueeText> with SingleTickerProviderSta
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _animation,
-      builder: (context, child) {
-        return FractionalTranslation(
-          translation: Offset(_animation.value, 0),
-          child: child,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return AnimatedBuilder(
+          animation: _animation,
+          builder: (context, child) {
+            // 텍스트 너비 계산
+            final textWidth = _calculateTextWidth(widget.text, 12.0);
+            final containerWidth = constraints.maxWidth;
+            final totalDistance = containerWidth + textWidth;
+            
+            // 오른쪽에서 시작해서 왼쪽으로 이동
+            final offset = containerWidth - (_animation.value * totalDistance);
+            
+            return Transform.translate(
+              offset: Offset(offset, 0),
+              child: child,
+            );
+          },
+          child: Text(
+            widget.text,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              height: 1.2,
+            ),
+            maxLines: 1,
+            softWrap: false,
+            overflow: TextOverflow.visible,
+          ),
         );
       },
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-            child: Text(
-              widget.text,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ],
-      ),
     );
+  }
+  
+  double _calculateTextWidth(String text, double fontSize) {
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: text,
+        style: TextStyle(fontSize: fontSize, fontWeight: FontWeight.w500),
+      ),
+      maxLines: 1,
+      textDirection: TextDirection.ltr,
+    )..layout();
+    return textPainter.width;
   }
 }
