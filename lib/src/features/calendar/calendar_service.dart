@@ -55,15 +55,25 @@ class CalendarService {
                debugPrint('[CalendarService] ====== Found ${calendars.data!.length} calendars ======');
                
                for (var cal in calendars.data!) {
-                   debugPrint('[CalendarService] Calendar: ${cal.name} | Account: ${cal.accountName} | ID: ${cal.id}');
+                   final calId = cal.id;
+                   final calName = cal.name ?? 'Unknown Calendar';
+                   final calAccount = cal.accountName ?? 'Local';
+                   
+                   debugPrint('[CalendarService] Calendar: $calName | Account: $calAccount | ID: $calId');
+                   
+                   // ID가 null이면 건너뛰기
+                   if (calId == null) {
+                     debugPrint('[CalendarService] --> Skipping calendar with null ID');
+                     continue;
+                   }
                    
                    final evResult = await _deviceCalendar.retrieveEvents(
-                      cal.id, 
+                      calId, 
                       RetrieveEventsParams(startDate: start, endDate: end)
                    );
                    
                    if (evResult.isSuccess && evResult.data != null) {
-                      debugPrint('[CalendarService] --> ${evResult.data!.length} events in "${cal.name}"');
+                      debugPrint('[CalendarService] --> ${evResult.data!.length} events in "$calName"');
                       
                       for (var e in evResult.data!) {
                           if (e.start == null) continue;
@@ -73,12 +83,12 @@ class CalendarService {
                           events.add(CalendarEventData(
                              title: e.title ?? 'Event',
                              date: date,
-                             type: _guessType(cal.name, e.title),
+                             type: _guessType(calName, e.title),
                              source: _determineSource(cal)
                           ));
                       }
                    } else {
-                      debugPrint('[CalendarService] --> Error reading events from "${cal.name}"');
+                      debugPrint('[CalendarService] --> Error reading events from "$calName"');
                    }
                }
             } else {
