@@ -3280,20 +3280,22 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                   child: Column(
                     children: [
                       const Text(
-                        "수신자들에게 발송될 최종 이미지입니다.\n이대로 발송하시겠습니까?", 
+                        "수신자들에게 발송될\n최종 이미지입니다.", 
                         textAlign: TextAlign.center,
                         style: TextStyle(color: Colors.grey, fontSize: 14)
                       ),
                       const SizedBox(height: 8),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                        margin: const EdgeInsets.symmetric(horizontal: 20),
                         decoration: BoxDecoration(
                           color: const Color(0xFFE0F7FA),
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: const Color(0xFFB2EBF2)),
                         ),
                         child: const Text(
-                          "더블탭으로 확대/축소, 드래그로 이미지 이동이 가능합니다",
+                          "더블탭으로 확대/축소, 드래그로 이동이 가능합니다.\n발송 전 이미지 결과물을 확인해 주세요.",
+                          textAlign: TextAlign.center,
                           style: TextStyle(fontSize: 11, color: Color(0xFF006064), fontWeight: FontWeight.w500),
                         ),
                       ),
@@ -3301,32 +3303,23 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                       Expanded(
                         child: Container(
                           margin: const EdgeInsets.symmetric(horizontal: 10),
-                          child: Center(
-                            child: AspectRatio(
-                              aspectRatio: 3 / 4, // 카드 종횡비
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  border: Border.all(color: Colors.grey.withOpacity(0.3)),
-                                  borderRadius: BorderRadius.circular(8),
-                                  color: Colors.grey[100],
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(8),
-                                  child: GestureDetector(
-                                    onDoubleTap: () {
-                                      if (transformationController.value.getMaxScaleOnAxis() > 1.0) {
-                                        transformationController.value = Matrix4.identity();
-                                      } else {
-                                        transformationController.value = Matrix4.identity()..scale(3.0);
-                                      }
-                                    },
-                                    child: InteractiveViewer(
-                                      transformationController: transformationController,
-                                      minScale: 1.0,
-                                      maxScale: 5.0,
-                                      child: Image.file(File(savedPath), fit: BoxFit.cover),
-                                    ),
-                                  ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: GestureDetector(
+                              onDoubleTap: () {
+                                if (transformationController.value.getMaxScaleOnAxis() > 1.0) {
+                                  transformationController.value = Matrix4.identity();
+                                } else {
+                                  transformationController.value = Matrix4.identity()..scale(3.0);
+                                }
+                              },
+                              child: InteractiveViewer(
+                                transformationController: transformationController,
+                                minScale: 1.0,
+                                maxScale: 5.0,
+                                child: Image.file(
+                                  File(savedPath), 
+                                  fit: BoxFit.contain, // contain으로 변경하여 찌그러짐 방지
                                 ),
                               ),
                             ),
