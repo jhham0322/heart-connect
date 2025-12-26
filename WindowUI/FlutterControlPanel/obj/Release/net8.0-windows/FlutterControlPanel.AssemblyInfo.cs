@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("FlutterControlPanel")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3da90e1daa0caeccda2b3407f52dcb80ff87f5c3")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+cde3f1be61dc4e813fdcd05f91fb2304bde91c57")]
 [assembly: System.Reflection.AssemblyProductAttribute("FlutterControlPanel")]
 [assembly: System.Reflection.AssemblyTitleAttribute("FlutterControlPanel")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

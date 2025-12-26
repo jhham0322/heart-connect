@@ -67,7 +67,7 @@ namespace FlutterControlPanel
             // 1. Controls Panel
             Panel controlPanel = new Panel();
             controlPanel.Dock = DockStyle.Top;
-            controlPanel.Height = 180; // Increased height for two rows
+            controlPanel.Height = 230; // Increased height for Android controls
             controlPanel.Padding = new Padding(10);
             controlPanel.BackColor = Color.White;
             this.Controls.Add(controlPanel);
@@ -210,6 +210,64 @@ namespace FlutterControlPanel
             btnBuildAndroid.FlatStyle = FlatStyle.Flat;
             btnBuildAndroid.Click += BtnBuildAndroid_Click;
             controlPanel.Controls.Add(btnBuildAndroid);
+
+            // Row 4: Android Device Controls
+            int row4Y = 180;
+
+            // Install to Device Button
+            Button btnInstall = new Button();
+            btnInstall.Text = "📲 Install";
+            btnInstall.Size = new Size(100, 35);
+            btnInstall.Location = new Point(10, row4Y);
+            btnInstall.BackColor = Color.FromArgb(129, 212, 250);
+            btnInstall.FlatStyle = FlatStyle.Flat;
+            btnInstall.Font = new Font("Segoe UI", 9, FontStyle.Bold);
+            btnInstall.Click += BtnInstallToDevice_Click;
+            controlPanel.Controls.Add(btnInstall);
+
+            // Run on Device Button
+            Button btnRunDevice = new Button();
+            btnRunDevice.Text = "▶ Run";
+            btnRunDevice.Size = new Size(80, 35);
+            btnRunDevice.Location = new Point(120, row4Y);
+            btnRunDevice.BackColor = Color.FromArgb(165, 214, 167);
+            btnRunDevice.FlatStyle = FlatStyle.Flat;
+            btnRunDevice.Font = new Font("Segoe UI", 9, FontStyle.Bold);
+            btnRunDevice.Click += BtnRunOnDevice_Click;
+            controlPanel.Controls.Add(btnRunDevice);
+
+            // Logcat Button
+            Button btnLogcat = new Button();
+            btnLogcat.Text = "📝 Logcat";
+            btnLogcat.Size = new Size(100, 35);
+            btnLogcat.Location = new Point(210, row4Y);
+            btnLogcat.BackColor = Color.FromArgb(255, 224, 178);
+            btnLogcat.FlatStyle = FlatStyle.Flat;
+            btnLogcat.Font = new Font("Segoe UI", 9, FontStyle.Bold);
+            btnLogcat.Click += BtnLogcat_Click;
+            controlPanel.Controls.Add(btnLogcat);
+
+            // Stop Logcat Button
+            Button btnStopLogcat = new Button();
+            btnStopLogcat.Text = "⏹ Stop";
+            btnStopLogcat.Size = new Size(80, 35);
+            btnStopLogcat.Location = new Point(320, row4Y);
+            btnStopLogcat.BackColor = Color.FromArgb(255, 183, 178);
+            btnStopLogcat.FlatStyle = FlatStyle.Flat;
+            btnStopLogcat.Font = new Font("Segoe UI", 9, FontStyle.Bold);
+            btnStopLogcat.Click += (s, ev) => StopProcess();
+            controlPanel.Controls.Add(btnStopLogcat);
+
+            // Check Devices Button
+            Button btnDevices = new Button();
+            btnDevices.Text = "📱 Devices";
+            btnDevices.Size = new Size(100, 35);
+            btnDevices.Location = new Point(410, row4Y);
+            btnDevices.BackColor = Color.FromArgb(206, 147, 216);
+            btnDevices.FlatStyle = FlatStyle.Flat;
+            btnDevices.Font = new Font("Segoe UI", 9, FontStyle.Bold);
+            btnDevices.Click += BtnCheckDevices_Click;
+            controlPanel.Controls.Add(btnDevices);
 
             // 2. Output Box (Enable Copy)
             outputBox = new RichTextBox();
@@ -427,6 +485,59 @@ namespace FlutterControlPanel
         {
             StopProcess();
             base.OnFormClosing(e);
+        }
+
+        // Android Device Functions
+        private void BtnCheckDevices_Click(object sender, EventArgs e)
+        {
+            outputBox.Clear();
+            Log("Checking connected devices...");
+            StartProcess("adb", "devices -l");
+        }
+
+        private void BtnInstallToDevice_Click(object sender, EventArgs e)
+        {
+            string apkPath = Path.Combine(projectRoot, "build", "app", "outputs", "flutter-apk", "app-release.apk");
+            
+            if (!File.Exists(apkPath))
+            {
+                // Try debug apk
+                apkPath = Path.Combine(projectRoot, "build", "app", "outputs", "flutter-apk", "app-debug.apk");
+            }
+            
+            if (!File.Exists(apkPath))
+            {
+                MessageBox.Show("APK not found. Please build first.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            outputBox.Clear();
+            Log($"Installing APK: {apkPath}");
+            StartProcess("adb", $"install -r \"{apkPath}\"");
+        }
+
+        private void BtnRunOnDevice_Click(object sender, EventArgs e)
+        {
+            outputBox.Clear();
+            Log("Launching app on device...");
+            // Package name from build.gradle.kts
+            StartProcess("adb", "shell am start -n com.example.heart_connect/.MainActivity");
+        }
+
+        private void BtnLogcat_Click(object sender, EventArgs e)
+        {
+            if (cmdProcess != null && !cmdProcess.HasExited)
+            {
+                MessageBox.Show("Please stop the running process first.");
+                return;
+            }
+
+            outputBox.Clear();
+            Log("Starting Logcat (filtering Flutter)...");
+            Log("Press 'Stop' to stop logging.\n");
+            
+            // Filter logs for Flutter app
+            StartProcess("adb", "logcat -v time *:S flutter:V FlutterActivity:V");
         }
     }
 }
