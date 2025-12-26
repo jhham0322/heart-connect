@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_contacts/flutter_contacts.dart' as fc;
 import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -24,23 +25,54 @@ class ContactService extends AsyncNotifier<void> {
         throw Exception('Permission denied');
       }
 
-      // 2. Fetch Device Contacts
+      // 2. Fetch Device Contacts (with accounts to get starred info)
       final deviceContacts = await fc.FlutterContacts.getContacts(
         withProperties: true, 
         withPhoto: true,
+        withAccounts: true, // starred 정보 포함
         sorted: true
       );
 
-      // 3. Sync to DB
+      // 3. 내 이름에서 성씨 추출 (첫 번째 연락처 또는 SIM 정보에서)
+      String? myFamilyName;
+      try {
+        // 보통 "내 정보" 또는 첫 연락처에서 성씨를 추출
+        // 또는 SharedPreferences에서 사용자가 설정한 이름을 사용
+        // 여기서는 간단히 "함" 성씨를 기본값으로 사용 (나중에 설정에서 변경 가능)
+        // TODO: 사용자 프로필에서 성씨 가져오기
+        myFamilyName = null; // 일단 null로 두고 groupTag 기반으로 처리
+      } catch (e) {
+        debugPrint('Error getting my name: $e');
+      }
+
+      // 4. Sync to DB
       for (var c in deviceContacts) {
         if (c.phones.isEmpty) continue;
         
         final normalizedPhone = c.phones.first.number.replaceAll(RegExp(r'\D'), ''); 
         
+        // starred 연락처 확인
+        final isStarred = c.isStarred;
+        
+        // 가족 태그 결정
+        String? groupTag;
+        if (c.groups.isNotEmpty) {
+          groupTag = c.groups.first.name;
+        }
+        
+        // 성씨가 같으면 가족으로 판단 (한국 이름 기준: 첫 글자가 성)
+        if (myFamilyName != null && c.displayName.isNotEmpty) {
+          final contactFamilyName = c.displayName[0];
+          if (contactFamilyName == myFamilyName) {
+            groupTag = '가족';
+          }
+        }
+        
         final companion = ContactsCompanion(
           phone: Value(normalizedPhone),
           name: Value(c.displayName),
-          groupTag: Value(c.groups.isNotEmpty ? c.groups.first.id : null),
+          groupTag: Value(groupTag),
+          isFavorite: Value(isStarred), // 스타 여부 저장
         );
 
         await db.upsertContact(companion);

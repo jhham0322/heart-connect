@@ -162,6 +162,10 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
           return _buildEmptyState();
         }
 
+        // 내 성씨 추출 (이름이 "함"으로 시작하는 연락처가 많으면 그것이 내 성씨)
+        // TODO: 설정에서 사용자 성씨 관리
+        String myFamilyName = '함'; // 기본값, 나중에 설정에서 변경 가능
+        
         // 필터링 적용
         switch (_selectedFilter) {
           case '즐겨찾기':
@@ -180,14 +184,31 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
             });
             break;
           case '가족':
-            contacts = contacts.where((c) => 
-              c.groupTag?.toLowerCase().contains('family') == true ||
-              c.groupTag?.contains('가족') == true
-            ).toList();
+            // 성씨가 같거나 groupTag에 가족이 포함된 연락처
+            contacts = contacts.where((c) {
+              if (c.groupTag?.toLowerCase().contains('family') == true ||
+                  c.groupTag?.contains('가족') == true) {
+                return true;
+              }
+              // 성씨가 같으면 가족
+              if (c.name.isNotEmpty && c.name[0] == myFamilyName) {
+                return true;
+              }
+              return false;
+            }).toList();
             break;
           default: // 전체
             break;
         }
+
+        // 즐겨찾기(스타) 연락처를 맨 위로 정렬
+        contacts.sort((a, b) {
+          // 먼저 즐겨찾기 여부로 정렬
+          if (a.isFavorite && !b.isFavorite) return -1;
+          if (!a.isFavorite && b.isFavorite) return 1;
+          // 그 다음 이름순 정렬
+          return a.name.compareTo(b.name);
+        });
 
         // 필터 결과가 없는 경우
         if (contacts.isEmpty) {
