@@ -598,7 +598,17 @@ namespace FlutterControlPanel
                 // Kill any existing instances of flutter run if we are starting a new one? 
                 // No, let user manage that or simple stop.
                 
-                string fullCmd = $"\"{fileName}\" {arguments}";
+                string fullCmd;
+                // fileName이 "cmd"인 경우 이중 cmd 호출 방지
+                if (fileName.Equals("cmd", StringComparison.OrdinalIgnoreCase))
+                {
+                    fullCmd = arguments;
+                }
+                else
+                {
+                    fullCmd = $"\"{fileName}\" {arguments}";
+                }
+                
                 Log($"Working Dir: {projectRoot}");
                 Log($"Executing: {fullCmd}...");
 
