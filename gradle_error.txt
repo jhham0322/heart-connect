@@ -1,0 +1,771 @@
+﻿Initialized native services in: C:\Users\ham03_4mb3gaz\.gradle\native
+Initialized jansi services in: C:\Users\ham03_4mb3gaz\.gradle\native
+Found daemon DaemonInfo{pid=15304, address=[3978fac8-e777-4441-94ea-bdb2a600a2aa port:55041, addresses:[/127.0.0.1]], state=Idle, lastBusy=1766713227850, context=DefaultDaemonContext[uid=7dc48362-e6f8-40a3-a4d5-6010d47f1102,javaHome=C:\Program Files\Android\Android Studio\jbr,javaVersion=21,javaVendor=JetBrains s.r.o.,daemonRegistryDir=C:\Users\ham03_4mb3gaz\.gradle\daemon,pid=15304,idleTimeout=10800000,priority=NORMAL,applyInstrumentationAgent=true,nativeServicesMode=ENABLED,daemonOpts=-XX:MaxMetaspaceSize=4G,-XX:ReservedCodeCacheSize=512m,-XX:+HeapDumpOnOutOfMemoryError,-Xmx8G,-Dfile.encoding=UTF-8,-Duser.country=KR,-Duser.language=ko,-Duser.variant]} however its context does not match the desired criteria.
+JVM is incompatible.
+Wanted: DaemonRequestContext{jvmCriteria=C:\Program Files\Microsoft\jdk-17.0.17.10-hotspot (no JDK specified, using current Java home), daemonOpts=[-XX:MaxMetaspaceSize=4G, -XX:ReservedCodeCacheSize=512m, -XX:+HeapDumpOnOutOfMemoryError, -Xmx8G, -Dfile.encoding=x-windows-949, -Duser.country=KR, -Duser.language=ko, -Duser.variant], applyInstrumentationAgent=true, nativeServicesMode=ENABLED, priority=NORMAL}
+Actual: DefaultDaemonContext[uid=7dc48362-e6f8-40a3-a4d5-6010d47f1102,javaHome=C:\Program Files\Android\Android Studio\jbr,javaVersion=21,javaVendor=JetBrains s.r.o.,daemonRegistryDir=C:\Users\ham03_4mb3gaz\.gradle\daemon,pid=15304,idleTimeout=10800000,priority=NORMAL,applyInstrumentationAgent=true,nativeServicesMode=ENABLED,daemonOpts=-XX:MaxMetaspaceSize=4G,-XX:ReservedCodeCacheSize=512m,-XX:+HeapDumpOnOutOfMemoryError,-Xmx8G,-Dfile.encoding=UTF-8,-Duser.country=KR,-Duser.language=ko,-Duser.variant]
+
+  Looking for a different daemon...
+The client will now receive all logging from the daemon (pid: 29384). The daemon log file: C:\Users\ham03_4mb3gaz\.gradle\daemon\8.14\daemon-29384.out.log
+Starting 3rd build in daemon [uptime: 6 mins 55.3 secs, performance: 100%, GC rate: 0.00/s, heap usage: 0% of 8 GiB, non-heap usage: 2% of 4 GiB]
+Using 16 worker leases.
+Now considering [E:\work2025\App\ConnectHeart\android, C:\src\flutter\packages\flutter_tools\gradle] as hierarchies to watch
+Watching the file system is configured to be enabled if available
+File system watching is active
+Starting Build
+Now considering [C:\src\flutter\packages\flutter_tools\gradle, E:\work2025\App\ConnectHeart\android] as hierarchies to watch
+
+> Configure project :gradle
+Evaluating project ':gradle' using build file 'C:\src\flutter\packages\flutter_tools\gradle\build.gradle.kts'.
+Resolved plugin [id: 'org.gradle.java-gradle-plugin']
+Resolved plugin [id: 'org.gradle.groovy']
+Resolved plugin [id: 'org.gradle.kotlin.kotlin-dsl', version: '5.2.0']
+Resolved plugin [id: 'org.jetbrains.kotlin.jvm', version: '1.9.20']
+Using Kotlin Gradle Plugin gradle85 variant
+kotlin scripting plugin: created the scripting discovery configuration: kotlinScriptDef
+kotlin scripting plugin: created the scripting discovery configuration: testKotlinScriptDef
+file or directory 'C:\src\flutter\packages\flutter_tools\gradle\src\main\java', not found
+Resolved plugin [id: 'dev.flutter.flutter-plugin-loader', version: '1.0.0']
+Resolved plugin [id: 'com.android.application', version: '8.11.1', apply: false]
+Resolved plugin [id: 'org.jetbrains.kotlin.android', version: '2.2.20', apply: false]
+Resolve mutations for :gradle:checkKotlinGradlePluginConfigurationErrors (Thread[Execution worker,5,main]) started.
+:gradle:checkKotlinGradlePluginConfigurationErrors (Thread[Execution worker,5,main]) started.
+
+> Task :gradle:checkKotlinGradlePluginConfigurationErrors SKIPPED
+Skipping task ':gradle:checkKotlinGradlePluginConfigurationErrors' as task onlyIf 'errorDiagnostics are present' is false.
+Resolve mutations for :gradle:compileKotlin (Thread[Execution worker,5,main]) started.
+:gradle:compileKotlin (Thread[Execution worker,5,main]) started.
+
+> Task :gradle:compileKotlin UP-TO-DATE
+Caching disabled for task ':gradle:compileKotlin' because:
+  Build cache is disabled
+Skipping task ':gradle:compileKotlin' as it is up-to-date.
+Resolve mutations for :gradle:compileJava (Thread[Execution worker,5,main]) started.
+:gradle:compileJava (Thread[Execution worker,5,main]) started.
+
+> Task :gradle:compileJava NO-SOURCE
+Skipping task ':gradle:compileJava' as it has no source files and no previous output files.
+Resolve mutations for :gradle:compileGroovy (Thread[Execution worker,5,main]) started.
+:gradle:compileGroovy (Thread[Execution worker,5,main]) started.
+
+> Task :gradle:compileGroovy NO-SOURCE
+Skipping task ':gradle:compileGroovy' as it has no source files and no previous output files.
+Resolve mutations for :gradle:pluginDescriptors (Thread[Execution worker,5,main]) started.
+:gradle:pluginDescriptors (Thread[Execution worker,5,main]) started.
+
+> Task :gradle:pluginDescriptors UP-TO-DATE
+Caching disabled for task ':gradle:pluginDescriptors' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':gradle:pluginDescriptors' as it is up-to-date.
+Resolve mutations for :gradle:processResources (Thread[Execution worker,5,main]) started.
+:gradle:processResources (Thread[Execution worker,5,main]) started.
+
+> Task :gradle:processResources UP-TO-DATE
+Caching disabled for task ':gradle:processResources' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':gradle:processResources' as it is up-to-date.
+Resolve mutations for :gradle:classes (Thread[Execution worker,5,main]) started.
+:gradle:classes (Thread[Execution worker,5,main]) started.
+
+> Task :gradle:classes UP-TO-DATE
+Skipping task ':gradle:classes' as it has no actions.
+Resolve mutations for :gradle:jar (Thread[Execution worker,5,main]) started.
+:gradle:jar (Thread[Execution worker,5,main]) started.
+
+> Task :gradle:jar UP-TO-DATE
+Caching disabled for task ':gradle:jar' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':gradle:jar' as it is up-to-date.
+Settings evaluated using settings file 'E:\work2025\App\ConnectHeart\android\settings.gradle.kts'.
+Projects loaded. Root project using build file 'E:\work2025\App\ConnectHeart\android\build.gradle.kts'.
+Included projects: [root project 'android', project ':app', project ':app_links', project ':device_calendar', project ':file_selector_android', project ':flutter_contacts', project ':flutter_keyboard_visibility_temp_fork', project ':flutter_local_notifications', project ':flutter_plugin_android_lifecycle', project ':flutter_sms_inbox', project ':image_picker_android', project ':path_provider_android', project ':permission_handler_android', project ':quill_native_bridge_android', project ':share_plus', project ':shared_preferences_android', project ':sqlite3_flutter_libs', project ':url_launcher_android', project ':video_player_android', project ':workmanager_android']
+
+> Configure project :app
+Evaluating project ':app' using build file 'E:\work2025\App\ConnectHeart\android\app\build.gradle.kts'.
+Resolved plugin [id: 'com.android.application']
+Resolved plugin [id: 'kotlin-android']
+Resolved plugin [id: 'dev.flutter.flutter-gradle-plugin']
+Using default execution profile
+Build 68e3b6d3-eae7-42e5-a5f1-87402dd73920 is started
+Using Kotlin Gradle Plugin gradle813 variant
+C/C++: android.ndkVersion from module build.gradle is [28.2.13676358]
+C/C++: android.ndkPath from module build.gradle is not set
+C/C++: ndk.dir in local.properties is not set
+C/C++: Not considering ANDROID_NDK_HOME because support was removed after deprecation period.
+C/C++: sdkFolder is C:\Users\ham03_4mb3gaz\AppData\Local\Android\sdk
+C/C++: android.ndkVersion from module build.gradle is [28.2.13676358]
+C/C++: android.ndkPath from module build.gradle is not set
+C/C++: ndk.dir in local.properties is not set
+C/C++: Not considering ANDROID_NDK_HOME because support was removed after deprecation period.
+C/C++: sdkFolder is C:\Users\ham03_4mb3gaz\AppData\Local\Android\sdk
+C/C++: android.ndkVersion from module build.gradle is [28.2.13676358]
+C/C++: android.ndkPath from module build.gradle is not set
+C/C++: ndk.dir in local.properties is not set
+C/C++: Not considering ANDROID_NDK_HOME because support was removed after deprecation period.
+C/C++: sdkFolder is C:\Users\ham03_4mb3gaz\AppData\Local\Android\sdk
+C/C++: android.ndkVersion from module build.gradle is [28.2.13676358]
+C/C++: android.ndkPath from module build.gradle is not set
+C/C++: ndk.dir in local.properties is not set
+C/C++: Not considering ANDROID_NDK_HOME because support was removed after deprecation period.
+C/C++: sdkFolder is C:\Users\ham03_4mb3gaz\AppData\Local\Android\sdk
+C/C++: android.ndkVersion from module build.gradle is [28.2.13676358]
+C/C++: android.ndkPath from module build.gradle is not set
+C/C++: ndk.dir in local.properties is not set
+C/C++: Not considering ANDROID_NDK_HOME because support was removed after deprecation period.
+C/C++: sdkFolder is C:\Users\ham03_4mb3gaz\AppData\Local\Android\sdk
+C/C++: android.ndkVersion from module build.gradle is [28.2.13676358]
+C/C++: android.ndkPath from module build.gradle is not set
+C/C++: ndk.dir in local.properties is not set
+C/C++: Not considering ANDROID_NDK_HOME because support was removed after deprecation period.
+C/C++: sdkFolder is C:\Users\ham03_4mb3gaz\AppData\Local\Android\sdk
+C/C++: android.ndkVersion from module build.gradle is [28.2.13676358]
+C/C++: android.ndkPath from module build.gradle is not set
+C/C++: ndk.dir in local.properties is not set
+C/C++: Not considering ANDROID_NDK_HOME because support was removed after deprecation period.
+C/C++: sdkFolder is C:\Users\ham03_4mb3gaz\AppData\Local\Android\sdk
+C/C++: android.ndkVersion from module build.gradle is [28.2.13676358]
+C/C++: android.ndkPath from module build.gradle is not set
+C/C++: ndk.dir in local.properties is not set
+C/C++: Not considering ANDROID_NDK_HOME because support was removed after deprecation period.
+C/C++: sdkFolder is C:\Users\ham03_4mb3gaz\AppData\Local\Android\sdk
+C/C++: android.ndkVersion from module build.gradle is [28.2.13676358]
+C/C++: android.ndkPath from module build.gradle is not set
+C/C++: ndk.dir in local.properties is not set
+C/C++: Not considering ANDROID_NDK_HOME because support was removed after deprecation period.
+C/C++: sdkFolder is C:\Users\ham03_4mb3gaz\AppData\Local\Android\sdk
+C/C++: android.ndkVersion from module build.gradle is [28.2.13676358]
+C/C++: android.ndkPath from module build.gradle is not set
+C/C++: ndk.dir in local.properties is not set
+C/C++: Not considering ANDROID_NDK_HOME because support was removed after deprecation period.
+C/C++: sdkFolder is C:\Users\ham03_4mb3gaz\AppData\Local\Android\sdk
+C/C++: android.ndkVersion from module build.gradle is [28.2.13676358]
+C/C++: android.ndkPath from module build.gradle is not set
+C/C++: ndk.dir in local.properties is not set
+C/C++: Not considering ANDROID_NDK_HOME because support was removed after deprecation period.
+C/C++: sdkFolder is C:\Users\ham03_4mb3gaz\AppData\Local\Android\sdk
+C/C++: android.ndkVersion from module build.gradle is [28.2.13676358]
+C/C++: android.ndkPath from module build.gradle is not set
+C/C++: ndk.dir in local.properties is not set
+C/C++: Not considering ANDROID_NDK_HOME because support was removed after deprecation period.
+C/C++: sdkFolder is C:\Users\ham03_4mb3gaz\AppData\Local\Android\sdk
+C/C++: android.ndkVersion from module build.gradle is [28.2.13676358]
+C/C++: android.ndkPath from module build.gradle is not set
+C/C++: ndk.dir in local.properties is not set
+C/C++: Not considering ANDROID_NDK_HOME because support was removed after deprecation period.
+C/C++: sdkFolder is C:\Users\ham03_4mb3gaz\AppData\Local\Android\sdk
+C/C++: android.ndkVersion from module build.gradle is [28.2.13676358]
+C/C++: android.ndkPath from module build.gradle is not set
+C/C++: ndk.dir in local.properties is not set
+C/C++: Not considering ANDROID_NDK_HOME because support was removed after deprecation period.
+C/C++: sdkFolder is C:\Users\ham03_4mb3gaz\AppData\Local\Android\sdk
+C/C++: android.ndkVersion from module build.gradle is [28.2.13676358]
+C/C++: android.ndkPath from module build.gradle is not set
+C/C++: ndk.dir in local.properties is not set
+C/C++: Not considering ANDROID_NDK_HOME because support was removed after deprecation period.
+C/C++: sdkFolder is C:\Users\ham03_4mb3gaz\AppData\Local\Android\sdk
+C/C++: android.ndkVersion from module build.gradle is [28.2.13676358]
+C/C++: android.ndkPath from module build.gradle is not set
+C/C++: ndk.dir in local.properties is not set
+C/C++: Not considering ANDROID_NDK_HOME because support was removed after deprecation period.
+C/C++: sdkFolder is C:\Users\ham03_4mb3gaz\AppData\Local\Android\sdk
+C/C++: android.ndkVersion from module build.gradle is [28.2.13676358]
+C/C++: android.ndkPath from module build.gradle is not set
+C/C++: ndk.dir in local.properties is not set
+C/C++: Not considering ANDROID_NDK_HOME because support was removed after deprecation period.
+C/C++: sdkFolder is C:\Users\ham03_4mb3gaz\AppData\Local\Android\sdk
+C/C++: android.ndkVersion from module build.gradle is [28.2.13676358]
+C/C++: android.ndkPath from module build.gradle is not set
+C/C++: ndk.dir in local.properties is not set
+C/C++: Not considering ANDROID_NDK_HOME because support was removed after deprecation period.
+C/C++: sdkFolder is C:\Users\ham03_4mb3gaz\AppData\Local\Android\sdk
+C/C++: android.ndkVersion from module build.gradle is [28.2.13676358]
+C/C++: android.ndkPath from module build.gradle is not set
+C/C++: ndk.dir in local.properties is not set
+C/C++: Not considering ANDROID_NDK_HOME because support was removed after deprecation period.
+C/C++: sdkFolder is C:\Users\ham03_4mb3gaz\AppData\Local\Android\sdk
+
+> Configure project :
+Evaluating root project 'android' using build file 'E:\work2025\App\ConnectHeart\android\build.gradle.kts'.
+
+> Configure project :app_links
+Evaluating project ':app_links' using build file 'C:\Users\ham03_4mb3gaz\AppData\Local\Pub\Cache\hosted\pub.dev\app_links-7.0.0\android\build.gradle'.
+Using default execution profile
+
+> Configure project :device_calendar
+Evaluating project ':device_calendar' using build file 'C:\Users\ham03_4mb3gaz\AppData\Local\Pub\Cache\hosted\pub.dev\device_calendar-4.3.3\android\build.gradle'.
+Using default execution profile
+Using Kotlin Gradle Plugin gradle813 variant
+
+> Configure project :file_selector_android
+Evaluating project ':file_selector_android' using build file 'C:\Users\ham03_4mb3gaz\AppData\Local\Pub\Cache\hosted\pub.dev\file_selector_android-0.5.2+4\android\build.gradle'.
+Using default execution profile
+
+> Configure project :flutter_contacts
+Evaluating project ':flutter_contacts' using build file 'C:\Users\ham03_4mb3gaz\AppData\Local\Pub\Cache\hosted\pub.dev\flutter_contacts-1.1.9+2\android\build.gradle'.
+Using default execution profile
+Using Kotlin Gradle Plugin gradle813 variant
+
+> Configure project :flutter_keyboard_visibility_temp_fork
+Evaluating project ':flutter_keyboard_visibility_temp_fork' using build file 'C:\Users\ham03_4mb3gaz\AppData\Local\Pub\Cache\hosted\pub.dev\flutter_keyboard_visibility_temp_fork-0.1.5\android\build.gradle'.
+Using default execution profile
+
+> Configure project :flutter_local_notifications
+Evaluating project ':flutter_local_notifications' using build file 'C:\Users\ham03_4mb3gaz\AppData\Local\Pub\Cache\hosted\pub.dev\flutter_local_notifications-18.0.1\android\build.gradle'.
+Using default execution profile
+
+> Configure project :flutter_plugin_android_lifecycle
+Evaluating project ':flutter_plugin_android_lifecycle' using build file 'C:\Users\ham03_4mb3gaz\AppData\Local\Pub\Cache\hosted\pub.dev\flutter_plugin_android_lifecycle-2.0.33\android\build.gradle'.
+Using default execution profile
+
+> Configure project :flutter_sms_inbox
+Evaluating project ':flutter_sms_inbox' using build file 'C:\Users\ham03_4mb3gaz\AppData\Local\Pub\Cache\hosted\pub.dev\flutter_sms_inbox-1.0.4\android\build.gradle'.
+Using default execution profile
+
+> Configure project :image_picker_android
+Evaluating project ':image_picker_android' using build file 'C:\Users\ham03_4mb3gaz\AppData\Local\Pub\Cache\hosted\pub.dev\image_picker_android-0.8.13+10\android\build.gradle'.
+Using default execution profile
+
+> Configure project :path_provider_android
+Evaluating project ':path_provider_android' using build file 'C:\Users\ham03_4mb3gaz\AppData\Local\Pub\Cache\hosted\pub.dev\path_provider_android-2.2.22\android\build.gradle'.
+Using default execution profile
+
+> Configure project :permission_handler_android
+Evaluating project ':permission_handler_android' using build file 'C:\Users\ham03_4mb3gaz\AppData\Local\Pub\Cache\hosted\pub.dev\permission_handler_android-13.0.1\android\build.gradle'.
+Using default execution profile
+
+> Configure project :quill_native_bridge_android
+Evaluating project ':quill_native_bridge_android' using build file 'C:\Users\ham03_4mb3gaz\AppData\Local\Pub\Cache\hosted\pub.dev\quill_native_bridge_android-0.0.1+2\android\build.gradle'.
+Using default execution profile
+Using Kotlin Gradle Plugin gradle813 variant
+
+> Configure project :share_plus
+Evaluating project ':share_plus' using build file 'C:\Users\ham03_4mb3gaz\AppData\Local\Pub\Cache\hosted\pub.dev\share_plus-12.0.1\android\build.gradle'.
+Using default execution profile
+Using Kotlin Gradle Plugin gradle813 variant
+
+> Configure project :shared_preferences_android
+Evaluating project ':shared_preferences_android' using build file 'C:\Users\ham03_4mb3gaz\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_android-2.4.18\android\build.gradle'.
+Using default execution profile
+Using Kotlin Gradle Plugin gradle813 variant
+
+> Configure project :sqlite3_flutter_libs
+Evaluating project ':sqlite3_flutter_libs' using build file 'C:\Users\ham03_4mb3gaz\AppData\Local\Pub\Cache\hosted\pub.dev\sqlite3_flutter_libs-0.5.41\android\build.gradle'.
+Using default execution profile
+
+> Configure project :url_launcher_android
+Evaluating project ':url_launcher_android' using build file 'C:\Users\ham03_4mb3gaz\AppData\Local\Pub\Cache\hosted\pub.dev\url_launcher_android-6.3.28\android\build.gradle'.
+Using default execution profile
+
+> Configure project :video_player_android
+Evaluating project ':video_player_android' using build file 'C:\Users\ham03_4mb3gaz\AppData\Local\Pub\Cache\hosted\pub.dev\video_player_android-2.9.1\android\build.gradle'.
+Using default execution profile
+Using Kotlin Gradle Plugin gradle813 variant
+
+> Configure project :workmanager_android
+Evaluating project ':workmanager_android' using build file 'C:\Users\ham03_4mb3gaz\AppData\Local\Pub\Cache\hosted\pub.dev\workmanager_android-0.9.0+2\android\build.gradle'.
+Using default execution profile
+Using Kotlin Gradle Plugin gradle813 variant
+All projects evaluated.
+Task name matched 'assembleDebug'
+Selected primary task 'assembleDebug' from project :
+Adding -Xuse-inline-scopes-numbers Kotlin compiler flag for task :app:compileDebugKotlin
+Tasks to be executed: [task ':app:DebugMinSdkCheck', task ':app:preBuild', task ':app:preDebugBuild', task ':app:mergeDebugNativeDebugMetadata', task ':app:checkKotlinGradlePluginConfigurationErrors', task ':app:compileFlutterBuildDebug', task ':app:packJniLibsflutterBuildDebug', task ':app_links:preBuild', task ':app_links:preDebugBuild', task ':app_links:writeDebugAarMetadata', task ':device_calendar:preBuild', task ':device_calendar:preDebugBuild', task ':device_calendar:writeDebugAarMetadata', task ':file_selector_android:preBuild', task ':file_selector_android:preDebugBuild', task ':file_selector_android:writeDebugAarMetadata', task ':flutter_contacts:preBuild', task ':flutter_contacts:preDebugBuild', task ':flutter_contacts:writeDebugAarMetadata', task ':flutter_keyboard_visibility_temp_fork:preBuild', task ':flutter_keyboard_visibility_temp_fork:preDebugBuild', task ':flutter_keyboard_visibility_temp_fork:writeDebugAarMetadata', task ':flutter_local_notifications:preBuild', task ':flutter_local_notifications:preDebugBuild', task ':flutter_local_notifications:writeDebugAarMetadata', task ':flutter_plugin_android_lifecycle:preBuild', task ':flutter_plugin_android_lifecycle:preDebugBuild', task ':flutter_plugin_android_lifecycle:writeDebugAarMetadata', task ':flutter_sms_inbox:preBuild', task ':flutter_sms_inbox:preDebugBuild', task ':flutter_sms_inbox:writeDebugAarMetadata', task ':image_picker_android:preBuild', task ':image_picker_android:preDebugBuild', task ':image_picker_android:writeDebugAarMetadata', task ':path_provider_android:preBuild', task ':path_provider_android:preDebugBuild', task ':path_provider_android:writeDebugAarMetadata', task ':permission_handler_android:preBuild', task ':permission_handler_android:preDebugBuild', task ':permission_handler_android:writeDebugAarMetadata', task ':quill_native_bridge_android:preBuild', task ':quill_native_bridge_android:preDebugBuild', task ':quill_native_bridge_android:writeDebugAarMetadata', task ':share_plus:preBuild', task ':share_plus:preDebugBuild', task ':share_plus:writeDebugAarMetadata', task ':shared_preferences_android:preBuild', task ':shared_preferences_android:preDebugBuild', task ':shared_preferences_android:writeDebugAarMetadata', task ':sqlite3_flutter_libs:preBuild', task ':sqlite3_flutter_libs:preDebugBuild', task ':sqlite3_flutter_libs:writeDebugAarMetadata', task ':url_launcher_android:preBuild', task ':url_launcher_android:preDebugBuild', task ':url_launcher_android:writeDebugAarMetadata', task ':video_player_android:preBuild', task ':video_player_android:preDebugBuild', task ':video_player_android:writeDebugAarMetadata', task ':workmanager_android:preBuild', task ':workmanager_android:preDebugBuild', task ':workmanager_android:writeDebugAarMetadata', task ':app:checkDebugAarMetadata', task ':app:cleanMergeDebugAssets', task ':app:mergeDebugShaders', task ':app:compileDebugShaders', task ':app:generateDebugAssets', task ':app_links:mergeDebugShaders', task ':app_links:compileDebugShaders', task ':app_links:generateDebugAssets', task ':app_links:mergeDebugAssets', task ':device_calendar:mergeDebugShaders', task ':device_calendar:compileDebugShaders', task ':device_calendar:generateDebugAssets', task ':device_calendar:mergeDebugAssets', task ':file_selector_android:mergeDebugShaders', task ':file_selector_android:compileDebugShaders', task ':file_selector_android:generateDebugAssets', task ':file_selector_android:mergeDebugAssets', task ':flutter_contacts:mergeDebugShaders', task ':flutter_contacts:compileDebugShaders', task ':flutter_contacts:generateDebugAssets', task ':flutter_contacts:mergeDebugAssets', task ':flutter_keyboard_visibility_temp_fork:mergeDebugShaders', task ':flutter_keyboard_visibility_temp_fork:compileDebugShaders', task ':flutter_keyboard_visibility_temp_fork:generateDebugAssets', task ':flutter_keyboard_visibility_temp_fork:mergeDebugAssets', task ':flutter_local_notifications:mergeDebugShaders', task ':flutter_local_notifications:compileDebugShaders', task ':flutter_local_notifications:generateDebugAssets', task ':flutter_local_notifications:mergeDebugAssets', task ':flutter_plugin_android_lifecycle:mergeDebugShaders', task ':flutter_plugin_android_lifecycle:compileDebugShaders', task ':flutter_plugin_android_lifecycle:generateDebugAssets', task ':flutter_plugin_android_lifecycle:mergeDebugAssets', task ':flutter_sms_inbox:mergeDebugShaders', task ':flutter_sms_inbox:compileDebugShaders', task ':flutter_sms_inbox:generateDebugAssets', task ':flutter_sms_inbox:mergeDebugAssets', task ':image_picker_android:mergeDebugShaders', task ':image_picker_android:compileDebugShaders', task ':image_picker_android:generateDebugAssets', task ':image_picker_android:mergeDebugAssets', task ':path_provider_android:mergeDebugShaders', task ':path_provider_android:compileDebugShaders', task ':path_provider_android:generateDebugAssets', task ':path_provider_android:mergeDebugAssets', task ':permission_handler_android:mergeDebugShaders', task ':permission_handler_android:compileDebugShaders', task ':permission_handler_android:generateDebugAssets', task ':permission_handler_android:mergeDebugAssets', task ':quill_native_bridge_android:mergeDebugShaders', task ':quill_native_bridge_android:compileDebugShaders', task ':quill_native_bridge_android:generateDebugAssets', task ':quill_native_bridge_android:mergeDebugAssets', task ':share_plus:mergeDebugShaders', task ':share_plus:compileDebugShaders', task ':share_plus:generateDebugAssets', task ':share_plus:mergeDebugAssets', task ':shared_preferences_android:mergeDebugShaders', task ':shared_preferences_android:compileDebugShaders', task ':shared_preferences_android:generateDebugAssets', task ':shared_preferences_android:mergeDebugAssets', task ':sqlite3_flutter_libs:mergeDebugShaders', task ':sqlite3_flutter_libs:compileDebugShaders', task ':sqlite3_flutter_libs:generateDebugAssets', task ':sqlite3_flutter_libs:mergeDebugAssets', task ':url_launcher_android:mergeDebugShaders', task ':url_launcher_android:compileDebugShaders', task ':url_launcher_android:generateDebugAssets', task ':url_launcher_android:mergeDebugAssets', task ':video_player_android:mergeDebugShaders', task ':video_player_android:compileDebugShaders', task ':video_player_android:generateDebugAssets', task ':video_player_android:mergeDebugAssets', task ':workmanager_android:mergeDebugShaders', task ':workmanager_android:compileDebugShaders', task ':workmanager_android:generateDebugAssets', task ':workmanager_android:mergeDebugAssets', task ':app:mergeDebugAssets', task ':app:copyFlutterAssetsDebug', task ':app:generateDebugResValues', task ':app_links:generateDebugResValues', task ':app_links:generateDebugResources', task ':app_links:packageDebugResources', task ':device_calendar:generateDebugResValues', task ':device_calendar:generateDebugResources', task ':device_calendar:packageDebugResources', task ':file_selector_android:generateDebugResValues', task ':file_selector_android:generateDebugResources', task ':file_selector_android:packageDebugResources', task ':flutter_contacts:generateDebugResValues', task ':flutter_contacts:generateDebugResources', task ':flutter_contacts:packageDebugResources', task ':flutter_keyboard_visibility_temp_fork:generateDebugResValues', task ':flutter_keyboard_visibility_temp_fork:generateDebugResources', task ':flutter_keyboard_visibility_temp_fork:packageDebugResources', task ':flutter_local_notifications:generateDebugResValues', task ':flutter_local_notifications:generateDebugResources', task ':flutter_local_notifications:packageDebugResources', task ':flutter_plugin_android_lifecycle:generateDebugResValues', task ':flutter_plugin_android_lifecycle:generateDebugResources', task ':flutter_plugin_android_lifecycle:packageDebugResources', task ':flutter_sms_inbox:generateDebugResValues', task ':flutter_sms_inbox:generateDebugResources', task ':flutter_sms_inbox:packageDebugResources', task ':image_picker_android:generateDebugResValues', task ':image_picker_android:generateDebugResources', task ':image_picker_android:packageDebugResources', task ':path_provider_android:generateDebugResValues', task ':path_provider_android:generateDebugResources', task ':path_provider_android:packageDebugResources', task ':permission_handler_android:generateDebugResValues', task ':permission_handler_android:generateDebugResources', task ':permission_handler_android:packageDebugResources', task ':quill_native_bridge_android:generateDebugResValues', task ':quill_native_bridge_android:generateDebugResources', task ':quill_native_bridge_android:packageDebugResources', task ':share_plus:generateDebugResValues', task ':share_plus:generateDebugResources', task ':share_plus:packageDebugResources', task ':shared_preferences_android:generateDebugResValues', task ':shared_preferences_android:generateDebugResources', task ':shared_preferences_android:packageDebugResources', task ':sqlite3_flutter_libs:generateDebugResValues', task ':sqlite3_flutter_libs:generateDebugResources', task ':sqlite3_flutter_libs:packageDebugResources', task ':url_launcher_android:generateDebugResValues', task ':url_launcher_android:generateDebugResources', task ':url_launcher_android:packageDebugResources', task ':video_player_android:generateDebugResValues', task ':video_player_android:generateDebugResources', task ':video_player_android:packageDebugResources', task ':workmanager_android:generateDebugResValues', task ':workmanager_android:generateDebugResources', task ':workmanager_android:packageDebugResources', task ':app:mapDebugSourceSetPaths', task ':app:generateDebugResources', task ':app:mergeDebugResources', task ':app:packageDebugResources', task ':app:parseDebugLocalResources', task ':app:createDebugCompatibleScreenManifests', task ':app:extractDeepLinksDebug', task ':app_links:extractDeepLinksDebug', task ':app_links:processDebugManifest', task ':device_calendar:extractDeepLinksDebug', task ':device_calendar:processDebugManifest', task ':file_selector_android:extractDeepLinksDebug', task ':file_selector_android:processDebugManifest', task ':flutter_contacts:extractDeepLinksDebug', task ':flutter_contacts:processDebugManifest', task ':flutter_keyboard_visibility_temp_fork:extractDeepLinksDebug', task ':flutter_keyboard_visibility_temp_fork:processDebugManifest', task ':flutter_local_notifications:extractDeepLinksDebug', task ':flutter_local_notifications:processDebugManifest', task ':flutter_plugin_android_lifecycle:extractDeepLinksDebug', task ':flutter_plugin_android_lifecycle:processDebugManifest', task ':flutter_sms_inbox:extractDeepLinksDebug', task ':flutter_sms_inbox:processDebugManifest', task ':image_picker_android:extractDeepLinksDebug', task ':image_picker_android:processDebugManifest', task ':path_provider_android:extractDeepLinksDebug', task ':path_provider_android:processDebugManifest', task ':permission_handler_android:extractDeepLinksDebug', task ':permission_handler_android:processDebugManifest', task ':quill_native_bridge_android:extractDeepLinksDebug', task ':quill_native_bridge_android:processDebugManifest', task ':share_plus:extractDeepLinksDebug', task ':share_plus:processDebugManifest', task ':shared_preferences_android:extractDeepLinksDebug', task ':shared_preferences_android:processDebugManifest', task ':sqlite3_flutter_libs:extractDeepLinksDebug', task ':sqlite3_flutter_libs:processDebugManifest', task ':url_launcher_android:extractDeepLinksDebug', task ':url_launcher_android:processDebugManifest', task ':video_player_android:extractDeepLinksDebug', task ':video_player_android:processDebugManifest', task ':workmanager_android:extractDeepLinksDebug', task ':workmanager_android:processDebugManifest', task ':app:processDebugMainManifest', task ':app:outputDebugAppLinkSettings', task ':app:processDebugManifest', task ':app:processDebugManifestForPackage', task ':app_links:compileDebugLibraryResources', task ':app_links:parseDebugLocalResources', task ':app_links:generateDebugRFile', task ':device_calendar:compileDebugLibraryResources', task ':device_calendar:parseDebugLocalResources', task ':device_calendar:generateDebugRFile', task ':file_selector_android:compileDebugLibraryResources', task ':file_selector_android:parseDebugLocalResources', task ':file_selector_android:generateDebugRFile', task ':flutter_contacts:compileDebugLibraryResources', task ':flutter_contacts:parseDebugLocalResources', task ':flutter_contacts:generateDebugRFile', task ':flutter_keyboard_visibility_temp_fork:compileDebugLibraryResources', task ':flutter_keyboard_visibility_temp_fork:parseDebugLocalResources', task ':flutter_keyboard_visibility_temp_fork:generateDebugRFile', task ':flutter_local_notifications:compileDebugLibraryResources', task ':flutter_local_notifications:parseDebugLocalResources', task ':flutter_local_notifications:generateDebugRFile', task ':flutter_plugin_android_lifecycle:compileDebugLibraryResources', task ':flutter_plugin_android_lifecycle:parseDebugLocalResources', task ':flutter_plugin_android_lifecycle:generateDebugRFile', task ':flutter_sms_inbox:compileDebugLibraryResources', task ':flutter_sms_inbox:parseDebugLocalResources', task ':flutter_sms_inbox:generateDebugRFile', task ':image_picker_android:compileDebugLibraryResources', task ':image_picker_android:parseDebugLocalResources', task ':image_picker_android:generateDebugRFile', task ':path_provider_android:compileDebugLibraryResources', task ':path_provider_android:parseDebugLocalResources', task ':path_provider_android:generateDebugRFile', task ':permission_handler_android:compileDebugLibraryResources', task ':permission_handler_android:parseDebugLocalResources', task ':permission_handler_android:generateDebugRFile', task ':quill_native_bridge_android:compileDebugLibraryResources', task ':quill_native_bridge_android:parseDebugLocalResources', task ':quill_native_bridge_android:generateDebugRFile', task ':share_plus:compileDebugLibraryResources', task ':share_plus:parseDebugLocalResources', task ':share_plus:generateDebugRFile', task ':shared_preferences_android:compileDebugLibraryResources', task ':shared_preferences_android:parseDebugLocalResources', task ':shared_preferences_android:generateDebugRFile', task ':sqlite3_flutter_libs:compileDebugLibraryResources', task ':sqlite3_flutter_libs:parseDebugLocalResources', task ':sqlite3_flutter_libs:generateDebugRFile', task ':url_launcher_android:compileDebugLibraryResources', task ':url_launcher_android:parseDebugLocalResources', task ':url_launcher_android:generateDebugRFile', task ':video_player_android:compileDebugLibraryResources', task ':video_player_android:parseDebugLocalResources', task ':video_player_android:generateDebugRFile', task ':workmanager_android:compileDebugLibraryResources', task ':workmanager_android:parseDebugLocalResources', task ':workmanager_android:generateDebugRFile', task ':app:processDebugResources', task ':app_links:javaPreCompileDebug', task ':app_links:compileDebugJavaWithJavac', task ':app_links:bundleLibCompileToJarDebug', task ':device_calendar:checkKotlinGradlePluginConfigurationErrors', task ':device_calendar:compileDebugKotlin', task ':device_calendar:javaPreCompileDebug', task ':device_calendar:compileDebugJavaWithJavac', task ':device_calendar:bundleLibCompileToJarDebug', task ':file_selector_android:javaPreCompileDebug', task ':file_selector_android:compileDebugJavaWithJavac', task ':file_selector_android:bundleLibCompileToJarDebug', task ':flutter_contacts:checkKotlinGradlePluginConfigurationErrors', task ':flutter_contacts:compileDebugKotlin', task ':flutter_contacts:javaPreCompileDebug', task ':flutter_contacts:compileDebugJavaWithJavac', task ':flutter_contacts:bundleLibCompileToJarDebug', task ':flutter_keyboard_visibility_temp_fork:javaPreCompileDebug', task ':flutter_keyboard_visibility_temp_fork:compileDebugJavaWithJavac', task ':flutter_keyboard_visibility_temp_fork:bundleLibCompileToJarDebug', task ':flutter_local_notifications:javaPreCompileDebug', task ':flutter_local_notifications:compileDebugJavaWithJavac', task ':flutter_local_notifications:bundleLibCompileToJarDebug', task ':flutter_plugin_android_lifecycle:javaPreCompileDebug', task ':flutter_plugin_android_lifecycle:compileDebugJavaWithJavac', task ':flutter_plugin_android_lifecycle:bundleLibCompileToJarDebug', task ':flutter_sms_inbox:javaPreCompileDebug', task ':flutter_sms_inbox:compileDebugJavaWithJavac', task ':flutter_sms_inbox:bundleLibCompileToJarDebug', task ':image_picker_android:javaPreCompileDebug', task ':image_picker_android:compileDebugJavaWithJavac', task ':image_picker_android:bundleLibCompileToJarDebug', task ':path_provider_android:javaPreCompileDebug', task ':path_provider_android:compileDebugJavaWithJavac', task ':path_provider_android:bundleLibCompileToJarDebug', task ':permission_handler_android:javaPreCompileDebug', task ':permission_handler_android:compileDebugJavaWithJavac', task ':permission_handler_android:bundleLibCompileToJarDebug', task ':quill_native_bridge_android:checkKotlinGradlePluginConfigurationErrors', task ':quill_native_bridge_android:compileDebugKotlin', task ':quill_native_bridge_android:javaPreCompileDebug', task ':quill_native_bridge_android:compileDebugJavaWithJavac', task ':quill_native_bridge_android:bundleLibCompileToJarDebug', task ':share_plus:checkKotlinGradlePluginConfigurationErrors', task ':share_plus:compileDebugKotlin', task ':share_plus:javaPreCompileDebug', task ':share_plus:compileDebugJavaWithJavac', task ':share_plus:bundleLibCompileToJarDebug', task ':shared_preferences_android:checkKotlinGradlePluginConfigurationErrors', task ':shared_preferences_android:compileDebugKotlin', task ':shared_preferences_android:javaPreCompileDebug', task ':shared_preferences_android:compileDebugJavaWithJavac', task ':shared_preferences_android:bundleLibCompileToJarDebug', task ':sqlite3_flutter_libs:javaPreCompileDebug', task ':sqlite3_flutter_libs:compileDebugJavaWithJavac', task ':sqlite3_flutter_libs:bundleLibCompileToJarDebug', task ':url_launcher_android:generateDebugBuildConfig', task ':url_launcher_android:javaPreCompileDebug', task ':url_launcher_android:compileDebugJavaWithJavac', task ':url_launcher_android:bundleLibCompileToJarDebug', task ':video_player_android:checkKotlinGradlePluginConfigurationErrors', task ':video_player_android:compileDebugKotlin', task ':video_player_android:javaPreCompileDebug', task ':video_player_android:compileDebugJavaWithJavac', task ':video_player_android:bundleLibCompileToJarDebug', task ':workmanager_android:checkKotlinGradlePluginConfigurationErrors', task ':workmanager_android:compileDebugKotlin', task ':workmanager_android:javaPreCompileDebug', task ':workmanager_android:compileDebugJavaWithJavac', task ':workmanager_android:bundleLibCompileToJarDebug', task ':app:compileDebugKotlin', task ':app:javaPreCompileDebug', task ':app:compileDebugJavaWithJavac', task ':app:compressDebugAssets', task ':app_links:bundleLibRuntimeToJarDebug', task ':device_calendar:bundleLibRuntimeToJarDebug', task ':file_selector_android:bundleLibRuntimeToJarDebug', task ':flutter_contacts:bundleLibRuntimeToJarDebug', task ':flutter_keyboard_visibility_temp_fork:bundleLibRuntimeToJarDebug', task ':flutter_local_notifications:bundleLibRuntimeToJarDebug', task ':image_picker_android:bundleLibRuntimeToJarDebug', task ':flutter_plugin_android_lifecycle:bundleLibRuntimeToJarDebug', task ':flutter_sms_inbox:bundleLibRuntimeToJarDebug', task ':path_provider_android:bundleLibRuntimeToJarDebug', task ':permission_handler_android:bundleLibRuntimeToJarDebug', task ':quill_native_bridge_android:bundleLibRuntimeToJarDebug', task ':share_plus:bundleLibRuntimeToJarDebug', task ':shared_preferences_android:bundleLibRuntimeToJarDebug', task ':sqlite3_flutter_libs:bundleLibRuntimeToJarDebug', task ':url_launcher_android:bundleLibRuntimeToJarDebug', task ':video_player_android:bundleLibRuntimeToJarDebug', task ':workmanager_android:bundleLibRuntimeToJarDebug', task ':app:desugarDebugFileDependencies', task ':app:dexBuilderDebug', task ':app:mergeDebugGlobalSynthetics', task ':app:processDebugJavaRes', task ':app_links:processDebugJavaRes', task ':device_calendar:processDebugJavaRes', task ':file_selector_android:processDebugJavaRes', task ':flutter_contacts:processDebugJavaRes', task ':flutter_keyboard_visibility_temp_fork:processDebugJavaRes', task ':flutter_local_notifications:processDebugJavaRes', task ':flutter_plugin_android_lifecycle:processDebugJavaRes', task ':flutter_sms_inbox:processDebugJavaRes', task ':image_picker_android:processDebugJavaRes', task ':path_provider_android:processDebugJavaRes', task ':permission_handler_android:processDebugJavaRes', task ':quill_native_bridge_android:processDebugJavaRes', task ':share_plus:processDebugJavaRes', task ':shared_preferences_android:processDebugJavaRes', task ':sqlite3_flutter_libs:processDebugJavaRes', task ':url_launcher_android:processDebugJavaRes', task ':video_player_android:processDebugJavaRes', task ':workmanager_android:processDebugJavaRes', task ':app:mergeDebugJavaResource', task ':app:checkDebugDuplicateClasses', task ':app:mergeExtDexDebug', task ':app_links:bundleLibRuntimeToDirDebug', task ':device_calendar:bundleLibRuntimeToDirDebug', task ':file_selector_android:bundleLibRuntimeToDirDebug', task ':flutter_contacts:bundleLibRuntimeToDirDebug', task ':flutter_keyboard_visibility_temp_fork:bundleLibRuntimeToDirDebug', task ':flutter_local_notifications:bundleLibRuntimeToDirDebug', task ':image_picker_android:bundleLibRuntimeToDirDebug', task ':flutter_plugin_android_lifecycle:bundleLibRuntimeToDirDebug', task ':flutter_sms_inbox:bundleLibRuntimeToDirDebug', task ':path_provider_android:bundleLibRuntimeToDirDebug', task ':permission_handler_android:bundleLibRuntimeToDirDebug', task ':quill_native_bridge_android:bundleLibRuntimeToDirDebug', task ':share_plus:bundleLibRuntimeToDirDebug', task ':shared_preferences_android:bundleLibRuntimeToDirDebug', task ':sqlite3_flutter_libs:bundleLibRuntimeToDirDebug', task ':url_launcher_android:bundleLibRuntimeToDirDebug', task ':video_player_android:bundleLibRuntimeToDirDebug', task ':workmanager_android:bundleLibRuntimeToDirDebug', task ':app:mergeLibDexDebug', task ':app:mergeProjectDexDebug', task ':app:configureCMakeDebug[arm64-v8a]', task ':app:buildCMakeDebug[arm64-v8a]', task ':app:configureCMakeDebug[armeabi-v7a]', task ':app:buildCMakeDebug[armeabi-v7a]', task ':app:configureCMakeDebug[x86_64]', task ':app:buildCMakeDebug[x86_64]', task ':app:mergeDebugJniLibFolders', task ':app_links:mergeDebugJniLibFolders', task ':app_links:mergeDebugNativeLibs', task ':app_links:copyDebugJniLibsProjectOnly', task ':device_calendar:mergeDebugJniLibFolders', task ':device_calendar:mergeDebugNativeLibs', task ':device_calendar:copyDebugJniLibsProjectOnly', task ':file_selector_android:mergeDebugJniLibFolders', task ':file_selector_android:mergeDebugNativeLibs', task ':file_selector_android:copyDebugJniLibsProjectOnly', task ':flutter_contacts:mergeDebugJniLibFolders', task ':flutter_contacts:mergeDebugNativeLibs', task ':flutter_contacts:copyDebugJniLibsProjectOnly', task ':flutter_keyboard_visibility_temp_fork:mergeDebugJniLibFolders', task ':flutter_keyboard_visibility_temp_fork:mergeDebugNativeLibs', task ':flutter_keyboard_visibility_temp_fork:copyDebugJniLibsProjectOnly', task ':flutter_local_notifications:mergeDebugJniLibFolders', task ':flutter_local_notifications:mergeDebugNativeLibs', task ':flutter_local_notifications:copyDebugJniLibsProjectOnly', task ':flutter_plugin_android_lifecycle:mergeDebugJniLibFolders', task ':flutter_plugin_android_lifecycle:mergeDebugNativeLibs', task ':flutter_plugin_android_lifecycle:copyDebugJniLibsProjectOnly', task ':flutter_sms_inbox:mergeDebugJniLibFolders', task ':flutter_sms_inbox:mergeDebugNativeLibs', task ':flutter_sms_inbox:copyDebugJniLibsProjectOnly', task ':image_picker_android:mergeDebugJniLibFolders', task ':image_picker_android:mergeDebugNativeLibs', task ':image_picker_android:copyDebugJniLibsProjectOnly', task ':path_provider_android:mergeDebugJniLibFolders', task ':path_provider_android:mergeDebugNativeLibs', task ':path_provider_android:copyDebugJniLibsProjectOnly', task ':permission_handler_android:mergeDebugJniLibFolders', task ':permission_handler_android:mergeDebugNativeLibs', task ':permission_handler_android:copyDebugJniLibsProjectOnly', task ':quill_native_bridge_android:mergeDebugJniLibFolders', task ':quill_native_bridge_android:mergeDebugNativeLibs', task ':quill_native_bridge_android:copyDebugJniLibsProjectOnly', task ':share_plus:mergeDebugJniLibFolders', task ':share_plus:mergeDebugNativeLibs', task ':share_plus:copyDebugJniLibsProjectOnly', task ':shared_preferences_android:mergeDebugJniLibFolders', task ':shared_preferences_android:mergeDebugNativeLibs', task ':shared_preferences_android:copyDebugJniLibsProjectOnly', task ':sqlite3_flutter_libs:mergeDebugJniLibFolders', task ':sqlite3_flutter_libs:mergeDebugNativeLibs', task ':sqlite3_flutter_libs:copyDebugJniLibsProjectOnly', task ':url_launcher_android:mergeDebugJniLibFolders', task ':url_launcher_android:mergeDebugNativeLibs', task ':url_launcher_android:copyDebugJniLibsProjectOnly', task ':video_player_android:mergeDebugJniLibFolders', task ':video_player_android:mergeDebugNativeLibs', task ':video_player_android:copyDebugJniLibsProjectOnly', task ':workmanager_android:mergeDebugJniLibFolders', task ':workmanager_android:mergeDebugNativeLibs', task ':workmanager_android:copyDebugJniLibsProjectOnly', task ':app:mergeDebugNativeLibs', task ':app:stripDebugDebugSymbols', task ':app:validateSigningDebug', task ':app:writeDebugAppMetadata', task ':app:writeDebugSigningConfigVersions', task ':app:packageDebug', task ':app:createDebugApkListingFileRedirect', task ':app:assembleDebug', task ':app_links:stripDebugDebugSymbols', task ':app_links:copyDebugJniLibsProjectAndLocalJars', task ':app_links:extractDebugAnnotations', task ':app_links:extractDeepLinksForAarDebug', task ':app_links:mergeDebugGeneratedProguardFiles', task ':app_links:mergeDebugConsumerProguardFiles', task ':app_links:prepareDebugArtProfile', task ':app_links:prepareLintJarForPublish', task ':app_links:mergeDebugJavaResource', task ':app_links:syncDebugLibJars', task ':app_links:bundleDebugAar', task ':app_links:assembleDebug', task ':device_calendar:stripDebugDebugSymbols', task ':device_calendar:copyDebugJniLibsProjectAndLocalJars', task ':device_calendar:extractDebugAnnotations', task ':device_calendar:extractDeepLinksForAarDebug', task ':device_calendar:mergeDebugGeneratedProguardFiles', task ':device_calendar:mergeDebugConsumerProguardFiles', task ':device_calendar:prepareDebugArtProfile', task ':device_calendar:prepareLintJarForPublish', task ':device_calendar:mergeDebugJavaResource', task ':device_calendar:syncDebugLibJars', task ':device_calendar:bundleDebugAar', task ':device_calendar:assembleDebug', task ':file_selector_android:stripDebugDebugSymbols', task ':file_selector_android:copyDebugJniLibsProjectAndLocalJars', task ':file_selector_android:extractDebugAnnotations', task ':file_selector_android:extractDeepLinksForAarDebug', task ':file_selector_android:mergeDebugGeneratedProguardFiles', task ':file_selector_android:mergeDebugConsumerProguardFiles', task ':file_selector_android:prepareDebugArtProfile', task ':file_selector_android:prepareLintJarForPublish', task ':file_selector_android:mergeDebugJavaResource', task ':file_selector_android:syncDebugLibJars', task ':file_selector_android:bundleDebugAar', task ':file_selector_android:assembleDebug', task ':flutter_contacts:stripDebugDebugSymbols', task ':flutter_contacts:copyDebugJniLibsProjectAndLocalJars', task ':flutter_contacts:extractDebugAnnotations', task ':flutter_contacts:extractDeepLinksForAarDebug', task ':flutter_contacts:mergeDebugGeneratedProguardFiles', task ':flutter_contacts:mergeDebugConsumerProguardFiles', task ':flutter_contacts:prepareDebugArtProfile', task ':flutter_contacts:prepareLintJarForPublish', task ':flutter_contacts:mergeDebugJavaResource', task ':flutter_contacts:syncDebugLibJars', task ':flutter_contacts:bundleDebugAar', task ':flutter_contacts:assembleDebug', task ':flutter_keyboard_visibility_temp_fork:stripDebugDebugSymbols', task ':flutter_keyboard_visibility_temp_fork:copyDebugJniLibsProjectAndLocalJars', task ':flutter_keyboard_visibility_temp_fork:extractDebugAnnotations', task ':flutter_keyboard_visibility_temp_fork:extractDeepLinksForAarDebug', task ':flutter_keyboard_visibility_temp_fork:mergeDebugGeneratedProguardFiles', task ':flutter_keyboard_visibility_temp_fork:mergeDebugConsumerProguardFiles', task ':flutter_keyboard_visibility_temp_fork:prepareDebugArtProfile', task ':flutter_keyboard_visibility_temp_fork:prepareLintJarForPublish', task ':flutter_keyboard_visibility_temp_fork:mergeDebugJavaResource', task ':flutter_keyboard_visibility_temp_fork:syncDebugLibJars', task ':flutter_keyboard_visibility_temp_fork:bundleDebugAar', task ':flutter_keyboard_visibility_temp_fork:assembleDebug', task ':flutter_local_notifications:stripDebugDebugSymbols', task ':flutter_local_notifications:copyDebugJniLibsProjectAndLocalJars', task ':flutter_local_notifications:extractDebugAnnotations', task ':flutter_local_notifications:extractDeepLinksForAarDebug', task ':flutter_local_notifications:mergeDebugGeneratedProguardFiles', task ':flutter_local_notifications:mergeDebugConsumerProguardFiles', task ':flutter_local_notifications:prepareDebugArtProfile', task ':flutter_local_notifications:prepareLintJarForPublish', task ':flutter_local_notifications:mergeDebugJavaResource', task ':flutter_local_notifications:syncDebugLibJars', task ':flutter_local_notifications:bundleDebugAar', task ':flutter_local_notifications:assembleDebug', task ':flutter_plugin_android_lifecycle:stripDebugDebugSymbols', task ':flutter_plugin_android_lifecycle:copyDebugJniLibsProjectAndLocalJars', task ':flutter_plugin_android_lifecycle:extractDebugAnnotations', task ':flutter_plugin_android_lifecycle:extractDeepLinksForAarDebug', task ':flutter_plugin_android_lifecycle:mergeDebugGeneratedProguardFiles', task ':flutter_plugin_android_lifecycle:mergeDebugConsumerProguardFiles', task ':flutter_plugin_android_lifecycle:prepareDebugArtProfile', task ':flutter_plugin_android_lifecycle:prepareLintJarForPublish', task ':flutter_plugin_android_lifecycle:mergeDebugJavaResource', task ':flutter_plugin_android_lifecycle:syncDebugLibJars', task ':flutter_plugin_android_lifecycle:bundleDebugAar', task ':flutter_plugin_android_lifecycle:assembleDebug', task ':flutter_sms_inbox:stripDebugDebugSymbols', task ':flutter_sms_inbox:copyDebugJniLibsProjectAndLocalJars', task ':flutter_sms_inbox:extractDebugAnnotations', task ':flutter_sms_inbox:extractDeepLinksForAarDebug', task ':flutter_sms_inbox:mergeDebugGeneratedProguardFiles', task ':flutter_sms_inbox:mergeDebugConsumerProguardFiles', task ':flutter_sms_inbox:prepareDebugArtProfile', task ':flutter_sms_inbox:prepareLintJarForPublish', task ':flutter_sms_inbox:mergeDebugJavaResource', task ':flutter_sms_inbox:syncDebugLibJars', task ':flutter_sms_inbox:bundleDebugAar', task ':flutter_sms_inbox:assembleDebug', task ':image_picker_android:stripDebugDebugSymbols', task ':image_picker_android:copyDebugJniLibsProjectAndLocalJars', task ':image_picker_android:extractDebugAnnotations', task ':image_picker_android:extractDeepLinksForAarDebug', task ':image_picker_android:mergeDebugGeneratedProguardFiles', task ':image_picker_android:mergeDebugConsumerProguardFiles', task ':image_picker_android:prepareDebugArtProfile', task ':image_picker_android:prepareLintJarForPublish', task ':image_picker_android:mergeDebugJavaResource', task ':image_picker_android:syncDebugLibJars', task ':image_picker_android:bundleDebugAar', task ':image_picker_android:assembleDebug', task ':path_provider_android:stripDebugDebugSymbols', task ':path_provider_android:copyDebugJniLibsProjectAndLocalJars', task ':path_provider_android:extractDebugAnnotations', task ':path_provider_android:extractDeepLinksForAarDebug', task ':path_provider_android:mergeDebugGeneratedProguardFiles', task ':path_provider_android:mergeDebugConsumerProguardFiles', task ':path_provider_android:prepareDebugArtProfile', task ':path_provider_android:prepareLintJarForPublish', task ':path_provider_android:mergeDebugJavaResource', task ':path_provider_android:syncDebugLibJars', task ':path_provider_android:bundleDebugAar', task ':path_provider_android:assembleDebug', task ':permission_handler_android:stripDebugDebugSymbols', task ':permission_handler_android:copyDebugJniLibsProjectAndLocalJars', task ':permission_handler_android:extractDebugAnnotations', task ':permission_handler_android:extractDeepLinksForAarDebug', task ':permission_handler_android:mergeDebugGeneratedProguardFiles', task ':permission_handler_android:mergeDebugConsumerProguardFiles', task ':permission_handler_android:prepareDebugArtProfile', task ':permission_handler_android:prepareLintJarForPublish', task ':permission_handler_android:mergeDebugJavaResource', task ':permission_handler_android:syncDebugLibJars', task ':permission_handler_android:bundleDebugAar', task ':permission_handler_android:assembleDebug', task ':quill_native_bridge_android:stripDebugDebugSymbols', task ':quill_native_bridge_android:copyDebugJniLibsProjectAndLocalJars', task ':quill_native_bridge_android:extractDebugAnnotations', task ':quill_native_bridge_android:extractDeepLinksForAarDebug', task ':quill_native_bridge_android:mergeDebugGeneratedProguardFiles', task ':quill_native_bridge_android:mergeDebugConsumerProguardFiles', task ':quill_native_bridge_android:prepareDebugArtProfile', task ':quill_native_bridge_android:prepareLintJarForPublish', task ':quill_native_bridge_android:mergeDebugJavaResource', task ':quill_native_bridge_android:syncDebugLibJars', task ':quill_native_bridge_android:bundleDebugAar', task ':quill_native_bridge_android:assembleDebug', task ':share_plus:stripDebugDebugSymbols', task ':share_plus:copyDebugJniLibsProjectAndLocalJars', task ':share_plus:extractDebugAnnotations', task ':share_plus:extractDeepLinksForAarDebug', task ':share_plus:mergeDebugGeneratedProguardFiles', task ':share_plus:mergeDebugConsumerProguardFiles', task ':share_plus:prepareDebugArtProfile', task ':share_plus:prepareLintJarForPublish', task ':share_plus:mergeDebugJavaResource', task ':share_plus:syncDebugLibJars', task ':share_plus:bundleDebugAar', task ':share_plus:assembleDebug', task ':shared_preferences_android:stripDebugDebugSymbols', task ':shared_preferences_android:copyDebugJniLibsProjectAndLocalJars', task ':shared_preferences_android:extractDebugAnnotations', task ':shared_preferences_android:extractDeepLinksForAarDebug', task ':shared_preferences_android:mergeDebugGeneratedProguardFiles', task ':shared_preferences_android:mergeDebugConsumerProguardFiles', task ':shared_preferences_android:prepareDebugArtProfile', task ':shared_preferences_android:prepareLintJarForPublish', task ':shared_preferences_android:mergeDebugJavaResource', task ':shared_preferences_android:syncDebugLibJars', task ':shared_preferences_android:bundleDebugAar', task ':shared_preferences_android:assembleDebug', task ':sqlite3_flutter_libs:stripDebugDebugSymbols', task ':sqlite3_flutter_libs:copyDebugJniLibsProjectAndLocalJars', task ':sqlite3_flutter_libs:extractDebugAnnotations', task ':sqlite3_flutter_libs:extractDeepLinksForAarDebug', task ':sqlite3_flutter_libs:mergeDebugGeneratedProguardFiles', task ':sqlite3_flutter_libs:mergeDebugConsumerProguardFiles', task ':sqlite3_flutter_libs:prepareDebugArtProfile', task ':sqlite3_flutter_libs:prepareLintJarForPublish', task ':sqlite3_flutter_libs:mergeDebugJavaResource', task ':sqlite3_flutter_libs:syncDebugLibJars', task ':sqlite3_flutter_libs:bundleDebugAar', task ':sqlite3_flutter_libs:assembleDebug', task ':url_launcher_android:stripDebugDebugSymbols', task ':url_launcher_android:copyDebugJniLibsProjectAndLocalJars', task ':url_launcher_android:extractDebugAnnotations', task ':url_launcher_android:extractDeepLinksForAarDebug', task ':url_launcher_android:mergeDebugGeneratedProguardFiles', task ':url_launcher_android:mergeDebugConsumerProguardFiles', task ':url_launcher_android:prepareDebugArtProfile', task ':url_launcher_android:prepareLintJarForPublish', task ':url_launcher_android:mergeDebugJavaResource', task ':url_launcher_android:syncDebugLibJars', task ':url_launcher_android:bundleDebugAar', task ':url_launcher_android:assembleDebug', task ':video_player_android:stripDebugDebugSymbols', task ':video_player_android:copyDebugJniLibsProjectAndLocalJars', task ':video_player_android:extractDebugAnnotations', task ':video_player_android:extractDeepLinksForAarDebug', task ':video_player_android:mergeDebugGeneratedProguardFiles', task ':video_player_android:mergeDebugConsumerProguardFiles', task ':video_player_android:prepareDebugArtProfile', task ':video_player_android:prepareLintJarForPublish', task ':video_player_android:mergeDebugJavaResource', task ':video_player_android:syncDebugLibJars', task ':video_player_android:bundleDebugAar', task ':video_player_android:assembleDebug', task ':workmanager_android:stripDebugDebugSymbols', task ':workmanager_android:copyDebugJniLibsProjectAndLocalJars', task ':workmanager_android:extractDebugAnnotations', task ':workmanager_android:extractDeepLinksForAarDebug', task ':workmanager_android:mergeDebugGeneratedProguardFiles', task ':workmanager_android:mergeDebugConsumerProguardFiles', task ':workmanager_android:prepareDebugArtProfile', task ':workmanager_android:prepareLintJarForPublish', task ':workmanager_android:mergeDebugJavaResource', task ':workmanager_android:syncDebugLibJars', task ':workmanager_android:bundleDebugAar', task ':workmanager_android:assembleDebug']
+Tasks that were excluded: []
+work action Parameters of IdentityTransform (Thread[Execution worker Thread 15,5,main]) started.
+work action Parameters of DexingNoClasspathTransform (Thread[Execution worker Thread 15,5,main]) started.
+work action Parameters of DexingOutputSplitTransform (Thread[Execution worker Thread 15,5,main]) started.
+work action Parameters of ClassesDirToClassesTransform (Thread[Execution worker Thread 15,5,main]) started.
+work action Parameters of DexingOutputSplitTransform (Thread[Execution worker Thread 15,5,main]) started.
+Resolve mutations for :app:DebugMinSdkCheck (Thread[Execution worker Thread 15,5,main]) started.
+:app:DebugMinSdkCheck (Thread[Execution worker Thread 15,5,main]) started.
+
+> Task :app:DebugMinSdkCheck
+Caching disabled for task ':app:DebugMinSdkCheck' because:
+  Build cache is disabled
+Task ':app:DebugMinSdkCheck' is not up-to-date because:
+  Task has not declared any outputs despite executing actions.
+Resolve mutations for :app:preBuild (Thread[Execution worker Thread 15,5,main]) started.
+:app:preBuild (Thread[Execution worker Thread 15,5,main]) started.
+
+> Task :app:preBuild UP-TO-DATE
+Skipping task ':app:preBuild' as it has no actions.
+Resolve mutations for :app:preDebugBuild (Thread[Execution worker Thread 15,5,main]) started.
+:app:preDebugBuild (Thread[Execution worker Thread 15,5,main]) started.
+
+> Task :app:preDebugBuild UP-TO-DATE
+Skipping task ':app:preDebugBuild' as it has no actions.
+Resolve mutations for :app:mergeDebugNativeDebugMetadata (Thread[Execution worker Thread 15,5,main]) started.
+:app:mergeDebugNativeDebugMetadata (Thread[Execution worker Thread 15,5,main]) started.
+
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+Skipping task ':app:mergeDebugNativeDebugMetadata' as it has no source files and no previous output files.
+Resolve mutations for :app:checkKotlinGradlePluginConfigurationErrors (Thread[Execution worker Thread 15,5,main]) started.
+:app:checkKotlinGradlePluginConfigurationErrors (Thread[Execution worker Thread 15,5,main]) started.
+
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+Skipping task ':app:checkKotlinGradlePluginConfigurationErrors' as task onlyIf 'errorDiagnostics are present' is false.
+Resolve mutations for :app:compileFlutterBuildDebug (Thread[Execution worker Thread 15,5,main]) started.
+:app:compileFlutterBuildDebug (Thread[Execution worker Thread 15,5,main]) started.
+
+> Task :app:compileFlutterBuildDebug UP-TO-DATE
+Caching disabled for task ':app:compileFlutterBuildDebug' because:
+  Build cache is disabled
+  Caching has not been enabled for the task
+Skipping task ':app:compileFlutterBuildDebug' as it is up-to-date.
+Resolve mutations for :app:packJniLibsflutterBuildDebug (Thread[Execution worker Thread 15,5,main]) started.
+:app:packJniLibsflutterBuildDebug (Thread[Execution worker Thread 15,5,main]) started.
+
+> Task :app:packJniLibsflutterBuildDebug UP-TO-DATE
+Caching disabled for task ':app:packJniLibsflutterBuildDebug' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':app:packJniLibsflutterBuildDebug' as it is up-to-date.
+Resolve mutations for :app_links:preBuild (Thread[Execution worker Thread 15,5,main]) started.
+:app_links:preBuild (Thread[Execution worker Thread 15,5,main]) started.
+
+> Task :app_links:preBuild UP-TO-DATE
+Skipping task ':app_links:preBuild' as it has no actions.
+Resolve mutations for :app_links:preDebugBuild (Thread[Execution worker Thread 15,5,main]) started.
+:app_links:preDebugBuild (Thread[Execution worker Thread 15,5,main]) started.
+
+> Task :app_links:preDebugBuild UP-TO-DATE
+Skipping task ':app_links:preDebugBuild' as it has no actions.
+Resolve mutations for :app_links:writeDebugAarMetadata (Thread[Execution worker Thread 15,5,main]) started.
+:app_links:writeDebugAarMetadata (Thread[Execution worker Thread 15,5,main]) started.
+
+> Task :app_links:writeDebugAarMetadata UP-TO-DATE
+Caching disabled for task ':app_links:writeDebugAarMetadata' because:
+  Build cache is disabled
+  Caching has been disabled for the task
+Skipping task ':app_links:writeDebugAarMetadata' as it is up-to-date.
+work action resolve aar-metadata.properties (project :app_links) (Thread[Execution worker Thread 15,5,main]) started.
+Resolve mutations for :device_calendar:preBuild (Thread[Execution worker Thread 15,5,main]) started.
+:device_calendar:preBuild (Thread[Execution worker Thread 15,5,main]) started.
+
+> Task :device_calendar:preBuild UP-TO-DATE
+Skipping task ':device_calendar:preBuild' as it has no actions.
+Resolve mutations for :device_calendar:preDebugBuild (Thread[Execution worker Thread 15,5,main]) started.
+:device_calendar:preDebugBuild (Thread[Execution worker Thread 15,5,main]) started.
+
+> Task :device_calendar:preDebugBuild UP-TO-DATE
+Skipping task ':device_calendar:preDebugBuild' as it has no actions.
+Resolve mutations for :device_calendar:writeDebugAarMetadata (Thread[Execution worker Thread 15,5,main]) started.
+:device_calendar:writeDebugAarMetadata (Thread[Execution worker Thread 15,5,main]) started.
+
+> Task :device_calendar:writeDebugAarMetadata UP-TO-DATE
+Caching disabled for task ':device_calendar:writeDebugAarMetadata' because:
+  Build cache is disabled
+  Caching has been disabled for the task
+Skipping task ':device_calendar:writeDebugAarMetadata' as it is up-to-date.
+work action resolve aar-metadata.properties (project :device_calendar) (Thread[Execution worker Thread 15,5,main]) started.
+Resolve mutations for :file_selector_android:preBuild (Thread[Execution worker Thread 15,5,main]) started.
+:file_selector_android:preBuild (Thread[Execution worker Thread 15,5,main]) started.
+
+> Task :file_selector_android:preBuild UP-TO-DATE
+Skipping task ':file_selector_android:preBuild' as it has no actions.
+Resolve mutations for :file_selector_android:preDebugBuild (Thread[Execution worker Thread 15,5,main]) started.
+:file_selector_android:preDebugBuild (Thread[Execution worker Thread 15,5,main]) started.
+
+> Task :file_selector_android:preDebugBuild UP-TO-DATE
+Skipping task ':file_selector_android:preDebugBuild' as it has no actions.
+Resolve mutations for :file_selector_android:writeDebugAarMetadata (Thread[Execution worker Thread 15,5,main]) started.
+:file_selector_android:writeDebugAarMetadata (Thread[Execution worker Thread 15,5,main]) started.
+
+> Task :file_selector_android:writeDebugAarMetadata UP-TO-DATE
+Caching disabled for task ':file_selector_android:writeDebugAarMetadata' because:
+  Build cache is disabled
+  Caching has been disabled for the task
+Skipping task ':file_selector_android:writeDebugAarMetadata' as it is up-to-date.
+work action resolve aar-metadata.properties (project :file_selector_android) (Thread[Execution worker Thread 15,5,main]) started.
+Resolve mutations for :flutter_contacts:preBuild (Thread[Execution worker Thread 15,5,main]) started.
+:flutter_contacts:preBuild (Thread[Execution worker Thread 15,5,main]) started.
+
+> Task :flutter_contacts:preBuild UP-TO-DATE
+Skipping task ':flutter_contacts:preBuild' as it has no actions.
+Resolve mutations for :flutter_contacts:preDebugBuild (Thread[Execution worker Thread 15,5,main]) started.
+:flutter_contacts:preDebugBuild (Thread[Execution worker Thread 15,5,main]) started.
+
+> Task :flutter_contacts:preDebugBuild UP-TO-DATE
+Skipping task ':flutter_contacts:preDebugBuild' as it has no actions.
+Resolve mutations for :flutter_contacts:writeDebugAarMetadata (Thread[Execution worker Thread 15,5,main]) started.
+:flutter_contacts:writeDebugAarMetadata (Thread[Execution worker Thread 15,5,main]) started.
+
+> Task :flutter_contacts:writeDebugAarMetadata UP-TO-DATE
+Caching disabled for task ':flutter_contacts:writeDebugAarMetadata' because:
+  Build cache is disabled
+  Caching has been disabled for the task
+Skipping task ':flutter_contacts:writeDebugAarMetadata' as it is up-to-date.
+work action resolve aar-metadata.properties (project :flutter_contacts) (Thread[Execution worker Thread 15,5,main]) started.
+Resolve mutations for :flutter_keyboard_visibility_temp_fork:preBuild (Thread[Execution worker Thread 15,5,main]) started.
+:flutter_keyboard_visibility_temp_fork:preBuild (Thread[Execution worker Thread 15,5,main]) started.
+
+> Task :flutter_keyboard_visibility_temp_fork:preBuild UP-TO-DATE
+Skipping task ':flutter_keyboard_visibility_temp_fork:preBuild' as it has no actions.
+Resolve mutations for :flutter_keyboard_visibility_temp_fork:preDebugBuild (Thread[Execution worker Thread 15,5,main]) started.
+:flutter_keyboard_visibility_temp_fork:preDebugBuild (Thread[Execution worker Thread 15,5,main]) started.
+
+> Task :flutter_keyboard_visibility_temp_fork:preDebugBuild UP-TO-DATE
+Skipping task ':flutter_keyboard_visibility_temp_fork:preDebugBuild' as it has no actions.
+Resolve mutations for :flutter_keyboard_visibility_temp_fork:writeDebugAarMetadata (Thread[Execution worker Thread 15,5,main]) started.
+:flutter_keyboard_visibility_temp_fork:writeDebugAarMetadata (Thread[Execution worker Thread 15,5,main]) started.
+
+> Task :flutter_keyboard_visibility_temp_fork:writeDebugAarMetadata UP-TO-DATE
+Caching disabled for task ':flutter_keyboard_visibility_temp_fork:writeDebugAarMetadata' because:
+  Build cache is disabled
+  Caching has been disabled for the task
+Skipping task ':flutter_keyboard_visibility_temp_fork:writeDebugAarMetadata' as it is up-to-date.
+work action resolve aar-metadata.properties (project :flutter_keyboard_visibility_temp_fork) (Thread[Execution worker Thread 15,5,main]) started.
+Resolve mutations for :flutter_local_notifications:preBuild (Thread[Execution worker Thread 15,5,main]) started.
+:flutter_local_notifications:preBuild (Thread[Execution worker Thread 15,5,main]) started.
+
+> Task :flutter_local_notifications:preBuild UP-TO-DATE
+Skipping task ':flutter_local_notifications:preBuild' as it has no actions.
+Resolve mutations for :flutter_local_notifications:preDebugBuild (Thread[Execution worker Thread 15,5,main]) started.
+:flutter_local_notifications:preDebugBuild (Thread[Execution worker Thread 15,5,main]) started.
+
+> Task :flutter_local_notifications:preDebugBuild UP-TO-DATE
+Skipping task ':flutter_local_notifications:preDebugBuild' as it has no actions.
+Resolve mutations for :flutter_local_notifications:writeDebugAarMetadata (Thread[Execution worker Thread 15,5,main]) started.
+:flutter_local_notifications:writeDebugAarMetadata (Thread[Execution worker Thread 15,5,main]) started.
+
+> Task :flutter_local_notifications:writeDebugAarMetadata UP-TO-DATE
+Caching disabled for task ':flutter_local_notifications:writeDebugAarMetadata' because:
+  Build cache is disabled
+  Caching has been disabled for the task
+Skipping task ':flutter_local_notifications:writeDebugAarMetadata' as it is up-to-date.
+work action resolve aar-metadata.properties (project :flutter_local_notifications) (Thread[Execution worker Thread 15,5,main]) started.
+Resolve mutations for :flutter_plugin_android_lifecycle:preBuild (Thread[Execution worker Thread 15,5,main]) started.
+:flutter_plugin_android_lifecycle:preBuild (Thread[Execution worker Thread 15,5,main]) started.
+
+> Task :flutter_plugin_android_lifecycle:preBuild UP-TO-DATE
+Skipping task ':flutter_plugin_android_lifecycle:preBuild' as it has no actions.
+Resolve mutations for :flutter_plugin_android_lifecycle:preDebugBuild (Thread[Execution worker Thread 15,5,main]) started.
+:flutter_plugin_android_lifecycle:preDebugBuild (Thread[Execution worker Thread 15,5,main]) started.
+
+> Task :flutter_plugin_android_lifecycle:preDebugBuild UP-TO-DATE
+Skipping task ':flutter_plugin_android_lifecycle:preDebugBuild' as it has no actions.
+Resolve mutations for :flutter_plugin_android_lifecycle:writeDebugAarMetadata (Thread[Execution worker Thread 15,5,main]) started.
+:flutter_plugin_android_lifecycle:writeDebugAarMetadata (Thread[Execution worker Thread 15,5,main]) started.
+
+> Task :flutter_plugin_android_lifecycle:writeDebugAarMetadata UP-TO-DATE
+Caching disabled for task ':flutter_plugin_android_lifecycle:writeDebugAarMetadata' because:
+  Build cache is disabled
+  Caching has been disabled for the task
+Skipping task ':flutter_plugin_android_lifecycle:writeDebugAarMetadata' as it is up-to-date.
+work action resolve aar-metadata.properties (project :flutter_plugin_android_lifecycle) (Thread[Execution worker Thread 15,5,main]) started.
+Resolve mutations for :flutter_sms_inbox:preBuild (Thread[Execution worker Thread 15,5,main]) started.
+:flutter_sms_inbox:preBuild (Thread[Execution worker Thread 15,5,main]) started.
+
+> Task :flutter_sms_inbox:preBuild UP-TO-DATE
+Skipping task ':flutter_sms_inbox:preBuild' as it has no actions.
+Resolve mutations for :flutter_sms_inbox:preDebugBuild (Thread[Execution worker Thread 15,5,main]) started.
+:flutter_sms_inbox:preDebugBuild (Thread[Execution worker Thread 15,5,main]) started.
+
+> Task :flutter_sms_inbox:preDebugBuild UP-TO-DATE
+Skipping task ':flutter_sms_inbox:preDebugBuild' as it has no actions.
+Resolve mutations for :flutter_sms_inbox:writeDebugAarMetadata (Thread[Execution worker Thread 15,5,main]) started.
+:flutter_sms_inbox:writeDebugAarMetadata (Thread[Execution worker Thread 15,5,main]) started.
+
+> Task :flutter_sms_inbox:writeDebugAarMetadata UP-TO-DATE
+Caching disabled for task ':flutter_sms_inbox:writeDebugAarMetadata' because:
+  Build cache is disabled
+  Caching has been disabled for the task
+Skipping task ':flutter_sms_inbox:writeDebugAarMetadata' as it is up-to-date.
+work action resolve aar-metadata.properties (project :flutter_sms_inbox) (Thread[Execution worker Thread 15,5,main]) started.
+Resolve mutations for :image_picker_android:preBuild (Thread[Execution worker Thread 15,5,main]) started.
+:image_picker_android:preBuild (Thread[Execution worker Thread 15,5,main]) started.
+
+> Task :image_picker_android:preBuild UP-TO-DATE
+Skipping task ':image_picker_android:preBuild' as it has no actions.
+Resolve mutations for :image_picker_android:preDebugBuild (Thread[Execution worker Thread 15,5,main]) started.
+:image_picker_android:preDebugBuild (Thread[Execution worker Thread 15,5,main]) started.
+
+> Task :image_picker_android:preDebugBuild UP-TO-DATE
+Skipping task ':image_picker_android:preDebugBuild' as it has no actions.
+Resolve mutations for :image_picker_android:writeDebugAarMetadata (Thread[Execution worker Thread 15,5,main]) started.
+:image_picker_android:writeDebugAarMetadata (Thread[Execution worker Thread 15,5,main]) started.
+
+> Task :image_picker_android:writeDebugAarMetadata UP-TO-DATE
+Caching disabled for task ':image_picker_android:writeDebugAarMetadata' because:
+  Build cache is disabled
+  Caching has been disabled for the task
+Skipping task ':image_picker_android:writeDebugAarMetadata' as it is up-to-date.
+work action resolve aar-metadata.properties (project :image_picker_android) (Thread[Execution worker Thread 15,5,main]) started.
+Resolve mutations for :path_provider_android:preBuild (Thread[Execution worker Thread 15,5,main]) started.
+:path_provider_android:preBuild (Thread[Execution worker Thread 15,5,main]) started.
+
+> Task :path_provider_android:preBuild UP-TO-DATE
+Skipping task ':path_provider_android:preBuild' as it has no actions.
+Resolve mutations for :path_provider_android:preDebugBuild (Thread[Execution worker Thread 15,5,main]) started.
+:path_provider_android:preDebugBuild (Thread[Execution worker Thread 15,5,main]) started.
+
+> Task :path_provider_android:preDebugBuild UP-TO-DATE
+Skipping task ':path_provider_android:preDebugBuild' as it has no actions.
+Resolve mutations for :path_provider_android:writeDebugAarMetadata (Thread[Execution worker Thread 15,5,main]) started.
+:path_provider_android:writeDebugAarMetadata (Thread[Execution worker Thread 15,5,main]) started.
+
+> Task :path_provider_android:writeDebugAarMetadata UP-TO-DATE
+Caching disabled for task ':path_provider_android:writeDebugAarMetadata' because:
+  Build cache is disabled
+  Caching has been disabled for the task
+Skipping task ':path_provider_android:writeDebugAarMetadata' as it is up-to-date.
+work action resolve aar-metadata.properties (project :path_provider_android) (Thread[Execution worker Thread 15,5,main]) started.
+Resolve mutations for :permission_handler_android:preBuild (Thread[Execution worker Thread 15,5,main]) started.
+:permission_handler_android:preBuild (Thread[Execution worker Thread 15,5,main]) started.
+
+> Task :permission_handler_android:preBuild UP-TO-DATE
+Skipping task ':permission_handler_android:preBuild' as it has no actions.
+Resolve mutations for :permission_handler_android:preDebugBuild (Thread[Execution worker Thread 15,5,main]) started.
+:permission_handler_android:preDebugBuild (Thread[Execution worker Thread 15,5,main]) started.
+
+> Task :permission_handler_android:preDebugBuild UP-TO-DATE
+Skipping task ':permission_handler_android:preDebugBuild' as it has no actions.
+Resolve mutations for :permission_handler_android:writeDebugAarMetadata (Thread[Execution worker Thread 15,5,main]) started.
+:permission_handler_android:writeDebugAarMetadata (Thread[Execution worker Thread 15,5,main]) started.
+
+> Task :permission_handler_android:writeDebugAarMetadata UP-TO-DATE
+Caching disabled for task ':permission_handler_android:writeDebugAarMetadata' because:
+  Build cache is disabled
+  Caching has been disabled for the task
+Skipping task ':permission_handler_android:writeDebugAarMetadata' as it is up-to-date.
+work action resolve aar-metadata.properties (project :permission_handler_android) (Thread[Execution worker Thread 15,5,main]) started.
+Resolve mutations for :quill_native_bridge_android:preBuild (Thread[Execution worker Thread 15,5,main]) started.
+:quill_native_bridge_android:preBuild (Thread[Execution worker Thread 15,5,main]) started.
+
+> Task :quill_native_bridge_android:preBuild UP-TO-DATE
+Skipping task ':quill_native_bridge_android:preBuild' as it has no actions.
+Resolve mutations for :quill_native_bridge_android:preDebugBuild (Thread[Execution worker Thread 15,5,main]) started.
+:quill_native_bridge_android:preDebugBuild (Thread[Execution worker Thread 15,5,main]) started.
+
+> Task :quill_native_bridge_android:preDebugBuild UP-TO-DATE
+Skipping task ':quill_native_bridge_android:preDebugBuild' as it has no actions.
+Resolve mutations for :quill_native_bridge_android:writeDebugAarMetadata (Thread[Execution worker Thread 15,5,main]) started.
+:quill_native_bridge_android:writeDebugAarMetadata (Thread[Execution worker Thread 15,5,main]) started.
+
+> Task :quill_native_bridge_android:writeDebugAarMetadata UP-TO-DATE
+Caching disabled for task ':quill_native_bridge_android:writeDebugAarMetadata' because:
+  Build cache is disabled
+  Caching has been disabled for the task
+Skipping task ':quill_native_bridge_android:writeDebugAarMetadata' as it is up-to-date.
+work action resolve aar-metadata.properties (project :quill_native_bridge_android) (Thread[Execution worker Thread 15,5,main]) started.
+Resolve mutations for :share_plus:preBuild (Thread[Execution worker Thread 15,5,main]) started.
+:share_plus:preBuild (Thread[Execution worker Thread 15,5,main]) started.
+
+> Task :share_plus:preBuild UP-TO-DATE
+Skipping task ':share_plus:preBuild' as it has no actions.
+Resolve mutations for :share_plus:preDebugBuild (Thread[Execution worker Thread 15,5,main]) started.
+:share_plus:preDebugBuild (Thread[Execution worker Thread 15,5,main]) started.
+
+> Task :share_plus:preDebugBuild UP-TO-DATE
+Skipping task ':share_plus:preDebugBuild' as it has no actions.
+Resolve mutations for :share_plus:writeDebugAarMetadata (Thread[Execution worker Thread 15,5,main]) started.
+:share_plus:writeDebugAarMetadata (Thread[Execution worker Thread 15,5,main]) started.
+
+> Task :share_plus:writeDebugAarMetadata UP-TO-DATE
+Caching disabled for task ':share_plus:writeDebugAarMetadata' because:
+  Build cache is disabled
+  Caching has been disabled for the task
+Skipping task ':share_plus:writeDebugAarMetadata' as it is up-to-date.
+work action resolve aar-metadata.properties (project :share_plus) (Thread[Execution worker Thread 15,5,main]) started.
+Resolve mutations for :shared_preferences_android:preBuild (Thread[Execution worker Thread 15,5,main]) started.
+:shared_preferences_android:preBuild (Thread[Execution worker Thread 15,5,main]) started.
+
+> Task :shared_preferences_android:preBuild UP-TO-DATE
+Skipping task ':shared_preferences_android:preBuild' as it has no actions.
+Resolve mutations for :shared_preferences_android:preDebugBuild (Thread[Execution worker Thread 15,5,main]) started.
+:shared_preferences_android:preDebugBuild (Thread[Execution worker Thread 15,5,main]) started.
+
+> Task :shared_preferences_android:preDebugBuild UP-TO-DATE
+Skipping task ':shared_preferences_android:preDebugBuild' as it has no actions.
+Resolve mutations for :shared_preferences_android:writeDebugAarMetadata (Thread[Execution worker Thread 15,5,main]) started.
+:shared_preferences_android:writeDebugAarMetadata (Thread[Execution worker Thread 15,5,main]) started.
+
+> Task :shared_preferences_android:writeDebugAarMetadata UP-TO-DATE
+Caching disabled for task ':shared_preferences_android:writeDebugAarMetadata' because:
+  Build cache is disabled
+  Caching has been disabled for the task
+Skipping task ':shared_preferences_android:writeDebugAarMetadata' as it is up-to-date.
+work action resolve aar-metadata.properties (project :shared_preferences_android) (Thread[Execution worker Thread 15,5,main]) started.
+Resolve mutations for :sqlite3_flutter_libs:preBuild (Thread[Execution worker Thread 15,5,main]) started.
+:sqlite3_flutter_libs:preBuild (Thread[Execution worker Thread 15,5,main]) started.
+
+> Task :sqlite3_flutter_libs:preBuild UP-TO-DATE
+Skipping task ':sqlite3_flutter_libs:preBuild' as it has no actions.
+Resolve mutations for :sqlite3_flutter_libs:preDebugBuild (Thread[Execution worker Thread 15,5,main]) started.
+:sqlite3_flutter_libs:preDebugBuild (Thread[Execution worker Thread 4,5,main]) started.
+
+> Task :sqlite3_flutter_libs:preDebugBuild UP-TO-DATE
+Skipping task ':sqlite3_flutter_libs:preDebugBuild' as it has no actions.
+Resolve mutations for :sqlite3_flutter_libs:writeDebugAarMetadata (Thread[Execution worker Thread 4,5,main]) started.
+:sqlite3_flutter_libs:writeDebugAarMetadata (Thread[Execution worker Thread 4,5,main]) started.
+
+> Task :sqlite3_flutter_libs:writeDebugAarMetadata UP-TO-DATE
+Caching disabled for task ':sqlite3_flutter_libs:writeDebugAarMetadata' because:
+  Build cache is disabled
+  Caching has been disabled for the task
+Skipping task ':sqlite3_flutter_libs:writeDebugAarMetadata' as it is up-to-date.
+work action resolve aar-metadata.properties (project :sqlite3_flutter_libs) (Thread[Execution worker Thread 4,5,main]) started.
+Resolve mutations for :url_launcher_android:preBuild (Thread[Execution worker Thread 4,5,main]) started.
+:url_launcher_android:preBuild (Thread[Execution worker Thread 4,5,main]) started.
+
+> Task :url_launcher_android:preBuild UP-TO-DATE
+Skipping task ':url_launcher_android:preBuild' as it has no actions.
+Resolve mutations for :url_launcher_android:preDebugBuild (Thread[Execution worker Thread 4,5,main]) started.
+:url_launcher_android:preDebugBuild (Thread[Execution worker Thread 4,5,main]) started.
+
+> Task :url_launcher_android:preDebugBuild UP-TO-DATE
+Skipping task ':url_launcher_android:preDebugBuild' as it has no actions.
+Resolve mutations for :url_launcher_android:writeDebugAarMetadata (Thread[Execution worker Thread 4,5,main]) started.
+:url_launcher_android:writeDebugAarMetadata (Thread[Execution worker Thread 4,5,main]) started.
+
+> Task :url_launcher_android:writeDebugAarMetadata UP-TO-DATE
+Caching disabled for task ':url_launcher_android:writeDebugAarMetadata' because:
+  Build cache is disabled
+  Caching has been disabled for the task
+Skipping task ':url_launcher_android:writeDebugAarMetadata' as it is up-to-date.
+work action resolve aar-metadata.properties (project :url_launcher_android) (Thread[Execution worker Thread 4,5,main]) started.
+Resolve mutations for :video_player_android:preBuild (Thread[Execution worker Thread 4,5,main]) started.
+:video_player_android:preBuild (Thread[Execution worker Thread 4,5,main]) started.
+
+> Task :video_player_android:preBuild UP-TO-DATE
+Skipping task ':video_player_android:preBuild' as it has no actions.
+Resolve mutations for :video_player_android:preDebugBuild (Thread[Execution worker Thread 4,5,main]) started.
+:video_player_android:preDebugBuild (Thread[Execution worker Thread 4,5,main]) started.
+
+> Task :video_player_android:preDebugBuild UP-TO-DATE
+Skipping task ':video_player_android:preDebugBuild' as it has no actions.
+Resolve mutations for :video_player_android:writeDebugAarMetadata (Thread[Execution worker Thread 4,5,main]) started.
+:video_player_android:writeDebugAarMetadata (Thread[Execution worker Thread 4,5,main]) started.
+
+> Task :video_player_android:writeDebugAarMetadata UP-TO-DATE
+Caching disabled for task ':video_player_android:writeDebugAarMetadata' because:
+  Build cache is disabled
+  Caching has been disabled for the task
+Skipping task ':video_player_android:writeDebugAarMetadata' as it is up-to-date.
+work action resolve aar-metadata.properties (project :video_player_android) (Thread[Execution worker Thread 4,5,main]) started.
+Resolve mutations for :workmanager_android:preBuild (Thread[Execution worker Thread 4,5,main]) started.
+:workmanager_android:preBuild (Thread[Execution worker Thread 4,5,main]) started.
+
+> Task :workmanager_android:preBuild UP-TO-DATE
+Skipping task ':workmanager_android:preBuild' as it has no actions.
+Resolve mutations for :workmanager_android:preDebugBuild (Thread[Execution worker Thread 4,5,main]) started.
+:workmanager_android:preDebugBuild (Thread[Execution worker Thread 4,5,main]) started.
+
+> Task :workmanager_android:preDebugBuild UP-TO-DATE
+Skipping task ':workmanager_android:preDebugBuild' as it has no actions.
+Resolve mutations for :workmanager_android:writeDebugAarMetadata (Thread[Execution worker Thread 4,5,main]) started.
+:workmanager_android:writeDebugAarMetadata (Thread[Execution worker Thread 4,5,main]) started.
+
+> Task :workmanager_android:writeDebugAarMetadata UP-TO-DATE
+Caching disabled for task ':workmanager_android:writeDebugAarMetadata' because:
+  Build cache is disabled
+  Caching has been disabled for the task
+Skipping task ':workmanager_android:writeDebugAarMetadata' as it is up-to-date.
+work action resolve aar-metadata.properties (project :workmanager_android) (Thread[Execution worker Thread 4,5,main]) started.
+Resolve mutations for :app:checkDebugAarMetadata (Thread[Execution worker Thread 4,5,main]) started.
+:app:checkDebugAarMetadata (Thread[Execution worker Thread 4,5,main]) started.
+Resolve mutations for :app:cleanMergeDebugAssets (Thread[Execution worker Thread 5,5,main]) started.
+:app:cleanMergeDebugAssets (Thread[Execution worker Thread 5,5,main]) started.
+
+> Task :app:cleanMergeDebugAssets UP-TO-DATE
+Caching disabled for task ':app:cleanMergeDebugAssets' because:
+  Build cache is disabled
+Task ':app:cleanMergeDebugAssets' is not up-to-date because:
+  Task has not declared any outputs despite executing actions.
+Resolve mutations for :app:mergeDebugShaders (Thread[Execution worker Thread 5,5,main]) started.
+:app:mergeDebugShaders (Thread[Execution worker Thread 14,5,main]) started.
+
+> Task :app:mergeDebugShaders UP-TO-DATE
+Caching disabled for task ':app:mergeDebugShaders' because:
+  Build cache is disabled
+  Simple merging task
+Skipping task ':app:mergeDebugShaders' as it is up-to-date.
+Resolve mutations for :app:compileDebugShaders (Thread[Execution worker Thread 14,5,main]) started.
+:app:compileDebugShaders (Thread[Execution worker Thread 14,5,main]) started.
+
+> Task :app:compileDebugShaders NO-SOURCE
+Skipping task ':app:compileDebugShaders' as it has no source files and no previous output files.
+Resolve mutations for :app:generateDebugAssets (Thread[Execution worker Thread 14,5,main]) started.
+:app:generateDebugAssets (Thread[Execution worker Thread 7,5,main]) started.
+
+> Task :app:generateDebugAssets UP-TO-DATE
+Skipping task ':app:generateDebugAssets' as it has no actions.
+Resolve mutations for :app_links:mergeDebugShaders (Thread[Execution worker Thread 7,5,main]) started.
+:app_links:mergeDebugShaders (Thread[Execution worker Thread 14,5,main]) started.
+
+> Task :app_links:mergeDebugShaders UP-TO-DATE
+Caching disabled for task ':app_links:mergeDebugShaders' because:
+  Build cache is disabled
+  Simple merging task
+Skipping task ':app_links:mergeDebugShaders' as it is up-to-date.
+Resolve mutations for :app_links:compileDebugShaders (Thread[Execution worker Thread 14,5,main]) started.
+:app_links:compileDebugShaders (Thread[Execution worker Thread 14,5,main]) started.
+
+> Task :app_links:compileDebugShaders NO-SOURCE
+Skipping task ':app_links:compileDebugShaders' as it has no source files and no previous output files.
+Resolve mutations for :app_links:generateDebugAssets (Thread[Execution worker Thread 14,5,main]) started.
+:app_links:generateDebugAssets (Thread[Execution worker Thread 14,5,main]) started.
+
+> Task :app_links:generateDebugAssets UP-TO-DATE
+Skipping task ':app_links:generateDebugAssets' as it has no actions.
+Resolve mutations for :app_links:mergeDebugAssets (Thread[Execution worker Thread 14,5,main]) started.
+:app_links:mergeDebugAssets (Thread[Execution worker Thread 14,5,main]) started.
+
+> Task :app:checkDebugAarMetadata FAILED
+Caching disabled for task ':app:checkDebugAarMetadata' because:
+  Build cache is disabled
+  Caching has been disabled for the task
+Task ':app:checkDebugAarMetadata' is not up-to-date because:
+  Task has failed previously.
+
+> Task :app_links:mergeDebugAssets UP-TO-DATE
+Caching disabled for task ':app_links:mergeDebugAssets' because:
+  Build cache is disabled
+  Simple merging task
+Skipping task ':app_links:mergeDebugAssets' as it is up-to-date.
+Build 68e3b6d3-eae7-42e5-a5f1-87402dd73920 is closed
+
+[Incubating] Problems report is available at: file:///E:/work2025/App/ConnectHeart/build/reports/problems/problems-report.html
+.\gradlew.bat : 
+위치 줄:1 문자:13
++ cd android; .\gradlew.bat assembleDebug --info 2>&1 | Out-File -
+FileP ...
++             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:String) [], RemoteE 
+   xception
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:checkDebugAarMetadata'.
+> A failure occurred while executing com.android.build.gradle.inte
+rnal.tasks.CheckAarMetadataWorkAction
+   > An issue was found when checking AAR metadata:
+     
+       1.  Dependency ':flutter_local_notifications' requires core
+ library desugaring to be enabled
+           for :app.
+     
+           See https://developer.android.com/studio/write/java8-su
+pport.html for more
+           details.
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+
+BUILD FAILED in 3s
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+30 actionable tasks: 2 executed, 28 up-to-date
+Watched directory hierarchies: [C:\src\flutter\packages\flutter_tools\gradle]
