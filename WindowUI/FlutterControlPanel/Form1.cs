@@ -44,7 +44,7 @@ namespace FlutterControlPanel
         private void SetupCustomUI()
         {
             this.Text = "Heart Connect - Flutter Controller";
-            this.Size = new Size(768, 1024); // Default size as requested
+            this.Size = new Size(850, 1024); // Wider for Android buttons
             this.BackColor = Color.FromArgb(245, 245, 245);
 
             try {
@@ -449,7 +449,7 @@ namespace FlutterControlPanel
 
             try 
             {
-                outputBox.Clear();
+                // Don't clear here - let individual buttons decide
                 // Kill any existing instances of flutter run if we are starting a new one? 
                 // No, let user manage that or simple stop.
                 

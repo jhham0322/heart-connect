@@ -200,12 +200,29 @@ namespace FlutterControlPanel
                                 
                                 if (ms.Length > 0)
                                 {
-                                    Image img = Image.FromStream(ms);
+                                    try
+                                    {
+                                        Image img = Image.FromStream(ms);
+                                        this.Invoke(new Action(() =>
+                                        {
+                                            screenBox.Image?.Dispose();
+                                            screenBox.Image = img;
+                                            lblStatus.Text = $"Screen captured at {DateTime.Now:HH:mm:ss}";
+                                        }));
+                                    }
+                                    catch
+                                    {
+                                        this.Invoke(new Action(() =>
+                                        {
+                                            lblStatus.Text = "No device connected or screen capture failed";
+                                        }));
+                                    }
+                                }
+                                else
+                                {
                                     this.Invoke(new Action(() =>
                                     {
-                                        screenBox.Image?.Dispose();
-                                        screenBox.Image = img;
-                                        lblStatus.Text = $"Screen captured at {DateTime.Now:HH:mm:ss}";
+                                        lblStatus.Text = "No device connected. Please connect Android phone via USB.";
                                     }));
                                 }
                             }
