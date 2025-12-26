@@ -172,11 +172,7 @@ class HomeViewModel extends StateNotifier<HomeState> {
        }
        
        if (existingPlan == null) {
-          if (recipientList.isEmpty) continue; // If forcing only recipient-events to be synced, keep this. 
-          // But likely we want all events. For now, let's keep existing behavior of filtering?
-          // No, if user sees the event, it must be in DB. 
-          // If it is NOT in DB, then it is not shown (since futureEvents comes from plans).
-          // So if user sees it, existingPlan is NOT null.
+          // 모든 캘린더 이벤트를 DB에 추가 (수신자가 없어도)
           
           await db.insertPlan(DailyPlansCompanion.insert(
              date: eDate,

@@ -229,7 +229,7 @@ namespace FlutterControlPanel
             GroupBox grpAuto = new GroupBox();
             grpAuto.Text = "Auto Reload";
             grpAuto.Location = new Point(460, 5);
-            grpAuto.Size = new Size(200, 60);
+            grpAuto.Size = new Size(180, 60);
             controlPanel.Controls.Add(grpAuto);
 
             chkAutoReload = new CheckBox();
@@ -254,10 +254,10 @@ namespace FlutterControlPanel
             lblSec.AutoSize = true;
             grpAuto.Controls.Add(lblSec);
             
-            // Auto Build (Android) 체크박스 - 빌드 버튼 아래 라인에 우측 정렬
+            // Auto Build (Android) 체크박스 - Row 2에 우측 정렬
             chkAutoBuild = new CheckBox();
-            chkAutoBuild.Text = "📱 Auto Build (파일 변경 시 자동 빌드)";
-            chkAutoBuild.Location = new Point(this.ClientSize.Width - 250, 55);
+            chkAutoBuild.Text = "📱 Auto Build";
+            chkAutoBuild.Location = new Point(this.ClientSize.Width - 120, 80);
             chkAutoBuild.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             chkAutoBuild.AutoSize = true;
             chkAutoBuild.ForeColor = Color.FromArgb(0, 150, 136);
@@ -334,7 +334,7 @@ namespace FlutterControlPanel
             btnBuildAndroid = new Button();
             btnBuildAndroid.Text = "📱 Build";
             btnBuildAndroid.Size = new Size(80, 40);
-            btnBuildAndroid.Location = new Point(this.ClientSize.Width - 280, 10);
+            btnBuildAndroid.Location = new Point(this.ClientSize.Width - 250, 10);
             btnBuildAndroid.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             btnBuildAndroid.BackColor = Color.FromArgb(129, 199, 132);
             btnBuildAndroid.FlatStyle = FlatStyle.Flat;
