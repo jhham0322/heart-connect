@@ -269,8 +269,7 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
                 height: 36,
               ),
               onPressed: () {
-                Navigator.push(
-                  context,
+                Navigator.of(context, rootNavigator: true).push(
                   MaterialPageRoute(builder: (context) => WriteCardScreen(initialContact: contact)),
                 );
               },
