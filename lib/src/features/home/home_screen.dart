@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:drift/drift.dart' hide Column; // Added for Value
 import 'package:permission_handler/permission_handler.dart'; // Added for permissions
+import 'package:url_launcher/url_launcher.dart'; // Added for opening URLs
 import '../../theme/app_theme.dart';
 import '../contacts/contact_service.dart';
 import 'home_view_model.dart';
@@ -251,7 +252,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               child: const Icon(FontAwesomeIcons.n, color: Color(0xFF03C75A), size: 20),
             ),
             const SizedBox(width: 12),
-            const Expanded(child: Text('네이버 캘린더 연동')),
+            const Expanded(child: Text('네이버 캘린더 안내', style: TextStyle(fontSize: 18))),
           ],
         ),
         content: Column(
@@ -259,25 +260,44 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              '네이버 캘린더 앱이 설치되어 있지만, 일정이 기기에 동기화되지 않았습니다.',
+              '네이버 캘린더 일정을 보려면 구글 캘린더와 동기화가 필요합니다.',
               style: TextStyle(fontSize: 14),
             ),
             const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: const Color(0xFF03C75A).withOpacity(0.1),
+                color: Colors.blue.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFF03C75A).withOpacity(0.3)),
+                border: Border.all(color: Colors.blue.withOpacity(0.3)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: const [
-                  Text('📱 네이버 캘린더 앱에서:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                  Text('💡 권장 방법:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
                   SizedBox(height: 8),
-                  Text('1. ≡ 메뉴 터치', style: TextStyle(fontSize: 12)),
-                  Text('2. 설정 ⚙️ 터치', style: TextStyle(fontSize: 12)),
-                  Text('3. "기기 캘린더 연동" 활성화', style: TextStyle(fontSize: 12)),
+                  Text('네이버 캘린더의 일정을 구글 캘린더에 직접 입력하시면 앱에서 자동으로 표시됩니다.', 
+                       style: TextStyle(fontSize: 12, color: Colors.black87)),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.grey.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: const [
+                  Icon(FontAwesomeIcons.circleInfo, size: 12, color: Colors.grey),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      '현재 네이버 캘린더는 기기 연동을 지원하지 않습니다.',
+                      style: TextStyle(fontSize: 11, color: Colors.grey),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -286,24 +306,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('나중에'),
+            child: const Text('확인'),
           ),
-          ElevatedButton(
+          ElevatedButton.icon(
             onPressed: () async {
               Navigator.pop(context);
-              // 네이버 캘린더 앱 열기
-              try {
-                await _calendarChannel.invokeMethod('openNaverCalendarSettings');
-              } catch (e) {
-                debugPrint('Error opening Naver Calendar: $e');
+              // 구글 캘린더 열기
+              final uri = Uri.parse('https://calendar.google.com');
+              if (await canLaunchUrl(uri)) {
+                await launchUrl(uri, mode: LaunchMode.externalApplication);
               }
             },
+            icon: const Icon(FontAwesomeIcons.google, size: 14),
+            label: const Text('구글 캘린더'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF03C75A),
+              backgroundColor: Colors.blue,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             ),
-            child: const Text('네이버 캘린더 열기'),
           ),
         ],
       ),
