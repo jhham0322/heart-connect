@@ -223,26 +223,24 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
             contacts = contacts.where((c) => c.isFavorite).toList();
             break;
           case '최근 연락':
-            // 최근 연락: 연락 기록이 있는 사람만 표시, 날짜 내림차순
-            contacts = contacts.where((c) => 
-              c.lastSentDate != null || c.lastReceivedDate != null
-            ).toList();
+            // 최근 연락: 모든 연락처 표시, 연락 기록 있는 사람 상위 정렬
             contacts.sort((a, b) {
               final aDate = a.lastSentDate ?? a.lastReceivedDate;
               final bDate = b.lastSentDate ?? b.lastReceivedDate;
-              if (aDate == null && bDate == null) return 0;
-              if (aDate == null) return 1;
-              if (bDate == null) return -1;
-              return bDate.compareTo(aDate); // 내림차순
+              // 연락 기록 있는 사람 우선
+              if (aDate != null && bDate == null) return -1;
+              if (aDate == null && bDate != null) return 1;
+              // 둘 다 있으면 날짜 내림차순
+              if (aDate != null && bDate != null) {
+                return bDate.compareTo(aDate);
+              }
+              // 둘 다 없으면 이름순
+              return a.name.compareTo(b.name);
             });
             break;
           case '가족':
-            // 즐겨찾기(단축번호) 또는 성씨가 같거나 groupTag에 가족이 포함된 연락처
+            // 성씨가 같거나 groupTag에 가족이 포함된 연락처 (즐겨찾기 조건 제거)
             contacts = contacts.where((c) {
-              // 즐겨찾기(단축번호)도 가족에 포함
-              if (c.isFavorite) {
-                return true;
-              }
               if (c.groupTag?.toLowerCase().contains('family') == true ||
                   c.groupTag?.contains('가족') == true) {
                 return true;
