@@ -21,6 +21,13 @@ namespace FlutterControlPanel
         private ToolStripStatusLabel statusLabel;
         private ToolTip toolTip;
         
+        // Auto Build 관련
+        private FileSystemWatcher fileWatcher;
+        private CheckBox chkAutoBuild;
+        private System.Windows.Forms.Timer autoBuildDebounceTimer;
+        private DateTime lastBuildTime = DateTime.MinValue;
+        private bool isBuilding = false;
+        
         // Path to the Flutter project root
         // Assuming we build to WindowUI/FlutterControlPanel/bin/Release, the root is up 4 levels?
         // Let's just hardcode the path provided in user info or search for pubspec.yaml
@@ -39,6 +46,81 @@ namespace FlutterControlPanel
             
             autoReloadTimer = new System.Windows.Forms.Timer();
             autoReloadTimer.Tick += AutoReloadTimer_Tick;
+            
+            // Auto Build Debounce Timer (변경 후 2초 대기)
+            autoBuildDebounceTimer = new System.Windows.Forms.Timer();
+            autoBuildDebounceTimer.Interval = 2000;
+            autoBuildDebounceTimer.Tick += AutoBuildDebounceTimer_Tick;
+            
+            // File System Watcher 초기화
+            SetupFileWatcher();
+        }
+        
+        private void SetupFileWatcher()
+        {
+            try
+            {
+                string libPath = Path.Combine(projectRoot, "lib");
+                if (Directory.Exists(libPath))
+                {
+                    fileWatcher = new FileSystemWatcher(libPath);
+                    fileWatcher.Filter = "*.dart";
+                    fileWatcher.IncludeSubdirectories = true;
+                    fileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName;
+                    fileWatcher.Changed += FileWatcher_Changed;
+                    fileWatcher.Created += FileWatcher_Changed;
+                    fileWatcher.EnableRaisingEvents = false; // 기본적으로 비활성화
+                }
+            }
+            catch (Exception ex)
+            {
+                Log($"FileWatcher 초기화 실패: {ex.Message}");
+            }
+        }
+        
+        private void FileWatcher_Changed(object sender, FileSystemEventArgs e)
+        {
+            // UI 스레드에서 debounce timer 리셋
+            this.Invoke((MethodInvoker)delegate {
+                autoBuildDebounceTimer.Stop();
+                autoBuildDebounceTimer.Start();
+                statusLabel.Text = $"변경 감지: {Path.GetFileName(e.FullPath)} - 빌드 대기 중...";
+            });
+        }
+        
+        private void AutoBuildDebounceTimer_Tick(object sender, EventArgs e)
+        {
+            autoBuildDebounceTimer.Stop();
+            
+            // 이미 빌드 중이면 스킵
+            if (isBuilding || (cmdProcess != null && !cmdProcess.HasExited))
+            {
+                Log("빌드 중이므로 자동 빌드를 건너뜁니다.");
+                return;
+            }
+            
+            // 마지막 빌드로부터 5초 이내면 스킵
+            if ((DateTime.Now - lastBuildTime).TotalSeconds < 5)
+            {
+                Log("최근 빌드가 완료되어 자동 빌드를 건너뜁니다.");
+                return;
+            }
+            
+            Log("\n=== 자동 빌드 시작 (파일 변경 감지) ===");
+            isBuilding = true;
+            TriggerAutoBuildAndTest();
+        }
+        
+        private void TriggerAutoBuildAndTest()
+        {
+            string packageName = GetPackageName();
+            string buildAndTestCmd = $"flutter build apk --release && " +
+                $"\"{adbPath}\" install -r \"{Path.Combine(projectRoot, "build", "app", "outputs", "flutter-apk", "app-release.apk")}\" && " +
+                $"\"{adbPath}\" shell monkey -p {packageName} -c android.intent.category.LAUNCHER 1";
+            
+            StartProcess("cmd", "/c " + buildAndTestCmd);
+            lastBuildTime = DateTime.Now;
+            isBuilding = false;
         }
 
         private void SetupCustomUI()
@@ -144,30 +226,43 @@ namespace FlutterControlPanel
 
             // Auto Reload Group (Wider)
             GroupBox grpAuto = new GroupBox();
-            grpAuto.Text = "Auto Reload";
+            grpAuto.Text = "Auto Reload / Build";
             grpAuto.Location = new Point(460, 5); // Shifted right
-            grpAuto.Size = new Size(280, 60); // Compact height
+            grpAuto.Size = new Size(340, 60); // Compact height
             controlPanel.Controls.Add(grpAuto);
 
             chkAutoReload = new CheckBox();
-            chkAutoReload.Text = "Enable";
+            chkAutoReload.Text = "Hot Reload";
             chkAutoReload.Location = new Point(15, 25);
             chkAutoReload.AutoSize = true;
             chkAutoReload.CheckedChanged += ChkAutoReload_CheckedChanged;
             grpAuto.Controls.Add(chkAutoReload);
+            toolTip.SetToolTip(chkAutoReload, "Windows 실행 중 주기적으로 Hot Reload");
 
             numInterval = new NumericUpDown();
             numInterval.Minimum = 1;
             numInterval.Maximum = 600;
             numInterval.Value = 3;
-            numInterval.Location = new Point(100, 23);
-            numInterval.Width = 60;
+            numInterval.Location = new Point(110, 23);
+            numInterval.Width = 50;
             grpAuto.Controls.Add(numInterval);
 
             Label lblSec = new Label();
-            lblSec.Text = "sec";
-            lblSec.Location = new Point(170, 25);
+            lblSec.Text = "초";
+            lblSec.Location = new Point(165, 25);
+            lblSec.AutoSize = true;
             grpAuto.Controls.Add(lblSec);
+            
+            // Auto Build (Android) 체크박스
+            chkAutoBuild = new CheckBox();
+            chkAutoBuild.Text = "📱 Auto Build";
+            chkAutoBuild.Location = new Point(200, 25);
+            chkAutoBuild.AutoSize = true;
+            chkAutoBuild.ForeColor = Color.FromArgb(0, 150, 136);
+            chkAutoBuild.Font = new Font("Segoe UI", 9, FontStyle.Bold);
+            chkAutoBuild.CheckedChanged += ChkAutoBuild_CheckedChanged;
+            grpAuto.Controls.Add(chkAutoBuild);
+            toolTip.SetToolTip(chkAutoBuild, "파일 변경 시 자동으로 Android 빌드 → 설치 → 실행");
 
             // Row 2: Reinstall & Gen buttons
             int row2Y = 75;
@@ -443,6 +538,30 @@ namespace FlutterControlPanel
                 Log("Auto reload stopped.");
             }
         }
+        
+        private void ChkAutoBuild_CheckedChanged(object sender, EventArgs e)
+        {
+            if (fileWatcher == null)
+            {
+                Log("FileWatcher가 초기화되지 않았습니다.");
+                chkAutoBuild.Checked = false;
+                return;
+            }
+            
+            if (chkAutoBuild.Checked)
+            {
+                fileWatcher.EnableRaisingEvents = true;
+                Log("📱 Auto Build 활성화: 파일 변경 시 자동으로 빌드 → 설치 → 실행");
+                statusLabel.Text = "Auto Build ON - 파일 변경 대기 중...";
+            }
+            else
+            {
+                fileWatcher.EnableRaisingEvents = false;
+                autoBuildDebounceTimer.Stop();
+                Log("Auto Build 비활성화");
+                statusLabel.Text = "Ready";
+            }
+        }
 
         private void AutoReloadTimer_Tick(object sender, EventArgs e)
         {
@@ -632,6 +751,10 @@ namespace FlutterControlPanel
 🔧 Reinstall - 전체 재설치 (clean → pub get → build_runner → run)
 🏗 Gen && Run - 코드 생성 후 실행
 
+[자동화]
+☑ Hot Reload - Windows 실행 중 N초마다 자동 Hot Reload
+☑ Auto Build - 파일 변경 시 자동으로 Android 빌드→설치→실행 ⭐NEW
+
 [로그]
 🗑 Clear - 로그 지우기
 📋 Copy - 로그 클립보드 복사
@@ -648,13 +771,11 @@ namespace FlutterControlPanel
 ⏹ Stop - Logcat 중지
 📱 Devices - 연결된 기기 목록 확인
 
-[Android 폰 사용법]
-1. 폰에서 [설정] → [개발자 옵션] → [USB 디버깅] 활성화
-2. USB로 PC와 폰 연결
-3. [Devices] 클릭하여 연결 확인
-4. [Build & Test] 클릭하여 빌드+설치+실행
-   (또는 Build → Install → Run 순서로)
-5. [Logcat] 클릭하여 로그 확인 (디버깅)
+[Auto Build 사용법] ⭐
+1. 폰을 USB로 연결하고 [Devices]로 확인
+2. 'Auto Build' 체크박스 활성화
+3. 코드 수정 후 저장하면 2초 후 자동 빌드 시작
+4. 빌드 완료 시 자동으로 설치 및 앱 실행!
 ";
             MessageBox.Show(helpText, "❓ 사용법", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
