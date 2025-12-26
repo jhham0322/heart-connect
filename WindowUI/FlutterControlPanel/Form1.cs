@@ -235,16 +235,42 @@ namespace FlutterControlPanel
 
             // Build Android Button
             btnBuildAndroid = new Button();
-            btnBuildAndroid.Text = "📱 Build Android";
-            btnBuildAndroid.Size = new Size(120, 40);
-            btnBuildAndroid.RightToLeft = RightToLeft.No; // Just alignment
-            btnBuildAndroid.Location = new Point(controlPanel.Width - 140, 10);
+            btnBuildAndroid.Text = "📱 Build";
+            btnBuildAndroid.Size = new Size(80, 40);
+            btnBuildAndroid.Location = new Point(controlPanel.Width - 280, 10);
             btnBuildAndroid.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             btnBuildAndroid.BackColor = Color.FromArgb(129, 199, 132);
             btnBuildAndroid.FlatStyle = FlatStyle.Flat;
             btnBuildAndroid.Click += BtnBuildAndroid_Click;
             controlPanel.Controls.Add(btnBuildAndroid);
             toolTip.SetToolTip(btnBuildAndroid, "Android APK 빌드 (Release)");
+
+            // Build & Test Button (Build + Install + Run)
+            Button btnBuildTest = new Button();
+            btnBuildTest.Text = "🚀 Build && Test";
+            btnBuildTest.Size = new Size(110, 40);
+            btnBuildTest.Location = new Point(controlPanel.Width - 190, 10);
+            btnBuildTest.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnBuildTest.BackColor = Color.FromArgb(79, 195, 247);
+            btnBuildTest.ForeColor = Color.White;
+            btnBuildTest.FlatStyle = FlatStyle.Flat;
+            btnBuildTest.Font = new Font("Segoe UI", 9, FontStyle.Bold);
+            btnBuildTest.Click += BtnBuildAndTest_Click;
+            controlPanel.Controls.Add(btnBuildTest);
+            toolTip.SetToolTip(btnBuildTest, "빌드 → 설치 → 실행 (한번에 테스트)");
+
+            // Settings Button
+            Button btnSettings = new Button();
+            btnSettings.Text = "⚙";
+            btnSettings.Size = new Size(40, 40);
+            btnSettings.Location = new Point(controlPanel.Width - 70, 10);
+            btnSettings.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnSettings.BackColor = Color.FromArgb(255, 183, 77);
+            btnSettings.FlatStyle = FlatStyle.Flat;
+            btnSettings.Font = new Font("Segoe UI", 16);
+            btnSettings.Click += BtnSettings_Click;
+            controlPanel.Controls.Add(btnSettings);
+            toolTip.SetToolTip(btnSettings, "Android 설정 (패키지명, 앱이름, 아이콘 등)");
 
             // Row 4: Android Device Controls
             int row4Y = 180;
@@ -610,8 +636,10 @@ namespace FlutterControlPanel
 🗑 Clear - 로그 지우기
 📋 Copy - 로그 클립보드 복사
 
-[Android 빌드]
+[Android 빌드 & 테스트]
 📱 Build - Android APK 빌드 (Release)
+🚀 Build & Test - 빌드 → 설치 → 실행 (한번에!)
+⚙ Settings - 패키지명, 앱이름, 버전, 아이콘 설정
 
 [Android 기기 (USB 연결 필요)]
 📲 Install - APK를 연결된 폰에 설치
@@ -624,12 +652,62 @@ namespace FlutterControlPanel
 1. 폰에서 [설정] → [개발자 옵션] → [USB 디버깅] 활성화
 2. USB로 PC와 폰 연결
 3. [Devices] 클릭하여 연결 확인
-4. [Build] 클릭하여 APK 빌드
-5. [Install] 클릭하여 폰에 설치
-6. [Run] 클릭하여 앱 실행
-7. [Logcat] 클릭하여 로그 확인 (디버깅)
+4. [Build & Test] 클릭하여 빌드+설치+실행
+   (또는 Build → Install → Run 순서로)
+5. [Logcat] 클릭하여 로그 확인 (디버깅)
 ";
             MessageBox.Show(helpText, "❓ 사용법", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void BtnBuildAndTest_Click(object sender, EventArgs e)
+        {
+            if (cmdProcess != null && !cmdProcess.HasExited)
+            {
+                MessageBox.Show("Please stop the running process first.");
+                return;
+            }
+
+            outputBox.Clear();
+            Log("=== Build & Test 시작 ===");
+            Log("1단계: APK 빌드 중...\n");
+
+            // Build -> Install -> Run in sequence
+            string packageName = GetPackageName();
+            string buildAndTestCmd = $"flutter build apk --release && " +
+                $"\"{adbPath}\" install -r \"{Path.Combine(projectRoot, "build", "app", "outputs", "flutter-apk", "app-release.apk")}\" && " +
+                $"\"{adbPath}\" shell monkey -p {packageName} -c android.intent.category.LAUNCHER 1";
+            
+            StartProcess("cmd", "/c " + buildAndTestCmd);
+        }
+
+        private void BtnSettings_Click(object sender, EventArgs e)
+        {
+            using (AndroidSettingsForm settingsForm = new AndroidSettingsForm(projectRoot))
+            {
+                if (settingsForm.ShowDialog() == DialogResult.OK)
+                {
+                    Log("설정이 저장되었습니다. 다음 빌드에 적용됩니다.");
+                }
+            }
+        }
+
+        private string GetPackageName()
+        {
+            try
+            {
+                string gradlePath = Path.Combine(projectRoot, "android", "app", "build.gradle.kts");
+                if (File.Exists(gradlePath))
+                {
+                    string content = File.ReadAllText(gradlePath);
+                    var match = System.Text.RegularExpressions.Regex.Match(content, @"applicationId\s*=\s*""([^""]+)""");
+                    if (match.Success)
+                    {
+                        return match.Groups[1].Value;
+                    }
+                }
+            }
+            catch { }
+            return "com.example.heart_connect"; // fallback
         }
     }
 }
