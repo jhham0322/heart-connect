@@ -19,6 +19,7 @@ namespace FlutterControlPanel
         private NumericUpDown numInterval;
         private Button btnBuildAndroid;
         private ToolStripStatusLabel statusLabel;
+        private ToolTip toolTip;
         
         // Path to the Flutter project root
         // Assuming we build to WindowUI/FlutterControlPanel/bin/Release, the root is up 4 levels?
@@ -72,6 +73,26 @@ namespace FlutterControlPanel
             controlPanel.BackColor = Color.White;
             this.Controls.Add(controlPanel);
 
+            // Initialize ToolTip
+            toolTip = new ToolTip();
+            toolTip.AutoPopDelay = 5000;
+            toolTip.InitialDelay = 500;
+            toolTip.ReshowDelay = 200;
+            toolTip.ShowAlways = true;
+
+            // Help Button (사용법)
+            Button btnHelp = new Button();
+            btnHelp.Text = "❓";
+            btnHelp.Size = new Size(40, 40);
+            btnHelp.Location = new Point(controlPanel.Width - 50, controlPanel.Height - 50);
+            btnHelp.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            btnHelp.BackColor = Color.FromArgb(187, 222, 251);
+            btnHelp.FlatStyle = FlatStyle.Flat;
+            btnHelp.Font = new Font("Segoe UI", 14, FontStyle.Bold);
+            btnHelp.Click += BtnHelp_Click;
+            toolTip.SetToolTip(btnHelp, "사용법 보기");
+            controlPanel.Controls.Add(btnHelp);
+
             // Row 1: Execution Control
             // Run Windows Button
             btnRunWindows = new Button();
@@ -87,6 +108,7 @@ namespace FlutterControlPanel
                  RunProcessChain("flutter run -d windows");
             };
             controlPanel.Controls.Add(btnRunWindows);
+            toolTip.SetToolTip(btnRunWindows, "Flutter Windows 앱 실행");
 
             // Hot Reload Button
             btnHotReload = new Button();
@@ -99,6 +121,7 @@ namespace FlutterControlPanel
             btnHotReload.Click += BtnHotReload_Click;
             btnHotReload.Enabled = false;
             controlPanel.Controls.Add(btnHotReload);
+            toolTip.SetToolTip(btnHotReload, "코드 변경사항 빠르게 반영 (상태 유지)");
 
             // Hot Restart Button
             btnHotRestart = new Button();
@@ -111,6 +134,7 @@ namespace FlutterControlPanel
             btnHotRestart.Click += BtnHotRestart_Click;
             btnHotRestart.Enabled = false;
             controlPanel.Controls.Add(btnHotRestart);
+            toolTip.SetToolTip(btnHotRestart, "앱 재시작 (상태 초기화)");
 
             // Auto Reload Group (Wider)
             GroupBox grpAuto = new GroupBox();
@@ -155,6 +179,7 @@ namespace FlutterControlPanel
                 RunProcessChain("flutter clean && flutter pub get && dart run build_runner build --delete-conflicting-outputs && flutter run -d windows");
             };
             controlPanel.Controls.Add(btnReinstall);
+            toolTip.SetToolTip(btnReinstall, "전체 재설치: clean → pub get → build_runner → run");
 
             // Gen & Run button
             Button btnGenRun = new Button();
@@ -168,6 +193,7 @@ namespace FlutterControlPanel
                  RunProcessChain("dart run build_runner build --delete-conflicting-outputs && flutter run -d windows");
             };
             controlPanel.Controls.Add(btnGenRun);
+            toolTip.SetToolTip(btnGenRun, "코드 생성 후 실행 (build_runner → run)");
 
             // Row 3: Log & Build Controls
             int row3Y = 135;
@@ -182,6 +208,7 @@ namespace FlutterControlPanel
             btnClearLog.Font = new Font("Segoe UI", 9, FontStyle.Bold);
             btnClearLog.Click += (s, e) => outputBox.Clear();
             controlPanel.Controls.Add(btnClearLog);
+            toolTip.SetToolTip(btnClearLog, "로그 지우기");
 
             // Copy Log Button
             Button btnCopyLog = new Button();
@@ -198,6 +225,7 @@ namespace FlutterControlPanel
                 }
             };
             controlPanel.Controls.Add(btnCopyLog);
+            toolTip.SetToolTip(btnCopyLog, "로그 클립보드 복사");
 
             // Build Android Button
             btnBuildAndroid = new Button();
@@ -210,6 +238,7 @@ namespace FlutterControlPanel
             btnBuildAndroid.FlatStyle = FlatStyle.Flat;
             btnBuildAndroid.Click += BtnBuildAndroid_Click;
             controlPanel.Controls.Add(btnBuildAndroid);
+            toolTip.SetToolTip(btnBuildAndroid, "Android APK 빌드 (Release)");
 
             // Row 4: Android Device Controls
             int row4Y = 180;
@@ -224,6 +253,7 @@ namespace FlutterControlPanel
             btnInstall.Font = new Font("Segoe UI", 9, FontStyle.Bold);
             btnInstall.Click += BtnInstallToDevice_Click;
             controlPanel.Controls.Add(btnInstall);
+            toolTip.SetToolTip(btnInstall, "APK를 연결된 폰에 설치");
 
             // Run on Device Button
             Button btnRunDevice = new Button();
@@ -235,6 +265,7 @@ namespace FlutterControlPanel
             btnRunDevice.Font = new Font("Segoe UI", 9, FontStyle.Bold);
             btnRunDevice.Click += BtnRunOnDevice_Click;
             controlPanel.Controls.Add(btnRunDevice);
+            toolTip.SetToolTip(btnRunDevice, "폰에서 앱 실행");
 
             // Logcat Button
             Button btnLogcat = new Button();
@@ -246,6 +277,7 @@ namespace FlutterControlPanel
             btnLogcat.Font = new Font("Segoe UI", 9, FontStyle.Bold);
             btnLogcat.Click += BtnLogcat_Click;
             controlPanel.Controls.Add(btnLogcat);
+            toolTip.SetToolTip(btnLogcat, "Flutter 앱 로그 실시간 확인");
 
             // Stop Logcat Button
             Button btnStopLogcat = new Button();
@@ -257,6 +289,7 @@ namespace FlutterControlPanel
             btnStopLogcat.Font = new Font("Segoe UI", 9, FontStyle.Bold);
             btnStopLogcat.Click += (s, ev) => StopProcess();
             controlPanel.Controls.Add(btnStopLogcat);
+            toolTip.SetToolTip(btnStopLogcat, "Logcat 중지");
 
             // Check Devices Button
             Button btnDevices = new Button();
@@ -268,6 +301,7 @@ namespace FlutterControlPanel
             btnDevices.Font = new Font("Segoe UI", 9, FontStyle.Bold);
             btnDevices.Click += BtnCheckDevices_Click;
             controlPanel.Controls.Add(btnDevices);
+            toolTip.SetToolTip(btnDevices, "연결된 Android 기기 목록 확인");
 
             // 2. Output Box (Enable Copy)
             outputBox = new RichTextBox();
@@ -538,6 +572,43 @@ namespace FlutterControlPanel
             
             // Filter logs for Flutter app
             StartProcess("adb", "logcat -v time *:S flutter:V FlutterActivity:V");
+        }
+
+        private void BtnHelp_Click(object sender, EventArgs e)
+        {
+            string helpText = @"=== Heart Connect Controller 사용법 ===
+
+[Windows 개발]
+▶ Run - Flutter Windows 앱 실행
+⚡ Hot Reload - 코드 변경사항 빠르게 반영 (상태 유지)
+🔄 Hot Restart - 앱 재시작 (상태 초기화)
+🔧 Reinstall - 전체 재설치 (clean → pub get → build_runner → run)
+🏗 Gen && Run - 코드 생성 후 실행
+
+[로그]
+🗑 Clear - 로그 지우기
+📋 Copy - 로그 클립보드 복사
+
+[Android 빌드]
+📱 Build - Android APK 빌드 (Release)
+
+[Android 기기 (USB 연결 필요)]
+📲 Install - APK를 연결된 폰에 설치
+▶ Run - 폰에서 앱 실행
+📝 Logcat - Flutter 앱 로그 실시간 확인
+⏹ Stop - Logcat 중지
+📱 Devices - 연결된 기기 목록 확인
+
+[Android 폰 사용법]
+1. 폰에서 [설정] → [개발자 옵션] → [USB 디버깅] 활성화
+2. USB로 PC와 폰 연결
+3. [Devices] 클릭하여 연결 확인
+4. [Build] 클릭하여 APK 빌드
+5. [Install] 클릭하여 폰에 설치
+6. [Run] 클릭하여 앱 실행
+7. [Logcat] 클릭하여 로그 확인 (디버깅)
+";
+            MessageBox.Show(helpText, "❓ 사용법", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
     }
 }
