@@ -246,10 +246,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: const Color(0xFF03C75A).withOpacity(0.2),
+                color: Colors.orange.withOpacity(0.2),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Icon(FontAwesomeIcons.n, color: Color(0xFF03C75A), size: 20),
+              child: const Icon(FontAwesomeIcons.triangleExclamation, color: Colors.orange, size: 20),
             ),
             const SizedBox(width: 12),
             const Expanded(child: Text('네이버 캘린더 안내', style: TextStyle(fontSize: 18))),
@@ -259,44 +259,47 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              '네이버 캘린더 일정을 보려면 구글 캘린더와 동기화가 필요합니다.',
-              style: TextStyle(fontSize: 14),
-            ),
-            const SizedBox(height: 16),
+            // 미지원 이유 설명
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.blue.withOpacity(0.1),
+                color: Colors.red.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.blue.withOpacity(0.3)),
+                border: Border.all(color: Colors.red.withOpacity(0.3)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: const [
-                  Text('💡 권장 방법:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                  Text('❌ 네이버 캘린더 미지원', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.red)),
                   SizedBox(height: 8),
-                  Text('네이버 캘린더의 일정을 구글 캘린더에 직접 입력하시면 앱에서 자동으로 표시됩니다.', 
-                       style: TextStyle(fontSize: 12, color: Colors.black87)),
+                  Text(
+                    '네이버 캘린더는 Android 표준 캘린더 동기화(CalendarContract)를 지원하지 않아 앱에서 일정을 읽을 수 없습니다.',
+                    style: TextStyle(fontSize: 12, color: Colors.black87),
+                  ),
                 ],
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
+            // 대안 안내
             Container(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.grey.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
+                color: Colors.green.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.green.withOpacity(0.3)),
               ),
-              child: Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: const [
-                  Icon(FontAwesomeIcons.circleInfo, size: 12, color: Colors.grey),
-                  SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      '현재 네이버 캘린더는 기기 연동을 지원하지 않습니다.',
-                      style: TextStyle(fontSize: 11, color: Colors.grey),
-                    ),
+                  Text('✅ 지원되는 캘린더', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.green)),
+                  SizedBox(height: 8),
+                  Text('• 구글 캘린더', style: TextStyle(fontSize: 13)),
+                  Text('• 삼성 캘린더', style: TextStyle(fontSize: 13)),
+                  Text('• 기본 기기 캘린더', style: TextStyle(fontSize: 13)),
+                  SizedBox(height: 8),
+                  Text(
+                    '위 캘린더에 일정을 등록하시면 앱에서 자동으로 표시됩니다.',
+                    style: TextStyle(fontSize: 12, color: Colors.black54),
                   ),
                 ],
               ),
@@ -307,23 +310,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: const Text('확인'),
-          ),
-          ElevatedButton.icon(
-            onPressed: () async {
-              Navigator.pop(context);
-              // 구글 캘린더 열기
-              final uri = Uri.parse('https://calendar.google.com');
-              if (await canLaunchUrl(uri)) {
-                await launchUrl(uri, mode: LaunchMode.externalApplication);
-              }
-            },
-            icon: const Icon(FontAwesomeIcons.google, size: 14),
-            label: const Text('구글 캘린더'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            ),
           ),
         ],
       ),
