@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart'; // For date formatting
+import 'package:permission_handler/permission_handler.dart';
 import '../card_editor/write_card_screen.dart';
 import '../database/app_database.dart';
 import '../database/database_provider.dart';
@@ -10,6 +11,7 @@ import '../../theme/app_theme.dart';
 import 'contact_detail_screen.dart';
 import '../../utils/phone_formatter.dart';
 import 'current_contact_provider.dart';
+import 'contact_service.dart';
 
 class ContactsScreen extends ConsumerStatefulWidget {
   const ContactsScreen({super.key});
@@ -460,9 +462,30 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
           const SizedBox(height: 16),
           const Text("연락처를 동기화해주세요."),
           TextButton(
-            onPressed: () {
-              // trigger sync
-              // ref.read(contactServiceProvider.notifier).syncContacts();
+            onPressed: () async {
+              try {
+                await ref.read(contactServiceProvider.notifier).syncContacts();
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("연락처 동기화 완료!")),
+                  );
+                }
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text("동기화 실패: $e\n설정에서 연락처 권한을 허용해주세요."),
+                      action: SnackBarAction(
+                        label: "설정",
+                        onPressed: () async {
+                          // Open app settings
+                          await openAppSettings();
+                        },
+                      ),
+                    ),
+                  );
+                }
+              }
             }, 
             child: const Text("동기화 하기"),
           )
