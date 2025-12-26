@@ -163,6 +163,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   bool _isSending = false;
   bool _isCapturing = false; // 캡쳐 중인지 여부
   bool _isZoomMode = false; // 줌 모드 (배경 이미지 편집 중)
+  bool _isDragMode = false; // 글상자 이동 모드 (롱프레스 시)
 
   // Text Box Style State (글상자 스타일)
   Color _boxColor = Colors.white;
@@ -2112,6 +2113,31 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
             ),
           ),
           
+          // 줌 모드 표시 아이콘
+          if (_isZoomMode)
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 100,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.7),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.zoom_in, color: Colors.white, size: 20),
+                      SizedBox(width: 8),
+                      Text("줌 모드", style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          
           // 하단 고정 전송 버튼 및 수신자 목록
           Positioned(
             bottom: MediaQuery.of(context).padding.bottom + 16, // SafeArea 패딩 적용
@@ -2527,8 +2553,18 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                                     );
                                   });
                                 },
+                                onPanStart: (details) {
+                                  // 드래그 시작 시 이동 모드 활성화
+                                  setState(() => _isDragMode = true);
+                                },
                                 onPanEnd: (details) {
+                                  // 드래그 종료 시 이동 모드 비활성화
+                                  setState(() => _isDragMode = false);
                                   _saveDraft();
+                                },
+                                onPanCancel: () {
+                                  // 드래그 취소 시 이동 모드 비활성화
+                                  setState(() => _isDragMode = false);
                                 },
                                 onTap: () {
                                   _editorFocusNode.requestFocus();
@@ -2557,6 +2593,27 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                                 child: Stack(
                                   clipBehavior: Clip.none,
                                   children: [
+                                    // 드래그 모드일 때 이동 아이콘 표시 (왼쪽 상단)
+                                    if (_isDragMode && !_isCapturing)
+                                      Positioned(
+                                        left: -30,
+                                        top: -10,
+                                        child: Container(
+                                          padding: const EdgeInsets.all(6),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFFF29D86),
+                                            shape: BoxShape.circle,
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.black.withOpacity(0.3),
+                                                blurRadius: 8,
+                                                offset: const Offset(0, 2),
+                                              ),
+                                            ],
+                                          ),
+                                          child: const Icon(Icons.open_with, color: Colors.white, size: 18),
+                                        ),
+                                      ),
                                     Column(
                                       mainAxisSize: MainAxisSize.min,
                                       crossAxisAlignment: CrossAxisAlignment.stretch,
