@@ -218,29 +218,35 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
         }
         
         // 2. 카테고리 필터링 적용
+        final sixMonthsAgo = DateTime.now().subtract(const Duration(days: 180));
+        
         switch (_selectedFilter) {
           case '즐겨찾기':
             contacts = contacts.where((c) => c.isFavorite).toList();
             break;
           case '최근 연락':
-            // 최근 연락: 모든 연락처 표시, 연락 기록 있는 사람 상위 정렬
+            // 최근 연락: 6개월 이내 연락 기록이 있는 사람만, 날짜 내림차순
+            contacts = contacts.where((c) {
+              final lastDate = c.lastSentDate ?? c.lastReceivedDate;
+              if (lastDate == null) return false;
+              return lastDate.isAfter(sixMonthsAgo);
+            }).toList();
             contacts.sort((a, b) {
               final aDate = a.lastSentDate ?? a.lastReceivedDate;
               final bDate = b.lastSentDate ?? b.lastReceivedDate;
-              // 연락 기록 있는 사람 우선
-              if (aDate != null && bDate == null) return -1;
-              if (aDate == null && bDate != null) return 1;
-              // 둘 다 있으면 날짜 내림차순
-              if (aDate != null && bDate != null) {
-                return bDate.compareTo(aDate);
-              }
-              // 둘 다 없으면 이름순
-              return a.name.compareTo(b.name);
+              if (aDate == null && bDate == null) return 0;
+              if (aDate == null) return 1;
+              if (bDate == null) return -1;
+              return bDate.compareTo(aDate); // 날짜 내림차순
             });
             break;
           case '가족':
-            // 성씨가 같거나 groupTag에 가족이 포함된 연락처 (즐겨찾기 조건 제거)
+            // 성씨가 같거나 groupTag에 가족이 포함 또는 즐겨찾기(단축번호) 연락처
             contacts = contacts.where((c) {
+              // 즐겨찾기(단축번호)도 가족에 포함
+              if (c.isFavorite) {
+                return true;
+              }
               if (c.groupTag?.toLowerCase().contains('family') == true ||
                   c.groupTag?.contains('가족') == true) {
                 return true;
@@ -251,7 +257,7 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
               }
               return false;
             }).toList();
-            // 가족 필터에서는 즐겨찾기(스타) 연락처를 맨 위로
+            // 가족 필터에서는 즐겨찾기(스타/단축번호) 연락처를 맨 위로
             contacts.sort((a, b) {
               if (a.isFavorite && !b.isFavorite) return -1;
               if (!a.isFavorite && b.isFavorite) return 1;
