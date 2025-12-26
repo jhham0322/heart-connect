@@ -1969,31 +1969,48 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     // 발송 버튼 높이
     final sendButtonHeight = 90.0 + MediaQuery.of(context).padding.bottom;
     final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+    final toolbarHeight = 50.0; // 툴바 높이
+    final thumbnailHeight = 90.0; // 썸네일 영역 높이
+    final bottomFixedHeight = toolbarHeight + thumbnailHeight; // 하단 고정 영역 총 높이
     
     return Scaffold(
       backgroundColor: const Color(0xFFFFFCF9),
       resizeToAvoidBottomInset: false, // 키보드가 올라와도 화면 리사이즈 안함 (직접 스크롤로 처리)
       body: Stack(
         children: [
-          // Background/Content
+          // 1. Background/Content (배경 이미지만 스크롤 가능)
           Positioned(
             top: 0,
             left: 0,
             right: 0,
-            bottom: keyboardHeight > 0 ? keyboardHeight : sendButtonHeight, // 키보드가 올라오면 키보드 위까지, 아니면 발송 버튼 위까지
+            bottom: keyboardHeight > 0 
+                ? keyboardHeight + bottomFixedHeight 
+                : sendButtonHeight + bottomFixedHeight,
             child: SingleChildScrollView(
               controller: _mainScrollController,
               child: Column(
                 children: [
-                  // 1. Card Preview (캡쳐 가능 영역) - 상단에 붙음
+                  // Card Preview (캡쳐 가능 영역)
                   _buildCardPreview(),
-                  
-                  // 2. Toolbar (이미지와 썸네일 사이)
+                ],
+              ),
+            ),
+          ),
+          
+          // 2. 하단 고정 영역 (툴바 + 썸네일)
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: keyboardHeight > 0 ? keyboardHeight : sendButtonHeight,
+            child: Container(
+              color: const Color(0xFFFFFCF9),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Toolbar
                   _buildToolbar(),
-                  
-                  // 3. Template Selector (Background or Frame)
+                  // Template Selector (썸네일)
                   _buildTemplateSelector(),
-
                 ],
               ),
             ),
