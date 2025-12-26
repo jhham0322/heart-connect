@@ -82,7 +82,7 @@ class CalendarService {
                    }
                }
             } else {
-               debugPrint('[CalendarService] Error retrieving calendars: ${calendars.errorMessages}');
+               debugPrint('[CalendarService] Error retrieving calendars');
             }
          } else {
             debugPrint('[CalendarService] Calendar permission DENIED');
