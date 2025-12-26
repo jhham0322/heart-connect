@@ -257,7 +257,8 @@ namespace FlutterControlPanel
             // Auto Build (Android) 체크박스 - 그룹박스 밖에 배치
             chkAutoBuild = new CheckBox();
             chkAutoBuild.Text = "📱 Auto Build";
-            chkAutoBuild.Location = new Point(650, 55);
+            chkAutoBuild.Location = new Point(this.ClientSize.Width - 360, 55);
+            chkAutoBuild.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             chkAutoBuild.AutoSize = true;
             chkAutoBuild.ForeColor = Color.FromArgb(0, 150, 136);
             chkAutoBuild.Font = new Font("Segoe UI", 9, FontStyle.Bold);
@@ -333,7 +334,7 @@ namespace FlutterControlPanel
             btnBuildAndroid = new Button();
             btnBuildAndroid.Text = "📱 Build";
             btnBuildAndroid.Size = new Size(80, 40);
-            btnBuildAndroid.Location = new Point(650, 10);
+            btnBuildAndroid.Location = new Point(this.ClientSize.Width - 280, 10);
             btnBuildAndroid.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             btnBuildAndroid.BackColor = Color.FromArgb(129, 199, 132);
             btnBuildAndroid.FlatStyle = FlatStyle.Flat;
@@ -345,7 +346,7 @@ namespace FlutterControlPanel
             Button btnBuildTest = new Button();
             btnBuildTest.Text = "🚀 Build && Test";
             btnBuildTest.Size = new Size(110, 40);
-            btnBuildTest.Location = new Point(740, 10);
+            btnBuildTest.Location = new Point(this.ClientSize.Width - 190, 10);
             btnBuildTest.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             btnBuildTest.BackColor = Color.FromArgb(79, 195, 247);
             btnBuildTest.ForeColor = Color.White;
@@ -359,7 +360,7 @@ namespace FlutterControlPanel
             Button btnSettings = new Button();
             btnSettings.Text = "⚙";
             btnSettings.Size = new Size(40, 40);
-            btnSettings.Location = new Point(860, 10);
+            btnSettings.Location = new Point(this.ClientSize.Width - 70, 10);
             btnSettings.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             btnSettings.BackColor = Color.FromArgb(255, 183, 77);
             btnSettings.FlatStyle = FlatStyle.Flat;
