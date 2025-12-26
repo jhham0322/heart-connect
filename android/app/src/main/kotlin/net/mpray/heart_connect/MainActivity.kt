@@ -1,4 +1,4 @@
-package com.example.heart_connect
+package net.mpray.heart_connect
 
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine

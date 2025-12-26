@@ -1,0 +1,26 @@
+﻿--------- beginning of crash
+12-26 22:49:37.104 14845 14845 E AndroidRuntime: FATAL EXCEPTION: main
+12-26 22:49:37.104 14845 14845 E AndroidRuntime: Process: net.mpray.heart_connect, PID: 14845
+12-26 22:49:37.104 14845 14845 E AndroidRuntime: java.lang.RuntimeException: Unable to instantiate activity ComponentInfo{net.mpray.heart_connect/net.mpray.heart_connect.MainActivity}: java.lang.ClassNotFoundException: Didn't find class "net.mpray.heart_connect.MainActivity" on path: DexPathList[[zip file "/data/app/~~DRJm29dp8S1C8jSHZNBzFw==/net.mpray.heart_connect-AbJ9jSjo45Dy2iARQRkr2g==/base.apk"],nativeLibraryDirectories=[/data/app/~~DRJm29dp8S1C8jSHZNBzFw==/net.mpray.heart_connect-AbJ9jSjo45Dy2iARQRkr2g==/lib/arm64, /data/app/~~DRJm29dp8S1C8jSHZNBzFw==/net.mpray.heart_connect-AbJ9jSjo45Dy2iARQRkr2g==/base.apk!/lib/arm64-v8a, /system/lib64, /system_ext/lib64]]
+12-26 22:49:37.104 14845 14845 E AndroidRuntime: 	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:4586)
+12-26 22:49:37.104 14845 14845 E AndroidRuntime: 	at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:4941)
+12-26 22:49:37.104 14845 14845 E AndroidRuntime: 	at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:222)
+12-26 22:49:37.104 14845 14845 E AndroidRuntime: 	at android.app.servertransaction.TransactionExecutor.executeNonLifecycleItem(TransactionExecutor.java:133)
+12-26 22:49:37.104 14845 14845 E AndroidRuntime: 	at android.app.servertransaction.TransactionExecutor.executeTransactionItems(TransactionExecutor.java:103)
+12-26 22:49:37.104 14845 14845 E AndroidRuntime: 	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:80)
+12-26 22:49:37.104 14845 14845 E AndroidRuntime: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:3150)
+12-26 22:49:37.104 14845 14845 E AndroidRuntime: 	at android.os.Handler.dispatchMessage(Handler.java:110)
+12-26 22:49:37.104 14845 14845 E AndroidRuntime: 	at android.os.Looper.loopOnce(Looper.java:273)
+12-26 22:49:37.104 14845 14845 E AndroidRuntime: 	at android.os.Looper.loop(Looper.java:363)
+12-26 22:49:37.104 14845 14845 E AndroidRuntime: 	at android.app.ActivityThread.main(ActivityThread.java:10060)
+12-26 22:49:37.104 14845 14845 E AndroidRuntime: 	at java.lang.reflect.Method.invoke(Native Method)
+12-26 22:49:37.104 14845 14845 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:632)
+12-26 22:49:37.104 14845 14845 E AndroidRuntime: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:975)
+12-26 22:49:37.104 14845 14845 E AndroidRuntime: Caused by: java.lang.ClassNotFoundException: Didn't find class "net.mpray.heart_connect.MainActivity" on path: DexPathList[[zip file "/data/app/~~DRJm29dp8S1C8jSHZNBzFw==/net.mpray.heart_connect-AbJ9jSjo45Dy2iARQRkr2g==/base.apk"],nativeLibraryDirectories=[/data/app/~~DRJm29dp8S1C8jSHZNBzFw==/net.mpray.heart_connect-AbJ9jSjo45Dy2iARQRkr2g==/lib/arm64, /data/app/~~DRJm29dp8S1C8jSHZNBzFw==/net.mpray.heart_connect-AbJ9jSjo45Dy2iARQRkr2g==/base.apk!/lib/arm64-v8a, /system/lib64, /system_ext/lib64]]
+12-26 22:49:37.104 14845 14845 E AndroidRuntime: 	at dalvik.system.BaseDexClassLoader.findClass(BaseDexClassLoader.java:259)
+12-26 22:49:37.104 14845 14845 E AndroidRuntime: 	at java.lang.ClassLoader.loadClass(ClassLoader.java:637)
+12-26 22:49:37.104 14845 14845 E AndroidRuntime: 	at java.lang.ClassLoader.loadClass(ClassLoader.java:573)
+12-26 22:49:37.104 14845 14845 E AndroidRuntime: 	at android.app.AppComponentFactory.instantiateActivity(AppComponentFactory.java:95)
+12-26 22:49:37.104 14845 14845 E AndroidRuntime: 	at android.app.Instrumentation.newActivity(Instrumentation.java:1446)
+12-26 22:49:37.104 14845 14845 E AndroidRuntime: 	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:4573)
+12-26 22:49:37.104 14845 14845 E AndroidRuntime: 	... 13 more
