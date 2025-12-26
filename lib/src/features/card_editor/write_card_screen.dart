@@ -2173,7 +2173,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                 clipBehavior: Clip.hardEdge,
                 child: _MarqueeText(
                   text: "배경 이미지를 더블탭하시면 줌 모드로 전환됩니다. 줌 모드에서 이미지 크기와 위치를 조절하실 수 있습니다.",
-                  durationSeconds: 10,
+                  durationSeconds: 0, // 텍스트 길이에 따라 자동 계산
                   onComplete: () {
                     if (mounted) setState(() => _showInitialHint = false);
                   },
@@ -2195,7 +2195,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                 clipBehavior: Clip.hardEdge,
                 child: _MarqueeText(
                   text: "두 손가락으로 벌리거나 줄여서 이미지 크기를 조정하실 수 있습니다. 한 손가락으로 드래그하시면 이미지를 이동하실 수 있습니다. 편집이 완료되시면 더블탭 또는 줌 모드 버튼을 눌러 종료해 주세요.",
-                  durationSeconds: 15,
+                  durationSeconds: 0, // 텍스트 길이에 따라 자동 계산
                   onComplete: () {
                     if (mounted) setState(() => _showZoomHint = false);
                   },
@@ -2218,7 +2218,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                 clipBehavior: Clip.hardEdge,
                 child: const _MarqueeText(
                   text: "드래그 중입니다. 손가락을 움직여 이미지 위치를 조정해 주세요.",
-                  durationSeconds: 8,
+                  durationSeconds: 0, // 텍스트 길이에 따라 자동 계산
                 ),
               ),
             ),
@@ -2238,7 +2238,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                 clipBehavior: Clip.hardEdge,
                 child: const _MarqueeText(
                   text: "확대/축소 중입니다. 두 손가락을 벌리거나 줄여서 이미지 크기를 조정해 주세요.",
-                  durationSeconds: 8,
+                  durationSeconds: 0, // 텍스트 길이에 따라 자동 계산
                 ),
               ),
             ),
@@ -2628,9 +2628,10 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                             key: _backgroundKey,
                             child: InteractiveViewer(
                               transformationController: _transformationController,
-                              minScale: 0.5,
+                              minScale: 1.0, // 이미지가 보이는 영역보다 작아지지 않음
                               maxScale: 5.0,
-                              boundaryMargin: const EdgeInsets.all(double.infinity), // 경계 제한 없음
+                              constrained: true, // 이미지가 경계를 벗어나지 않음
+                              clipBehavior: Clip.hardEdge, // 경계를 벗어난 부분 클립
                               panEnabled: _isZoomMode, // 줌 모드일 때만 이동 가능
                               scaleEnabled: _isZoomMode, // 줌 모드일 때만 줌 가능
                               interactionEndFrictionCoefficient: 0.0001, // 부드러운 제스처
@@ -5020,8 +5021,8 @@ class _MarqueeTextState extends State<_MarqueeText> with SingleTickerProviderSta
     // 텍스트 너비 계산
     _textWidth = _calculateTextWidth(widget.text, 12.0);
     
-    // 애니메이션 시간: 텍스트 길이에 비례 (글자당 약 0.08초, 최소 5초, 최대 30초)
-    final calculatedDuration = (_textWidth / 8).clamp(5.0, 30.0).toInt();
+    // 애니메이션 시간: 텍스트 너비에 비례 (100픽셀당 약 3초, 최소 8초, 최대 60초)
+    final calculatedDuration = ((_textWidth + 300) / 35).clamp(8.0, 60.0).toInt();
     final duration = widget.durationSeconds > 0 ? widget.durationSeconds : calculatedDuration;
     
     _controller = AnimationController(
