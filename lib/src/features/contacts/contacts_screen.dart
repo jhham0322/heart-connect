@@ -24,6 +24,7 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
   int _selectedTabIndex = 0; // 0: My People, 1: Memory Record
   String _searchQuery = '';
   Contact? _selectedContact; // 현재 선택된 연락처
+  String _selectedFilter = '전체'; // 필터: 전체, 즐겨찾기, 최근 연락, 가족 등
 
   @override
   Widget build(BuildContext context) {
@@ -118,13 +119,29 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
              scrollDirection: Axis.horizontal,
              child: Row(
                children: [
-                 const _FilterChip(label: "전체", isActive: true),
+                 _FilterChip(
+                   label: "전체",
+                   isActive: _selectedFilter == '전체',
+                   onTap: () => setState(() => _selectedFilter = '전체'),
+                 ),
                  const SizedBox(width: 8),
-                 const _FilterChip(label: "즐겨찾기"),
+                 _FilterChip(
+                   label: "즐겨찾기",
+                   isActive: _selectedFilter == '즐겨찾기',
+                   onTap: () => setState(() => _selectedFilter = '즐겨찾기'),
+                 ),
                  const SizedBox(width: 8),
-                 const _FilterChip(label: "최근 연락"),
+                 _FilterChip(
+                   label: "최근 연락",
+                   isActive: _selectedFilter == '최근 연락',
+                   onTap: () => setState(() => _selectedFilter = '최근 연락'),
+                 ),
                  const SizedBox(width: 8),
-                 const _FilterChip(label: "가족"),
+                 _FilterChip(
+                   label: "가족",
+                   isActive: _selectedFilter == '가족',
+                   onTap: () => setState(() => _selectedFilter = '가족'),
+                 ),
                ],
              ),
            )
@@ -140,9 +157,50 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
         if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
         }
-        final contacts = snapshot.data!;
+        var contacts = snapshot.data!;
         if (contacts.isEmpty) {
           return _buildEmptyState();
+        }
+
+        // 필터링 적용
+        switch (_selectedFilter) {
+          case '즐겨찾기':
+            contacts = contacts.where((c) => c.isFavorite).toList();
+            break;
+          case '최근 연락':
+            contacts = contacts.where((c) => c.lastSentDate != null || c.lastReceivedDate != null).toList();
+            // 최근 날짜순 정렬
+            contacts.sort((a, b) {
+              final aDate = a.lastSentDate ?? a.lastReceivedDate;
+              final bDate = b.lastSentDate ?? b.lastReceivedDate;
+              if (aDate == null && bDate == null) return 0;
+              if (aDate == null) return 1;
+              if (bDate == null) return -1;
+              return bDate.compareTo(aDate);
+            });
+            break;
+          case '가족':
+            contacts = contacts.where((c) => 
+              c.groupTag?.toLowerCase().contains('family') == true ||
+              c.groupTag?.contains('가족') == true
+            ).toList();
+            break;
+          default: // 전체
+            break;
+        }
+
+        // 필터 결과가 없는 경우
+        if (contacts.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.filter_list_off, size: 48, color: Colors.grey),
+                const SizedBox(height: 16),
+                Text("'$_selectedFilter' 조건에 맞는 연락처가 없습니다."),
+              ],
+            ),
+          );
         }
 
         // 첫 번째 연락처 자동 선택 (아무것도 선택되지 않은 경우)
