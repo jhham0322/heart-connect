@@ -1,0 +1,343 @@
+using System;
+using System.Diagnostics;
+using System.Drawing;
+using System.IO;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace FlutterControlPanel
+{
+    public class DeviceMonitorForm : Form
+    {
+        private PictureBox screenBox;
+        private RichTextBox logBox;
+        private Button btnCopyScreen;
+        private Button btnCopyLog;
+        private Button btnRefresh;
+        private Button btnStartLog;
+        private Button btnStopLog;
+        private ToolStripStatusLabel lblStatus;
+        private System.Windows.Forms.Timer refreshTimer;
+        private Process logcatProcess;
+        private string adbPath;
+        private StringBuilder logBuffer = new StringBuilder();
+        private bool isCapturing = false;
+
+        public DeviceMonitorForm(string adbPath)
+        {
+            this.adbPath = adbPath;
+            InitializeUI();
+            StartScreenCapture();
+        }
+
+        private void InitializeUI()
+        {
+            this.Text = "📱 Device Monitor - Screen & Log";
+            this.Size = new Size(1000, 700);
+            this.StartPosition = FormStartPosition.CenterScreen;
+            this.BackColor = Color.FromArgb(45, 45, 45);
+
+            // Split panel
+            SplitContainer splitContainer = new SplitContainer();
+            splitContainer.Dock = DockStyle.Fill;
+            splitContainer.SplitterDistance = 400;
+            splitContainer.BackColor = Color.FromArgb(60, 60, 60);
+            this.Controls.Add(splitContainer);
+
+            // Left Panel - Screen
+            Panel leftPanel = new Panel();
+            leftPanel.Dock = DockStyle.Fill;
+            leftPanel.BackColor = Color.FromArgb(30, 30, 30);
+            splitContainer.Panel1.Controls.Add(leftPanel);
+
+            Label lblScreen = new Label();
+            lblScreen.Text = "📱 Phone Screen";
+            lblScreen.ForeColor = Color.White;
+            lblScreen.Font = new Font("Segoe UI", 12, FontStyle.Bold);
+            lblScreen.Dock = DockStyle.Top;
+            lblScreen.Height = 30;
+            lblScreen.TextAlign = ContentAlignment.MiddleCenter;
+            leftPanel.Controls.Add(lblScreen);
+
+            screenBox = new PictureBox();
+            screenBox.Dock = DockStyle.Fill;
+            screenBox.SizeMode = PictureBoxSizeMode.Zoom;
+            screenBox.BackColor = Color.Black;
+            leftPanel.Controls.Add(screenBox);
+            screenBox.BringToFront();
+
+            // Left Bottom - Controls
+            Panel leftBottom = new Panel();
+            leftBottom.Dock = DockStyle.Bottom;
+            leftBottom.Height = 50;
+            leftBottom.BackColor = Color.FromArgb(50, 50, 50);
+            leftPanel.Controls.Add(leftBottom);
+
+            btnRefresh = new Button();
+            btnRefresh.Text = "🔄 Refresh";
+            btnRefresh.Size = new Size(100, 35);
+            btnRefresh.Location = new Point(10, 8);
+            btnRefresh.BackColor = Color.FromArgb(129, 212, 250);
+            btnRefresh.FlatStyle = FlatStyle.Flat;
+            btnRefresh.Click += (s, e) => CaptureScreen();
+            leftBottom.Controls.Add(btnRefresh);
+
+            btnCopyScreen = new Button();
+            btnCopyScreen.Text = "📋 Copy Screen";
+            btnCopyScreen.Size = new Size(120, 35);
+            btnCopyScreen.Location = new Point(120, 8);
+            btnCopyScreen.BackColor = Color.FromArgb(165, 214, 167);
+            btnCopyScreen.FlatStyle = FlatStyle.Flat;
+            btnCopyScreen.Click += BtnCopyScreen_Click;
+            leftBottom.Controls.Add(btnCopyScreen);
+
+            // Right Panel - Log
+            Panel rightPanel = new Panel();
+            rightPanel.Dock = DockStyle.Fill;
+            rightPanel.BackColor = Color.FromArgb(30, 30, 30);
+            splitContainer.Panel2.Controls.Add(rightPanel);
+
+            Label lblLog = new Label();
+            lblLog.Text = "📝 Logcat (Flutter)";
+            lblLog.ForeColor = Color.White;
+            lblLog.Font = new Font("Segoe UI", 12, FontStyle.Bold);
+            lblLog.Dock = DockStyle.Top;
+            lblLog.Height = 30;
+            lblLog.TextAlign = ContentAlignment.MiddleCenter;
+            rightPanel.Controls.Add(lblLog);
+
+            logBox = new RichTextBox();
+            logBox.Dock = DockStyle.Fill;
+            logBox.BackColor = Color.FromArgb(20, 20, 20);
+            logBox.ForeColor = Color.LightGreen;
+            logBox.Font = new Font("Consolas", 9);
+            logBox.ReadOnly = true;
+            rightPanel.Controls.Add(logBox);
+            logBox.BringToFront();
+
+            // Right Bottom - Controls
+            Panel rightBottom = new Panel();
+            rightBottom.Dock = DockStyle.Bottom;
+            rightBottom.Height = 50;
+            rightBottom.BackColor = Color.FromArgb(50, 50, 50);
+            rightPanel.Controls.Add(rightBottom);
+
+            btnStartLog = new Button();
+            btnStartLog.Text = "▶ Start Log";
+            btnStartLog.Size = new Size(100, 35);
+            btnStartLog.Location = new Point(10, 8);
+            btnStartLog.BackColor = Color.FromArgb(129, 199, 132);
+            btnStartLog.FlatStyle = FlatStyle.Flat;
+            btnStartLog.Click += BtnStartLog_Click;
+            rightBottom.Controls.Add(btnStartLog);
+
+            btnStopLog = new Button();
+            btnStopLog.Text = "⏹ Stop Log";
+            btnStopLog.Size = new Size(100, 35);
+            btnStopLog.Location = new Point(120, 8);
+            btnStopLog.BackColor = Color.FromArgb(255, 138, 101);
+            btnStopLog.FlatStyle = FlatStyle.Flat;
+            btnStopLog.Click += BtnStopLog_Click;
+            rightBottom.Controls.Add(btnStopLog);
+
+            btnCopyLog = new Button();
+            btnCopyLog.Text = "📋 Copy Log";
+            btnCopyLog.Size = new Size(100, 35);
+            btnCopyLog.Location = new Point(230, 8);
+            btnCopyLog.BackColor = Color.FromArgb(165, 214, 167);
+            btnCopyLog.FlatStyle = FlatStyle.Flat;
+            btnCopyLog.Click += BtnCopyLog_Click;
+            rightBottom.Controls.Add(btnCopyLog);
+
+            // Status bar
+            StatusStrip statusStrip = new StatusStrip();
+            statusStrip.BackColor = Color.FromArgb(40, 40, 40);
+            lblStatus = new ToolStripStatusLabel("Ready");
+            lblStatus.ForeColor = Color.White;
+            statusStrip.Items.Add(lblStatus);
+            this.Controls.Add(statusStrip);
+
+            // Screen refresh timer (2 seconds)
+            refreshTimer = new System.Windows.Forms.Timer();
+            refreshTimer.Interval = 2000;
+            refreshTimer.Tick += (s, e) => CaptureScreen();
+        }
+
+        private void StartScreenCapture()
+        {
+            CaptureScreen();
+            refreshTimer.Start();
+        }
+
+        private async void CaptureScreen()
+        {
+            if (isCapturing) return;
+            isCapturing = true;
+
+            try
+            {
+                lblStatus.Text = "Capturing screen...";
+                
+                await Task.Run(() =>
+                {
+                    try
+                    {
+                        ProcessStartInfo psi = new ProcessStartInfo();
+                        psi.FileName = adbPath;
+                        psi.Arguments = "exec-out screencap -p";
+                        psi.UseShellExecute = false;
+                        psi.RedirectStandardOutput = true;
+                        psi.CreateNoWindow = true;
+
+                        using (Process process = Process.Start(psi))
+                        {
+                            using (MemoryStream ms = new MemoryStream())
+                            {
+                                process.StandardOutput.BaseStream.CopyTo(ms);
+                                ms.Position = 0;
+                                
+                                if (ms.Length > 0)
+                                {
+                                    Image img = Image.FromStream(ms);
+                                    this.Invoke(new Action(() =>
+                                    {
+                                        screenBox.Image?.Dispose();
+                                        screenBox.Image = img;
+                                        lblStatus.Text = $"Screen captured at {DateTime.Now:HH:mm:ss}";
+                                    }));
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        this.Invoke(new Action(() =>
+                        {
+                            lblStatus.Text = $"Error: {ex.Message}";
+                        }));
+                    }
+                });
+            }
+            finally
+            {
+                isCapturing = false;
+            }
+        }
+
+        private void BtnStartLog_Click(object sender, EventArgs e)
+        {
+            if (logcatProcess != null && !logcatProcess.HasExited)
+            {
+                MessageBox.Show("Logcat is already running.");
+                return;
+            }
+
+            logBox.Clear();
+            logBuffer.Clear();
+            lblStatus.Text = "Starting logcat...";
+
+            try
+            {
+                ProcessStartInfo psi = new ProcessStartInfo();
+                psi.FileName = adbPath;
+                psi.Arguments = "logcat -v time flutter:V *:S";
+                psi.UseShellExecute = false;
+                psi.RedirectStandardOutput = true;
+                psi.RedirectStandardError = true;
+                psi.CreateNoWindow = true;
+                psi.StandardOutputEncoding = Encoding.UTF8;
+
+                logcatProcess = new Process();
+                logcatProcess.StartInfo = psi;
+                logcatProcess.OutputDataReceived += (s, ev) =>
+                {
+                    if (ev.Data != null)
+                    {
+                        logBuffer.AppendLine(ev.Data);
+                        try
+                        {
+                            this.Invoke(new Action(() =>
+                            {
+                                logBox.AppendText(ev.Data + Environment.NewLine);
+                                logBox.ScrollToCaret();
+                            }));
+                        }
+                        catch { }
+                    }
+                };
+                logcatProcess.ErrorDataReceived += (s, ev) =>
+                {
+                    if (ev.Data != null)
+                    {
+                        try
+                        {
+                            this.Invoke(new Action(() =>
+                            {
+                                logBox.AppendText("ERR: " + ev.Data + Environment.NewLine);
+                            }));
+                        }
+                        catch { }
+                    }
+                };
+
+                logcatProcess.Start();
+                logcatProcess.BeginOutputReadLine();
+                logcatProcess.BeginErrorReadLine();
+
+                lblStatus.Text = "Logcat running...";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error starting logcat: {ex.Message}");
+            }
+        }
+
+        private void BtnStopLog_Click(object sender, EventArgs e)
+        {
+            if (logcatProcess != null && !logcatProcess.HasExited)
+            {
+                logcatProcess.Kill();
+                logcatProcess = null;
+                lblStatus.Text = "Logcat stopped.";
+            }
+        }
+
+        private void BtnCopyScreen_Click(object sender, EventArgs e)
+        {
+            if (screenBox.Image != null)
+            {
+                Clipboard.SetImage(screenBox.Image);
+                MessageBox.Show("Screen copied to clipboard!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else
+            {
+                MessageBox.Show("No screen captured yet.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
+        private void BtnCopyLog_Click(object sender, EventArgs e)
+        {
+            if (!string.IsNullOrEmpty(logBox.Text))
+            {
+                Clipboard.SetText(logBox.Text);
+                MessageBox.Show("Log copied to clipboard!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else
+            {
+                MessageBox.Show("No log to copy.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            refreshTimer?.Stop();
+            if (logcatProcess != null && !logcatProcess.HasExited)
+            {
+                logcatProcess.Kill();
+            }
+            base.OnFormClosing(e);
+        }
+    }
+}

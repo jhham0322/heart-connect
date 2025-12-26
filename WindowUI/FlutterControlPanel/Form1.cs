@@ -309,6 +309,21 @@ namespace FlutterControlPanel
             controlPanel.Controls.Add(btnDevices);
             toolTip.SetToolTip(btnDevices, "연결된 Android 기기 목록 확인");
 
+            // Device Monitor Button
+            Button btnMonitor = new Button();
+            btnMonitor.Text = "🖥 Monitor";
+            btnMonitor.Size = new Size(100, 35);
+            btnMonitor.Location = new Point(520, row4Y);
+            btnMonitor.BackColor = Color.FromArgb(255, 183, 77);
+            btnMonitor.FlatStyle = FlatStyle.Flat;
+            btnMonitor.Font = new Font("Segoe UI", 9, FontStyle.Bold);
+            btnMonitor.Click += (s, ev) => {
+                DeviceMonitorForm monitor = new DeviceMonitorForm(adbPath);
+                monitor.Show();
+            };
+            controlPanel.Controls.Add(btnMonitor);
+            toolTip.SetToolTip(btnMonitor, "폰 화면과 로그를 실시간으로 모니터링");
+
             // 2. Output Box (Enable Copy)
             outputBox = new RichTextBox();
             outputBox.Dock = DockStyle.Fill;
