@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Added for TextInputFormatter
 import 'dart:convert'; // Added for JSON decoding
+import 'dart:io'; // Added for Platform check
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:drift/drift.dart' hide Column; // Added for Value
+import 'package:permission_handler/permission_handler.dart'; // Added for permissions
 import '../../theme/app_theme.dart';
 import '../contacts/contact_service.dart';
 import 'home_view_model.dart';
@@ -24,6 +26,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   // 캐러셀 컨트롤러
   late PageController _pageController;
   int _currentPage = 0;
+  bool _hasCalendarPermission = true; // 권한 상태
   
   @override
   void initState() {
@@ -33,9 +36,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       initialPage: 0,
     );
     
-    // 앱 시작 시 데이터 동기화
+    // 앱 시작 시 데이터 동기화 및 권한 확인
     WidgetsBinding.instance.addPostFrameCallback((_) async {
        try {
+         // 0. 캘린더 권한 확인 (Android/iOS만)
+         if (Platform.isAndroid || Platform.isIOS) {
+           await _checkCalendarPermission();
+         }
+         
          // 1. 주소록 동기화 (Windows는 Mock 데이터 생성)
          await ref.read(contactServiceProvider.notifier).syncContacts();
          // 2. 홈 모델 새로고침
@@ -44,6 +52,139 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
          debugPrint("Init Sync Error: $e");
        }
     });
+  }
+  
+  // 캘린더 권한 확인 및 요청
+  Future<void> _checkCalendarPermission() async {
+    final status = await Permission.calendar.status;
+    
+    if (status.isDenied || status.isPermanentlyDenied) {
+      setState(() => _hasCalendarPermission = false);
+      
+      // 첫 실행 시 권한 요청 다이얼로그 표시
+      if (status.isDenied && mounted) {
+        _showCalendarPermissionDialog();
+      }
+    } else if (status.isGranted) {
+      setState(() => _hasCalendarPermission = true);
+    }
+  }
+  
+  // 캘린더 권한 요청 다이얼로그
+  void _showCalendarPermissionDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Icon(FontAwesomeIcons.calendar, color: AppTheme.accentCoral),
+            const SizedBox(width: 12),
+            const Text('캘린더 연동'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              '구글 캘린더, 네이버 캘린더의 일정을 가져오려면 캘린더 접근 권한이 필요합니다.',
+              style: TextStyle(fontSize: 15),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppTheme.accentCoral.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  Icon(FontAwesomeIcons.circleInfo, size: 16, color: AppTheme.accentCoral),
+                  const SizedBox(width: 8),
+                  const Expanded(
+                    child: Text(
+                      '기념일, 생일 등의 일정을 자동으로 표시합니다.',
+                      style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              // 나중에 설정에서 허용하도록 안내
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('설정 > 권한에서 캘린더 권한을 허용할 수 있습니다.')),
+              );
+            },
+            child: const Text('나중에'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              final result = await Permission.calendar.request();
+              
+              if (result.isGranted) {
+                setState(() => _hasCalendarPermission = true);
+                // 권한 허용 후 데이터 새로고침
+                ref.read(homeViewModelProvider.notifier).refresh();
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('✓ 캘린더가 연동되었습니다!')),
+                  );
+                }
+              } else if (result.isPermanentlyDenied) {
+                // 영구 거부된 경우 설정으로 이동 안내
+                _showOpenSettingsDialog();
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.accentCoral,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            ),
+            child: const Text('권한 허용'),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  // 설정으로 이동 다이얼로그
+  void _showOpenSettingsDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text('권한 설정 필요'),
+        content: const Text(
+          '캘린더 권한이 거부되었습니다.\n설정에서 직접 권한을 허용해주세요.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('취소'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              openAppSettings();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.accentCoral,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('설정 열기'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
