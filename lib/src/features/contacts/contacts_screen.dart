@@ -247,38 +247,82 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
             });
             break;
           case '가족':
-            // 가족 관련 단어 목록
-            const familyKeywords = [
-              '어머니', '아버지', '장인', '장모', '삼촌', '고모', '이모', 
-              '숙부', '숙모', '엄마', '아빠', '큰아버지', '작은아버지', 
-              '할아버지', '할머니', '손주', '조카', '큰이모', '작은이모', 
-              '큰삼촌', '작은삼촌', '동생', '친척', '형제', '자매', '형', '누나', '오빠', '언니',
-              '며느리', '사위', '시아버지', '시어머니', '처형', '처제', '매형', '매제',
-              'mother', 'father', 'mom', 'dad', 'uncle', 'aunt', 'grandma', 'grandpa',
+            // 가족 관련 단어 카테고리별 정의
+            const spouseKeywords = ['아내', '남편', '부인', '배우자', '와이프', '신랑', '신부', 'wife', 'husband'];
+            const childKeywords = ['아들', '딸', '자녀', '막내', '첫째', '둘째', '셋째', '애기', '아기', '손자', '손녀', 'son', 'daughter'];
+            const parentKeywords = ['어머니', '아버지', '엄마', '아빠', '모친', '부친', '어무이', '아부지', 'mother', 'father', 'mom', 'dad'];
+            const siblingKeywords = ['형', '누나', '오빠', '언니', '동생', '형제', '자매', '남동생', '여동생', 'brother', 'sister'];
+            const maternalKeywords = ['이모', '외삼촌', '외할머니', '외할아버지', '외숙모', '이모부', '외가'];
+            const relativeKeywords = [
+              '삼촌', '고모', '숙부', '숙모', '고모부', '조카', '사촌', '친척', 
+              '할머니', '할아버지', '장인', '장모', '시아버지', '시어머니',
+              '며느리', '사위', '처형', '처제', '매형', '매제', '올케', '형수', '제수',
+              '6촌', '8촌', 'uncle', 'aunt', 'grandma', 'grandpa', 'cousin'
             ];
             
-            // 즐겨찾기(단축번호) + 가족 관련 단어가 이름에 포함 + 같은 성씨
-            contacts = contacts.where((c) {
-              // 1. 즐겨찾기(단축번호)
-              if (c.isFavorite) {
-                return true;
+            // 접두사 (큰, 작은, 친, 외 등)
+            const prefixes = ['큰', '작은', '친', '외', '새', '의붓', '계'];
+            
+            // 모든 가족 단어 목록 (접두사 조합 포함)
+            List<String> allFamilyKeywords = [];
+            for (var keywords in [spouseKeywords, childKeywords, parentKeywords, siblingKeywords, maternalKeywords, relativeKeywords]) {
+              for (var keyword in keywords) {
+                allFamilyKeywords.add(keyword);
+                // 접두사 조합 추가
+                for (var prefix in prefixes) {
+                  allFamilyKeywords.add('$prefix$keyword');
+                }
               }
-              
-              // 2. groupTag에 가족 포함
+            }
+            
+            // 가족 카테고리 판별 함수
+            int getFamilyPriority(String name) {
+              final nameLower = name.toLowerCase();
+              // 1순위: 배우자
+              for (var kw in spouseKeywords) {
+                if (nameLower.contains(kw)) return 1;
+              }
+              // 2순위: 자녀
+              for (var kw in childKeywords) {
+                if (nameLower.contains(kw)) return 2;
+              }
+              // 3순위: 부모
+              for (var kw in parentKeywords) {
+                if (nameLower.contains(kw)) return 3;
+              }
+              // 4순위: 형제
+              for (var kw in siblingKeywords) {
+                if (nameLower.contains(kw)) return 4;
+              }
+              // 5순위: 외가
+              for (var kw in maternalKeywords) {
+                if (nameLower.contains(kw)) return 5;
+              }
+              // 6순위: 친척
+              for (var kw in relativeKeywords) {
+                if (nameLower.contains(kw)) return 6;
+              }
+              // 7순위: 같은 성씨
+              return 7;
+            }
+            
+            // 가족 필터링: 가족 관련 단어 + groupTag에 가족 + 같은 성씨
+            contacts = contacts.where((c) {
+              // 1. groupTag에 가족 포함
               if (c.groupTag?.toLowerCase().contains('family') == true ||
                   c.groupTag?.contains('가족') == true) {
                 return true;
               }
               
-              // 3. 이름에 가족 관련 단어가 포함
+              // 2. 이름에 가족 관련 단어가 포함
               final nameLower = c.name.toLowerCase();
-              for (var keyword in familyKeywords) {
+              for (var keyword in allFamilyKeywords) {
                 if (nameLower.contains(keyword.toLowerCase())) {
                   return true;
                 }
               }
               
-              // 4. 성씨가 같으면 가족
+              // 3. 성씨가 같으면 가족
               if (c.name.isNotEmpty && c.name[0] == myFamilyName) {
                 return true;
               }
@@ -286,17 +330,13 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
               return false;
             }).toList();
             
-            // 정렬: 1. 즐겨찾기 먼저 → 2. 같은 성씨 → 3. 이름순
+            // 정렬: 배우자→자녀→부모→형제→외가→친척→같은성씨, 그 안에서 이름순
             contacts.sort((a, b) {
-              // 1순위: 즐겨찾기
-              if (a.isFavorite && !b.isFavorite) return -1;
-              if (!a.isFavorite && b.isFavorite) return 1;
-              // 2순위: 같은 성씨 (둘 다 즐겨찾기이거나 둘 다 아닐 때)
-              final aIsSameFamily = a.name.isNotEmpty && a.name[0] == myFamilyName;
-              final bIsSameFamily = b.name.isNotEmpty && b.name[0] == myFamilyName;
-              if (aIsSameFamily && !bIsSameFamily) return -1;
-              if (!aIsSameFamily && bIsSameFamily) return 1;
-              // 3순위: 이름순
+              final aPriority = getFamilyPriority(a.name);
+              final bPriority = getFamilyPriority(b.name);
+              if (aPriority != bPriority) {
+                return aPriority.compareTo(bPriority);
+              }
               return a.name.compareTo(b.name);
             });
             break;
