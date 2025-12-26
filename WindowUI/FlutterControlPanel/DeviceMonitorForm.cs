@@ -194,66 +194,99 @@ namespace FlutterControlPanel
                             return;
                         }
 
-                        ProcessStartInfo psi = new ProcessStartInfo();
-                        psi.FileName = adbPath;
-                        psi.Arguments = "exec-out screencap -p";
-                        psi.UseShellExecute = false;
-                        psi.RedirectStandardOutput = true;
-                        psi.RedirectStandardError = true;
-                        psi.CreateNoWindow = true;
+                        string tempPath = Path.Combine(Path.GetTempPath(), "screen_capture.png");
+                        string phonePath = "/sdcard/screen_capture.png";
 
-                        using (Process process = new Process())
+                        // Step 1: Capture screen on phone
+                        var psiCapture = new ProcessStartInfo
                         {
-                            process.StartInfo = psi;
-                            process.Start();
-
-                            using (MemoryStream ms = new MemoryStream())
+                            FileName = adbPath,
+                            Arguments = $"shell screencap -p {phonePath}",
+                            UseShellExecute = false,
+                            CreateNoWindow = true,
+                            RedirectStandardError = true
+                        };
+                        
+                        using (var proc = Process.Start(psiCapture))
+                        {
+                            proc.WaitForExit(10000);
+                            if (proc.ExitCode != 0)
                             {
-                                // Read binary data from stdout
-                                byte[] buffer = new byte[4096];
-                                int bytesRead;
-                                while ((bytesRead = process.StandardOutput.BaseStream.Read(buffer, 0, buffer.Length)) > 0)
+                                string error = proc.StandardError.ReadToEnd();
+                                this.Invoke(new Action(() =>
                                 {
-                                    ms.Write(buffer, 0, bytesRead);
-                                }
-
-                                process.WaitForExit(5000); // Wait max 5 seconds
-
-                                if (ms.Length > 100) // Valid PNG should be > 100 bytes
-                                {
-                                    ms.Position = 0;
-                                    try
-                                    {
-                                        Image img = Image.FromStream(ms);
-                                        this.Invoke(new Action(() =>
-                                        {
-                                            screenBox.Image?.Dispose();
-                                            screenBox.Image = img;
-                                            lblStatus.Text = $"Screen captured at {DateTime.Now:HH:mm:ss} ({ms.Length} bytes)";
-                                        }));
-                                    }
-                                    catch (Exception imgEx)
-                                    {
-                                        this.Invoke(new Action(() =>
-                                        {
-                                            lblStatus.Text = $"Image parse error: {imgEx.Message}";
-                                        }));
-                                    }
-                                }
-                                else
-                                {
-                                    // Read error output
-                                    string error = process.StandardError.ReadToEnd();
-                                    this.Invoke(new Action(() =>
-                                    {
-                                        if (!string.IsNullOrEmpty(error))
-                                            lblStatus.Text = $"ADB Error: {error}";
-                                        else
-                                            lblStatus.Text = $"No screen data ({ms.Length} bytes). Is phone connected?";
-                                    }));
-                                }
+                                    lblStatus.Text = $"Capture failed: {error}";
+                                }));
+                                return;
                             }
                         }
+
+                        // Step 2: Pull file from phone
+                        var psiPull = new ProcessStartInfo
+                        {
+                            FileName = adbPath,
+                            Arguments = $"pull {phonePath} \"{tempPath}\"",
+                            UseShellExecute = false,
+                            CreateNoWindow = true,
+                            RedirectStandardError = true
+                        };
+                        
+                        using (var proc = Process.Start(psiPull))
+                        {
+                            proc.WaitForExit(10000);
+                            if (proc.ExitCode != 0)
+                            {
+                                string error = proc.StandardError.ReadToEnd();
+                                this.Invoke(new Action(() =>
+                                {
+                                    lblStatus.Text = $"Pull failed: {error}";
+                                }));
+                                return;
+                            }
+                        }
+
+                        // Step 3: Load image
+                        if (File.Exists(tempPath))
+                        {
+                            try
+                            {
+                                using (var stream = new FileStream(tempPath, FileMode.Open, FileAccess.Read))
+                                {
+                                    Image img = Image.FromStream(stream);
+                                    this.Invoke(new Action(() =>
+                                    {
+                                        screenBox.Image?.Dispose();
+                                        screenBox.Image = (Image)img.Clone();
+                                        lblStatus.Text = $"Screen captured at {DateTime.Now:HH:mm:ss}";
+                                    }));
+                                }
+                                File.Delete(tempPath);
+                            }
+                            catch (Exception imgEx)
+                            {
+                                this.Invoke(new Action(() =>
+                                {
+                                    lblStatus.Text = $"Image load error: {imgEx.Message}";
+                                }));
+                            }
+                        }
+                        else
+                        {
+                            this.Invoke(new Action(() =>
+                            {
+                                lblStatus.Text = "Screenshot file not found. Is device connected?";
+                            }));
+                        }
+
+                        // Cleanup phone file
+                        var psiClean = new ProcessStartInfo
+                        {
+                            FileName = adbPath,
+                            Arguments = $"shell rm {phonePath}",
+                            UseShellExecute = false,
+                            CreateNoWindow = true
+                        };
+                        Process.Start(psiClean)?.WaitForExit(2000);
                     }
                     catch (Exception ex)
                     {
