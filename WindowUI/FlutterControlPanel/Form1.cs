@@ -438,7 +438,7 @@ namespace FlutterControlPanel
                 // Kill any existing instances of flutter run if we are starting a new one? 
                 // No, let user manage that or simple stop.
                 
-                string fullCmd = $"{fileName} {arguments}";
+                string fullCmd = $"\"{fileName}\" {arguments}";
                 Log($"Working Dir: {projectRoot}");
                 Log($"Executing: {fullCmd}...");
 
