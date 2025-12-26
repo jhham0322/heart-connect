@@ -3603,6 +3603,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                   children: [
                     // 검색창
                     TextField(
+                      controller: TextEditingController(text: searchQuery),
                       decoration: InputDecoration(
                         hintText: '이름 또는 전화번호 검색',
                         prefixIcon: const Icon(Icons.search, color: Color(0xFFF29D86)),
@@ -3622,26 +3623,49 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                     ),
                     const SizedBox(height: 10),
                     
-                    // 필터 버튼들
-                    Row(
-                      children: ['전체', '즐겨찾기', '가족'].map((filter) {
-                        final isActive = selectedFilter == filter;
-                        return Padding(
-                          padding: const EdgeInsets.only(right: 8),
-                          child: ChoiceChip(
-                            label: Text(filter),
-                            selected: isActive,
-                            selectedColor: const Color(0xFFF29D86),
-                            labelStyle: TextStyle(
-                              color: isActive ? Colors.white : Colors.grey[700],
-                              fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-                            ),
-                            onSelected: (selected) {
-                              setDialogState(() => selectedFilter = filter);
-                            },
-                          ),
+                    // 필터 버튼들 - 화면 크기에 따라 아이콘/텍스트 전환
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        final isNarrow = constraints.maxWidth < 280;
+                        final filters = [
+                          {'name': '전체', 'icon': Icons.people},
+                          {'name': '즐겨찾기', 'icon': Icons.star},
+                          {'name': '가족', 'icon': Icons.family_restroom},
+                        ];
+                        
+                        return Row(
+                          children: filters.map((filter) {
+                            final filterName = filter['name'] as String;
+                            final filterIcon = filter['icon'] as IconData;
+                            final isActive = selectedFilter == filterName;
+                            
+                            return Padding(
+                              padding: const EdgeInsets.only(right: 8),
+                              child: Tooltip(
+                                message: filterName,
+                                child: ChoiceChip(
+                                  label: isNarrow 
+                                      ? Icon(
+                                          filterIcon, 
+                                          size: 18, 
+                                          color: isActive ? Colors.white : Colors.grey[700],
+                                        )
+                                      : Text(filterName),
+                                  selected: isActive,
+                                  selectedColor: const Color(0xFFF29D86),
+                                  labelStyle: TextStyle(
+                                    color: isActive ? Colors.white : Colors.grey[700],
+                                    fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+                                  ),
+                                  onSelected: (selected) {
+                                    setDialogState(() => selectedFilter = filterName);
+                                  },
+                                ),
+                              ),
+                            );
+                          }).toList(),
                         );
-                      }).toList(),
+                      },
                     ),
                     const SizedBox(height: 10),
                     
@@ -3693,14 +3717,17 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                            // Refresh contact list
                            final newContacts = await db.getAllContacts();
                            
-                           // Extract phone from result to auto-select
-                           final match = RegExp(r'\(([^)]+)\)').firstMatch(result);
+                           // Extract name and phone from result
+                           final match = RegExp(r'^(.+) \(([^)]+)\)$').firstMatch(result);
                            if (match != null) {
-                              final newPhone = match.group(1)!;
+                              final newName = match.group(1)!;
+                              final newPhone = match.group(2)!;
                               setDialogState(() {
                                 contacts.clear();
                                 contacts.addAll(newContacts);
                                 selectedPhones.add(newPhone);
+                                // 검색어를 새로 추가된 이름으로 설정
+                                searchQuery = newName;
                               });
                            }
                         }
