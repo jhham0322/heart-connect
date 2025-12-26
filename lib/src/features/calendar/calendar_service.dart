@@ -33,7 +33,9 @@ class CalendarService {
   Future<List<CalendarEventData>> getEvents(DateTime start, DateTime end) async {
     final events = <CalendarEventData>[];
 
-    // Mobile Integration logic
+    // Mobile Integration - 실제 디바이스 캘린더 연동
+    // device_calendar 패키지가 구글 캘린더, 네이버 캘린더, Samsung 캘린더 등
+    // 디바이스에 등록된 모든 캘린더 계정을 자동으로 읽어옵니다.
     if (Platform.isAndroid || Platform.isIOS) {
        try {
          var permissions = await _deviceCalendar.hasPermissions();
@@ -43,13 +45,19 @@ class CalendarService {
          
          if (permissions.isSuccess && permissions.data!) {
             final calendars = await _deviceCalendar.retrieveCalendars();
+            debugPrint('[CalendarService] Found ${calendars.data?.length ?? 0} calendars');
+            
             if (calendars.isSuccess && calendars.data != null) {
                for (var cal in calendars.data!) {
+                   debugPrint('[CalendarService] Reading calendar: ${cal.name} (${cal.accountName}) - ${_determineSource(cal)}');
+                   
                    final evResult = await _deviceCalendar.retrieveEvents(
                       cal.id, 
                       RetrieveEventsParams(startDate: start, endDate: end)
                    );
                    if (evResult.isSuccess && evResult.data != null) {
+                      debugPrint('[CalendarService] Found ${evResult.data!.length} events in ${cal.name}');
+                      
                       for (var e in evResult.data!) {
                           if (e.start == null) continue;
                           final date = DateTime.fromMillisecondsSinceEpoch(e.start!.millisecondsSinceEpoch);
@@ -64,21 +72,22 @@ class CalendarService {
                    }
                }
             }
+         } else {
+            debugPrint('[CalendarService] Calendar permission denied');
          }
        } catch (e) {
-         // Silently ignore errors on unsupported platforms or permission issues
-         debugPrint("Calendar Sync Error: $e");
+         debugPrint("[CalendarService] Calendar Sync Error: $e");
        }
     } 
     
-    // Filter out duplicates if Mock data overlaps (not implemented here, simple append)
-    // Always add Mock Data for demo/PC
-    if (Platform.isWindows || events.isEmpty) {
+    // Windows에서만 Mock Data 사용 (개발/테스트용)
+    if (Platform.isWindows) {
         events.addAll(_getMockEvents(start, end));
     }
     
-    // Sort
+    // Sort by date
     events.sort((a, b) => a.date.compareTo(b.date));
+    debugPrint('[CalendarService] Total events loaded: ${events.length}');
     return events;
   }
 

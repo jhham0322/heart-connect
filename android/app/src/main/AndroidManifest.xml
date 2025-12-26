@@ -8,6 +8,10 @@
     <!-- Required for Call log (recent contacts) -->
     <uses-permission android:name="android.permission.READ_CALL_LOG"/>
     
+    <!-- Required for Calendar sync (Google Calendar, Naver Calendar, etc.) -->
+    <uses-permission android:name="android.permission.READ_CALENDAR"/>
+    <uses-permission android:name="android.permission.WRITE_CALENDAR"/>
+    
     <application
         android:label="HC"
         android:name="${applicationName}"
