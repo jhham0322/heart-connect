@@ -3207,28 +3207,34 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                       const SizedBox(height: 10),
                       Expanded(
                         child: Container(
-                          width: double.infinity,
                           margin: const EdgeInsets.symmetric(horizontal: 10),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey.withOpacity(0.3)),
-                            borderRadius: BorderRadius.circular(8),
-                            color: Colors.grey[100],
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: GestureDetector(
-                              onDoubleTap: () {
-                                if (transformationController.value.getMaxScaleOnAxis() > 1.0) {
-                                  transformationController.value = Matrix4.identity();
-                                } else {
-                                  transformationController.value = Matrix4.identity()..scale(3.0);
-                                }
-                              },
-                              child: InteractiveViewer(
-                                transformationController: transformationController,
-                                minScale: 1.0,
-                                maxScale: 5.0,
-                                child: Image.file(File(savedPath), fit: BoxFit.contain),
+                          child: Center(
+                            child: AspectRatio(
+                              aspectRatio: 3 / 4, // 카드 종횡비
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.grey.withOpacity(0.3)),
+                                  borderRadius: BorderRadius.circular(8),
+                                  color: Colors.grey[100],
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: GestureDetector(
+                                    onDoubleTap: () {
+                                      if (transformationController.value.getMaxScaleOnAxis() > 1.0) {
+                                        transformationController.value = Matrix4.identity();
+                                      } else {
+                                        transformationController.value = Matrix4.identity()..scale(3.0);
+                                      }
+                                    },
+                                    child: InteractiveViewer(
+                                      transformationController: transformationController,
+                                      minScale: 1.0,
+                                      maxScale: 5.0,
+                                      child: Image.file(File(savedPath), fit: BoxFit.cover),
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
                           ),
@@ -3471,26 +3477,105 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     await showDialog(
       context: context,
       builder: (context) {
+        String searchQuery = '';
+        String selectedFilter = '전체';
+        
         return StatefulBuilder(
           builder: (context, setDialogState) {
+            // 필터링된 연락처 목록
+            final filteredContacts = contacts.where((contact) {
+              // 검색어 필터
+              final matchesSearch = searchQuery.isEmpty ||
+                  contact.name.toLowerCase().contains(searchQuery.toLowerCase()) ||
+                  contact.phone.contains(searchQuery);
+              
+              // 카테고리 필터
+              bool matchesCategory = true;
+              if (selectedFilter == '즐겨찾기') {
+                matchesCategory = contact.isFavorite;
+              } else if (selectedFilter == '가족') {
+                matchesCategory = contact.groupTag == '가족' || contact.groupTag == 'Family';
+              }
+              
+              return matchesSearch && matchesCategory;
+            }).toList();
+            
             return AlertDialog(
               title: const Text("발송 대상 선택"),
               content: SizedBox(
                 width: double.maxFinite,
-                height: 400,
+                height: 450,
                 child: Column(
                   children: [
+                    // 검색창
+                    TextField(
+                      decoration: InputDecoration(
+                        hintText: '이름 또는 전화번호 검색',
+                        prefixIcon: const Icon(Icons.search, color: Color(0xFFF29D86)),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(color: Color(0xFFF29D86)),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(color: Color(0xFFF29D86), width: 2),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      ),
+                      onChanged: (value) {
+                        setDialogState(() => searchQuery = value);
+                      },
+                    ),
+                    const SizedBox(height: 10),
+                    
+                    // 필터 버튼들
+                    Row(
+                      children: ['전체', '즐겨찾기', '가족'].map((filter) {
+                        final isActive = selectedFilter == filter;
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: ChoiceChip(
+                            label: Text(filter),
+                            selected: isActive,
+                            selectedColor: const Color(0xFFF29D86),
+                            labelStyle: TextStyle(
+                              color: isActive ? Colors.white : Colors.grey[700],
+                              fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+                            ),
+                            onSelected: (selected) {
+                              setDialogState(() => selectedFilter = filter);
+                            },
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 10),
+                    
+                    // 연락처 목록
                     Expanded(
-                      child: contacts.isEmpty
-                          ? const Center(child: Text("저장된 연락처가 없습니다."))
+                      child: filteredContacts.isEmpty
+                          ? Center(
+                              child: Text(
+                                searchQuery.isNotEmpty 
+                                    ? "검색 결과가 없습니다."
+                                    : "저장된 연락처가 없습니다.",
+                                style: const TextStyle(color: Colors.grey),
+                              ),
+                            )
                           : ListView.builder(
-                              itemCount: contacts.length,
+                              itemCount: filteredContacts.length,
                               itemBuilder: (context, index) {
-                                final contact = contacts[index];
+                                final contact = filteredContacts[index];
                                 final isSelected = selectedPhones.contains(contact.phone);
                                 return CheckboxListTile(
                                   value: isSelected,
-                                  title: Text(contact.name),
+                                  title: Row(
+                                    children: [
+                                      Expanded(child: Text(contact.name)),
+                                      if (contact.isFavorite == true)
+                                        const Icon(Icons.star, color: Colors.amber, size: 16),
+                                    ],
+                                  ),
                                   subtitle: Text(formatPhone(contact.phone)),
                                   activeColor: const Color(0xFFF29D86),
                                   onChanged: (bool? value) {
