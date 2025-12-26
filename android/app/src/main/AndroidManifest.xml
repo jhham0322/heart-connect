@@ -2,6 +2,9 @@
     <!-- Required for Gemini API calls -->
     <uses-permission android:name="android.permission.INTERNET"/>
     
+    <!-- Required for Contacts sync -->
+    <uses-permission android:name="android.permission.READ_CONTACTS"/>
+    
     <application
         android:label="heart_connect"
         android:name="${applicationName}"
