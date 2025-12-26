@@ -648,6 +648,20 @@ namespace FlutterControlPanel
             }
         }
 
+        // ADB 명령을 올바르게 실행하는 헬퍼 함수
+        private void StartAdbCommand(string arguments)
+        {
+            if (!File.Exists(adbPath))
+            {
+                Log($"ERROR: ADB not found at: {adbPath}");
+                Log("Please install Android SDK Platform Tools");
+                return;
+            }
+            
+            // adb.exe를 직접 fileName으로 전달 (StartProcess가 cmd /c로 감싸줌)
+            StartProcess(adbPath, arguments);
+        }
+
         private void StopProcess()
         {
             if (cmdProcess != null && !cmdProcess.HasExited)
@@ -692,7 +706,7 @@ namespace FlutterControlPanel
         {
             outputBox.Clear();
             Log("Checking connected devices...");
-            StartProcess(adbPath, "devices -l");
+            StartAdbCommand("devices -l");
         }
 
         private void BtnInstallToDevice_Click(object sender, EventArgs e)
@@ -713,7 +727,7 @@ namespace FlutterControlPanel
 
             outputBox.Clear();
             Log($"Installing APK: {apkPath}");
-            StartProcess(adbPath, $"install -r \"{apkPath}\"");
+            StartAdbCommand($"install -r \"{apkPath}\"");
         }
 
         private void BtnRunOnDevice_Click(object sender, EventArgs e)
@@ -721,7 +735,8 @@ namespace FlutterControlPanel
             outputBox.Clear();
             Log("Launching app on device...");
             // Package name from build.gradle.kts
-            StartProcess(adbPath, "shell am start -n com.example.heart_connect/.MainActivity");
+            string packageName = GetPackageName();
+            StartAdbCommand($"shell monkey -p {packageName} -c android.intent.category.LAUNCHER 1");
         }
 
         private void BtnLogcat_Click(object sender, EventArgs e)
@@ -737,7 +752,7 @@ namespace FlutterControlPanel
             Log("Press 'Stop' to stop logging.\n");
             
             // Filter logs for Flutter app
-            StartProcess(adbPath, "logcat -v time *:S flutter:V FlutterActivity:V");
+            StartAdbCommand("logcat -v time *:S flutter:V FlutterActivity:V");
         }
 
         private void BtnHelp_Click(object sender, EventArgs e)

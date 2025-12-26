@@ -1,0 +1,14 @@
+E:\work2025\App\ConnectHeart\WindowUI\FlutterControlPanel\bin\Debug\net8.0-windows\FlutterControlPanel.exe
+E:\work2025\App\ConnectHeart\WindowUI\FlutterControlPanel\bin\Debug\net8.0-windows\FlutterControlPanel.deps.json
+E:\work2025\App\ConnectHeart\WindowUI\FlutterControlPanel\bin\Debug\net8.0-windows\FlutterControlPanel.runtimeconfig.json
+E:\work2025\App\ConnectHeart\WindowUI\FlutterControlPanel\bin\Debug\net8.0-windows\FlutterControlPanel.dll
+E:\work2025\App\ConnectHeart\WindowUI\FlutterControlPanel\bin\Debug\net8.0-windows\FlutterControlPanel.pdb
+E:\work2025\App\ConnectHeart\WindowUI\FlutterControlPanel\obj\Debug\net8.0-windows\FlutterControlPanel.GeneratedMSBuildEditorConfig.editorconfig
+E:\work2025\App\ConnectHeart\WindowUI\FlutterControlPanel\obj\Debug\net8.0-windows\FlutterControlPanel.AssemblyInfoInputs.cache
+E:\work2025\App\ConnectHeart\WindowUI\FlutterControlPanel\obj\Debug\net8.0-windows\FlutterControlPanel.AssemblyInfo.cs
+E:\work2025\App\ConnectHeart\WindowUI\FlutterControlPanel\obj\Debug\net8.0-windows\FlutterControlPanel.csproj.CoreCompileInputs.cache
+E:\work2025\App\ConnectHeart\WindowUI\FlutterControlPanel\obj\Debug\net8.0-windows\FlutterControlPanel.dll
+E:\work2025\App\ConnectHeart\WindowUI\FlutterControlPanel\obj\Debug\net8.0-windows\refint\FlutterControlPanel.dll
+E:\work2025\App\ConnectHeart\WindowUI\FlutterControlPanel\obj\Debug\net8.0-windows\FlutterControlPanel.pdb
+E:\work2025\App\ConnectHeart\WindowUI\FlutterControlPanel\obj\Debug\net8.0-windows\FlutterControlPanel.genruntimeconfig.cache
+E:\work2025\App\ConnectHeart\WindowUI\FlutterControlPanel\obj\Debug\net8.0-windows\ref\FlutterControlPanel.dll

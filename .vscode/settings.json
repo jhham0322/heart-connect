@@ -4,5 +4,6 @@
         ".dart_tool\\build",
         ".dart_tool\\build_resolvers",
         ".flutter-plugins-dependencies"
-    ]
+    ],
+    "cmake.sourceDirectory": "E:/work2025/App/ConnectHeart/windows"
 }
