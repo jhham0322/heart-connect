@@ -2154,7 +2154,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
               ),
             ),
           
-          // 안내 메시지 영역 (undo/redo 버튼 영역 침범 방지)
+          // 안내 메시지 영역 (undo/redo 버튼 영역 침범 방지, right: 110)
           // - 초기: 더블탭 안내
           // - 줌 모드: 드래그/확대축소 방법 안내
           // - 드래그 중: 이동 가능 표시
@@ -2163,43 +2163,42 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
             Positioned(
               top: MediaQuery.of(context).padding.top + 50,
               left: 16,
-              right: 80, // undo/redo 버튼 영역 피함
-              child: GestureDetector(
-                onTap: () => setState(() => _showInitialHint = false),
-                child: Container(
-                  height: 32,
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF29D86).withOpacity(0.95),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  clipBehavior: Clip.hardEdge,
-                  child: const Center(
-                    child: Text(
-                      "💡 이미지를 더블탭하면 줌 모드가 됩니다",
-                      style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w500),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
+              right: 110, // undo/redo 버튼 영역 피함
+              child: Container(
+                height: 28,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF29D86).withOpacity(0.95),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                clipBehavior: Clip.hardEdge,
+                child: _MarqueeText(
+                  text: "배경 이미지를 더블탭하시면 줌 모드로 전환됩니다. 줌 모드에서 이미지 크기와 위치를 조절하실 수 있습니다.",
+                  durationSeconds: 10,
+                  onComplete: () {
+                    if (mounted) setState(() => _showInitialHint = false);
+                  },
                 ),
               ),
             ),
           
-          if (_showZoomHint && _isZoomMode)
+          if (_showZoomHint && _isZoomMode && !_isPanning && !_isPinching)
             Positioned(
               top: MediaQuery.of(context).padding.top + 50,
               left: 16,
-              right: 80, // undo/redo 버튼 영역 피함
+              right: 110, // undo/redo 버튼 영역 피함
               child: Container(
-                height: 32,
-                padding: const EdgeInsets.symmetric(horizontal: 12),
+                height: 28,
                 decoration: BoxDecoration(
                   color: const Color(0xFFF29D86).withOpacity(0.95),
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(14),
                 ),
                 clipBehavior: Clip.hardEdge,
-                child: const _MarqueeText(
-                  text: "🤏 두 손가락 핀치로 확대/축소  |  👆 드래그로 이동  |  더블탭 또는 줌 버튼으로 종료",
+                child: _MarqueeText(
+                  text: "두 손가락으로 벌리거나 줄여서 이미지 크기를 조정하실 수 있습니다. 한 손가락으로 드래그하시면 이미지를 이동하실 수 있습니다. 편집이 완료되시면 더블탭 또는 줌 모드 버튼을 눌러 종료해 주세요.",
+                  durationSeconds: 15,
+                  onComplete: () {
+                    if (mounted) setState(() => _showZoomHint = false);
+                  },
                 ),
               ),
             ),
@@ -2209,19 +2208,17 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
             Positioned(
               top: MediaQuery.of(context).padding.top + 50,
               left: 16,
-              right: 80,
+              right: 110,
               child: Container(
-                height: 32,
-                padding: const EdgeInsets.symmetric(horizontal: 12),
+                height: 28,
                 decoration: BoxDecoration(
                   color: Colors.blue.withOpacity(0.9),
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(14),
                 ),
-                child: const Center(
-                  child: Text(
-                    "👆 드래그 중 - 이미지 이동 가능",
-                    style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
-                  ),
+                clipBehavior: Clip.hardEdge,
+                child: const _MarqueeText(
+                  text: "드래그 중입니다. 손가락을 움직여 이미지 위치를 조정해 주세요.",
+                  durationSeconds: 8,
                 ),
               ),
             ),
@@ -2231,19 +2228,17 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
             Positioned(
               top: MediaQuery.of(context).padding.top + 50,
               left: 16,
-              right: 80,
+              right: 110,
               child: Container(
-                height: 32,
-                padding: const EdgeInsets.symmetric(horizontal: 12),
+                height: 28,
                 decoration: BoxDecoration(
                   color: Colors.green.withOpacity(0.9),
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(14),
                 ),
-                child: const Center(
-                  child: Text(
-                    "🤏 핀치 중 - 확대/축소 가능",
-                    style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
-                  ),
+                clipBehavior: Clip.hardEdge,
+                child: const _MarqueeText(
+                  text: "확대/축소 중입니다. 두 손가락을 벌리거나 줄여서 이미지 크기를 조정해 주세요.",
+                  durationSeconds: 8,
                 ),
               ),
             ),
@@ -3285,16 +3280,9 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(color: const Color(0xFFB2EBF2)),
                         ),
-                        child: const Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.touch_app, size: 14, color: Color(0xFF0097A7)),
-                            SizedBox(width: 6),
-                            Text(
-                              "💡 더블 클릭: 확대/축소  |  드래그: 이동",
-                              style: TextStyle(fontSize: 12, color: Color(0xFF006064), fontWeight: FontWeight.bold),
-                            ),
-                          ],
+                        child: const Text(
+                          "더블탭으로 확대/축소, 드래그로 이미지 이동이 가능합니다",
+                          style: TextStyle(fontSize: 11, color: Color(0xFF006064), fontWeight: FontWeight.w500),
                         ),
                       ),
                       const SizedBox(height: 10),
@@ -4994,7 +4982,14 @@ class CloudBorder extends OutlinedBorder {
 // 가로 스크롤 애니메이션 텍스트 위젯
 class _MarqueeText extends StatefulWidget {
   final String text;
-  const _MarqueeText({required this.text});
+  final VoidCallback? onComplete;
+  final int durationSeconds;
+  
+  const _MarqueeText({
+    required this.text, 
+    this.onComplete,
+    this.durationSeconds = 12,
+  });
 
   @override
   State<_MarqueeText> createState() => _MarqueeTextState();
@@ -5003,16 +4998,29 @@ class _MarqueeText extends StatefulWidget {
 class _MarqueeTextState extends State<_MarqueeText> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
+  bool _hasCompleted = false;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(seconds: 10),
+      duration: Duration(seconds: widget.durationSeconds),
       vsync: this,
-    )..repeat();
+    );
     
-    _animation = Tween<double>(begin: 1.0, end: -1.0).animate(_controller);
+    _animation = Tween<double>(begin: 1.0, end: -1.5).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.linear),
+    );
+    
+    // 한 바퀴 돌면 콜백 호출
+    _controller.addStatusListener((status) {
+      if (status == AnimationStatus.completed && !_hasCompleted) {
+        _hasCompleted = true;
+        widget.onComplete?.call();
+      }
+    });
+    
+    _controller.forward();
   }
 
   @override
@@ -5035,12 +5043,12 @@ class _MarqueeTextState extends State<_MarqueeText> with SingleTickerProviderSta
         mainAxisSize: MainAxisSize.min,
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
             child: Text(
               widget.text,
               style: const TextStyle(
                 color: Colors.white,
-                fontSize: 13,
+                fontSize: 12,
                 fontWeight: FontWeight.w500,
               ),
             ),
