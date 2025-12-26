@@ -2157,10 +2157,10 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
               left: 16,
               right: 16,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                height: 36,
                 decoration: BoxDecoration(
                   color: const Color(0xFFF29D86).withOpacity(0.95),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(18),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.2),
@@ -2169,49 +2169,9 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                     ),
                   ],
                 ),
-                child: const Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(Icons.pinch, color: Colors.white, size: 18),
-                        SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            "두 손가락으로 벌리고 줄여서 이미지 크기 조정",
-                            style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w500),
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 6),
-                    Row(
-                      children: [
-                        Icon(Icons.pan_tool, color: Colors.white, size: 18),
-                        SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            "드래그해서 이미지 이동",
-                            style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w500),
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 6),
-                    Row(
-                      children: [
-                        Icon(Icons.touch_app, color: Colors.white, size: 18),
-                        SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            "더블클릭 또는 줌 모드 버튼으로 종료",
-                            style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w500),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                clipBehavior: Clip.hardEdge,
+                child: const _MarqueeText(
+                  text: "✨ 환영합니다! 두 손가락으로 벌리거나 줄여서 이미지 크기를 조정하실 수 있습니다. 화면을 드래그하시면 이미지를 이동하실 수 있습니다. 편집이 완료되시면 더블클릭 또는 줌 모드 버튼을 눌러 종료해 주세요. ✨",
                 ),
               ),
             ),
@@ -4870,7 +4830,7 @@ class _MarqueeTextState extends State<_MarqueeText> with SingleTickerProviderSta
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(seconds: 6),
+      duration: const Duration(seconds: 10),
       vsync: this,
     )..repeat();
     
