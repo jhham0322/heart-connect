@@ -223,6 +223,14 @@ class AppDatabase extends _$AppDatabase {
     );
     await (update(contacts)..where((t) => t.id.equals(contactId))).write(companion);
   }
+  
+  // 가족 태그 업데이트
+  Future<void> updateContactFamily(int contactId, bool isFamily) async {
+    final companion = ContactsCompanion(
+      groupTag: Value(isFamily ? '가족' : null),
+    );
+    await (update(contacts)..where((t) => t.id.equals(contactId))).write(companion);
+  }
 
   // HISTORY methods
   Future<List<HistoryData>> getHistoryForContact(int contactId) {

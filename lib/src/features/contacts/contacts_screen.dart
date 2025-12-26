@@ -241,7 +241,7 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
             });
             break;
           case '가족':
-            // 성씨가 같거나 groupTag에 가족이 포함 또는 즐겨찾기(단축번호) 연락처
+            // 즐겨찾기(단축번호) + 성씨가 같거나 groupTag에 가족 포함
             contacts = contacts.where((c) {
               // 즐겨찾기(단축번호)도 가족에 포함
               if (c.isFavorite) {
@@ -257,10 +257,17 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
               }
               return false;
             }).toList();
-            // 가족 필터에서는 즐겨찾기(스타/단축번호) 연락처를 맨 위로
+            // 정렬: 1. 즐겨찾기 먼저 → 2. 같은 성씨 → 3. 이름순
             contacts.sort((a, b) {
+              // 1순위: 즐겨찾기
               if (a.isFavorite && !b.isFavorite) return -1;
               if (!a.isFavorite && b.isFavorite) return 1;
+              // 2순위: 같은 성씨 (둘 다 즐겨찾기이거나 둘 다 아닐 때)
+              final aIsSameFamily = a.name.isNotEmpty && a.name[0] == myFamilyName;
+              final bIsSameFamily = b.name.isNotEmpty && b.name[0] == myFamilyName;
+              if (aIsSameFamily && !bIsSameFamily) return -1;
+              if (!aIsSameFamily && bIsSameFamily) return 1;
+              // 3순위: 이름순
               return a.name.compareTo(b.name);
             });
             break;
@@ -276,6 +283,9 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
 
         // 필터 결과가 없는 경우
         if (contacts.isEmpty) {
+          if (_selectedFilter == '가족') {
+            return _buildEmptyFamilyState();
+          }
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -416,6 +426,24 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
                 ],
               ),
             ),
+            // 가족 필터일 때 가족 삭제 버튼
+            if (_selectedFilter == '가족')
+              GestureDetector(
+                onTap: () async {
+                  // 가족에서 제거
+                  final db = ref.read(appDatabaseProvider);
+                  await db.updateContactFamily(contact.id, false);
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("${contact.name}을(를) 가족에서 제거했습니다.")),
+                    );
+                  }
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  child: const Icon(FontAwesomeIcons.userMinus, color: Colors.red, size: 18),
+                ),
+              ),
             IconButton(
               icon: Image.asset(
                 'assets/icons/heart_icon.png',
@@ -430,6 +458,85 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
             )
           ],
         ),
+      ),
+    );
+  }
+  
+  Widget _buildEmptyFamilyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(FontAwesomeIcons.peopleGroup, size: 48, color: Colors.grey),
+          const SizedBox(height: 16),
+          const Text("가족으로 등록된 연락처가 없습니다."),
+          const SizedBox(height: 16),
+          ElevatedButton.icon(
+            onPressed: _showAddFamilyDialog,
+            icon: const Icon(FontAwesomeIcons.userPlus, size: 16),
+            label: const Text("가족 추가"),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF5D4037),
+              foregroundColor: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  void _showAddFamilyDialog() async {
+    final db = ref.read(appDatabaseProvider);
+    final allContacts = await db.getAllContacts();
+    
+    // 가족이 아닌 연락처만 필터링
+    final nonFamilyContacts = allContacts.where((c) {
+      if (c.isFavorite) return false;
+      if (c.groupTag?.contains('가족') == true) return false;
+      return true;
+    }).toList();
+    
+    if (!mounted) return;
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("가족 추가"),
+        content: SizedBox(
+          width: double.maxFinite,
+          height: 400,
+          child: nonFamilyContacts.isEmpty 
+              ? const Center(child: Text("추가할 연락처가 없습니다."))
+              : ListView.builder(
+                  itemCount: nonFamilyContacts.length,
+                  itemBuilder: (context, index) {
+                    final contact = nonFamilyContacts[index];
+                    return ListTile(
+                      title: Text(contact.name),
+                      subtitle: Text(formatPhone(contact.phone)),
+                      trailing: IconButton(
+                        icon: const Icon(FontAwesomeIcons.userPlus, color: Color(0xFF5D4037)),
+                        onPressed: () async {
+                          await db.updateContactFamily(contact.id, true);
+                          if (mounted) {
+                            Navigator.pop(context);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text("${contact.name}을(를) 가족으로 추가했습니다.")),
+                            );
+                            setState(() {}); // 새로고침
+                          }
+                        },
+                      ),
+                    );
+                  },
+                ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("닫기"),
+          ),
+        ],
       ),
     );
   }
