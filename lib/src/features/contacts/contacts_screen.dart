@@ -9,6 +9,7 @@ import '../database/database_provider.dart';
 import '../../theme/app_theme.dart';
 import 'contact_detail_screen.dart';
 import '../../utils/phone_formatter.dart';
+import 'current_contact_provider.dart';
 
 class ContactsScreen extends ConsumerStatefulWidget {
   const ContactsScreen({super.key});
@@ -20,6 +21,7 @@ class ContactsScreen extends ConsumerStatefulWidget {
 class _ContactsScreenState extends ConsumerState<ContactsScreen> {
   int _selectedTabIndex = 0; // 0: My People, 1: Memory Record
   String _searchQuery = '';
+  Contact? _selectedContact; // 현재 선택된 연락처
 
   @override
   Widget build(BuildContext context) {
@@ -141,6 +143,16 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
           return _buildEmptyState();
         }
 
+        // 첫 번째 연락처 자동 선택 (아무것도 선택되지 않은 경우)
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (_selectedContact == null && contacts.isNotEmpty) {
+            setState(() {
+              _selectedContact = contacts.first;
+            });
+            ref.read(currentContactProvider.notifier).state = contacts.first;
+          }
+        });
+
         return ListView.builder(
           padding: const EdgeInsets.fromLTRB(20, 10, 20, 100),
           itemCount: contacts.length,
@@ -197,8 +209,18 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
   }
 
   Widget _buildContactCard(Contact contact) {
+    final isSelected = _selectedContact?.id == contact.id;
+    
     return GestureDetector(
       onTap: () {
+        // 연락처 선택
+        setState(() {
+          _selectedContact = contact;
+        });
+        ref.read(currentContactProvider.notifier).state = contact;
+      },
+      onDoubleTap: () {
+        // 더블탭으로 상세화면 이동
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => ContactDetailScreen(contact: contact)),
@@ -208,9 +230,12 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: isSelected ? const Color(0xFFFFF3E0) : Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFF5D4037).withOpacity(0.05)),
+          border: Border.all(
+            color: isSelected ? const Color(0xFFFF8A65) : const Color(0xFF5D4037).withOpacity(0.05),
+            width: isSelected ? 2 : 1,
+          ),
           boxShadow: [
             BoxShadow(color: Colors.black.withOpacity(0.03), offset: const Offset(0, 4), blurRadius: 10)
           ],
