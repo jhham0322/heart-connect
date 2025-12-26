@@ -85,6 +85,9 @@ class HomeViewModel extends StateNotifier<HomeState> {
     // AI Service for Name Extraction
     final aiService = AiService(); 
     
+    // 0. Mock 데이터 삭제 (이전에 저장된 테스트용 데이터 정리)
+    await db.deleteMockPlans();
+    
     // 1. Generate Base Plans (Holidays, Birthdays)
     await db.generateWeeklyPlans();
     

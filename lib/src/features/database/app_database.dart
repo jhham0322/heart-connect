@@ -373,6 +373,22 @@ class AppDatabase extends _$AppDatabase {
     return (delete(dailyPlans)..where((t) => t.date.isSmallerThanValue(cutoff))).go();
   }
 
+  // Mock 데이터 삭제 (이전에 저장된 테스트용 데이터 정리)
+  Future<void> deleteMockPlans() async {
+    final mockTitles = [
+      '유재석의 생일',
+      '박명수의 생일',
+      '결혼기념일 10주년',
+      'Christmas (성탄절)',
+      '신정 (New Year)',
+    ];
+    
+    for (var title in mockTitles) {
+      await (delete(dailyPlans)..where((t) => t.content.equals(title))).go();
+    }
+    print('[AppDatabase] Deleted mock plans from database');
+  }
+
   // --- Plan Generation Logic ---
   Future<void> generateWeeklyPlans() async {
     final now = DateTime.now();
