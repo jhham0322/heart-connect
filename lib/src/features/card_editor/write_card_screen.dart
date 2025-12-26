@@ -3303,6 +3303,10 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                       Expanded(
                         child: Container(
                           margin: const EdgeInsets.symmetric(horizontal: 10),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[100],
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(8),
                             child: GestureDetector(
@@ -3317,9 +3321,13 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                                 transformationController: transformationController,
                                 minScale: 1.0,
                                 maxScale: 5.0,
-                                child: Image.file(
-                                  File(savedPath), 
-                                  fit: BoxFit.contain, // contain으로 변경하여 찌그러짐 방지
+                                constrained: true,
+                                boundaryMargin: EdgeInsets.zero,
+                                child: Center(
+                                  child: Image.file(
+                                    File(savedPath), 
+                                    fit: BoxFit.contain,
+                                  ),
                                 ),
                               ),
                             ),
@@ -5014,8 +5022,8 @@ class _MarqueeTextState extends State<_MarqueeText> with SingleTickerProviderSta
     // 텍스트 너비 계산
     _textWidth = _calculateTextWidth(widget.text, 12.0);
     
-    // 애니메이션 시간: 텍스트 너비에 비례 (100픽셀당 약 3초, 최소 8초, 최대 60초)
-    final calculatedDuration = ((_textWidth + 300) / 35).clamp(8.0, 60.0).toInt();
+    // 애니메이션 시간: 텍스트 너비에 비례 (20% 더 빠르게, 최소 5초, 최대 42초)
+    final calculatedDuration = ((_textWidth + 300) / 52).clamp(5.0, 42.0).toInt();
     final duration = widget.durationSeconds > 0 ? widget.durationSeconds : calculatedDuration;
     
     _controller = AnimationController(
