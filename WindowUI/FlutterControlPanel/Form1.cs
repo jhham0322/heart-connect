@@ -322,7 +322,8 @@ namespace FlutterControlPanel
                 MessageBox.Show("Please stop the running process first.");
                 return;
             }
-            StartProcess("flutter", "build apk --release");
+            // Gradle 캐시 정리 후 빌드 (core library desugaring 설정 적용을 위해)
+            StartProcess("cmd", "/c flutter clean && flutter build apk --release");
         }
 
         private void StartProcess(string fileName, string arguments)
