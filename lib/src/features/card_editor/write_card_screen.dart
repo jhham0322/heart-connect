@@ -2114,46 +2114,104 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
             ),
           ),
           
-          // 줌 모드 표시 아이콘
+          // 줌 모드 표시 아이콘 (클릭하면 줌 모드 종료)
           if (_isZoomMode)
             Positioned(
               top: MediaQuery.of(context).padding.top + 100,
               left: 0,
               right: 0,
               child: Center(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.7),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.zoom_in, color: Colors.white, size: 16),
-                      SizedBox(width: 6),
-                      Text("줌 모드", style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
-                    ],
+                child: GestureDetector(
+                  onTap: () {
+                    // 줌 버튼 클릭 시 줌 모드 종료
+                    setState(() {
+                      _isZoomMode = false;
+                      _showZoomHint = false;
+                    });
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.7),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.zoom_in, color: Colors.white, size: 16),
+                        SizedBox(width: 6),
+                        Text("줌 모드", style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                        SizedBox(width: 6),
+                        Icon(Icons.close, color: Colors.white70, size: 14),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
           
-          // 줌 모드 안내 문구 (가로 스크롤 애니메이션)
+          // 줌 모드 안내 문구 (정적 텍스트로 변경, 여러 줄)
           if (_showZoomHint)
             Positioned(
               top: MediaQuery.of(context).padding.top + 50,
               left: 16,
               right: 16,
               child: Container(
-                height: 36,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF29D86).withOpacity(0.9),
-                  borderRadius: BorderRadius.circular(18),
+                  color: const Color(0xFFF29D86).withOpacity(0.95),
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
-                clipBehavior: Clip.hardEdge,
-                child: const _MarqueeText(
-                  text: "👆 두 손가락으로 벌리고 줄여서 이미지의 크기를 조정할 수 있습니다. 드래그해서 이미지를 이동할 수 있습니다.",
+                child: const Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.pinch, color: Colors.white, size: 18),
+                        SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            "두 손가락으로 벌리고 줄여서 이미지 크기 조정",
+                            style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w500),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 6),
+                    Row(
+                      children: [
+                        Icon(Icons.pan_tool, color: Colors.white, size: 18),
+                        SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            "드래그해서 이미지 이동",
+                            style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w500),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 6),
+                    Row(
+                      children: [
+                        Icon(Icons.touch_app, color: Colors.white, size: 18),
+                        SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            "더블클릭 또는 줌 모드 버튼으로 종료",
+                            style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w500),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -2488,8 +2546,8 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
       // 줌 모드 진입 시 안내 문구 표시
       if (_isZoomMode) {
         _showZoomHint = true;
-        // 3초 후 안내 문구 숨김
-        Future.delayed(const Duration(seconds: 3), () {
+        // 20초 후 안내 문구 숨김
+        Future.delayed(const Duration(seconds: 20), () {
           if (mounted) {
             setState(() => _showZoomHint = false);
           }
