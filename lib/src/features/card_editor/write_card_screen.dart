@@ -3628,7 +3628,9 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
               if (selectedFilter == '즐겨찾기') {
                 matchesCategory = contact.isFavorite;
               } else if (selectedFilter == '가족') {
-                matchesCategory = contact.groupTag == '가족' || contact.groupTag == 'Family';
+                // 가족 필터: groupTag가 '가족', 'Family', 'family' 중 하나이거나 포함하는 경우
+                final tag = contact.groupTag?.toLowerCase() ?? '';
+                matchesCategory = tag.contains('가족') || tag.contains('family');
               }
               
               return matchesSearch && matchesCategory;
@@ -3641,9 +3643,9 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                 height: 450,
                 child: Column(
                   children: [
-                    // 검색창
+                    // 검색창 - 키보드 자동 팝업 방지
                     TextField(
-                      controller: TextEditingController(text: searchQuery),
+                      autofocus: false,
                       decoration: InputDecoration(
                         hintText: '이름 또는 전화번호 검색',
                         prefixIcon: const Icon(Icons.search, color: Color(0xFFF29D86)),
@@ -3922,6 +3924,11 @@ class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
   void initState() {
     super.initState();
     _localRecipients = List.from(widget.recipients);
+    
+    // 다이얼로그 열 때 키보드 숨기기
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      FocusManager.instance.primaryFocus?.unfocus();
+    });
   }
 
   /// 마우스 트래커 재진입 에러 방지: addPostFrameCallback 사용
@@ -4128,10 +4135,29 @@ class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
       // Process batch (DB inserts)
       for (var item in batch) {
          try {
-           final dashedPhone = _extractDashedPhone(item);
-           if (dashedPhone != null) {
+           // 먼저 대시 포맷 전화번호 추출 시도
+           String? phoneForDb = _extractDashedPhone(item);
+           debugPrint('[발송] 아이템: $item, 대시형식 추출: $phoneForDb');
+           
+           // 대시 포맷이 없으면 숫자만 추출하여 포맷팅
+           if (phoneForDb == null) {
+             // 괄호 안의 내용도 확인 (예: "이름 (01012345678)")
+             String rawDigits = item;
+             final parenMatch = RegExp(r'\(([^)]+)\)').firstMatch(item);
+             if (parenMatch != null) {
+               rawDigits = parenMatch.group(1) ?? item;
+             }
+             final digits = rawDigits.replaceAll(RegExp(r'[^0-9]'), '');
+             debugPrint('[발송] 숫자 추출: $digits (길이: ${digits.length})');
+             if (digits.length >= 10 && digits.length <= 11) {
+               phoneForDb = _formatPhoneDigits(digits);
+               debugPrint('[발송] 포맷팅 결과: $phoneForDb');
+             }
+           }
+           
+           if (phoneForDb != null) {
              // Try to find contact
-             var contact = await (widget.database.select(widget.database.contacts)..where((t) => t.phone.equals(dashedPhone))).getSingleOrNull();
+             var contact = await (widget.database.select(widget.database.contacts)..where((t) => t.phone.equals(phoneForDb!))).getSingleOrNull();
              
              if (contact != null) {
                await widget.database.insertHistory(HistoryCompanion(
@@ -4143,26 +4169,31 @@ class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
                 ));
                _successCount++;
              } else {
-               // Create dummy contact for history test if it's one of our generated ones
-                if (item.contains("수신자")) {
-                  final phoneStartIndex = item.indexOf(dashedPhone);
-                  final dummyName = phoneStartIndex > 0 ? item.substring(0, phoneStartIndex).trimRight() : item;
-                  final newId = await widget.database.insertContact(ContactsCompanion(
-                    name: Value(dummyName.trim()),
-                    phone: Value(dashedPhone),
-                    groupTag: const Value('Test'),
-                  ));
-                  await widget.database.insertHistory(HistoryCompanion(
-                     contactId: Value(newId),
-                     type: const Value('SENT'),
-                     message: Value(widget.messageContent), 
-                     imagePath: Value(widget.savedPath),
-                     eventDate: Value(DateTime.now()),
-                   ));
-                   _successCount++;
-               } else {
-                 _failureCount++;
+               // 연락처가 DB에 없으면 새로 생성하고 발송 성공 처리
+               // item에서 이름 추출 (전화번호 앞부분)
+               String extractedName = item;
+               final phoneIndex = item.indexOf(phoneForDb!);
+               if (phoneIndex > 0) {
+                 extractedName = item.substring(0, phoneIndex).replaceAll(RegExp(r'[()]'), '').trim();
                }
+               
+               // 빈 이름이면 전화번호로 대체
+               if (extractedName.isEmpty) {
+                 extractedName = phoneForDb;
+               }
+               
+               final newId = await widget.database.insertContact(ContactsCompanion(
+                 name: Value(extractedName),
+                 phone: Value(phoneForDb),
+               ));
+               await widget.database.insertHistory(HistoryCompanion(
+                  contactId: Value(newId),
+                  type: const Value('SENT'),
+                  message: Value(widget.messageContent), 
+                  imagePath: Value(widget.savedPath),
+                  eventDate: Value(DateTime.now()),
+                ));
+                _successCount++;
              }
            } else {
              _failureCount++;
@@ -4310,7 +4341,9 @@ class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
                                          if (selectedFilter == '즐겨찾기') {
                                            matchesCategory = contact.isFavorite;
                                          } else if (selectedFilter == '가족') {
-                                           matchesCategory = contact.groupTag == '가족' || contact.groupTag == 'Family';
+                                           // 가족 필터: groupTag가 '가족', 'Family', 'family' 중 하나이거나 포함하는 경우
+                                           final tag = contact.groupTag?.toLowerCase() ?? '';
+                                           matchesCategory = tag.contains('가족') || tag.contains('family');
                                          }
                                          
                                          return matchesSearch && matchesCategory;
@@ -4325,6 +4358,7 @@ class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
                                              children: [
                                                // 검색창
                                                TextField(
+                                                 autofocus: false, // 키보드 자동 팝업 방지
                                                  decoration: InputDecoration(
                                                    hintText: '이름 또는 전화번호 검색',
                                                    prefixIcon: const Icon(Icons.search, color: Color(0xFFF29D86)),
