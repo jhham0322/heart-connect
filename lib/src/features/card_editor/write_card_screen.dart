@@ -3882,6 +3882,67 @@ class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
       if (mounted) setState(fn);
     });
   }
+  
+  /// 전화번호 포맷팅 (010-1234-5678 형식)
+  String _formatPhoneNumber(String phone) {
+    final digits = phone.replaceAll(RegExp(r'[^0-9]'), '');
+    if (digits.length == 11) {
+      return '${digits.substring(0, 3)}-${digits.substring(3, 7)}-${digits.substring(7)}';
+    } else if (digits.length == 10) {
+      return '${digits.substring(0, 3)}-${digits.substring(3, 6)}-${digits.substring(6)}';
+    }
+    return phone; // 포맷팅 불가 시 원본 반환
+  }
+  
+  /// 수동 연락처 추가 다이얼로그
+  Future<String?> _showManualAddDialog(BuildContext parentContext) async {
+    final textController = TextEditingController();
+    return showDialog<String>(
+      context: parentContext,
+      builder: (c) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text("새 연락처 추가"),
+        content: TextField(
+          controller: textController,
+          decoration: const InputDecoration(
+            hintText: "이름 010-0000-0000",
+            border: OutlineInputBorder(),
+            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          ),
+          autofocus: true,
+          inputFormatters: [RecipientInputFormatter()],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(c, null),
+            child: const Text("취소", style: TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final raw = textController.text.trim();
+              if (raw.isEmpty) {
+                Navigator.pop(c, null);
+                return;
+              }
+              final parsed = _parseRecipient(raw);
+              if (parsed == null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("형식이 올바르지 않습니다. 예: 홍길동 010-1234-5678")),
+                );
+                return;
+              }
+              Navigator.pop(c, parsed['display']);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFF29D86),
+              foregroundColor: Colors.white,
+            ),
+            child: const Text("추가"),
+          ),
+        ],
+      ),
+    );
+  }
 
   void _showResultPopup() {
     if (!mounted) return;
@@ -4175,51 +4236,192 @@ class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
                           ),
                           if (!_isSending)
                           ElevatedButton.icon(
-                            onPressed: () {
-                               final textController = TextEditingController();
-                               showDialog(
+                            onPressed: () async {
+                               // 연락처 선택 다이얼로그 표시
+                               final contacts = await widget.database.getAllContacts();
+                               
+                               if (!mounted) return;
+                               
+                               String searchQuery = '';
+                               String selectedFilter = '전체';
+                               final selectedPhones = <String>{};
+                               
+                               await showDialog(
                                  context: context,
-                                 builder: (c) => AlertDialog(
-                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                                   title: const Text("수신자 추가"),
-                                   content: TextField(
-                                     controller: textController,
-                                     decoration: const InputDecoration(
-                                       hintText: "이름 010-0000-0000",
-                                       border: OutlineInputBorder(),
-                                       contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                     ),
-                                     autofocus: true,
-                                     inputFormatters: [RecipientInputFormatter()],
-                                   ),
-                                   actions: [
-                                     TextButton(onPressed: () => Navigator.pop(c), child: const Text("취소", style: TextStyle(color: Colors.grey))),
-                                     ElevatedButton(
-                                       onPressed: () {
-                                         final raw = textController.text.trim();
-                                         if (raw.isEmpty) {
-                                           Navigator.pop(c);
-                                           return;
+                                 builder: (dialogContext) {
+                                   return StatefulBuilder(
+                                     builder: (context, setDialogState) {
+                                       // 필터링된 연락처 목록
+                                       final filteredContacts = contacts.where((contact) {
+                                         final matchesSearch = searchQuery.isEmpty ||
+                                             contact.name.toLowerCase().contains(searchQuery.toLowerCase()) ||
+                                             contact.phone.contains(searchQuery);
+                                         
+                                         bool matchesCategory = true;
+                                         if (selectedFilter == '즐겨찾기') {
+                                           matchesCategory = contact.isFavorite;
+                                         } else if (selectedFilter == '가족') {
+                                           matchesCategory = contact.groupTag == '가족' || contact.groupTag == 'Family';
                                          }
-                                         final parsed = _parseRecipient(raw);
-                                         if (parsed == null) {
-                                           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("형식이 올바르지 않습니다. 예: 홍길동 010-1234-5678")));
-                                           return;
-                                         }
-                                         final newDigits = parsed['digits']!;
-                                         final isDuplicate = _localRecipients.any((r) => _extractPhoneDigits(r) == newDigits);
-                                         if (isDuplicate) {
-                                           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("이미 존재하는 수신자입니다.")));
-                                           return;
-                                         }
-                                         _addRecipient(parsed['display']!);
-                                         Navigator.pop(c);
-                                       },
-                                       style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFF29D86), foregroundColor: Colors.white),
-                                       child: const Text("추가"),
-                                     ),
-                                   ],
-                                 ),
+                                         
+                                         return matchesSearch && matchesCategory;
+                                       }).toList();
+                                       
+                                       return AlertDialog(
+                                         title: const Text("발송 대상 선택"),
+                                         content: SizedBox(
+                                           width: double.maxFinite,
+                                           height: 450,
+                                           child: Column(
+                                             children: [
+                                               // 검색창
+                                               TextField(
+                                                 decoration: InputDecoration(
+                                                   hintText: '이름 또는 전화번호 검색',
+                                                   prefixIcon: const Icon(Icons.search, color: Color(0xFFF29D86)),
+                                                   border: OutlineInputBorder(
+                                                     borderRadius: BorderRadius.circular(10),
+                                                     borderSide: const BorderSide(color: Color(0xFFF29D86)),
+                                                   ),
+                                                   focusedBorder: OutlineInputBorder(
+                                                     borderRadius: BorderRadius.circular(10),
+                                                     borderSide: const BorderSide(color: Color(0xFFF29D86), width: 2),
+                                                   ),
+                                                   contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                                 ),
+                                                 onChanged: (value) {
+                                                   setDialogState(() => searchQuery = value);
+                                                 },
+                                               ),
+                                               const SizedBox(height: 10),
+                                               
+                                               // 필터 버튼들 - 아이콘으로 표시
+                                               Row(
+                                                 children: [
+                                                   {'name': '전체', 'icon': Icons.people},
+                                                   {'name': '즐겨찾기', 'icon': Icons.star},
+                                                   {'name': '가족', 'icon': Icons.family_restroom},
+                                                 ].map((filter) {
+                                                   final filterName = filter['name'] as String;
+                                                   final filterIcon = filter['icon'] as IconData;
+                                                   final isActive = selectedFilter == filterName;
+                                                   
+                                                   return Padding(
+                                                     padding: const EdgeInsets.only(right: 8),
+                                                     child: Tooltip(
+                                                       message: filterName,
+                                                       child: ChoiceChip(
+                                                         label: Icon(filterIcon, size: 18, color: isActive ? Colors.white : Colors.grey[700]),
+                                                         selected: isActive,
+                                                         selectedColor: const Color(0xFFF29D86),
+                                                         onSelected: (selected) {
+                                                           setDialogState(() => selectedFilter = filterName);
+                                                         },
+                                                       ),
+                                                     ),
+                                                   );
+                                                 }).toList(),
+                                               ),
+                                               const SizedBox(height: 10),
+                                               
+                                               // 연락처 목록
+                                               Expanded(
+                                                 child: filteredContacts.isEmpty
+                                                     ? Center(
+                                                         child: Text(
+                                                           searchQuery.isNotEmpty 
+                                                               ? "검색 결과가 없습니다."
+                                                               : "저장된 연락처가 없습니다.",
+                                                           style: const TextStyle(color: Colors.grey),
+                                                         ),
+                                                       )
+                                                     : ListView.builder(
+                                                         itemCount: filteredContacts.length,
+                                                         itemBuilder: (context, index) {
+                                                           final contact = filteredContacts[index];
+                                                           final isSelected = selectedPhones.contains(contact.phone);
+                                                           // 이미 추가된 수신자인지 확인
+                                                           final alreadyAdded = _localRecipients.any((r) => r.contains(contact.phone.replaceAll('-', '')));
+                                                           
+                                                           return CheckboxListTile(
+                                                             value: isSelected,
+                                                             enabled: !alreadyAdded,
+                                                             title: Row(
+                                                               children: [
+                                                                 Expanded(
+                                                                   child: Text(
+                                                                     contact.name,
+                                                                     style: TextStyle(
+                                                                       color: alreadyAdded ? Colors.grey : Colors.black,
+                                                                     ),
+                                                                   ),
+                                                                 ),
+                                                                 if (contact.isFavorite == true)
+                                                                   const Icon(Icons.star, color: Colors.amber, size: 16),
+                                                                 if (alreadyAdded)
+                                                                   const Text(" (추가됨)", style: TextStyle(color: Colors.grey, fontSize: 12)),
+                                                               ],
+                                                             ),
+                                                             subtitle: Text(_formatPhoneNumber(contact.phone)),
+                                                             activeColor: const Color(0xFFF29D86),
+                                                             onChanged: alreadyAdded ? null : (bool? value) {
+                                                               setDialogState(() {
+                                                                 if (value == true) {
+                                                                   selectedPhones.add(contact.phone);
+                                                                 } else {
+                                                                   selectedPhones.remove(contact.phone);
+                                                                 }
+                                                               });
+                                                             },
+                                                           );
+                                                         },
+                                                       ),
+                                               ),
+                                               const SizedBox(height: 16),
+                                               OutlinedButton.icon(
+                                                 onPressed: () async {
+                                                   // 새 연락처 추가 다이얼로그
+                                                   final result = await _showManualAddDialog(dialogContext);
+                                                   if (result != null) {
+                                                     Navigator.pop(dialogContext);
+                                                     _addRecipient(result);
+                                                   }
+                                                 },
+                                                 icon: const Icon(Icons.person_add, size: 18),
+                                                 label: const Text("새 연락처 추가"),
+                                                 style: OutlinedButton.styleFrom(
+                                                   foregroundColor: const Color(0xFFF29D86),
+                                                   side: const BorderSide(color: Color(0xFFF29D86)),
+                                                 ),
+                                               ),
+                                             ],
+                                           ),
+                                         ),
+                                         actions: [
+                                           TextButton(
+                                             onPressed: () => Navigator.pop(dialogContext),
+                                             child: const Text("취소", style: TextStyle(color: Colors.grey)),
+                                           ),
+                                           TextButton(
+                                             onPressed: () {
+                                               // 선택된 연락처들을 추가
+                                               for (var contact in contacts) {
+                                                 if (selectedPhones.contains(contact.phone)) {
+                                                   final formatted = "${contact.name} (${_formatPhoneNumber(contact.phone)})";
+                                                   if (!_localRecipients.any((r) => r.contains(contact.phone.replaceAll('-', '')))) {
+                                                     _addRecipient(formatted);
+                                                   }
+                                                 }
+                                               }
+                                               Navigator.pop(dialogContext);
+                                             },
+                                             child: const Text("확인", style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFF29D86))),
+                                           ),
+                                         ],
+                                       );
+                                     },
+                                   );
+                                 },
                                );
                             },
                             icon: const Icon(Icons.person_add, size: 18),
