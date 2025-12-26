@@ -1965,6 +1965,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
 
     return Scaffold(
       backgroundColor: const Color(0xFFFFFCF9),
+      resizeToAvoidBottomInset: true, // 키보드가 올라오면 화면 리사이즈
       body: Stack(
         children: [
           // Background/Content - 상단에 붙도록 padding 제거
@@ -1981,8 +1982,8 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                   // 3. Template Selector (Background or Frame)
                   _buildTemplateSelector(),
                   
-                  // 4. Footer Input (보낸 사람 입력) - Removed as per user request
-                  const SizedBox(height: 40), // Extra spacing instead
+                  // 4. 하단 여백 (발송 버튼 및 키보드 공간 확보)
+                  SizedBox(height: 120 + MediaQuery.of(context).viewInsets.bottom),
 
                 ],
               ),
