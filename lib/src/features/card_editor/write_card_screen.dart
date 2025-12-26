@@ -1969,50 +1969,27 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     // 발송 버튼 높이
     final sendButtonHeight = 90.0 + MediaQuery.of(context).padding.bottom;
     final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
-    final toolbarHeight = 50.0; // 툴바 높이
-    final thumbnailHeight = 90.0; // 썸네일 영역 높이
-    final bottomFixedHeight = toolbarHeight + thumbnailHeight; // 하단 고정 영역 총 높이
     
     return Scaffold(
       backgroundColor: const Color(0xFFFFFCF9),
       resizeToAvoidBottomInset: false, // 키보드가 올라와도 화면 리사이즈 안함 (직접 스크롤로 처리)
       body: Stack(
         children: [
-          // 1. Background/Content (배경 이미지만 스크롤 가능)
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: keyboardHeight > 0 
-                ? keyboardHeight + bottomFixedHeight 
-                : sendButtonHeight + bottomFixedHeight,
-            child: SingleChildScrollView(
-              controller: _mainScrollController,
-              child: Column(
-                children: [
-                  // Card Preview (캡쳐 가능 영역)
-                  _buildCardPreview(),
-                ],
-              ),
-            ),
-          ),
-          
-          // 2. 하단 고정 영역 (툴바 + 썸네일)
+          // 전체 콘텐츠를 하단에 고정 (배경 이미지 + 툴바 + 썸네일)
           Positioned(
             left: 0,
             right: 0,
             bottom: keyboardHeight > 0 ? keyboardHeight : sendButtonHeight,
-            child: Container(
-              color: const Color(0xFFFFFCF9),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Toolbar
-                  _buildToolbar(),
-                  // Template Selector (썸네일)
-                  _buildTemplateSelector(),
-                ],
-              ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Card Preview (캡쳐 가능 영역)
+                _buildCardPreview(),
+                // Toolbar
+                _buildToolbar(),
+                // Template Selector (썸네일)
+                _buildTemplateSelector(),
+              ],
             ),
           ),
 
