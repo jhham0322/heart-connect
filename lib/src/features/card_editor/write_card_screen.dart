@@ -328,17 +328,6 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     //   _recipients.add("수신자 $i 010-0000-${i.toString().padLeft(4, '0')}");
     // }
     _pendingRecipients = List.from(_recipients);
-    
-    // 화면 시작 시 맨 아래로 스크롤 (썸네일이 발송 버튼 위에 보이도록)
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_mainScrollController.hasClients) {
-        _mainScrollController.animateTo(
-          _mainScrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-        );
-      }
-    });
   }
   
   // --- Draft Persistence ---
@@ -1977,19 +1966,21 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
       );
     }
 
-    // 발송 버튼 위까지 스크롤할 수 있도록 하단 여백 계산
-    final screenHeight = MediaQuery.of(context).size.height;
-    final safeAreaBottom = MediaQuery.of(context).padding.bottom;
-    final sendButtonHeight = 90.0; // 발송 버튼 영역 높이
+    // 발송 버튼 높이
+    final sendButtonHeight = 90.0 + MediaQuery.of(context).padding.bottom;
+    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
     
     return Scaffold(
       backgroundColor: const Color(0xFFFFFCF9),
       resizeToAvoidBottomInset: false, // 키보드가 올라와도 화면 리사이즈 안함 (직접 스크롤로 처리)
       body: Stack(
         children: [
-          // Background/Content - 상단에 붙도록 padding 제거
-          Positioned.fill(
-            bottom: MediaQuery.of(context).viewInsets.bottom, // 키보드 높이만큼 바닥에서 띄움
+          // Background/Content
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: keyboardHeight > 0 ? keyboardHeight : sendButtonHeight, // 키보드가 올라오면 키보드 위까지, 아니면 발송 버튼 위까지
             child: SingleChildScrollView(
               controller: _mainScrollController,
               child: Column(
@@ -2002,10 +1993,6 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                   
                   // 3. Template Selector (Background or Frame)
                   _buildTemplateSelector(),
-                  
-                  // 4. 하단 여백 (발송 버튼 위까지 스크롤 가능하도록 충분한 여백)
-                  // 화면 높이에서 발송 버튼 영역과 SafeArea를 뺀 만큼
-                  SizedBox(height: screenHeight - sendButtonHeight - safeAreaBottom),
 
                 ],
               ),
