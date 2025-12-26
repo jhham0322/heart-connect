@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:device_calendar/device_calendar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 
 class CalendarEventData {
   final String title;
@@ -22,6 +23,9 @@ class CalendarEventData {
 class CalendarService {
   final DeviceCalendarPlugin _deviceCalendar = DeviceCalendarPlugin();
   bool _isTimezoneInitialized = false;
+  
+  // Native calendar channel
+  static const _calendarChannel = MethodChannel('com.heartconnect/calendar');
 
   Future<void> _initTimezone() async {
     if (!_isTimezoneInitialized) {
@@ -36,36 +40,61 @@ class CalendarService {
     debugPrint('[CalendarService] Getting events from $start to $end');
     debugPrint('[CalendarService] Platform: ${Platform.isAndroid ? "Android" : Platform.isIOS ? "iOS" : "Other"}');
 
-    // Mobile Integration - 실제 디바이스 캘린더 연동
-    if (Platform.isAndroid || Platform.isIOS) {
+    // Android: 네이티브 MethodChannel을 통해 직접 ContentProvider 조회
+    if (Platform.isAndroid) {
+       try {
+         final startMillis = start.millisecondsSinceEpoch;
+         final endMillis = end.millisecondsSinceEpoch;
+         
+         debugPrint('[CalendarService] Calling native getCalendarEvents...');
+         
+         final result = await _calendarChannel.invokeMethod('getCalendarEvents', {
+           'start': startMillis,
+           'end': endMillis,
+         });
+         
+         if (result != null && result is List) {
+           debugPrint('[CalendarService] Native returned ${result.length} events');
+           
+           for (var item in result) {
+             final map = Map<String, dynamic>.from(item);
+             final title = map['title'] as String? ?? 'Untitled';
+             final startMs = map['startMillis'] as int? ?? 0;
+             final source = map['source'] as String? ?? 'Phone';
+             final type = map['type'] as String? ?? 'Schedule';
+             
+             final date = DateTime.fromMillisecondsSinceEpoch(startMs);
+             
+             debugPrint('[CalendarService] Event: "$title" on $date from $source');
+             
+             events.add(CalendarEventData(
+               title: title,
+               date: date,
+               type: type,
+               source: source,
+             ));
+           }
+         }
+       } catch (e, stack) {
+         debugPrint("[CalendarService] Native Calendar Error: $e");
+         debugPrint("[CalendarService] Stack: $stack");
+       }
+    }
+    // iOS: device_calendar 패키지 사용 (iOS에서는 잘 작동함)
+    else if (Platform.isIOS) {
        try {
          var permissions = await _deviceCalendar.hasPermissions();
-         debugPrint('[CalendarService] Has permissions: ${permissions.isSuccess ? permissions.data : "error"}');
-         
          if (permissions.isSuccess && !permissions.data!) {
-             debugPrint('[CalendarService] Requesting calendar permissions...');
              permissions = await _deviceCalendar.requestPermissions();
          }
          
          if (permissions.isSuccess && permissions.data!) {
-            debugPrint('[CalendarService] Calendar permission GRANTED');
             final calendars = await _deviceCalendar.retrieveCalendars();
             
             if (calendars.isSuccess && calendars.data != null) {
-               debugPrint('[CalendarService] ====== Found ${calendars.data!.length} calendars ======');
-               
                for (var cal in calendars.data!) {
                    final calId = cal.id;
-                   final calName = cal.name ?? 'Unknown Calendar';
-                   final calAccount = cal.accountName ?? 'Local';
-                   
-                   debugPrint('[CalendarService] Calendar: $calName | Account: $calAccount | ID: $calId');
-                   
-                   // ID가 null이면 건너뛰기
-                   if (calId == null) {
-                     debugPrint('[CalendarService] --> Skipping calendar with null ID');
-                     continue;
-                   }
+                   if (calId == null) continue;
                    
                    final evResult = await _deviceCalendar.retrieveEvents(
                       calId, 
@@ -73,33 +102,23 @@ class CalendarService {
                    );
                    
                    if (evResult.isSuccess && evResult.data != null) {
-                      debugPrint('[CalendarService] --> ${evResult.data!.length} events in "$calName"');
-                      
                       for (var e in evResult.data!) {
                           if (e.start == null) continue;
                           final date = DateTime.fromMillisecondsSinceEpoch(e.start!.millisecondsSinceEpoch);
-                          debugPrint('[CalendarService]    Event: "${e.title}" on $date');
                           
                           events.add(CalendarEventData(
                              title: e.title ?? 'Event',
                              date: date,
-                             type: _guessType(calName, e.title),
+                             type: _guessType(cal.name, e.title),
                              source: _determineSource(cal)
                           ));
                       }
-                   } else {
-                      debugPrint('[CalendarService] --> Error reading events from "$calName"');
                    }
                }
-            } else {
-               debugPrint('[CalendarService] Error retrieving calendars');
             }
-         } else {
-            debugPrint('[CalendarService] Calendar permission DENIED');
          }
-       } catch (e, stack) {
-         debugPrint("[CalendarService] Calendar Sync Error: $e");
-         debugPrint("[CalendarService] Stack: $stack");
+       } catch (e) {
+         debugPrint("[CalendarService] iOS Calendar Error: $e");
        }
     } 
     
