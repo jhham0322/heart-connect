@@ -2109,7 +2109,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
           
           // 하단 고정 전송 버튼 및 수신자 목록
           Positioned(
-            bottom: 5, // 전송 버튼을 더 아래로 내림
+            bottom: MediaQuery.of(context).padding.bottom + 16, // SafeArea 패딩 적용
             left: 0,
             right: 0,
             child: Column(
@@ -2252,8 +2252,6 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                     ),
                   ],
                 ),
-                
-                const SizedBox(height: 16),
               ],
             ),
           ),
