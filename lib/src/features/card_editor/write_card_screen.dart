@@ -239,6 +239,9 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
 
   // Scroll Controller for Template Selector
   final ScrollController _scrollController = ScrollController();
+  
+  // Scroll Controller for Main Content (Initial scroll to bottom)
+  final ScrollController _mainScrollController = ScrollController();
 
   // Quill Editor Controller
   late QuillController _quillController;
@@ -325,6 +328,17 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     //   _recipients.add("수신자 $i 010-0000-${i.toString().padLeft(4, '0')}");
     // }
     _pendingRecipients = List.from(_recipients);
+    
+    // 화면 시작 시 맨 아래로 스크롤 (썸네일이 발송 버튼 위에 보이도록)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_mainScrollController.hasClients) {
+        _mainScrollController.animateTo(
+          _mainScrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
   }
   
   // --- Draft Persistence ---
@@ -1977,6 +1991,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
           Positioned.fill(
             bottom: MediaQuery.of(context).viewInsets.bottom, // 키보드 높이만큼 바닥에서 띄움
             child: SingleChildScrollView(
+              controller: _mainScrollController,
               child: Column(
                 children: [
                   // 1. Card Preview (캡쳐 가능 영역) - 상단에 붙음
