@@ -1984,7 +1984,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                   _buildTemplateSelector(),
                   
                   // 4. 하단 여백 (발송 버튼 공간)
-                  const SizedBox(height: 120),
+                  const SizedBox(height: 90),
 
                 ],
               ),
