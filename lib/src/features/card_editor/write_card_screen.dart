@@ -169,6 +169,8 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   bool _isPanning = false; // 이미지 드래그 중
   bool _isPinching = false; // 이미지 핀치(확대/축소) 중
   String _currentHintMessage = ''; // 현재 표시할 안내 메시지
+  bool _hasShownTextBoxDragHint = false; // 글상자 드래그 안내 표시 여부
+  bool _hasShownAiHint = false; // AI 문구 교정 안내 표시 여부
 
   // Text Box Style State (글상자 스타일)
   Color _boxColor = Colors.white;
@@ -633,6 +635,31 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
            _isFooterActive = false;
            // Clear selection in footer editor
            _footerQuillController.updateSelection(const TextSelection.collapsed(offset: 0), ChangeSource.local);
+           
+           // 처음 텍스트 영역 포커스 시 AI 문구 교정 안내
+           if (!_hasShownAiHint) {
+             _hasShownAiHint = true;
+             Future.delayed(const Duration(milliseconds: 500), () {
+               if (!mounted) return;
+               ScaffoldMessenger.of(context).showSnackBar(
+                 SnackBar(
+                   content: const Row(
+                     children: [
+                       Text('✨', style: TextStyle(fontSize: 18)),
+                       SizedBox(width: 8),
+                       Expanded(
+                         child: Text('💡 오른쪽 상단 AI 버튼으로 문구를 자동 교정할 수 있어요!'),
+                       ),
+                     ],
+                   ),
+                   backgroundColor: const Color(0xFF7C4DFF),
+                   duration: const Duration(seconds: 4),
+                   behavior: SnackBarBehavior.floating,
+                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                 ),
+               );
+             });
+           }
          }
          _updateToolbarState();
       });
@@ -2713,6 +2740,28 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                                   });
                                   _updateToolbarState();
                                   _saveDraft();
+                                  
+                                  // 처음 글상자 클릭 시 드래그 안내
+                                  if (!_hasShownTextBoxDragHint) {
+                                    _hasShownTextBoxDragHint = true;
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: const Row(
+                                          children: [
+                                            Icon(Icons.open_with, color: Colors.white, size: 20),
+                                            SizedBox(width: 8),
+                                            Expanded(
+                                              child: Text('💡 글상자를 드래그하면 위치를 이동할 수 있어요!'),
+                                            ),
+                                          ],
+                                        ),
+                                        backgroundColor: const Color(0xFFF29D86),
+                                        duration: const Duration(seconds: 3),
+                                        behavior: SnackBarBehavior.floating,
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                      ),
+                                    );
+                                  }
                                 },
                                 child: Container(
                                   key: _textBoxKey,
@@ -5242,8 +5291,14 @@ class _MarqueeTextState extends State<_MarqueeText> with SingleTickerProviderSta
     // 텍스트 너비 계산
     _textWidth = _calculateTextWidth(widget.text, 12.0);
     
-    // 애니메이션 시간: 텍스트 너비에 비례 (20% 더 빠르게, 최소 5초, 최대 42초)
-    final calculatedDuration = ((_textWidth + 300) / 52).clamp(5.0, 42.0).toInt();
+    // 임시 containerWidth 가정 (실제 값은 build에서 업데이트됨)
+    // 모바일 화면 평균 너비 ~350px 가정
+    final estimatedContainerWidth = 350.0;
+    final estimatedTotalDistance = estimatedContainerWidth + _textWidth + (estimatedContainerWidth / 2);
+    
+    // 애니메이션 시간: 이동 거리에 비례 (40px/초 속도)
+    // 마지막 글자가 중앙까지 도달하는 데 충분한 시간 확보
+    final calculatedDuration = (estimatedTotalDistance / 40).clamp(8.0, 60.0).toInt();
     final duration = widget.durationSeconds > 0 ? widget.durationSeconds : calculatedDuration;
     
     _controller = AnimationController(
