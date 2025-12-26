@@ -211,13 +211,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 const SizedBox(height: 16),
                 ElevatedButton(
                    onPressed: () {
-                      // Navigate to calendar or show create dialog
-                      // For now, let's just show a simple snackbar or navigate to write if that's the intention
-                      // Or ideally, open a 'Create Plan' dialog.
-                      // Since we don't have a dedicated 'Create Plan' screen yet, we can open the Calendar page if available,
-                      // or just show a message.
-                      // Let's assume navigating to Calendar is a good option.
-                      context.go('/calendar'); 
+                      // 일정 추가 다이얼로그 열기
+                      _showAddEventDialog(context);
                    },
                    style: ElevatedButton.styleFrom(
                       backgroundColor: AppTheme.accentCoral,
@@ -225,7 +220,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                    ),
-                   child: const Text("Check Calendar"),
+                   child: const Text("Add Schedule"),
                 )
              ],
           ),
