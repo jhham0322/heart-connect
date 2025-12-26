@@ -3304,7 +3304,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                         child: Container(
                           margin: const EdgeInsets.symmetric(horizontal: 10),
                           decoration: BoxDecoration(
-                            color: Colors.grey[100],
+                            color: Colors.grey[200],
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: ClipRRect(
@@ -3314,20 +3314,25 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                                 if (transformationController.value.getMaxScaleOnAxis() > 1.0) {
                                   transformationController.value = Matrix4.identity();
                                 } else {
-                                  transformationController.value = Matrix4.identity()..scale(3.0);
+                                  // 중앙에서 확대
+                                  transformationController.value = Matrix4.identity()
+                                    ..translate(-100.0, -200.0)
+                                    ..scale(2.0);
                                 }
                               },
                               child: InteractiveViewer(
                                 transformationController: transformationController,
-                                minScale: 1.0,
-                                maxScale: 5.0,
-                                constrained: true,
-                                boundaryMargin: EdgeInsets.zero,
-                                child: Center(
-                                  child: Image.file(
-                                    File(savedPath), 
-                                    fit: BoxFit.contain,
-                                  ),
+                                minScale: 0.5,
+                                maxScale: 4.0,
+                                panEnabled: true,
+                                scaleEnabled: true,
+                                child: Image.file(
+                                  File(savedPath),
+                                  fit: BoxFit.contain,
+                                  width: double.infinity,
+                                  height: double.infinity,
+                                  alignment: Alignment.center,
+                                  filterQuality: FilterQuality.high,
                                 ),
                               ),
                             ),
@@ -5097,12 +5102,13 @@ class _MarqueeTextState extends State<_MarqueeText> with SingleTickerProviderSta
     return LayoutBuilder(
       builder: (context, constraints) {
         _containerWidth = constraints.maxWidth;
-        final totalDistance = _containerWidth + _textWidth;
+        // 마지막 글자가 화면 중앙(containerWidth/2)까지 이동하도록 설정
+        final totalDistance = _containerWidth + _textWidth + (_containerWidth / 2);
         
         return AnimatedBuilder(
           animation: _animation,
           builder: (context, child) {
-            // 오른쪽에서 시작해서 왼쪽으로 이동
+            // 오른쪽 끝에서 시작해서 왼쪽으로 이동 (마지막 글자가 중앙까지)
             final offset = _containerWidth - (_animation.value * totalDistance);
             
             return Align(
