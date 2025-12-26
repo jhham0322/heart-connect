@@ -1963,6 +1963,11 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
       );
     }
 
+    // 발송 버튼 위까지 스크롤할 수 있도록 하단 여백 계산
+    final screenHeight = MediaQuery.of(context).size.height;
+    final safeAreaBottom = MediaQuery.of(context).padding.bottom;
+    final sendButtonHeight = 90.0; // 발송 버튼 영역 높이
+    
     return Scaffold(
       backgroundColor: const Color(0xFFFFFCF9),
       resizeToAvoidBottomInset: false, // 키보드가 올라와도 화면 리사이즈 안함 (직접 스크롤로 처리)
@@ -1983,8 +1988,9 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                   // 3. Template Selector (Background or Frame)
                   _buildTemplateSelector(),
                   
-                  // 4. 하단 여백 (발송 버튼 공간)
-                  const SizedBox(height: 90),
+                  // 4. 하단 여백 (발송 버튼 위까지 스크롤 가능하도록 충분한 여백)
+                  // 화면 높이에서 발송 버튼 영역과 SafeArea를 뺀 만큼
+                  SizedBox(height: screenHeight - sendButtonHeight - safeAreaBottom),
 
                 ],
               ),
