@@ -2436,15 +2436,8 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
 
   void _handleDoubleTap() {
     setState(() {
-      if (_isZoomMode) {
-        // 줌 모드 종료 - 원래 상태로 복귀
-        _isZoomMode = false;
-        _transformationController.value = Matrix4.identity();
-      } else {
-        // 줌 모드 진입 - 2배 확대
-        _isZoomMode = true;
-        _transformationController.value = Matrix4.identity()..scale(2.0);
-      }
+      // 줌 모드 토글 (이미지 크기는 유지, 사용자가 직접 조절)
+      _isZoomMode = !_isZoomMode;
     });
   }
 
