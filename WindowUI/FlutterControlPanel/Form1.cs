@@ -126,7 +126,8 @@ namespace FlutterControlPanel
         private void SetupCustomUI()
         {
             this.Text = "Heart Connect - Flutter Controller";
-            this.Size = new Size(850, 1024); // Wider for Android buttons
+            this.Size = new Size(1024, 800); // 모든 버튼이 보이도록 크기 조정
+            this.MinimumSize = new Size(900, 600); // 최소 크기 설정
             this.BackColor = Color.FromArgb(245, 245, 245);
 
             try {
