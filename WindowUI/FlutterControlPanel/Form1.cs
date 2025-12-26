@@ -25,6 +25,12 @@ namespace FlutterControlPanel
         // Assuming we build to WindowUI/FlutterControlPanel/bin/Release, the root is up 4 levels?
         // Let's just hardcode the path provided in user info or search for pubspec.yaml
         private string projectRoot = @"e:\work2025\App\ConnectHeart";
+        
+        // ADB path - Android SDK platform-tools
+        private string adbPath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "Android", "Sdk", "platform-tools", "adb.exe"
+        );
 
         public Form1()
         {
@@ -526,7 +532,7 @@ namespace FlutterControlPanel
         {
             outputBox.Clear();
             Log("Checking connected devices...");
-            StartProcess("adb", "devices -l");
+            StartProcess(adbPath, "devices -l");
         }
 
         private void BtnInstallToDevice_Click(object sender, EventArgs e)
@@ -547,7 +553,7 @@ namespace FlutterControlPanel
 
             outputBox.Clear();
             Log($"Installing APK: {apkPath}");
-            StartProcess("adb", $"install -r \"{apkPath}\"");
+            StartProcess(adbPath, $"install -r \"{apkPath}\"");
         }
 
         private void BtnRunOnDevice_Click(object sender, EventArgs e)
@@ -555,7 +561,7 @@ namespace FlutterControlPanel
             outputBox.Clear();
             Log("Launching app on device...");
             // Package name from build.gradle.kts
-            StartProcess("adb", "shell am start -n com.example.heart_connect/.MainActivity");
+            StartProcess(adbPath, "shell am start -n com.example.heart_connect/.MainActivity");
         }
 
         private void BtnLogcat_Click(object sender, EventArgs e)
@@ -571,7 +577,7 @@ namespace FlutterControlPanel
             Log("Press 'Stop' to stop logging.\n");
             
             // Filter logs for Flutter app
-            StartProcess("adb", "logcat -v time *:S flutter:V FlutterActivity:V");
+            StartProcess(adbPath, "logcat -v time *:S flutter:V FlutterActivity:V");
         }
 
         private void BtnHelp_Click(object sender, EventArgs e)
