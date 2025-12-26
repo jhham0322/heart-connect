@@ -154,6 +154,103 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
+  // 캘린더 앱 열기
+  Future<void> _openCalendarApp(String type) async {
+    Uri? uri;
+    String appName = '';
+    
+    switch (type) {
+      case 'phone':
+        // Android 기본 캘린더
+        uri = Uri.parse('content://com.android.calendar/time/');
+        appName = '기본 캘린더';
+        break;
+      case 'google':
+        // 구글 캘린더
+        uri = Uri.parse('https://calendar.google.com');
+        appName = 'Google Calendar';
+        break;
+      case 'naver':
+        // 네이버 캘린더
+        uri = Uri.parse('https://calendar.naver.com');
+        appName = 'Naver Calendar';
+        break;
+    }
+    
+    if (uri != null) {
+      try {
+        // Android에서 앱 직접 실행 시도
+        if (Platform.isAndroid) {
+          String? packageName;
+          switch (type) {
+            case 'phone':
+              packageName = 'com.android.calendar';
+              break;
+            case 'google':
+              packageName = 'com.google.android.calendar';
+              break;
+            case 'naver':
+              packageName = 'com.nhn.android.calendar';
+              break;
+          }
+          
+          if (packageName != null) {
+            final intent = Uri.parse('android-app://$packageName');
+            if (await canLaunchUrl(intent)) {
+              await launchUrl(intent);
+              return;
+            }
+          }
+        }
+        
+        // 앱이 없으면 웹으로 열기
+        if (await canLaunchUrl(uri)) {
+          await launchUrl(uri, mode: LaunchMode.externalApplication);
+        } else {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('$appName 앱을 열 수 없습니다.')),
+            );
+          }
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('$appName 앱을 열 수 없습니다: $e')),
+          );
+        }
+      }
+    }
+  }
+  
+  // 캘린더 버튼 위젯
+  Widget _buildCalendarButton({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.2),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: color, width: 1),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 14, color: color),
+            const SizedBox(height: 2),
+            Text(label, style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: color)),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -263,6 +360,49 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           decoration: BoxDecoration(color: const Color(0xFFFFF59D), borderRadius: BorderRadius.circular(12), border: Border.all(color: const Color(0xFF5D4037))),
                           child: const Text("Backup", style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
                         ),
+                      ),
+                    ],
+                  ),
+                ),
+                 const SizedBox(height: 16),
+                // 캘린더 연동 카드
+                _buildSettingCard(
+                  iconBg: const Color(0xFFB3E5FC),
+                  icon: FontAwesomeIcons.calendar,
+                  title: "Calendar Sync",
+                  desc: "외부 캘린더 앱 열기",
+                  descIcon: FontAwesomeIcons.arrowUpRightFromSquare,
+                  action: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // 기본 캘린더 앱
+                          _buildCalendarButton(
+                            icon: FontAwesomeIcons.mobile,
+                            label: "Phone",
+                            color: const Color(0xFF4FC3F7),
+                            onTap: () => _openCalendarApp('phone'),
+                          ),
+                          const SizedBox(width: 8),
+                          // 구글 캘린더
+                          _buildCalendarButton(
+                            icon: FontAwesomeIcons.google,
+                            label: "Google",
+                            color: const Color(0xFFEF5350),
+                            onTap: () => _openCalendarApp('google'),
+                          ),
+                          const SizedBox(width: 8),
+                          // 네이버 캘린더
+                          _buildCalendarButton(
+                            icon: FontAwesomeIcons.n,
+                            label: "Naver",
+                            color: const Color(0xFF4CAF50),
+                            onTap: () => _openCalendarApp('naver'),
+                          ),
+                        ],
                       ),
                     ],
                   ),
