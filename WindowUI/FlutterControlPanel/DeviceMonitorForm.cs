@@ -184,22 +184,44 @@ namespace FlutterControlPanel
                 {
                     try
                     {
+                        // Check if adb exists
+                        if (!File.Exists(adbPath))
+                        {
+                            this.Invoke(new Action(() =>
+                            {
+                                lblStatus.Text = $"ADB not found at: {adbPath}";
+                            }));
+                            return;
+                        }
+
                         ProcessStartInfo psi = new ProcessStartInfo();
                         psi.FileName = adbPath;
                         psi.Arguments = "exec-out screencap -p";
                         psi.UseShellExecute = false;
                         psi.RedirectStandardOutput = true;
+                        psi.RedirectStandardError = true;
                         psi.CreateNoWindow = true;
 
-                        using (Process process = Process.Start(psi))
+                        using (Process process = new Process())
                         {
+                            process.StartInfo = psi;
+                            process.Start();
+
                             using (MemoryStream ms = new MemoryStream())
                             {
-                                process.StandardOutput.BaseStream.CopyTo(ms);
-                                ms.Position = 0;
-                                
-                                if (ms.Length > 0)
+                                // Read binary data from stdout
+                                byte[] buffer = new byte[4096];
+                                int bytesRead;
+                                while ((bytesRead = process.StandardOutput.BaseStream.Read(buffer, 0, buffer.Length)) > 0)
                                 {
+                                    ms.Write(buffer, 0, bytesRead);
+                                }
+
+                                process.WaitForExit(5000); // Wait max 5 seconds
+
+                                if (ms.Length > 100) // Valid PNG should be > 100 bytes
+                                {
+                                    ms.Position = 0;
                                     try
                                     {
                                         Image img = Image.FromStream(ms);
@@ -207,22 +229,27 @@ namespace FlutterControlPanel
                                         {
                                             screenBox.Image?.Dispose();
                                             screenBox.Image = img;
-                                            lblStatus.Text = $"Screen captured at {DateTime.Now:HH:mm:ss}";
+                                            lblStatus.Text = $"Screen captured at {DateTime.Now:HH:mm:ss} ({ms.Length} bytes)";
                                         }));
                                     }
-                                    catch
+                                    catch (Exception imgEx)
                                     {
                                         this.Invoke(new Action(() =>
                                         {
-                                            lblStatus.Text = "No device connected or screen capture failed";
+                                            lblStatus.Text = $"Image parse error: {imgEx.Message}";
                                         }));
                                     }
                                 }
                                 else
                                 {
+                                    // Read error output
+                                    string error = process.StandardError.ReadToEnd();
                                     this.Invoke(new Action(() =>
                                     {
-                                        lblStatus.Text = "No device connected. Please connect Android phone via USB.";
+                                        if (!string.IsNullOrEmpty(error))
+                                            lblStatus.Text = $"ADB Error: {error}";
+                                        else
+                                            lblStatus.Text = $"No screen data ({ms.Length} bytes). Is phone connected?";
                                     }));
                                 }
                             }
