@@ -2487,24 +2487,14 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                             key: _backgroundKey,
                             child: InteractiveViewer(
                               transformationController: _transformationController,
-                              minScale: 0.5,
+                              minScale: 1.0,
                               maxScale: 5.0,
-                              panEnabled: true,
-                              scaleEnabled: true,
-                              boundaryMargin: const EdgeInsets.all(200), // 경계 여유 추가
-                              constrained: false, // 제약 해제로 더 자유로운 이동 가능
-                              clipBehavior: Clip.none, // 클립 안함
-                              onInteractionStart: (details) {
-                                // 제스처 시작 시 피드백
-                              },
+                              panEnabled: _isZoomMode, // 줌 모드일 때만 이동 가능
+                              scaleEnabled: _isZoomMode, // 줌 모드일 때만 줌 가능
                               onInteractionEnd: (details) {
                                 _saveDraft(); // 줌/이동 후 저장
                               },
-                              child: SizedBox(
-                                width: MediaQuery.of(context).size.width * 0.92,
-                                height: MediaQuery.of(context).size.width * 0.92 * (4 / 3),
-                                child: _buildImage(_selectedImage, fit: BoxFit.cover),
-                              ),
+                              child: _buildImage(_selectedImage, fit: BoxFit.cover),
                             ),
                           ),
                         ),
