@@ -164,6 +164,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   bool _isCapturing = false; // 캡쳐 중인지 여부
   bool _isZoomMode = false; // 줌 모드 (배경 이미지 편집 중)
   bool _isDragMode = false; // 글상자 이동 모드 (롱프레스 시)
+  bool _showZoomHint = false; // 줌 모드 안내 문구 표시
 
   // Text Box Style State (글상자 스타일)
   Color _boxColor = Colors.white;
@@ -2121,7 +2122,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
               right: 0,
               child: Center(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
                     color: Colors.black.withOpacity(0.7),
                     borderRadius: BorderRadius.circular(20),
@@ -2129,11 +2130,30 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                   child: const Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.zoom_in, color: Colors.white, size: 20),
-                      SizedBox(width: 8),
-                      Text("줌 모드", style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+                      Icon(Icons.zoom_in, color: Colors.white, size: 16),
+                      SizedBox(width: 6),
+                      Text("줌 모드", style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
                     ],
                   ),
+                ),
+              ),
+            ),
+          
+          // 줌 모드 안내 문구 (가로 스크롤 애니메이션)
+          if (_showZoomHint)
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 50,
+              left: 16,
+              right: 16,
+              child: Container(
+                height: 36,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF29D86).withOpacity(0.9),
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                clipBehavior: Clip.hardEdge,
+                child: const _MarqueeText(
+                  text: "👆 두 손가락으로 벌리고 줄여서 이미지의 크기를 조정할 수 있습니다. 드래그해서 이미지를 이동할 수 있습니다.",
                 ),
               ),
             ),
@@ -2464,6 +2484,19 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     setState(() {
       // 줌 모드 토글 (이미지 크기는 유지, 사용자가 직접 조절)
       _isZoomMode = !_isZoomMode;
+      
+      // 줌 모드 진입 시 안내 문구 표시
+      if (_isZoomMode) {
+        _showZoomHint = true;
+        // 3초 후 안내 문구 숨김
+        Future.delayed(const Duration(seconds: 3), () {
+          if (mounted) {
+            setState(() => _showZoomHint = false);
+          }
+        });
+      } else {
+        _showZoomHint = false;
+      }
     });
   }
 
@@ -2565,6 +2598,9 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                                 onPanCancel: () {
                                   // 드래그 취소 시 이동 모드 비활성화
                                   setState(() => _isDragMode = false);
+                                },
+                                onDoubleTap: () {
+                                  // 글상자 영역에서 더블탭 시 줌 모드 진입 방지 (아무 동작 안함)
                                 },
                                 onTap: () {
                                   _editorFocusNode.requestFocus();
@@ -4759,4 +4795,62 @@ class CloudBorder extends OutlinedBorder {
   ShapeBorder scale(double t) => CloudBorder(side: side.scale(t));
 }
 
+// 가로 스크롤 애니메이션 텍스트 위젯
+class _MarqueeText extends StatefulWidget {
+  final String text;
+  const _MarqueeText({required this.text});
 
+  @override
+  State<_MarqueeText> createState() => _MarqueeTextState();
+}
+
+class _MarqueeTextState extends State<_MarqueeText> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(seconds: 6),
+      vsync: this,
+    )..repeat();
+    
+    _animation = Tween<double>(begin: 1.0, end: -1.0).animate(_controller);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _animation,
+      builder: (context, child) {
+        return FractionalTranslation(
+          translation: Offset(_animation.value, 0),
+          child: child,
+        );
+      },
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Text(
+              widget.text,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
