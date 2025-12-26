@@ -598,23 +598,24 @@ namespace FlutterControlPanel
                 // Kill any existing instances of flutter run if we are starting a new one? 
                 // No, let user manage that or simple stop.
                 
-                string fullCmd;
-                // fileName이 "cmd"인 경우 이중 cmd 호출 방지
+                ProcessStartInfo psi = new ProcessStartInfo();
+                psi.FileName = "cmd.exe";
+                
+                // fileName이 "cmd"인 경우 arguments를 직접 사용 (이중 /c 방지)
                 if (fileName.Equals("cmd", StringComparison.OrdinalIgnoreCase))
                 {
-                    fullCmd = arguments;
+                    psi.Arguments = arguments;
+                    Log($"Working Dir: {projectRoot}");
+                    Log($"Executing: {arguments}...");
                 }
                 else
                 {
-                    fullCmd = $"\"{fileName}\" {arguments}";
+                    string fullCmd = $"\"{fileName}\" {arguments}";
+                    psi.Arguments = $"/c {fullCmd}";
+                    Log($"Working Dir: {projectRoot}");
+                    Log($"Executing: {fullCmd}...");
                 }
                 
-                Log($"Working Dir: {projectRoot}");
-                Log($"Executing: {fullCmd}...");
-
-                ProcessStartInfo psi = new ProcessStartInfo();
-                psi.FileName = "cmd.exe";
-                psi.Arguments = $"/c {fullCmd}";
                 psi.WorkingDirectory = projectRoot;
                 psi.UseShellExecute = false;
                 psi.RedirectStandardOutput = true;
