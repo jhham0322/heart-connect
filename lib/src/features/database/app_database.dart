@@ -205,6 +205,7 @@ class AppDatabase extends _$AppDatabase {
           groupTag: entry.groupTag,
           birthday: entry.birthday,
           isFavorite: entry.isFavorite, // 즐겨찾기 정보도 업데이트
+          photoData: entry.photoData, // 사진 데이터도 업데이트
         )
       );
       return existingContact.id;

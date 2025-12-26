@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_contacts/flutter_contacts.dart' as fc;
@@ -68,11 +69,18 @@ class ContactService extends AsyncNotifier<void> {
           }
         }
         
+        // 사진 데이터를 Base64로 변환
+        String? photoBase64;
+        if (c.photo != null && c.photo!.isNotEmpty) {
+          photoBase64 = base64Encode(c.photo!);
+        }
+        
         final companion = ContactsCompanion(
           phone: Value(normalizedPhone),
           name: Value(c.displayName),
           groupTag: Value(groupTag),
           isFavorite: Value(isStarred), // 스타 여부 저장
+          photoData: Value(photoBase64), // 사진 데이터 저장
         );
 
         await db.upsertContact(companion);
