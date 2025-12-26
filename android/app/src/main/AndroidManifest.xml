@@ -54,5 +54,10 @@
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
         </intent>
+        <!-- Calendar apps for package visibility -->
+        <package android:name="com.nhn.android.calendar"/>
+        <package android:name="com.google.android.calendar"/>
+        <package android:name="com.samsung.android.calendar"/>
+        <package android:name="com.android.calendar"/>
     </queries>
 </manifest>
