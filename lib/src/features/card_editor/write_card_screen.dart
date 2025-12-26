@@ -1877,9 +1877,9 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   Future<Uint8List?> _captureCardImage() async {
     try {
       RenderRepaintBoundary boundary = _captureKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
-      // MMS 전송을 위해 pixelRatio를 1.5로 낮춤 (파일 크기 최적화)
-      ui.Image image = await boundary.toImage(pixelRatio: 1.5);
-      ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
+      // PNG 형식으로 캡처 (바이트 순서 문제 방지)
+      ui.Image image = await boundary.toImage(pixelRatio: 2.0);
+      ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
       return byteData?.buffer.asUint8List();
     } catch (e) {
       print("캐처 오류: $e");
@@ -1887,17 +1887,15 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     }
   }
   
-  // 캐처한 이미지를 JPEG로 변환하여 저장 (MMS 전송용 파일 크기 최적화)
-  Future<Uint8List?> _convertToJpeg(Uint8List rawRgba, int width, int height) async {
+  // PNG를 JPEG로 변환하여 저장 (MMS 전송용 파일 크기 최적화)
+  Future<Uint8List?> _convertPngToJpeg(Uint8List pngBytes) async {
     try {
-      // RGBA 데이터를 image 패키지의 Image 객체로 변환
-      final image = img.Image.fromBytes(
-        width: width,
-        height: height,
-        bytes: rawRgba.buffer,
-        format: img.Format.uint8,
-        numChannels: 4,
-      );
+      // PNG 디코딩
+      final image = img.decodeImage(pngBytes);
+      if (image == null) {
+        print("PNG 디코딩 실패");
+        return null;
+      }
       
       // JPEG로 인코딩 (품질 85% - 파일 크기와 화질 균형)
       final jpegBytes = img.encodeJpg(image, quality: 85);
@@ -1918,18 +1916,6 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     // UI 업데이트 및 리페인트를 위해 충분히 대기
     await Future.delayed(const Duration(milliseconds: 500));
 
-    // 캐처 영역의 크기 가져오기
-    final RenderRepaintBoundary? boundary = _captureKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
-    if (boundary == null) {
-      if (mounted) setState(() => _isCapturing = false);
-      return null;
-    }
-    
-    // pixelRatio 1.5로 캐처한 이미지 크기 계산
-    final size = boundary.size;
-    final int width = (size.width * 1.5).round();
-    final int height = (size.height * 1.5).round();
-
     final imageBytes = await _captureCardImage();
 
     // 캐쳐 후 UI 복구
@@ -1940,8 +1926,8 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     if (imageBytes == null) return null;
     
     try {
-      // JPEG로 변환 (MMS 전송을 위해 파일 크기 최적화)
-      final jpegBytes = await _convertToJpeg(imageBytes, width, height);
+      // PNG를 JPEG로 변환 (MMS 전송을 위해 파일 크기 최적화)
+      final jpegBytes = await _convertPngToJpeg(imageBytes);
       if (jpegBytes == null) return null;
       
       final directory = await getApplicationDocumentsDirectory();
