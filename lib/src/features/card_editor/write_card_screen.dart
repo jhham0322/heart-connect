@@ -1965,11 +1965,12 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
 
     return Scaffold(
       backgroundColor: const Color(0xFFFFFCF9),
-      resizeToAvoidBottomInset: true, // 키보드가 올라오면 화면 리사이즈
+      resizeToAvoidBottomInset: false, // 키보드가 올라와도 화면 리사이즈 안함 (직접 스크롤로 처리)
       body: Stack(
         children: [
           // Background/Content - 상단에 붙도록 padding 제거
           Positioned.fill(
+            bottom: MediaQuery.of(context).viewInsets.bottom, // 키보드 높이만큼 바닥에서 띄움
             child: SingleChildScrollView(
               child: Column(
                 children: [
@@ -1982,8 +1983,8 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                   // 3. Template Selector (Background or Frame)
                   _buildTemplateSelector(),
                   
-                  // 4. 하단 여백 (발송 버튼 및 키보드 공간 확보)
-                  SizedBox(height: 120 + MediaQuery.of(context).viewInsets.bottom),
+                  // 4. 하단 여백 (발송 버튼 공간)
+                  const SizedBox(height: 120),
 
                 ],
               ),
