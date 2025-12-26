@@ -162,6 +162,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   // Send State
   bool _isSending = false;
   bool _isCapturing = false; // 캡쳐 중인지 여부
+  bool _isZoomMode = false; // 줌 모드 (배경 이미지 편집 중)
 
   // Text Box Style State (글상자 스타일)
   Color _boxColor = Colors.white;
@@ -2434,11 +2435,17 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   }
 
   void _handleDoubleTap() {
-    if (_transformationController.value != Matrix4.identity()) {
-      _transformationController.value = Matrix4.identity();
-    } else {
-      _transformationController.value = Matrix4.identity()..scale(2.0);
-    }
+    setState(() {
+      if (_isZoomMode) {
+        // 줌 모드 종료 - 원래 상태로 복귀
+        _isZoomMode = false;
+        _transformationController.value = Matrix4.identity();
+      } else {
+        // 줌 모드 진입 - 2배 확대
+        _isZoomMode = true;
+        _transformationController.value = Matrix4.identity()..scale(2.0);
+      }
+    });
   }
 
   Widget _buildCardPreview() {
@@ -2502,13 +2509,15 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                           ),
                         ),
 
-                        // 2. Draggable Text Area (위치 유지됨)
+                        // 2. Draggable Text Area (줌 모드가 아닐 때만 드래그 가능)
                         Positioned.fill(
-                          child: Center(
-                            child: Transform.translate(
-                              offset: _dragOffset,
-                              child: GestureDetector(
-                                onPanUpdate: (details) {
+                          child: IgnorePointer(
+                            ignoring: _isZoomMode, // 줌 모드일 때 글상자 터치 무시
+                            child: Center(
+                              child: Transform.translate(
+                                offset: _dragOffset,
+                                child: GestureDetector(
+                                  onPanUpdate: _isZoomMode ? null : (details) {
                                   // Calculate constraints
                                   final cardW = MediaQuery.of(context).size.width * 0.92;
                                   final cardH = cardW * (4 / 3); // AspectRatio 3/4 => H = W / 0.75
@@ -2736,6 +2745,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                           ),
                         ),
                       ),
+                    ),
                     ],
                   ),
                 ),
