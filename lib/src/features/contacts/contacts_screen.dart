@@ -24,7 +24,7 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
   int _selectedTabIndex = 0; // 0: My People, 1: Memory Record
   String _searchQuery = '';
   Contact? _selectedContact; // 현재 선택된 연락처
-  String _selectedFilter = '전체'; // 필터: 전체, 즐겨찾기, 최근 연락, 가족 등
+  String _selectedFilter = '전체'; // 기본은 전체
 
   @override
   Widget build(BuildContext context) {
@@ -104,7 +104,15 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
              ),
              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
              child: TextField(
-               onChanged: (value) => setState(() => _searchQuery = value),
+               onChanged: (value) {
+                 setState(() {
+                   _searchQuery = value;
+                   // 검색어 입력 시 자동으로 '전체'로 변경
+                   if (value.isNotEmpty && _selectedFilter != '전체') {
+                     _selectedFilter = '전체';
+                   }
+                 });
+               },
                decoration: const InputDecoration(
                  icon: Icon(FontAwesomeIcons.magnifyingGlass, color: Color(0xFF795548), size: 18),
                  border: InputBorder.none,
@@ -166,21 +174,34 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
         // TODO: 설정에서 사용자 성씨 관리
         String myFamilyName = '함'; // 기본값, 나중에 설정에서 변경 가능
         
-        // 필터링 적용
+        // 1. 검색어 필터링 먼저 적용
+        if (_searchQuery.isNotEmpty) {
+          contacts = contacts.where((c) =>
+            c.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+            c.phone.contains(_searchQuery) ||
+            (c.groupTag?.toLowerCase().contains(_searchQuery.toLowerCase()) ?? false)
+          ).toList();
+        }
+        
+        // 2. 카테고리 필터링 적용
         switch (_selectedFilter) {
           case '즐겨찾기':
             contacts = contacts.where((c) => c.isFavorite).toList();
             break;
           case '최근 연락':
-            contacts = contacts.where((c) => c.lastSentDate != null || c.lastReceivedDate != null).toList();
-            // 최근 날짜순 정렬
+            // 최근 연락: 모든 연락처를 이름순으로 표시 (lastSent/Received 데이터가 없어도)
+            // 나중에 메시지 발송 시 lastSentDate가 업데이트되면 그때 정렬
             contacts.sort((a, b) {
+              // 최근 연락 날짜가 있는 사람 우선
               final aDate = a.lastSentDate ?? a.lastReceivedDate;
               final bDate = b.lastSentDate ?? b.lastReceivedDate;
-              if (aDate == null && bDate == null) return 0;
-              if (aDate == null) return 1;
-              if (bDate == null) return -1;
-              return bDate.compareTo(aDate);
+              if (aDate != null && bDate == null) return -1;
+              if (aDate == null && bDate != null) return 1;
+              if (aDate != null && bDate != null) {
+                return bDate.compareTo(aDate);
+              }
+              // 둘 다 없으면 이름순
+              return a.name.compareTo(b.name);
             });
             break;
           case '가족':
@@ -196,19 +217,22 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
               }
               return false;
             }).toList();
+            // 가족 필터에서는 즐겨찾기(스타) 연락처를 맨 위로
+            contacts.sort((a, b) {
+              if (a.isFavorite && !b.isFavorite) return -1;
+              if (!a.isFavorite && b.isFavorite) return 1;
+              return a.name.compareTo(b.name);
+            });
             break;
           default: // 전체
+            // 전체도 즐겨찾기 상위 정렬
+            contacts.sort((a, b) {
+              if (a.isFavorite && !b.isFavorite) return -1;
+              if (!a.isFavorite && b.isFavorite) return 1;
+              return a.name.compareTo(b.name);
+            });
             break;
         }
-
-        // 즐겨찾기(스타) 연락처를 맨 위로 정렬
-        contacts.sort((a, b) {
-          // 먼저 즐겨찾기 여부로 정렬
-          if (a.isFavorite && !b.isFavorite) return -1;
-          if (!a.isFavorite && b.isFavorite) return 1;
-          // 그 다음 이름순 정렬
-          return a.name.compareTo(b.name);
-        });
 
         // 필터 결과가 없는 경우
         if (contacts.isEmpty) {
