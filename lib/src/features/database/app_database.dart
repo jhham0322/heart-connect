@@ -192,7 +192,25 @@ class AppDatabase extends _$AppDatabase {
   Future<int> insertContact(ContactsCompanion entry) => into(contacts).insert(entry);
   Future<bool> updateContact(Contact entry) => update(contacts).replace(entry);
   Future<int> upsertContact(ContactsCompanion entry) async {
-    return into(contacts).insertOnConflictUpdate(entry);
+    // phone 컬럼이 UNIQUE이므로 phone 기준으로 upsert
+    final existingContact = await (select(contacts)
+      ..where((t) => t.phone.equals(entry.phone.value))
+    ).getSingleOrNull();
+    
+    if (existingContact != null) {
+      // Update existing
+      await (update(contacts)..where((t) => t.id.equals(existingContact.id))).write(
+        ContactsCompanion(
+          name: entry.name,
+          groupTag: entry.groupTag,
+          birthday: entry.birthday,
+        )
+      );
+      return existingContact.id;
+    } else {
+      // Insert new
+      return into(contacts).insert(entry);
+    }
   }
 
   // HISTORY methods
