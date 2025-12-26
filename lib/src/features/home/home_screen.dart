@@ -201,18 +201,31 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   
   // 네이버 캘린더 동기화 확인 및 안내
   Future<void> _checkNaverCalendarSync() async {
-    if (!Platform.isAndroid) return;
+    debugPrint('[HomeScreen] Checking Naver calendar sync...');
+    if (!Platform.isAndroid) {
+      debugPrint('[HomeScreen] Not Android, skipping');
+      return;
+    }
     
     try {
       // 1. 네이버 캘린더 앱 설치 확인
       final isInstalled = await _calendarChannel.invokeMethod('isNaverCalendarInstalled');
-      if (isInstalled != true) return; // 설치 안 되어 있으면 패스
+      debugPrint('[HomeScreen] Naver calendar installed: $isInstalled');
+      if (isInstalled != true) {
+        debugPrint('[HomeScreen] Naver calendar not installed, skipping');
+        return;
+      }
       
       // 2. 시스템 캘린더에 네이버 계정 있는지 확인
       final hasNaver = await _calendarChannel.invokeMethod('hasNaverCalendarEvents');
-      if (hasNaver == true) return; // 이미 동기화되어 있으면 패스
+      debugPrint('[HomeScreen] Has Naver in system calendar: $hasNaver');
+      if (hasNaver == true) {
+        debugPrint('[HomeScreen] Naver already synced, skipping');
+        return;
+      }
       
       // 3. 네이버 캘린더가 설치되어 있지만 동기화 안 됨 -> 안내
+      debugPrint('[HomeScreen] Showing Naver calendar sync dialog');
       if (mounted) {
         _showNaverCalendarSyncDialog();
       }
