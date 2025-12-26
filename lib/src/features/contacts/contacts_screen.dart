@@ -26,6 +26,7 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
   String _searchQuery = '';
   Contact? _selectedContact; // 현재 선택된 연락처
   String _selectedFilter = '전체'; // 기본은 전체
+  bool _isSyncing = false; // 동기화 중 상태
 
   @override
   Widget build(BuildContext context) {
@@ -160,7 +161,8 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
                ),
                // 동기화 버튼
                GestureDetector(
-                 onTap: () async {
+                 onTap: _isSyncing ? null : () async {
+                   setState(() => _isSyncing = true);
                    try {
                      await ref.read(contactServiceProvider.notifier).syncContacts();
                      if (mounted) {
@@ -174,15 +176,19 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
                          SnackBar(content: Text("동기화 실패: $e")),
                        );
                      }
+                   } finally {
+                     if (mounted) setState(() => _isSyncing = false);
                    }
                  },
                  child: Container(
                    padding: const EdgeInsets.all(8),
                    decoration: BoxDecoration(
-                     color: const Color(0xFF5D4037),
+                     color: _isSyncing ? Colors.grey : const Color(0xFF5D4037),
                      borderRadius: BorderRadius.circular(20),
                    ),
-                   child: const Icon(FontAwesomeIcons.arrowsRotate, color: Colors.white, size: 16),
+                   child: _isSyncing
+                       ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                       : const Icon(FontAwesomeIcons.arrowsRotate, color: Colors.white, size: 16),
                  ),
                ),
              ],
@@ -241,22 +247,45 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
             });
             break;
           case '가족':
-            // 즐겨찾기(단축번호) + 성씨가 같거나 groupTag에 가족 포함
+            // 가족 관련 단어 목록
+            const familyKeywords = [
+              '어머니', '아버지', '장인', '장모', '삼촌', '고모', '이모', 
+              '숙부', '숙모', '엄마', '아빠', '큰아버지', '작은아버지', 
+              '할아버지', '할머니', '손주', '조카', '큰이모', '작은이모', 
+              '큰삼촌', '작은삼촌', '동생', '친척', '형제', '자매', '형', '누나', '오빠', '언니',
+              '며느리', '사위', '시아버지', '시어머니', '처형', '처제', '매형', '매제',
+              'mother', 'father', 'mom', 'dad', 'uncle', 'aunt', 'grandma', 'grandpa',
+            ];
+            
+            // 즐겨찾기(단축번호) + 가족 관련 단어가 이름에 포함 + 같은 성씨
             contacts = contacts.where((c) {
-              // 즐겨찾기(단축번호)도 가족에 포함
+              // 1. 즐겨찾기(단축번호)
               if (c.isFavorite) {
                 return true;
               }
+              
+              // 2. groupTag에 가족 포함
               if (c.groupTag?.toLowerCase().contains('family') == true ||
                   c.groupTag?.contains('가족') == true) {
                 return true;
               }
-              // 성씨가 같으면 가족
+              
+              // 3. 이름에 가족 관련 단어가 포함
+              final nameLower = c.name.toLowerCase();
+              for (var keyword in familyKeywords) {
+                if (nameLower.contains(keyword.toLowerCase())) {
+                  return true;
+                }
+              }
+              
+              // 4. 성씨가 같으면 가족
               if (c.name.isNotEmpty && c.name[0] == myFamilyName) {
                 return true;
               }
+              
               return false;
             }).toList();
+            
             // 정렬: 1. 즐겨찾기 먼저 → 2. 같은 성씨 → 3. 이름순
             contacts.sort((a, b) {
               // 1순위: 즐겨찾기
