@@ -225,11 +225,11 @@ namespace FlutterControlPanel
             controlPanel.Controls.Add(btnHotRestart);
             toolTip.SetToolTip(btnHotRestart, "앱 재시작 (상태 초기화)");
 
-            // Auto Reload Group (Wider)
+            // Auto Reload Group - 왼쪽에 배치
             GroupBox grpAuto = new GroupBox();
-            grpAuto.Text = "Auto Reload / Build";
-            grpAuto.Location = new Point(460, 5); // Shifted right
-            grpAuto.Size = new Size(180, 60); // Build 버튼과 겹치지 않게 조정
+            grpAuto.Text = "Auto Reload";
+            grpAuto.Location = new Point(460, 5);
+            grpAuto.Size = new Size(200, 60);
             controlPanel.Controls.Add(grpAuto);
 
             chkAutoReload = new CheckBox();
@@ -254,10 +254,10 @@ namespace FlutterControlPanel
             lblSec.AutoSize = true;
             grpAuto.Controls.Add(lblSec);
             
-            // Auto Build (Android) 체크박스 - 그룹박스 밖에 배치
+            // Auto Build (Android) 체크박스 - 빌드 버튼 아래 라인에 우측 정렬
             chkAutoBuild = new CheckBox();
-            chkAutoBuild.Text = "📱 Auto Build";
-            chkAutoBuild.Location = new Point(this.ClientSize.Width - 360, 55);
+            chkAutoBuild.Text = "📱 Auto Build (파일 변경 시 자동 빌드)";
+            chkAutoBuild.Location = new Point(this.ClientSize.Width - 250, 55);
             chkAutoBuild.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             chkAutoBuild.AutoSize = true;
             chkAutoBuild.ForeColor = Color.FromArgb(0, 150, 136);
