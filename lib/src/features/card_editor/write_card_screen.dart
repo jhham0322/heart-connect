@@ -2610,7 +2610,8 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(8),
             child: GestureDetector(
-              onHorizontalDragEnd: _handleSwipeNavigation,
+              // 줌 모드일 때는 스와이프 비활성화 (InteractiveViewer가 터치 처리)
+              onHorizontalDragEnd: _isZoomMode ? null : _handleSwipeNavigation,
               onDoubleTapDown: (details) => _doubleTapDetails = details,
               onDoubleTap: _handleDoubleTap,
               child: Stack(
@@ -2627,14 +2628,16 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                             key: _backgroundKey,
                             child: InteractiveViewer(
                               transformationController: _transformationController,
-                              minScale: 1.0,
+                              minScale: 0.5,
                               maxScale: 5.0,
+                              boundaryMargin: const EdgeInsets.all(double.infinity), // 경계 제한 없음
                               panEnabled: _isZoomMode, // 줌 모드일 때만 이동 가능
                               scaleEnabled: _isZoomMode, // 줌 모드일 때만 줌 가능
+                              interactionEndFrictionCoefficient: 0.0001, // 부드러운 제스처
                               onInteractionStart: (details) {
                                 if (_isZoomMode) {
                                   setState(() {
-                                    // 터치 포인트 수로 드래그/핀치 구분
+                                    // 터치 시작 즉시 상태 업데이트
                                     if (details.pointerCount == 1) {
                                       _isPanning = true;
                                       _isPinching = false;
@@ -2642,6 +2645,14 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                                       _isPanning = false;
                                       _isPinching = true;
                                     }
+                                  });
+                                }
+                              },
+                              onInteractionUpdate: (details) {
+                                if (_isZoomMode && details.pointerCount >= 2 && !_isPinching) {
+                                  setState(() {
+                                    _isPanning = false;
+                                    _isPinching = true;
                                   });
                                 }
                               },
@@ -4999,12 +5010,22 @@ class _MarqueeTextState extends State<_MarqueeText> with SingleTickerProviderSta
   late AnimationController _controller;
   late Animation<double> _animation;
   bool _hasCompleted = false;
+  double _textWidth = 0;
+  double _containerWidth = 0;
 
   @override
   void initState() {
     super.initState();
+    
+    // 텍스트 너비 계산
+    _textWidth = _calculateTextWidth(widget.text, 12.0);
+    
+    // 애니메이션 시간: 텍스트 길이에 비례 (글자당 약 0.08초, 최소 5초, 최대 30초)
+    final calculatedDuration = (_textWidth / 8).clamp(5.0, 30.0).toInt();
+    final duration = widget.durationSeconds > 0 ? widget.durationSeconds : calculatedDuration;
+    
     _controller = AnimationController(
-      duration: Duration(seconds: widget.durationSeconds),
+      duration: Duration(seconds: duration),
       vsync: this,
     );
     
@@ -5029,43 +5050,6 @@ class _MarqueeTextState extends State<_MarqueeText> with SingleTickerProviderSta
     _controller.dispose();
     super.dispose();
   }
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return AnimatedBuilder(
-          animation: _animation,
-          builder: (context, child) {
-            // 텍스트 너비 계산
-            final textWidth = _calculateTextWidth(widget.text, 12.0);
-            final containerWidth = constraints.maxWidth;
-            final totalDistance = containerWidth + textWidth;
-            
-            // 오른쪽에서 시작해서 왼쪽으로 이동
-            final offset = containerWidth - (_animation.value * totalDistance);
-            
-            return Transform.translate(
-              offset: Offset(offset, 0),
-              child: child,
-            );
-          },
-          child: Text(
-            widget.text,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              height: 1.2,
-            ),
-            maxLines: 1,
-            softWrap: false,
-            overflow: TextOverflow.visible,
-          ),
-        );
-      },
-    );
-  }
   
   double _calculateTextWidth(String text, double fontSize) {
     final textPainter = TextPainter(
@@ -5077,5 +5061,43 @@ class _MarqueeTextState extends State<_MarqueeText> with SingleTickerProviderSta
       textDirection: TextDirection.ltr,
     )..layout();
     return textPainter.width;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        _containerWidth = constraints.maxWidth;
+        final totalDistance = _containerWidth + _textWidth;
+        
+        return AnimatedBuilder(
+          animation: _animation,
+          builder: (context, child) {
+            // 오른쪽에서 시작해서 왼쪽으로 이동
+            final offset = _containerWidth - (_animation.value * totalDistance);
+            
+            return Align(
+              alignment: Alignment.centerLeft,
+              child: Transform.translate(
+                offset: Offset(offset, 0),
+                child: child,
+              ),
+            );
+          },
+          child: Text(
+            widget.text,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              height: 1.0,
+            ),
+            maxLines: 1,
+            softWrap: false,
+            overflow: TextOverflow.visible,
+          ),
+        );
+      },
+    );
   }
 }
