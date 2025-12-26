@@ -62,6 +62,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     if (status.isGranted) {
       setState(() => _hasCalendarPermission = true);
       debugPrint('[HomeScreen] Calendar permission already granted');
+      // 네이버 캘린더 동기화 확인
+      _checkNaverCalendarSync();
     } else {
       setState(() => _hasCalendarPermission = false);
       
@@ -141,6 +143,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('✓ 캘린더가 연동되었습니다!')),
                   );
+                  // 네이버 캘린더 동기화 확인 (잠시 후)
+                  Future.delayed(const Duration(seconds: 1), () {
+                    _checkNaverCalendarSync();
+                  });
                 }
               } else if (result.isPermanentlyDenied) {
                 // 영구 거부된 경우 설정으로 이동 안내
@@ -184,6 +190,107 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               foregroundColor: Colors.white,
             ),
             child: const Text('설정 열기'),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  // 네이버 캘린더 채널
+  static const _calendarChannel = MethodChannel('com.heartconnect/calendar');
+  
+  // 네이버 캘린더 동기화 확인 및 안내
+  Future<void> _checkNaverCalendarSync() async {
+    if (!Platform.isAndroid) return;
+    
+    try {
+      // 1. 네이버 캘린더 앱 설치 확인
+      final isInstalled = await _calendarChannel.invokeMethod('isNaverCalendarInstalled');
+      if (isInstalled != true) return; // 설치 안 되어 있으면 패스
+      
+      // 2. 시스템 캘린더에 네이버 계정 있는지 확인
+      final hasNaver = await _calendarChannel.invokeMethod('hasNaverCalendarEvents');
+      if (hasNaver == true) return; // 이미 동기화되어 있으면 패스
+      
+      // 3. 네이버 캘린더가 설치되어 있지만 동기화 안 됨 -> 안내
+      if (mounted) {
+        _showNaverCalendarSyncDialog();
+      }
+    } catch (e) {
+      debugPrint('[HomeScreen] Naver calendar check error: $e');
+    }
+  }
+  
+  // 네이버 캘린더 동기화 안내 다이얼로그
+  void _showNaverCalendarSyncDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: const Color(0xFF03C75A).withOpacity(0.2),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(FontAwesomeIcons.n, color: Color(0xFF03C75A), size: 20),
+            ),
+            const SizedBox(width: 12),
+            const Expanded(child: Text('네이버 캘린더 연동')),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              '네이버 캘린더 앱이 설치되어 있지만, 일정이 기기에 동기화되지 않았습니다.',
+              style: TextStyle(fontSize: 14),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: const Color(0xFF03C75A).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFF03C75A).withOpacity(0.3)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  Text('📱 네이버 캘린더 앱에서:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                  SizedBox(height: 8),
+                  Text('1. ≡ 메뉴 터치', style: TextStyle(fontSize: 12)),
+                  Text('2. 설정 ⚙️ 터치', style: TextStyle(fontSize: 12)),
+                  Text('3. "기기 캘린더 연동" 활성화', style: TextStyle(fontSize: 12)),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('나중에'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              // 네이버 캘린더 앱 열기
+              try {
+                await _calendarChannel.invokeMethod('openNaverCalendarSettings');
+              } catch (e) {
+                debugPrint('Error opening Naver Calendar: $e');
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF03C75A),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            ),
+            child: const Text('네이버 캘린더 열기'),
           ),
         ],
       ),

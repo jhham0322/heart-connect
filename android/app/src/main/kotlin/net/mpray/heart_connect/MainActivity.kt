@@ -55,6 +55,28 @@ class MainActivity : FlutterActivity() {
                         result.error("CALENDAR_ERROR", e.message, null)
                     }
                 }
+                "isNaverCalendarInstalled" -> {
+                    result.success(isAppInstalled("com.nhn.android.calendar"))
+                }
+                "openNaverCalendarSettings" -> {
+                    try {
+                        val intent = packageManager.getLaunchIntentForPackage("com.nhn.android.calendar")
+                        if (intent != null) {
+                            // 네이버 캘린더 앱 실행 (설정 화면으로 직접 이동은 불가하므로 앱 실행)
+                            startActivity(intent)
+                            result.success(true)
+                        } else {
+                            result.success(false)
+                        }
+                    } catch (e: Exception) {
+                        result.error("OPEN_ERROR", e.message, null)
+                    }
+                }
+                "hasNaverCalendarEvents" -> {
+                    // 시스템 캘린더에 네이버 계정 일정이 있는지 확인
+                    val hasNaver = checkNaverCalendarInSystem()
+                    result.success(hasNaver)
+                }
                 else -> {
                     result.notImplemented()
                 }
@@ -133,6 +155,45 @@ class MainActivity : FlutterActivity() {
         
         android.util.Log.d("CalendarNative", "Found ${events.size} events from ContentProvider")
         return events
+    }
+    
+    private fun isAppInstalled(packageName: String): Boolean {
+        return try {
+            packageManager.getPackageInfo(packageName, 0)
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+    
+    private fun checkNaverCalendarInSystem(): Boolean {
+        // 시스템 캘린더에서 네이버 계정 캘린더가 있는지 확인
+        val projection = arrayOf(
+            CalendarContract.Calendars._ID,
+            CalendarContract.Calendars.ACCOUNT_NAME,
+            CalendarContract.Calendars.ACCOUNT_TYPE
+        )
+        
+        val cursor = contentResolver.query(
+            CalendarContract.Calendars.CONTENT_URI,
+            projection,
+            null,
+            null,
+            null
+        )
+        
+        cursor?.use {
+            while (it.moveToNext()) {
+                val accountName = it.getString(it.getColumnIndexOrThrow(CalendarContract.Calendars.ACCOUNT_NAME)) ?: ""
+                val accountType = it.getString(it.getColumnIndexOrThrow(CalendarContract.Calendars.ACCOUNT_TYPE)) ?: ""
+                
+                if (accountName.contains("naver", ignoreCase = true) || 
+                    accountType.contains("naver", ignoreCase = true)) {
+                    return true
+                }
+            }
+        }
+        return false
     }
 
     private fun checkAiCoreAvailability(): Boolean {
