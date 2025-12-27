@@ -78,12 +78,20 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   Future<void> _requestSmsPermission() async {
     if (Platform.isAndroid || Platform.isIOS) {
+      debugPrint('[Onboarding] SMS 권한 요청 중...');
       final status = await Permission.sms.request();
+      debugPrint('[Onboarding] SMS 권한 상태: $status');
+      
       setState(() {
         _smsGranted = status.isGranted;
       });
+      
       if (status.isGranted) {
         _nextPage();
+      } else if (status.isPermanentlyDenied) {
+        // 영구 거부 상태 - 설정 화면으로 이동
+        debugPrint('[Onboarding] SMS 권한 영구 거부됨 - 설정 열기');
+        await openAppSettings();
       }
     } else {
       setState(() => _smsGranted = true);

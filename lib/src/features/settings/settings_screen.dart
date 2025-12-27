@@ -869,9 +869,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     _selectedLanguage = entry.key;
                   });
                   _saveSettings();
+                  // 즉시 언어 적용
+                  ref.read(localeProvider.notifier).setLocale(entry.key);
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('언어가 ${entry.value}로 변경되었습니다. (앱 재시작 필요)')),
+                    SnackBar(content: Text('언어가 ${entry.value}로 변경되었습니다.')),
                   );
                 },
               );
@@ -1203,9 +1205,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
 
           // Footer
-          Padding(
-            padding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
-            child: Container(
+          SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
+              child: Container(
               height: 80,
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -1237,6 +1241,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ),
                 ],
               ),
+            ),
             ),
           ),
         ],
