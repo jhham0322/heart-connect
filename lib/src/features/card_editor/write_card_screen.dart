@@ -2837,45 +2837,6 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                                       mainAxisSize: MainAxisSize.min,
                                       crossAxisAlignment: CrossAxisAlignment.stretch,
                                       children: [
-                                        // 1. 글자수 & AI 버튼 (상단 오른쪽 정렬) - 캡쳐 시 숨김
-                                        if (!_isCapturing)
-                                          Align(
-                                            alignment: Alignment.centerRight,
-                                            child: Padding(
-                                              padding: const EdgeInsets.only(bottom: 8.0),
-                                              child: Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  Container(
-                                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                                    decoration: BoxDecoration(
-                                                      color: Colors.white.withOpacity(0.7),
-                                                      borderRadius: BorderRadius.circular(8),
-                                                    ),
-                                                    child: Text(
-                                                      "${_message.length} / 75",
-                                                      style: TextStyle(fontSize: 10, color: _message.length >= 75 ? Colors.red : Colors.grey[700]),
-                                                    ),
-                                                  ),
-                                                  const SizedBox(width: 6),
-                                                  GestureDetector(
-                                                    onTap: _showAiToneSelector,
-                                                    child: Container(
-                                                      padding: const EdgeInsets.all(4),
-                                                      decoration: BoxDecoration(
-                                                        color: Colors.white.withOpacity(0.7),
-                                                        borderRadius: BorderRadius.circular(6),
-                                                      ),
-                                                      child: _isAiLoading 
-                                                        ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFFF29D86)))
-                                                        : const Icon(FontAwesomeIcons.wandMagicSparkles, size: 12, color: Color(0xFFF29D86)),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-
                                         // 2. 편집 가능한 QuillEditor
                                         ConstrainedBox(
                                           constraints: BoxConstraints(
@@ -2918,6 +2879,43 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                                         const SizedBox(height: 40), // Reserve some space so main text doesn't overlap footer initially
                                       ],
                                     ),
+                                    
+                                    // 1. 글자수 & AI 버튼 (글상자 바로 위쪽에 고정) - 캡쳐 시 숨김
+                                    if (!_isCapturing)
+                                      Positioned(
+                                        top: -28,
+                                        right: 0,
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                              decoration: BoxDecoration(
+                                                color: Colors.white.withOpacity(0.85),
+                                                borderRadius: BorderRadius.circular(8),
+                                              ),
+                                              child: Text(
+                                                "${_message.length} / 75",
+                                                style: TextStyle(fontSize: 10, color: _message.length >= 75 ? Colors.red : Colors.grey[700]),
+                                              ),
+                                            ),
+                                            const SizedBox(width: 6),
+                                            GestureDetector(
+                                              onTap: _showAiToneSelector,
+                                              child: Container(
+                                                padding: const EdgeInsets.all(4),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.white.withOpacity(0.85),
+                                                  borderRadius: BorderRadius.circular(6),
+                                                ),
+                                                child: _isAiLoading 
+                                                  ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFFF29D86)))
+                                                  : const Icon(FontAwesomeIcons.wandMagicSparkles, size: 12, color: Color(0xFFF29D86)),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
                                     
                                     // 3. Footer (Floating & Draggable)
                                     Positioned.fill(

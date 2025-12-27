@@ -1147,6 +1147,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
+                      const SizedBox(height: 4), // 상단 간격
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -1167,23 +1168,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 6),
                       // 지원 캘린더 안내 버튼
                       GestureDetector(
                         onTap: _showCalendarGuide,
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
                             color: Colors.blue.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(10),
                             border: Border.all(color: Colors.blue.withOpacity(0.3)),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(FontAwesomeIcons.circleInfo, size: 12, color: Colors.blue),
-                              const SizedBox(width: 6),
-                              Text(strings.settingsCalendarGuide, style: const TextStyle(fontSize: 11, color: Colors.blue, fontWeight: FontWeight.bold)),
+                              const Icon(FontAwesomeIcons.circleInfo, size: 10, color: Colors.blue),
+                              const SizedBox(width: 4),
+                              Text(strings.settingsCalendarGuide, style: const TextStyle(fontSize: 9, color: Colors.blue, fontWeight: FontWeight.bold)),
                             ],
                           ),
                         ),
@@ -1261,7 +1262,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     VoidCallback? onDescTap,
   }) {
     return Container(
-      height: 90,
+      constraints: const BoxConstraints(minHeight: 90),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
