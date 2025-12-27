@@ -136,28 +136,36 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const SizedBox(height: 40),
+          const SizedBox(height: 20),
           
-          // 앱 아이콘
+          // 앱 아이콘 (큰 사이즈)
           Container(
-            width: 120,
-            height: 120,
+            width: 160,
+            height: 160,
             decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(
-                colors: [
-                  const Color(0xFFF29D86).withAlpha(50),
-                  Colors.transparent,
-                ],
-              ),
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFFF29D86).withAlpha(60),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
             ),
-            child: Center(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(24),
               child: Image.asset(
-                'assets/icons/app_icon.png',
-                width: 80,
-                height: 80,
+                'assets/icons/heart_icon.png',
+                width: 160,
+                height: 160,
+                fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
-                  return const Text('💝', style: TextStyle(fontSize: 60));
+                  return Container(
+                    color: Colors.white,
+                    child: const Center(
+                      child: Text('💝', style: TextStyle(fontSize: 80)),
+                    ),
+                  );
                 },
               ),
             ),
@@ -238,43 +246,62 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           
           const SizedBox(height: 32),
           
-          // 언어 선택
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFFF29D86).withAlpha(100)),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.language, color: Color(0xFFF29D86), size: 20),
-                const SizedBox(width: 8),
-                DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    value: ref.watch(localeProvider).languageCode,
-                    isDense: true,
-                    icon: const Icon(Icons.arrow_drop_down, color: Color(0xFF5D4037)),
+          // 언어 선택 (PopupMenuButton 사용)
+          PopupMenuButton<String>(
+            initialValue: ref.watch(localeProvider).languageCode,
+            onSelected: (value) {
+              ref.read(localeProvider.notifier).setLocale(value);
+            },
+            offset: const Offset(0, 50),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            itemBuilder: (context) {
+              return supportedLanguages.entries.map((entry) {
+                return PopupMenuItem<String>(
+                  value: entry.key,
+                  child: Row(
+                    children: [
+                      if (entry.key == ref.watch(localeProvider).languageCode)
+                        const Icon(Icons.check, color: Color(0xFFF29D86), size: 18)
+                      else
+                        const SizedBox(width: 18),
+                      const SizedBox(width: 8),
+                      Text(entry.value, style: const TextStyle(fontSize: 15)),
+                    ],
+                  ),
+                );
+              }).toList();
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFFF29D86).withAlpha(100)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withAlpha(10),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.language, color: Color(0xFFF29D86), size: 22),
+                  const SizedBox(width: 10),
+                  Text(
+                    supportedLanguages[ref.watch(localeProvider).languageCode] ?? '한국어',
                     style: const TextStyle(
-                      fontSize: 15,
+                      fontSize: 16,
                       fontWeight: FontWeight.w500,
                       color: Color(0xFF5D4037),
                     ),
-                    items: supportedLanguages.entries.map((entry) {
-                      return DropdownMenuItem<String>(
-                        value: entry.key,
-                        child: Text(entry.value),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      if (value != null) {
-                        ref.read(localeProvider.notifier).setLocale(value);
-                      }
-                    },
                   ),
-                ),
-              ],
+                  const SizedBox(width: 8),
+                  const Icon(Icons.arrow_drop_down, color: Color(0xFF5D4037), size: 24),
+                ],
+              ),
             ),
           ),
           
