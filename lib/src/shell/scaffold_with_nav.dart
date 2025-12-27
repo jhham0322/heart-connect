@@ -5,6 +5,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../theme/app_theme.dart';
 import '../features/gallery/gallery_selection_provider.dart';
 import '../features/contacts/current_contact_provider.dart';
+import '../l10n/app_strings.dart';
 
 class ScaffoldWithNav extends ConsumerWidget {
   const ScaffoldWithNav({
@@ -44,17 +45,17 @@ class ScaffoldWithNav extends ConsumerWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Row(
+                  Row(
                     children: [
-                      Image(
+                      const Image(
                         image: AssetImage('assets/icons/heart_icon.png'),
                         width: 32,
                         height: 32,
                       ),
-                      SizedBox(width: 8),
+                      const SizedBox(width: 8),
                       Text(
-                        "Heart-Connect",
-                        style: TextStyle(
+                        ref.watch(appStringsProvider).appName,
+                        style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
                           color: AppTheme.textPrimary,
@@ -158,13 +159,13 @@ class ScaffoldWithNav extends ConsumerWidget {
                   children: [
                     _NavItem(
                       icon: FontAwesomeIcons.house,
-                      label: 'Home',
+                      label: ref.watch(appStringsProvider).navHome,
                       isSelected: navigationShell.currentIndex == 0,
                       onTap: () => _goBranch(0),
                     ),
                     _NavItem(
                       icon: FontAwesomeIcons.addressBook,
-                      label: 'Contacts',
+                      label: ref.watch(appStringsProvider).navContacts,
                       isSelected: navigationShell.currentIndex == 1,
                       onTap: () => _goBranch(1),
                     ),
@@ -178,13 +179,13 @@ class ScaffoldWithNav extends ConsumerWidget {
                   children: [
                     _NavItem(
                       icon: FontAwesomeIcons.image,
-                      label: 'Gallery',
+                      label: ref.watch(appStringsProvider).navGallery,
                       isSelected: navigationShell.currentIndex == 2,
                       onTap: () => _goBranch(2),
                     ),
                     _NavItem(
                       icon: FontAwesomeIcons.envelope,
-                      label: 'Mailbox',
+                      label: ref.watch(appStringsProvider).navMessages,
                       isSelected: navigationShell.currentIndex == 3,
                       onTap: () => _goBranch(3),
                     ),

@@ -17,6 +17,7 @@ import '../database/app_database.dart'; // Import for DailyPlan
 import '../database/database_provider.dart'; // Added for appDatabaseProvider
 import '../../utils/phone_formatter.dart'; // Added phone formatter utility
 import '../../widgets/contact_picker_dialog.dart'; // Common contact picker dialog
+import '../../l10n/app_strings.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -782,6 +783,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Widget _buildDailyPlanCard(DailyPlan plan, bool isActive) {
+    final strings = ref.watch(appStringsProvider);
     // Determine Icon and Emoji based on plan type
     String emoji = '📅';
     String subtitle = 'Event';
@@ -889,14 +891,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                     elevation: 0,
                   ),
-                  child: const Row(
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(FontAwesomeIcons.pen, size: 14),
-                      SizedBox(width: 8),
+                      const Icon(FontAwesomeIcons.pen, size: 14),
+                      const SizedBox(width: 8),
                       Text(
-                        "Write",
-                        style: TextStyle(
+                        strings.homeWriteCard,
+                        style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 15,
                         ),
@@ -1280,6 +1282,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   /// D. 다가오는 일정 섹션 (Real Data)
   Widget _buildUpcomingEvents(List<EventItem> events) {
+    final strings = ref.watch(appStringsProvider);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
       child: Column(
@@ -1288,9 +1291,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                "Upcoming Events",
-                style: TextStyle(
+              Text(
+                strings.homeUpcoming,
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: AppTheme.textPrimary,
@@ -1308,15 +1311,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           
           Expanded(
             child: events.isEmpty
-              ? const Center(
+              ? Center(
                   child: Padding(
-                    padding: EdgeInsets.all(20.0),
-                    child: Text("No upcoming events.", style: TextStyle(color: AppTheme.textSecondary)),
+                    padding: const EdgeInsets.all(20.0),
+                    child: Text(strings.homeNoEvents, style: const TextStyle(color: AppTheme.textSecondary)),
                   ),
                 )
               : ListView.builder(
                   padding: const EdgeInsets.only(bottom: 80),
-                  physics: const BouncingScrollPhysics(),
+                  physics: const AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
                   itemCount: events.length,
                   itemBuilder: (context, index) {
                     return _buildEventItem(events[index]);
