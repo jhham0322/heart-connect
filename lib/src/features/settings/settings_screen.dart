@@ -989,6 +989,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final strings = ref.watch(appStringsProvider);
+    
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       body: Column(
@@ -1003,8 +1005,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 _buildSettingCard(
                   iconBg: const Color(0xFFFFF59D),
                   icon: FontAwesomeIcons.bell,
-                  title: "Notifications",
-                  desc: "Receive Alerts",
+                  title: strings.settingsNotifications,
+                  desc: strings.settingsReceiveAlerts,
                   descIcon: FontAwesomeIcons.moon,
                   action: Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
@@ -1013,7 +1015,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       GestureDetector(
                         onTap: _pickTime,
                         child: Text(
-                          "Set Time\n${_notificationTime.format(context)}",
+                          "${strings.settingsSetTime}\n${_notificationTime.format(context)}",
                           textAlign: TextAlign.right,
                           style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, decoration: TextDecoration.underline),
                         ),
@@ -1049,8 +1051,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 _buildSettingCard(
                   iconBg: const Color(0xFFFFAB91),
                   icon: FontAwesomeIcons.wandMagicSparkles,
-                  title: "Design & Sending",
-                  desc: "카드 하단 브랜딩",
+                  title: strings.settingsDesignSending,
+                  desc: strings.settingsCardBranding,
                   descIcon: FontAwesomeIcons.heart,
                   onDescTap: _showBrandingInfo, // Add info tap
                   action: Switch(
@@ -1066,8 +1068,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 _buildSettingCard(
                   iconBg: const Color(0xFFFFF59D),
                   icon: FontAwesomeIcons.cloudArrowUp,
-                  title: "Data Management",
-                  desc: "Sync Contacts",
+                  title: strings.settingsDataManage,
+                  desc: strings.settingsSyncContacts,
                   descIcon: FontAwesomeIcons.rotate,
                   action: Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
@@ -1093,7 +1095,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                               decoration: BoxDecoration(color: const Color(0xFFFFF59D), borderRadius: BorderRadius.circular(12), border: Border.all(color: const Color(0xFF5D4037))),
-                              child: const Text("Backup", style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
+                              child: Text(strings.settingsBackup, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
                             ),
                           ),
                           const SizedBox(width: 6),
@@ -1102,7 +1104,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                               decoration: BoxDecoration(color: const Color(0xFFB3E5FC), borderRadius: BorderRadius.circular(12), border: Border.all(color: const Color(0xFF5D4037))),
-                              child: const Text("Restore", style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
+                              child: Text(strings.settingsRestore, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
                             ),
                           ),
                         ],
@@ -1116,7 +1118,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                               decoration: BoxDecoration(color: const Color(0xFFC8E6C9), borderRadius: BorderRadius.circular(12), border: Border.all(color: const Color(0xFF5D4037))),
-                              child: const Text("Export", style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
+                              child: Text(strings.settingsExport, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
                             ),
                           ),
                           const SizedBox(width: 6),
@@ -1125,7 +1127,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                               decoration: BoxDecoration(color: const Color(0xFFFFE0B2), borderRadius: BorderRadius.circular(12), border: Border.all(color: const Color(0xFF5D4037))),
-                              child: const Text("Import", style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
+                              child: Text(strings.settingsImport, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
                             ),
                           ),
                         ],
@@ -1138,8 +1140,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 _buildSettingCard(
                   iconBg: const Color(0xFFB3E5FC),
                   icon: FontAwesomeIcons.calendar,
-                  title: "Calendar Sync",
-                  desc: "외부 캘린더 앱 열기",
+                  title: strings.settingsCalendarSync,
+                  desc: strings.settingsOpenCalendar,
                   descIcon: FontAwesomeIcons.arrowUpRightFromSquare,
                   action: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -1178,10 +1180,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
-                            children: const [
-                              Icon(FontAwesomeIcons.circleInfo, size: 12, color: Colors.blue),
-                              SizedBox(width: 6),
-                              Text("지원 캘린더 안내", style: TextStyle(fontSize: 11, color: Colors.blue, fontWeight: FontWeight.bold)),
+                            children: [
+                              const Icon(FontAwesomeIcons.circleInfo, size: 12, color: Colors.blue),
+                              const SizedBox(width: 6),
+                              Text(strings.settingsCalendarGuide, style: const TextStyle(fontSize: 11, color: Colors.blue, fontWeight: FontWeight.bold)),
                             ],
                           ),
                         ),
@@ -1193,11 +1195,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 _buildSettingCard(
                   iconBg: const Color(0xFFFFF59D),
                   icon: FontAwesomeIcons.circleInfo,
-                  title: "App Info & Support",
-                  desc: "Version ${AppVersion.shortVersion}",
+                  title: strings.settingsAppInfo,
+                  desc: "${strings.settingsVersion} ${AppVersion.shortVersion}",
                   action: TextButton(
                     onPressed: _contactUs,
-                    child: const Text("Contact Us", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.brown, decoration: TextDecoration.underline)),
+                    child: Text(strings.settingsContactUs, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.brown, decoration: TextDecoration.underline)),
                   ),
                 ),
               ],
@@ -1220,11 +1222,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _FooterItem(icon: FontAwesomeIcons.user, label: "Account", onTap: _showAccountDialog),
-                  _FooterItem(icon: FontAwesomeIcons.globe, label: "Language", onTap: _showLanguageDialog),
+                  _FooterItem(icon: FontAwesomeIcons.user, label: strings.settingsAccount, onTap: _showAccountDialog),
+                  _FooterItem(icon: FontAwesomeIcons.globe, label: strings.settingsLanguage, onTap: _showLanguageDialog),
                   _FooterItem(
                     icon: FontAwesomeIcons.doorOpen, // Changed icon
-                    label: "Exit", // Changed label
+                    label: strings.settingsExit, // Changed label
                     onTap: () {
                       if (Navigator.canPop(context)) {
                         Navigator.pop(context);

@@ -35,8 +35,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   void _nextPage() {
-    // 총 6 페이지: 환영, 이름입력, 연락처권한, 캘린더권한, SMS읽기권한, SMS발송권한
-    if (_currentPage < 5) {
+    // 총 5 페이지: 환영, 이름입력, 연락처권한, 캘린더권한, SMS읽기권한
+    if (_currentPage < 4) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 400),
         curve: Curves.easeInOut,
@@ -172,7 +172,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 padding: const EdgeInsets.all(20),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(6, (index) {
+                  children: List.generate(5, (index) {
                     return Container(
                       margin: const EdgeInsets.symmetric(horizontal: 3),
                       width: _currentPage == index ? 20 : 6,
@@ -202,7 +202,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     _buildContactsPermissionPage(),// 2: 연락처 권한
                     _buildCalendarPermissionPage(),// 3: 캘린더 권한
                     _buildSmsPermissionPage(),     // 4: SMS 읽기 권한
-                    _buildSendSmsPermissionPage(), // 5: SMS 발송 권한 (NEW)
                   ],
                 ),
               ),
