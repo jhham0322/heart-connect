@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_contacts/flutter_contacts.dart' as fc;
 import 'package:heart_connect/src/features/alarm/notification_service.dart';
 import 'package:heart_connect/src/features/contacts/contact_service.dart';
 import 'package:heart_connect/src/features/database/database_provider.dart';
@@ -16,6 +17,8 @@ import 'package:drift/drift.dart' hide Column;
 import 'package:file_selector/file_selector.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:heart_connect/src/utils/app_version.dart';
+import 'package:heart_connect/src/l10n/app_strings.dart';
+import 'package:heart_connect/src/providers/locale_provider.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -57,10 +60,27 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
+    
+    // 저장된 사용자 이름 가져오기
+    String savedUserName = prefs.getString('user_name') ?? '';
+    
+    // 사용자 이름이 비어있거나 기본값이면 핸드폰 소유자 이름을 가져오기 시도
+    if (savedUserName.isEmpty || savedUserName == 'Heart-Connect') {
+      try {
+        if (await fc.FlutterContacts.requestPermission()) {
+          // 연락처에서 "나" 또는 소유자를 찾기 (통상적으로 첫 번째 연락처 또는 별도 API)
+          // 안드로이드에서 기기 소유자 이름 가져오기는 제한적이므로
+          // 여기서는 기본값 유지
+        }
+      } catch (e) {
+        // 권한 없음 또는 오류 - 무시
+      }
+    }
+    
     setState(() {
       _notificationsEnabled = prefs.getBool('notifications_enabled') ?? true;
       _brandingEnabled = prefs.getBool('branding_enabled') ?? true;
-      _userName = prefs.getString('user_name') ?? 'Heart-Connect';
+      _userName = savedUserName.isNotEmpty ? savedUserName : 'Heart-Connect';
       _selectedLanguage = prefs.getString('selected_language') ?? 'ko';
       
       final timeStr = prefs.getString('notification_time');
@@ -718,6 +738,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   // Account 다이얼로그 - 이름/별명 설정
   void _showAccountDialog() {
     final controller = TextEditingController(text: _userName);
+    final strings = ref.read(appStringsProvider);
     
     showDialog(
       context: context,
@@ -734,7 +755,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               child: const Icon(FontAwesomeIcons.user, color: Colors.orange, size: 20),
             ),
             const SizedBox(width: 12),
-            const Expanded(child: Text('내 이름/별명', style: TextStyle(fontSize: 18))),
+            Expanded(child: Text(strings.settingsMyName, style: const TextStyle(fontSize: 18))),
           ],
         ),
         content: Column(
@@ -744,8 +765,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             TextField(
               controller: controller,
               decoration: InputDecoration(
-                labelText: '이름 또는 별명',
-                hintText: '카드에 표시될 이름',
+                labelText: strings.settingsNameOrNickname,
+                hintText: strings.settingsNameHint,
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 prefixIcon: const Icon(FontAwesomeIcons.signature, size: 16),
               ),
@@ -758,13 +779,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
-                children: const [
-                  Icon(FontAwesomeIcons.circleInfo, size: 14, color: Colors.blue),
-                  SizedBox(width: 8),
+                children: [
+                  const Icon(FontAwesomeIcons.circleInfo, size: 14, color: Colors.blue),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      '이 이름은 카드 쓰기 화면의 Footer(서명)에 사용됩니다.',
-                      style: TextStyle(fontSize: 12, color: Colors.blue),
+                      strings.settingsNameUsageInfo,
+                      style: const TextStyle(fontSize: 12, color: Colors.blue),
                     ),
                   ),
                 ],
@@ -775,7 +796,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('취소', style: TextStyle(color: Colors.grey)),
+            child: Text(strings.cancel, style: const TextStyle(color: Colors.grey)),
           ),
           ElevatedButton(
             onPressed: () {
@@ -785,11 +806,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               _saveSettings();
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('이름이 "${_userName}"으로 변경되었습니다.')),
+                SnackBar(content: Text('${strings.settingsName}: "$_userName"')),
               );
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-            child: const Text('저장', style: TextStyle(color: Colors.white)),
+            child: Text(strings.save, style: const TextStyle(color: Colors.white)),
           ),
         ],
       ),
