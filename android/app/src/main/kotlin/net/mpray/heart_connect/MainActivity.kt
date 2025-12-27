@@ -160,30 +160,66 @@ class MainActivity : FlutterActivity() {
                 imageFile
             )
             
-            // MMS Intent 생성
+            android.util.Log.d("MMS", "이미지 URI: $imageUri")
+            android.util.Log.d("MMS", "수신자: $phoneNumber")
+            android.util.Log.d("MMS", "기본 SMS 앱: ${getDefaultSmsPackage()}")
+            
+            // 기본 SMS 앱 패키지 가져오기
+            val defaultSmsApp = getDefaultSmsPackage()
+            
+            // MMS Intent 생성 - 삼성 메시지 앱 방식
             val intent = Intent(Intent.ACTION_SEND).apply {
-                type = "image/*"
+                type = "image/jpeg"
+                
+                // 수신자 설정 (다양한 방식 시도)
                 putExtra("address", phoneNumber)
                 putExtra("sms_body", message)
+                putExtra("exit_on_sent", true)
+                
+                // 이미지 첨부
                 putExtra(Intent.EXTRA_STREAM, imageUri)
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 
-                // 기본 메시지 앱으로 보내기
-                setPackage(getDefaultSmsPackage())
+                // 기본 SMS 앱 직접 지정
+                if (defaultSmsApp != null) {
+                    setPackage(defaultSmsApp)
+                }
             }
             
-            // 기본 SMS 앱이 없으면 chooser 사용
-            if (intent.resolveActivity(packageManager) == null) {
-                intent.setPackage(null)
-                startActivity(Intent.createChooser(intent, "문자로 보내기"))
-            } else {
+            // Intent 실행 가능 여부 확인
+            if (defaultSmsApp != null && intent.resolveActivity(packageManager) != null) {
+                android.util.Log.d("MMS", "기본 SMS 앱으로 직접 열기: $defaultSmsApp")
                 startActivity(intent)
+            } else {
+                // Fallback: SENDTO with smsto: scheme (이미지 없이)
+                android.util.Log.d("MMS", "Fallback: smsto 방식 시도")
+                val smsIntent = Intent(Intent.ACTION_SENDTO).apply {
+                    data = android.net.Uri.parse("smsto:$phoneNumber")
+                    putExtra("sms_body", message)
+                }
+                if (smsIntent.resolveActivity(packageManager) != null) {
+                    startActivity(smsIntent)
+                    // 이미지는 별도로 공유
+                    val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                        type = "image/jpeg"
+                        putExtra(Intent.EXTRA_STREAM, imageUri)
+                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    }
+                    startActivity(Intent.createChooser(shareIntent, "이미지 공유"))
+                } else {
+                    // 최종 Fallback: Chooser
+                    android.util.Log.d("MMS", "Chooser 사용")
+                    intent.setPackage(null)
+                    startActivity(Intent.createChooser(intent, "문자로 보내기"))
+                }
             }
             
             android.util.Log.d("MMS", "MMS Intent 성공: $phoneNumber")
             true
         } catch (e: Exception) {
             android.util.Log.e("MMS", "MMS Intent 오류: ${e.message}")
+            e.printStackTrace()
             false
         }
     }

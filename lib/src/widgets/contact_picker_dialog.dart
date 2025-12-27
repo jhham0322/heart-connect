@@ -5,6 +5,7 @@ import 'package:drift/drift.dart' hide Column;
 import '../features/database/app_database.dart';
 import '../features/database/database_provider.dart';
 import '../utils/phone_formatter.dart';
+import '../l10n/app_strings.dart';
 
 /// 공통 연락처 선택 다이얼로그
 /// 모든 화면에서 동일하게 사용됩니다.
@@ -43,20 +44,25 @@ class _ContactPickerDialogState extends ConsumerState<ContactPickerDialog> {
   late Set<String> _selectedPhones;
   List<Contact> _contacts = [];
 
-  // 가족 필터용 키워드
-  static const _familyKeywords = [
+  // 가족 필터용 키워드 - 무조건 가족으로 인정
+  static const _familyKeywordsUnconditional = [
     // 배우자
     '아내', '남편', '부인', '배우자', '와이프', '신랑', '신부', 'wife', 'husband',
     // 자녀
     '아들', '딸', '자녀', '막내', '첫째', '둘째', '셋째', '애기', '아기', '손자', '손녀', 'son', 'daughter',
     // 부모
     '어머니', '아버지', '엄마', '아빠', '모친', '부친', 'mother', 'father', 'mom', 'dad',
-    // 형제
-    '형', '누나', '오빠', '언니', '동생', '형제', '자매', '남동생', '여동생', 'brother', 'sister',
     // 친척
     '이모', '삼촌', '고모', '숙부', '숙모', '조카', '사촌', '친척',
     '할머니', '할아버지', '장인', '장모', '시아버지', '시어머니',
-    '며느리', '사위', 'uncle', 'aunt', 'grandma', 'grandpa', 'cousin'
+    '며느리', '사위', 'uncle', 'aunt', 'grandma', 'grandpa', 'cousin',
+    // 형제 (구체적 표현)
+    '남동생', '여동생', '형제', '자매', 'brother', 'sister',
+  ];
+  
+  // 가족 필터용 키워드 - 같은 성씨일 때만 가족으로 인정
+  static const _familyKeywordsSameSurnameRequired = [
+    '형', '누나', '오빠', '언니', '동생',
   ];
   
   // 내 성 (TODO: 설정에서 변경 가능하도록)
@@ -110,23 +116,25 @@ class _ContactPickerDialogState extends ConsumerState<ContactPickerDialog> {
     
     return showDialog<Map<String, String>>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("새 연락처 추가"),
+      builder: (dialogContext) {
+        final strings = dialogContext.strings;
+        return AlertDialog(
+        title: Text(strings.addContactTitle),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: nameController,
-              decoration: const InputDecoration(
-                labelText: "이름",
+              decoration: InputDecoration(
+                labelText: strings.addContactName,
                 hintText: "홍길동",
               ),
             ),
             const SizedBox(height: 16),
             TextField(
               controller: phoneController,
-              decoration: const InputDecoration(
-                labelText: "전화번호",
+              decoration: InputDecoration(
+                labelText: strings.addContactPhone,
                 hintText: "010-1234-5678",
               ),
               keyboardType: TextInputType.phone,
@@ -135,8 +143,8 @@ class _ContactPickerDialogState extends ConsumerState<ContactPickerDialog> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("취소"),
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(strings.cancel),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -144,8 +152,8 @@ class _ContactPickerDialogState extends ConsumerState<ContactPickerDialog> {
               final phone = phoneController.text.replaceAll(RegExp(r'\D'), '');
               
               if (name.isEmpty || phone.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("이름과 전화번호를 입력해주세요.")),
+                ScaffoldMessenger.of(dialogContext).showSnackBar(
+                  SnackBar(content: Text(strings.addContactName)),
                 );
                 return;
               }
@@ -156,15 +164,16 @@ class _ContactPickerDialogState extends ConsumerState<ContactPickerDialog> {
                 phone: Value(phone),
               ));
               
-              Navigator.pop(context, {'name': name, 'phone': phone});
+              Navigator.pop(dialogContext, {'name': name, 'phone': phone});
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFF29D86),
             ),
-            child: const Text("추가"),
+            child: Text(strings.addContactAdd),
           ),
         ],
-      ),
+      );
+      },
     );
   }
 
@@ -175,17 +184,24 @@ class _ContactPickerDialogState extends ConsumerState<ContactPickerDialog> {
       return true;
     }
     
-    // 2. 이름에 가족 관련 단어 포함
     final nameLower = contact.name.toLowerCase();
-    for (var keyword in _familyKeywords) {
+    
+    // 2. 무조건 가족으로 인정되는 키워드 체크
+    for (var keyword in _familyKeywordsUnconditional) {
       if (nameLower.contains(keyword.toLowerCase())) {
         return true;
       }
     }
     
-    // 3. 성씨가 같으면 가족
-    if (contact.name.isNotEmpty && contact.name[0] == _myFamilyName) {
-      return true;
+    // 3. 같은 성씨일 때만 가족으로 인정되는 키워드 체크 (형, 누나, 동생 등)
+    // 예: "함형" (O), "정형외과" (X), "윤다형" (X)
+    final hasSameSurname = contact.name.isNotEmpty && contact.name[0] == _myFamilyName;
+    if (hasSameSurname) {
+      for (var keyword in _familyKeywordsSameSurnameRequired) {
+        if (nameLower.contains(keyword.toLowerCase())) {
+          return true;
+        }
+      }
     }
     
     return false;
@@ -211,9 +227,11 @@ class _ContactPickerDialogState extends ConsumerState<ContactPickerDialog> {
       return matchesSearch && matchesCategory;
     }).toList();
 
+    final strings = context.strings;
+    
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      title: const Text("발송 대상 선택"),
+      title: Text(strings.contactPickerTitle),
       content: SizedBox(
         width: double.maxFinite,
         height: 450,
@@ -223,7 +241,7 @@ class _ContactPickerDialogState extends ConsumerState<ContactPickerDialog> {
             TextField(
               autofocus: false,
               decoration: InputDecoration(
-                hintText: '이름 또는 전화번호 검색',
+                hintText: strings.contactPickerSearchHint,
                 prefixIcon: const Icon(Icons.search, color: Color(0xFFF29D86)),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
@@ -315,7 +333,7 @@ class _ContactPickerDialogState extends ConsumerState<ContactPickerDialog> {
             OutlinedButton.icon(
               onPressed: _handleAddNew,
               icon: const Icon(Icons.person_add, size: 18),
-              label: const Text("새 연락처 추가"),
+              label: Text(strings.contactPickerAddNew),
               style: OutlinedButton.styleFrom(
                 foregroundColor: const Color(0xFFF29D86),
                 side: const BorderSide(color: Color(0xFFF29D86)),
@@ -327,14 +345,14 @@ class _ContactPickerDialogState extends ConsumerState<ContactPickerDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text("취소", style: TextStyle(color: Colors.grey)),
+          child: Text(strings.cancel, style: const TextStyle(color: Colors.grey)),
         ),
         TextButton(
           onPressed: () {
             final selected = _contacts.where((c) => _selectedPhones.contains(c.phone)).toList();
             Navigator.pop(context, selected);
           },
-          child: const Text("확인", style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFF29D86))),
+          child: Text(strings.ok, style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFF29D86))),
         ),
       ],
     );

@@ -42,22 +42,28 @@ class MmsIntentService {
       if (Platform.isAndroid) {
         // Android: Method Channel로 MMS Intent 실행
         try {
+          debugPrint('[MmsIntent] Method Channel 호출 시작...');
           final result = await _channel.invokeMethod<bool>('sendMms', {
             'phone': cleanPhone,
             'imagePath': imagePath,
             'message': message ?? '',
           });
           
+          debugPrint('[MmsIntent] Method Channel 결과: $result');
+          
           if (result == true) {
             debugPrint('[MmsIntent] Android Intent 성공');
             return true;
+          } else {
+            debugPrint('[MmsIntent] Android Intent 실패 (result=$result)');
+            // Fallback: share_plus 사용
+            return await _shareWithPhone(cleanPhone, imagePath, message);
           }
         } catch (e) {
           debugPrint('[MmsIntent] Method Channel 오류: $e');
+          // Fallback: share_plus 사용
+          return await _shareWithPhone(cleanPhone, imagePath, message);
         }
-        
-        // Fallback: share_plus 사용
-        return await _shareWithPhone(cleanPhone, imagePath, message);
       } else if (Platform.isIOS) {
         // iOS: share_plus 사용
         return await _shareWithPhone(cleanPhone, imagePath, message);

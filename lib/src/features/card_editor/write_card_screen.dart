@@ -1468,7 +1468,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text("글상자 스타일", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  Text(ref.watch(appStringsProvider).textBoxStyleTitle, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 10),
 
                   // 0. 미리보기 영역 (고정)
@@ -1506,7 +1506,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                                   Align(
                                     alignment: Alignment.center,
                                     child: Text(
-                                      "Preview Text\n스타일 미리보기",
+                                      "Preview Text\n${ref.watch(appStringsProvider).textBoxPreview}",
                                       textAlign: TextAlign.center,
                                       style: GoogleFonts.getFont(_fontName, fontSize: 16, color: _currentStyle.color),
                                     ),
@@ -1521,7 +1521,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                                         borderRadius: BorderRadius.circular(_footerRadius),
                                       ),
                                       child: Text(
-                                        "보낸 사람",
+                                        ref.watch(appStringsProvider).textBoxSender,
                                         style: GoogleFonts.getFont(
                                           _footerFont,
                                           color: _footerColor,
@@ -1550,25 +1550,25 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           // 0. 글상자 모양
-                          const Text("글상자 모양", style: TextStyle(fontWeight: FontWeight.w600)),
+                          Text(ref.watch(appStringsProvider).textBoxShapeLabel, style: const TextStyle(fontWeight: FontWeight.w600)),
                           const SizedBox(height: 10),
                           SizedBox(
                             height: 60,
                             child: ListView(
                               scrollDirection: Axis.horizontal,
                               children: [
-                                {'type': 'rounded', 'icon': Icons.rounded_corner, 'label': '둥근'},
-                                {'type': 'rectangle', 'icon': Icons.crop_square, 'label': '직각'},
-                                {'type': 'beveled', 'icon': Icons.change_history, 'label': '모따기'},
-                                {'type': 'circle', 'icon': Icons.circle_outlined, 'label': '원형'},
-                                {'type': 'bubble_left', 'icon': Icons.chat_bubble_outline, 'label': '말풍선(좌)'},
-                                {'type': 'bubble_center', 'icon': Icons.chat_bubble_outline, 'label': '말풍선(중)'},
-                                {'type': 'bubble_right', 'icon': Icons.chat_bubble_outline, 'label': '말풍선(우)'},
-                                {'type': 'heart', 'icon': Icons.favorite_border, 'label': '하트'},
-                                {'type': 'star', 'icon': Icons.star_border, 'label': '별'},
-                                {'type': 'diamond', 'icon': FontAwesomeIcons.gem, 'label': '다이아'},
-                                {'type': 'hexagon', 'icon': FontAwesomeIcons.drawPolygon, 'label': '육각형'},
-                                {'type': 'cloud', 'icon': Icons.cloud_queue, 'label': '구름'},
+                                {'type': 'rounded', 'icon': Icons.rounded_corner, 'label': ref.watch(appStringsProvider).shapeRounded},
+                                {'type': 'rectangle', 'icon': Icons.crop_square, 'label': ref.watch(appStringsProvider).shapeRectangle},
+                                {'type': 'beveled', 'icon': Icons.change_history, 'label': ref.watch(appStringsProvider).shapeBevel},
+                                {'type': 'circle', 'icon': Icons.circle_outlined, 'label': ref.watch(appStringsProvider).shapeCircle},
+                                {'type': 'bubble_left', 'icon': Icons.chat_bubble_outline, 'label': ref.watch(appStringsProvider).shapeBubbleLeft},
+                                {'type': 'bubble_center', 'icon': Icons.chat_bubble_outline, 'label': ref.watch(appStringsProvider).shapeBubbleCenter},
+                                {'type': 'bubble_right', 'icon': Icons.chat_bubble_outline, 'label': ref.watch(appStringsProvider).shapeBubbleRight},
+                                {'type': 'heart', 'icon': Icons.favorite_border, 'label': ref.watch(appStringsProvider).shapeHeart},
+                                {'type': 'star', 'icon': Icons.star_border, 'label': ref.watch(appStringsProvider).shapeStar},
+                                {'type': 'diamond', 'icon': FontAwesomeIcons.gem, 'label': ref.watch(appStringsProvider).shapeDiamond},
+                                {'type': 'hexagon', 'icon': FontAwesomeIcons.drawPolygon, 'label': ref.watch(appStringsProvider).shapeHexagon},
+                                {'type': 'cloud', 'icon': Icons.cloud_queue, 'label': ref.watch(appStringsProvider).shapeCloud},
                               ].map((item) {
                                 final isSelected = _boxShape == item['type'] || (_boxShape == 'bubble' && item['type'] == 'bubble_right');
                                 
@@ -1615,7 +1615,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                           const SizedBox(height: 20),
 
                           // 1. 배경 색상
-                          const Text("배경 색상", style: TextStyle(fontWeight: FontWeight.w600)),
+                          Text(ref.watch(appStringsProvider).textBoxBackgroundColor, style: const TextStyle(fontWeight: FontWeight.w600)),
                           const SizedBox(height: 10),
                           SizedBox(
                             height: 40,
@@ -1657,7 +1657,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text("투명도", style: TextStyle(fontWeight: FontWeight.w600)),
+                              Text(ref.watch(appStringsProvider).textBoxOpacity, style: const TextStyle(fontWeight: FontWeight.w600)),
                               Text("${(_boxOpacity * 100).toInt()}%", style: const TextStyle(color: Colors.grey)),
                             ],
                           ),
@@ -1678,7 +1678,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text("둥근 모서리", style: TextStyle(fontWeight: FontWeight.w600)),
+                              Text(ref.watch(appStringsProvider).textBoxBorderRadius, style: const TextStyle(fontWeight: FontWeight.w600)),
                               Text("${_boxRadius.toInt()}px", style: const TextStyle(color: Colors.grey)),
                             ],
                           ),
@@ -1699,7 +1699,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                           const SizedBox(height: 10),
                           Row(
                             children: [
-                              const Text("테두리", style: TextStyle(fontWeight: FontWeight.w600)),
+                              Text(ref.watch(appStringsProvider).textBoxBorder, style: const TextStyle(fontWeight: FontWeight.w600)),
                               const Spacer(),
                               Switch(
                                 value: _hasBorder,
@@ -1716,7 +1716,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                const Text("테두리 두께", style: TextStyle(fontSize: 14, color: Colors.grey)),
+                                Text(ref.watch(appStringsProvider).textBoxBorderWidth, style: const TextStyle(fontSize: 14, color: Colors.grey)),
                                 Text("${_borderWidth.toStringAsFixed(1)}px", style: const TextStyle(color: Colors.grey)),
                               ],
                             ),
@@ -1737,7 +1737,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                           const Divider(height: 30),
 
                           // 5. 푸터 스타일 (Footer Style)
-                          const Text("푸터 (보낸 사람) 배경 스타일", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                          Text(ref.watch(appStringsProvider).textBoxFooterStyle, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                           const SizedBox(height: 10),
                           
                           // 안내 문구
@@ -1748,18 +1748,18 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                               color: Colors.grey[100],
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: const Row(
+                            child: Row(
                               children: [
                                 Icon(Icons.info_outline, size: 16, color: Colors.grey),
                                 SizedBox(width: 8),
-                                Expanded(child: Text("글자 크기와 색상은 푸터를 선택 후 상단 툴바에서 변경하세요.", style: TextStyle(fontSize: 12, color: Colors.grey))),
+                                Expanded(child: Text(ref.watch(appStringsProvider).textBoxFooterHint, style: const TextStyle(fontSize: 12, color: Colors.grey))),
                               ],
                             ),
                           ),
                           const SizedBox(height: 20),
 
                           // 푸터 배경 색상
-                          const Text("배경 색상", style: TextStyle(fontWeight: FontWeight.w600)),
+                          Text(ref.watch(appStringsProvider).textBoxBackgroundColor, style: const TextStyle(fontWeight: FontWeight.w600)),
                           const SizedBox(height: 10),
                           SizedBox(
                             height: 40,
@@ -1801,7 +1801,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text("배경 투명도", style: TextStyle(fontWeight: FontWeight.w600)),
+                              Text(ref.watch(appStringsProvider).footerBgOpacity, style: const TextStyle(fontWeight: FontWeight.w600)),
                               Text("${(_footerBgOpacity * 100).toInt()}%", style: const TextStyle(color: Colors.grey)),
                             ],
                           ),
@@ -1822,7 +1822,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text("배경 둥근 모서리", style: TextStyle(fontWeight: FontWeight.w600)),
+                              Text(ref.watch(appStringsProvider).footerBgRadius, style: const TextStyle(fontWeight: FontWeight.w600)),
                               Text("${_footerRadius.toInt()}px", style: const TextStyle(color: Colors.grey)),
                             ],
                           ),
@@ -1850,7 +1850,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                                 padding: const EdgeInsets.symmetric(vertical: 12),
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                               ),
-                              child: const Text("완료"),
+                              child: Text(ref.watch(appStringsProvider).done),
                             ),
                           ),
                           const SizedBox(height: 20),
@@ -2069,31 +2069,33 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                 
                 const Spacer(),
                 
-                // 배경 버튼 (상단 고정)
-                GestureDetector(
-                  onTap: () {
-                    setState(() {
-                       _isFrameMode = false;
-                       WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToSelected());
-                    });
-                    _showCategoryPicker();
+                // 배경 버튼 (상단 고정) - 좁은 화면에서는 아이콘만 표시
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final strings = ref.watch(appStringsProvider);
+                    final isActive = !_isFrameMode;
+                    return Tooltip(
+                      message: strings.editorBackground,
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                             _isFrameMode = false;
+                             WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToSelected());
+                          });
+                          _showCategoryPicker();
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: isActive ? const Color(0xFFF29D86) : Colors.white.withOpacity(0.8),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.white.withOpacity(0.5)),
+                          ),
+                          child: Icon(Icons.image, color: isActive ? Colors.white : const Color(0xFFF29D86), size: 18),
+                        ),
+                      ),
+                    );
                   },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: !_isFrameMode ? const Color(0xFFF29D86) : Colors.white.withOpacity(0.8),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.white.withOpacity(0.5)),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.image, color: !_isFrameMode ? Colors.white : const Color(0xFFF29D86), size: 18),
-                        const SizedBox(width: 6),
-                        Text(ref.watch(appStringsProvider).cardEditorBackground, style: TextStyle(color: !_isFrameMode ? Colors.white : const Color(0xFF555555), fontSize: 12, fontWeight: FontWeight.w600)),
-                      ],
-                    ),
-                  ),
                 ),
                 /* 
                 const SizedBox(width: 8),
@@ -2125,23 +2127,19 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                 ),
                 */
                 const SizedBox(width: 8),
-                // 글상자 스타일 버튼 (상단 고정)
-                GestureDetector(
-                  onTap: _showBoxStylePicker,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.8),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.white.withOpacity(0.5)),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.style, color: Color(0xFFF29D86), size: 18),
-                        SizedBox(width: 6),
-                        Text(ref.watch(appStringsProvider).cardEditorTextBox, style: TextStyle(color: Color(0xFF555555), fontSize: 12, fontWeight: FontWeight.w600)),
-                      ],
+                // 글상자 스타일 버튼 (상단 고정) - 아이콘만 표시
+                Tooltip(
+                  message: ref.watch(appStringsProvider).editorTextBox,
+                  child: GestureDetector(
+                    onTap: _showBoxStylePicker,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.8),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.white.withOpacity(0.5)),
+                      ),
+                      child: const Icon(Icons.style, color: Color(0xFFF29D86), size: 18),
                     ),
                   ),
                 ),

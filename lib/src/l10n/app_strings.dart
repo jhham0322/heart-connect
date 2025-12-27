@@ -332,6 +332,69 @@ class AppStrings {
   String get previewTitle => _get({'ko': '미리보기', 'en': 'Preview', 'ja': 'プレビュー', 'zh': '预览'});
   String get previewConfirm => _get({'ko': '이 이미지로 발송하시겠습니까?', 'en': 'Send with this image?', 'ja': 'この画像で送信しますか？', 'zh': '使用此图片发送？'});
   
+  // ========== 설정 화면 추가 ==========
+  String get settingsExternalCalendarGuide => _get({'ko': '외부 캘린더 연동 안내', 'en': 'External Calendar Guide', 'ja': '外部カレンダー連携ガイド', 'zh': '外部日历连接指南'});
+  String get settingsTest => _get({'ko': '테스트', 'en': 'Test', 'ja': 'テスト', 'zh': '测试'});
+  String get settingsGoogleCalendar => _get({'ko': 'Google 캘린더', 'en': 'Google', 'ja': 'Google', 'zh': 'Google'});
+  String get settingsSamsungCalendar => _get({'ko': 'Samsung 캘린더', 'en': 'Samsung', 'ja': 'Samsung', 'zh': 'Samsung'});
+  
+  // ========== 글상자 스타일 ==========
+  String get textBoxStyleTitle => _get({'ko': '글상자 스타일', 'en': 'Text Box Style', 'ja': 'テキストボックススタイル', 'zh': '文本框样式'});
+  String get textBoxPreviewText => _get({'ko': '스타일 미리보기', 'en': 'Style Preview', 'ja': 'スタイルプレビュー', 'zh': '样式预览'});
+  String get textBoxShapeRounded => _get({'ko': '둥근', 'en': 'Rounded', 'ja': '丸み', 'zh': '圆角'});
+  String get textBoxShapeSquare => _get({'ko': '직각', 'en': 'Square', 'ja': '四角', 'zh': '直角'});
+  String get textBoxShapeBevel => _get({'ko': '모따기', 'en': 'Bevel', 'ja': '面取り', 'zh': '斜角'});
+  String get textBoxShapeCircle => _get({'ko': '원형', 'en': 'Circle', 'ja': '円形', 'zh': '圆形'});
+  String get textBoxShapeBubble => _get({'ko': '말풍선', 'en': 'Bubble', 'ja': '吹き出し', 'zh': '气泡'});
+  String get textBoxBackgroundColor => _get({'ko': '배경 색상', 'en': 'Background Color', 'ja': '背景色', 'zh': '背景颜色'});
+  String get textBoxOpacity => _get({'ko': '투명도', 'en': 'Opacity', 'ja': '透明度', 'zh': '透明度'});
+  String get textBoxBorderRadius => _get({'ko': '둥근 모서리', 'en': 'Border Radius', 'ja': '角の丸み', 'zh': '圆角半径'});
+  
+  // ========== 연락처 피커 ==========
+  String get contactPickerTitle => _get({'ko': '발송 대상 선택', 'en': 'Select Recipients', 'ja': '送信先を選択', 'zh': '选择收件人'});
+  String get contactPickerSearchHint => _get({'ko': '이름 또는 전화번호...', 'en': 'Name or phone...', 'ja': '名前または電話番号...', 'zh': '姓名或电话...'});
+  String get contactPickerAllContacts => _get({'ko': '전체', 'en': 'All', 'ja': 'すべて', 'zh': '全部'});
+  String get contactPickerFavorites => _get({'ko': '즐겨찾기', 'en': 'Favorites', 'ja': 'お気に入り', 'zh': '收藏'});
+  String get contactPickerFamily => _get({'ko': '가족', 'en': 'Family', 'ja': '家族', 'zh': '家人'});
+  String get contactPickerAddNew => _get({'ko': '새 연락처 추가', 'en': 'Add New Contact', 'ja': '新しい連絡先を追加', 'zh': '添加新联系人'});
+  
+  // ========== 새 연락처 추가 다이얼로그 ==========
+  String get addContactTitle => _get({'ko': '새 연락처 추가', 'en': 'Add New Contact', 'ja': '新しい連絡先を追加', 'zh': '添加新联系人'});
+  String get addContactName => _get({'ko': '이름', 'en': 'Name', 'ja': '名前', 'zh': '姓名'});
+  String get addContactPhone => _get({'ko': '전화번호', 'en': 'Phone Number', 'ja': '電話番号', 'zh': '电话号码'});
+  String get addContactAdd => _get({'ko': '추가', 'en': 'Add', 'ja': '追加', 'zh': '添加'});
+  
+  // ========== 카드 에디터 상단 버튼 ==========
+  String get editorBackground => _get({'ko': '배경', 'en': 'Background', 'ja': '背景', 'zh': '背景'});
+  String get editorTextBox => _get({'ko': '글상자', 'en': 'Text Box', 'ja': 'テキスト', 'zh': '文本框'});
+  
+  // ========== 글상자 스타일 추가 ==========
+  String get textBoxBorder => _get({'ko': '테두리', 'en': 'Border', 'ja': 'ボーダー', 'zh': '边框'});
+  String get textBoxBorderWidth => _get({'ko': '테두리 두께', 'en': 'Border Width', 'ja': 'ボーダー幅', 'zh': '边框宽度'});
+  String get textBoxFooterStyle => _get({'ko': '푸터 (보낸 사람) 배경 스타일', 'en': 'Footer (Sender) Background Style', 'ja': 'フッター(送信者)背景スタイル', 'zh': '页脚（发件人）背景样式'});
+  String get textBoxFooterHint => _get({'ko': '글자 크기와 색상은 푸터를 선택 후 상단 툴바에서 변경하세요.', 'en': 'Change font size and color by selecting footer in the top toolbar.', 'ja': 'フォントサイズと色は上部ツールバーでフッターを選択して変更してください。', 'zh': '请在顶部工具栏中选择页脚后更改字体大小和颜色。'});
+  String get textBoxPreview => _get({'ko': '스타일 미리보기', 'en': 'Style Preview', 'ja': 'スタイルプレビュー', 'zh': '样式预览'});
+  String get textBoxSender => _get({'ko': '보낸 사람', 'en': 'From', 'ja': '送信者', 'zh': '发件人'});
+  String get textBoxShapeLabel => _get({'ko': '글상자 모양', 'en': 'Text Box Shape', 'ja': 'テキストボックス形状', 'zh': '文本框形状'});
+  
+  // 글상자 모양 옵션들
+  String get shapeRounded => _get({'ko': '둥근', 'en': 'Rounded', 'ja': '丸み', 'zh': '圆角'});
+  String get shapeRectangle => _get({'ko': '직각', 'en': 'Square', 'ja': '四角', 'zh': '直角'});
+  String get shapeBevel => _get({'ko': '모따기', 'en': 'Bevel', 'ja': '面取り', 'zh': '斜角'});
+  String get shapeCircle => _get({'ko': '원형', 'en': 'Circle', 'ja': '円形', 'zh': '圆形'});
+  String get shapeBubbleLeft => _get({'ko': '말풍선(좌)', 'en': 'Bubble(L)', 'ja': '吹き出し(左)', 'zh': '气泡(左)'});
+  String get shapeBubbleCenter => _get({'ko': '말풍선(중)', 'en': 'Bubble(C)', 'ja': '吹き出し(中)', 'zh': '气泡(中)'});
+  String get shapeBubbleRight => _get({'ko': '말풍선(우)', 'en': 'Bubble(R)', 'ja': '吹き出し(右)', 'zh': '气泡(右)'});
+  String get shapeHeart => _get({'ko': '하트', 'en': 'Heart', 'ja': 'ハート', 'zh': '心形'});
+  String get shapeStar => _get({'ko': '별', 'en': 'Star', 'ja': '星', 'zh': '星形'});
+  String get shapeDiamond => _get({'ko': '다이아', 'en': 'Diamond', 'ja': 'ダイヤ', 'zh': '菱形'});
+  String get shapeHexagon => _get({'ko': '육각형', 'en': 'Hexagon', 'ja': '六角形', 'zh': '六边形'});
+  String get shapeCloud => _get({'ko': '구름', 'en': 'Cloud', 'ja': '雲', 'zh': '云形'});
+  
+  // 푸터 배경 스타일
+  String get footerBgOpacity => _get({'ko': '배경 투명도', 'en': 'Background Opacity', 'ja': '背景透明度', 'zh': '背景透明度'});
+  String get footerBgRadius => _get({'ko': '배경 둥근 모서리', 'en': 'Background Radius', 'ja': '背景の角丸', 'zh': '背景圆角'});
+  
   // Helper method
   String _get(Map<String, String> translations) {
     return translations[languageCode] ?? translations['ko'] ?? translations['en'] ?? '';
