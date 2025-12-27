@@ -494,12 +494,20 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   }
 
 
-  // Fallback for legacy footer save
+  // Fallback for legacy footer save - user_name을 기본값으로 사용
   Future<void> _loadSavedFooter() async {
     final prefs = await SharedPreferences.getInstance();
     final savedFooter = prefs.getString('footer_text');
+    
     if (savedFooter != null && savedFooter.isNotEmpty && mounted) {
       _updateFooterController(savedFooter);
+    } else {
+      // user_name이 설정되어 있으면 그것을 사용
+      final userName = prefs.getString('user_name');
+      if (userName != null && userName.isNotEmpty && mounted) {
+        _footerText = userName;
+        _footerQuillController.document = Document()..insert(0, userName);
+      }
     }
   }
 

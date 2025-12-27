@@ -23,6 +23,26 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   bool _notificationsEnabled = true;
   TimeOfDay _notificationTime = const TimeOfDay(hour: 9, minute: 0);
   bool _brandingEnabled = true;
+  String _userName = 'Heart-Connect';
+  String _selectedLanguage = 'ko';
+  
+  // G20 언어 목록
+  final Map<String, String> _languages = {
+    'en': 'English',
+    'ko': '한국어',
+    'ja': '日本語',
+    'zh': '中文',
+    'de': 'Deutsch',
+    'fr': 'Français',
+    'es': 'Español',
+    'pt': 'Português',
+    'it': 'Italiano',
+    'ru': 'Русский',
+    'ar': 'العربية',
+    'hi': 'हिन्दी',
+    'tr': 'Türkçe',
+    'id': 'Bahasa Indonesia',
+  };
 
   @override
   void initState() {
@@ -35,6 +55,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     setState(() {
       _notificationsEnabled = prefs.getBool('notifications_enabled') ?? true;
       _brandingEnabled = prefs.getBool('branding_enabled') ?? true;
+      _userName = prefs.getString('user_name') ?? 'Heart-Connect';
+      _selectedLanguage = prefs.getString('selected_language') ?? 'ko';
       
       final timeStr = prefs.getString('notification_time');
       if (timeStr != null) {
@@ -48,6 +70,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('notifications_enabled', _notificationsEnabled);
     await prefs.setBool('branding_enabled', _brandingEnabled);
+    await prefs.setString('user_name', _userName);
+    await prefs.setString('selected_language', _selectedLanguage);
     await prefs.setString('notification_time', '${_notificationTime.hour}:${_notificationTime.minute}');
   }
 
@@ -191,7 +215,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   SizedBox(height: 8),
                   Text('• 구글 캘린더', style: TextStyle(fontSize: 13)),
                   Text('• 삼성 캘린더', style: TextStyle(fontSize: 13)),
-                  Text('• 기본 기기 캘린더', style: TextStyle(fontSize: 13)),
                   SizedBox(height: 8),
                   Text('위 캘린더에 일정을 등록하시면 앱에서 자동으로 표시됩니다.', style: TextStyle(fontSize: 12, color: Colors.black54)),
                 ],
@@ -223,6 +246,158 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: const Text('확인'),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  // Account 다이얼로그 - 이름/별명 설정
+  void _showAccountDialog() {
+    final controller = TextEditingController(text: _userName);
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.orange.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(FontAwesomeIcons.user, color: Colors.orange, size: 20),
+            ),
+            const SizedBox(width: 12),
+            const Expanded(child: Text('내 이름/별명', style: TextStyle(fontSize: 18))),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
+              controller: controller,
+              decoration: InputDecoration(
+                labelText: '이름 또는 별명',
+                hintText: '카드에 표시될 이름',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                prefixIcon: const Icon(FontAwesomeIcons.signature, size: 16),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.blue.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: const [
+                  Icon(FontAwesomeIcons.circleInfo, size: 14, color: Colors.blue),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      '이 이름은 카드 쓰기 화면의 Footer(서명)에 사용됩니다.',
+                      style: TextStyle(fontSize: 12, color: Colors.blue),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('취소', style: TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              setState(() {
+                _userName = controller.text.trim().isNotEmpty ? controller.text.trim() : 'Heart-Connect';
+              });
+              _saveSettings();
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('이름이 "${_userName}"으로 변경되었습니다.')),
+              );
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+            child: const Text('저장', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  // Language 다이얼로그 - G20 언어 선택
+  void _showLanguageDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.green.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(FontAwesomeIcons.globe, color: Colors.green, size: 20),
+            ),
+            const SizedBox(width: 12),
+            const Expanded(child: Text('언어 설정', style: TextStyle(fontSize: 18))),
+          ],
+        ),
+        content: SizedBox(
+          width: double.maxFinite,
+          height: 350,
+          child: ListView.builder(
+            itemCount: _languages.length,
+            itemBuilder: (context, index) {
+              final entry = _languages.entries.elementAt(index);
+              final isSelected = _selectedLanguage == entry.key;
+              
+              return ListTile(
+                leading: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: isSelected ? Colors.green.withOpacity(0.2) : Colors.grey.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Text(
+                    entry.key.toUpperCase(),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 10,
+                      color: isSelected ? Colors.green : Colors.grey,
+                    ),
+                  ),
+                ),
+                title: Text(entry.value),
+                trailing: isSelected ? const Icon(Icons.check_circle, color: Colors.green) : null,
+                onTap: () {
+                  setState(() {
+                    _selectedLanguage = entry.key;
+                  });
+                  _saveSettings();
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('언어가 ${entry.value}로 변경되었습니다. (앱 재시작 필요)')),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('취소'),
           ),
         ],
       ),
@@ -454,14 +629,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          // 기본 캘린더 앱
-                          _buildCalendarButton(
-                            icon: FontAwesomeIcons.mobile,
-                            label: "Phone",
-                            color: const Color(0xFF4FC3F7),
-                            onTap: () => _openCalendarApp('phone'),
-                          ),
-                          const SizedBox(width: 8),
                           // 구글 캘린더
                           _buildCalendarButton(
                             icon: FontAwesomeIcons.google,
@@ -532,8 +699,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  const _FooterItem(icon: FontAwesomeIcons.user, label: "Account"),
-                  const _FooterItem(icon: FontAwesomeIcons.globe, label: "Language"),
+                  _FooterItem(icon: FontAwesomeIcons.user, label: "Account", onTap: _showAccountDialog),
+                  _FooterItem(icon: FontAwesomeIcons.globe, label: "Language", onTap: _showLanguageDialog),
                   _FooterItem(
                     icon: FontAwesomeIcons.doorOpen, // Changed icon
                     label: "Exit", // Changed label
