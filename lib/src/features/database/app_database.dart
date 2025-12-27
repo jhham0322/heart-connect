@@ -287,6 +287,23 @@ class AppDatabase extends _$AppDatabase {
 
   Future<int> insertPlan(DailyPlansCompanion entry) => into(dailyPlans).insert(entry);
   
+  // 간단한 일정 추가 (스플래시용)
+  Future<int> insertPlanSimple({
+    required DateTime date,
+    required String content,
+    String type = 'Schedule',
+  }) {
+    return into(dailyPlans).insert(DailyPlansCompanion.insert(
+      date: date,
+      content: content,
+      type: Value(type),
+      goalCount: const Value(5),
+      isGenerated: const Value(false),
+      sortOrder: const Value(0),
+      isCompleted: const Value(false),
+    ));
+  }
+  
   Future<bool> updatePlan(DailyPlan entry) => update(dailyPlans).replace(entry);
   
   Future<int> deletePlan(int id) => (delete(dailyPlans)..where((t) => t.id.equals(id))).go();

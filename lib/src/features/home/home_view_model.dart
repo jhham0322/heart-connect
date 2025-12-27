@@ -81,156 +81,34 @@ class HomeViewModel extends StateNotifier<HomeState> {
 
   Future<void> loadData() async {
     final db = ref.read(appDatabaseProvider);
-    final calendarService = ref.read(calendarServiceProvider);
-    // AI Service for Name Extraction
-    final aiService = AiService(); 
     
-    // 0. Mock 데이터 삭제 (이전에 저장된 테스트용 데이터 정리)
-    await db.deleteMockPlans();
-    
-    // 1. Generate Base Plans (Holidays, Birthdays)
-    await db.generateWeeklyPlans();
-    
-    // 2. Sent Count
-    final count = await db.getTodaySentCount();
-    
-    // 3. Prepare Data
+    // 1. Prepare Dates
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    final tomorrow = today.add(const Duration(days: 1));
-    final endCalc = today.add(const Duration(days: 45));
     
-    // 4. Sync Calendar Events to DailyPlans
-    // Fetch current plans first to check duplicates
-    var plans = await db.getFuturePlans(today);
-    final calEvents = await calendarService.getEvents(today, endCalc);
-    final contacts = await db.getAllContacts(); // Get contacts for filtering
+    // 2. Get Plans from DB (빠름)
+    final plans = await db.getFuturePlans(today);
     
-    bool newPlansAdded = false;
-    for (var e in calEvents) {
-       // AI Extraction Logic & Direct Matching
-       // "스캐줄에 포함된 이름을 인공지능이 타이틀 및 내용에서 사람 이름을 가져오는 기능"
-       
-       final extractedNames = await aiService.extractNames(e.title);
-       final Set<String> matchedPhones = {};
-       final List<Map<String, String>> recipientList = [];
-       
-       // 1. Process AI Extracted Names
-       if (extractedNames.isNotEmpty && extractedNames != "NOTHING") {
-           final names = extractedNames.split(',').map((s) => s.trim()).toList();
-           for (var name in names) {
-               if (name.isEmpty) continue;
-               // Find contacts matching name (LIKE search logic)
-               // Normalize for matching: remove spaces
-               final cleanName = name.replaceAll(' ', '');
-               final matches = contacts.where((c) {
-                  final cleanContactName = c.name.replaceAll(' ', '');
-                  return cleanContactName.contains(cleanName) || cleanName.contains(cleanContactName);
-               }).toList();
-               
-               for (var match in matches) {
-                   if (matchedPhones.add(match.phone)) {
-                       recipientList.add({'name': match.name, 'phone': match.phone});
-                   }
-               }
-           }
-       } 
-
-       // 2. Direct String Matching (Fallback & Complementary)
-       // Check if title itself contains any contact name explicitly
-       // Also normalize spaces to handle "김 종 국" matching "김종국생일"
-       final cleanTitle = e.title.replaceAll(' ', '');
-       final directMatches = contacts.where((c) {
-           final cleanContactName = c.name.replaceAll(' ', '');
-           if (cleanContactName.isEmpty) return false;
-           return cleanTitle.contains(cleanContactName);
-       }).toList();
-
-       for (var match in directMatches) {
-           if (matchedPhones.add(match.phone)) {
-               recipientList.add({'name': match.name, 'phone': match.phone});
-           }
-       }
-
-       if (recipientList.isEmpty) {
-          // Even if no recipients, check if we need to insert the calendar event
-          // But continue if we only want to sync events with recipients? 
-          // User said "events have names but no recipients saved", implying events exist.
-          // Let's proceed to check existence.
-       }
-
-       final eDate = DateTime(e.date.year, e.date.month, e.date.day);
-       
-       // Check if this event already exists in plans
-       DailyPlan? existingPlan;
-       try {
-         existingPlan = plans.firstWhere((p) => 
-            p.date.year == eDate.year && 
-            p.date.month == eDate.month && 
-            p.date.day == eDate.day && 
-            (p.content == e.title || p.content.contains(e.title))
-         );
-       } catch (_) {
-         existingPlan = null;
-       }
-       
-       if (existingPlan == null) {
-          // 모든 캘린더 이벤트를 DB에 추가 (수신자가 없어도)
-          
-          await db.insertPlan(DailyPlansCompanion.insert(
-             date: eDate,
-             content: e.title,
-             type: Value(e.type),
-             goalCount: Value(5),
-             isGenerated: Value(false),
-             sortOrder: Value(0),
-             isCompleted: Value(false),
-             recipients: Value(recipientList.isEmpty ? null : jsonEncode(recipientList)),
-          ));
-          newPlansAdded = true;
-       } else {
-          // UPDATE: If plan exists but has no recipients (NULL), and we found some now.
-          // Note: We do NOT update if recipients is '[]' (empty list), as that implies user manually cleared it.
-          // Also check if recipients is empty string or "null" string just in case
-          final currentRecipients = existingPlan.recipients;
-          final isRecipientsNull = currentRecipients == null;
-          
-          if (isRecipientsNull && recipientList.isNotEmpty) {
-              print('[HomeViewModel] Auto-updating recipients for plan ${existingPlan.id} (${existingPlan.content}): $recipientList');
-              await db.updatePlanRecipients(existingPlan.id, jsonEncode(recipientList));
-              newPlansAdded = true; // Trigger reload
-          } else {
-              if (recipientList.isNotEmpty) {
-                 print('[HomeViewModel] Skipped auto-update for plan ${existingPlan.id}. Current recipients: $currentRecipients');
-              }
-          }
-       }
-    }
+    // 3. Get Contacts from DB for recipient matching (빠름)
+    final contacts = await db.getAllContacts();
     
-    // Reload plans if we added new ones
-    if (newPlansAdded) {
-       plans = await db.getFuturePlans(today);
-    }
-
-    // 5. Separate Today and Future Plans
+    // 4. Process Plans (로컬 처리만)
     final List<DailyPlan> todayPlans = [];
     final List<EventItem> futureEvents = [];
-    int todayGoal = 0; // Default to 0, will update if plans exist
+    int todayGoal = 0;
 
-    // First, count ALL today's plans for goal (including completed ones)
+    // Count ALL today's plans for goal
     final allTodayPlans = plans.where((p) {
       final diff = p.date.difference(today).inDays;
       return diff == 0 && p.content != 'Daily Warmth';
     }).toList();
 
     todayGoal = allTodayPlans.length;
-    
-    // Calculate Sent Count based on completed plans
     final sentCount = allTodayPlans.where((p) => p.isCompleted).length;
 
     for (var plan in plans) {
        final diff = plan.date.difference(today).inDays;
-       if (diff < 0) continue; // Safety check
+       if (diff < 0) continue;
        
        // Parse recipients
        List<Map<String, String>> recipients = [];
@@ -239,25 +117,20 @@ class HomeViewModel extends StateNotifier<HomeState> {
           final List<dynamic> list = jsonDecode(plan.recipients!);
           recipients = list.map((e) => Map<String, String>.from(e)).toList();
         } catch (e) {
-          print('[HomeViewModel] Error parsing recipients for plan ${plan.id}: $e');
+          // Ignore parse errors
         }
       }
 
        // Today Plans & Extended Range (D-5)
-       // "내일이 성탄절 D-5 까지 오늘의 카드로 올려줘"
        if (diff >= 0 && diff <= 5) {
-          // Add to Today Plans if not completed
-          if (!plan.isCompleted) {
-             if (plan.content != 'Daily Warmth') {
-                todayPlans.add(plan);
-             }
+          if (!plan.isCompleted && plan.content != 'Daily Warmth') {
+             todayPlans.add(plan);
           }
        } 
        else {
           // Future Events (D-6+)
           if (plan.content == 'Daily Warmth') continue;
 
-           // Map to EventItem
            IconData icon = FontAwesomeIcons.calendarDay;
            Color color = Colors.blueAccent;
            
@@ -302,9 +175,6 @@ class HomeViewModel extends StateNotifier<HomeState> {
            ));
        }
     }
-    
-    // Sort Today Plans (by sortOrder) - Already sorted by DB query but we used getFuturePlans which sorts by date then sortOrder.
-    // Filtered list preserves order.
 
     // Sort Future Events
     futureEvents.sort((a, b) => a.daysAway.compareTo(b.daysAway));
