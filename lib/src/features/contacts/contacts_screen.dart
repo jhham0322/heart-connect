@@ -75,7 +75,7 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
         children: [
           Expanded(
             child: _TabPill(
-              text: "내 사람들",
+              text: ref.watch(appStringsProvider).contactsMyPeople,
               iconWidget: Image.asset('assets/icons/heart_icon.png', width: 24, height: 24),
               isActive: _selectedTabIndex == 0,
               onTap: () => setState(() => _selectedTabIndex = 0),
@@ -84,7 +84,7 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
           const SizedBox(width: 12),
           Expanded(
             child: _TabPill(
-              text: "추억 기록",
+              text: ref.watch(appStringsProvider).contactsMemories,
               icon: FontAwesomeIcons.star,
               isActive: _selectedTabIndex == 1,
               onTap: () => setState(() => _selectedTabIndex = 1),
@@ -117,11 +117,11 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
                    }
                  });
                },
-               decoration: const InputDecoration(
-                 icon: Icon(FontAwesomeIcons.magnifyingGlass, color: Color(0xFF795548), size: 18),
+               decoration: InputDecoration(
+                 icon: const Icon(FontAwesomeIcons.magnifyingGlass, color: Color(0xFF795548), size: 18),
                  border: InputBorder.none,
-                 hintText: "이름, 태그 검색",
-                 hintStyle: TextStyle(color: Color(0xFFBCAAA4)),
+                 hintText: ref.watch(appStringsProvider).contactsSearchPlaceholder,
+                 hintStyle: const TextStyle(color: Color(0xFFBCAAA4)),
                ),
              ),
            ),
@@ -135,25 +135,25 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
                    child: Row(
                      children: [
                        _FilterChip(
-                         label: "전체",
+                         label: ref.watch(appStringsProvider).contactsAll,
                          isActive: _selectedFilter == '전체',
                          onTap: () => setState(() => _selectedFilter = '전체'),
                        ),
                        const SizedBox(width: 8),
                        _FilterChip(
-                         label: "즐겨찾기",
+                         label: ref.watch(appStringsProvider).contactsFavorites,
                          isActive: _selectedFilter == '즐겨찾기',
                          onTap: () => setState(() => _selectedFilter = '즐겨찾기'),
                        ),
                        const SizedBox(width: 8),
                        _FilterChip(
-                         label: "최근 연락",
+                         label: ref.watch(appStringsProvider).contactsRecent,
                          isActive: _selectedFilter == '최근 연락',
                          onTap: () => setState(() => _selectedFilter = '최근 연락'),
                        ),
                        const SizedBox(width: 8),
                        _FilterChip(
-                         label: "가족",
+                         label: ref.watch(appStringsProvider).contactsFamily,
                          isActive: _selectedFilter == '가족',
                          onTap: () => setState(() => _selectedFilter = '가족'),
                        ),
@@ -411,13 +411,13 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
         }
 
         if (recents.isEmpty) {
-          return const Center(
+          return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(FontAwesomeIcons.clockRotateLeft, size: 48, color: Colors.grey),
-                SizedBox(height: 16),
-                Text("아직 추억 기록이 없습니다."),
+                const Icon(FontAwesomeIcons.clockRotateLeft, size: 48, color: Colors.grey),
+                const SizedBox(height: 16),
+                Text(ref.watch(appStringsProvider).contactsNoMemories),
               ],
             ),
           );

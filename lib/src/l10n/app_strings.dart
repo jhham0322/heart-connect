@@ -191,6 +191,22 @@ class AppStrings {
   String get sendTotal => _get({'ko': '총', 'en': 'Total', 'ja': '合計', 'zh': '总计'});
   String get sendPerson => _get({'ko': '명', 'en': '', 'ja': '人', 'zh': '人'});
   String get sendSpamWarning => _get({'ko': '단시간 다량 발송은 스팸 정책에 의해 제한될 수 있습니다.\n안전을 위해 자동 계속 해제를 권장합니다.', 'en': 'Bulk sending may be limited by spam policies.\nDisabling auto-continue is recommended.', 'ja': '短時間での大量送信はスパムポリシーにより制限される場合があります。\n自動続行の無効化をお勧めします。', 'zh': '短时间内大量发送可能受到限制。\n建议关闭自动继续。'});
+  String totalPersonCount(int count) => _get({'ko': '총 $count명', 'en': 'Total: $count', 'ja': '合計 $count人', 'zh': '共 $count人'});
+  
+  // ========== 카드 에디터 힌트 메시지 ==========
+  String get cardHintZoomMode => _get({'ko': '배경 이미지를 더블탭하시면 줌 모드로 전환됩니다. 줌 모드에서 이미지 크기와 위치를 조절하실 수 있습니다.', 'en': 'Double-tap the background to enter zoom mode. You can adjust the image size and position in zoom mode.', 'ja': '背景画像をダブルタップするとズームモードに切り替わります。ズームモードで画像サイズと位置を調整できます。', 'zh': '双击背景图片进入缩放模式。您可以在缩放模式下调整图片大小和位置。'});
+  String get cardHintZoomEdit => _get({'ko': '두 손가락으로 벌리거나 줄여서 이미지 크기를 조정하실 수 있습니다. 한 손가락으로 드래그하시면 이미지를 이동하실 수 있습니다. 편집이 완료되시면 더블탭 또는 줌 모드 버튼을 눌러 종료해 주세요.', 'en': 'Pinch to resize the image. Drag with one finger to move. Double-tap or press the zoom button to exit when done.', 'ja': 'ピンチで画像サイズを調整できます。一本指でドラッグして移動できます。編集が完了したらダブルタップまたはズームボタンを押して終了してください。', 'zh': '双指捏合调整图片大小。单指拖动移动图片。完成后双击或按缩放按钮退出。'});
+  String get cardHintDragging => _get({'ko': '이미지 이동 중...', 'en': 'Moving image...', 'ja': '画像移動中...', 'zh': '移动图片中...'});
+  String get cardHintPinching => _get({'ko': '이미지 크기 조절 중...', 'en': 'Resizing image...', 'ja': '画像サイズ調整中...', 'zh': '调整图片大小中...'});
+  
+  // ========== 저장된 카드 목록 다이얼로그 ==========
+  String get savedCardsTitle => _get({'ko': '저장된 카드 목록', 'en': 'Saved Cards', 'ja': '保存されたカード', 'zh': '已保存的卡片'});
+  String get savedCardsEmpty => _get({'ko': '저장된 메시지가 없습니다.', 'en': 'No saved cards.', 'ja': '保存されたカードがありません。', 'zh': '没有保存的卡片。'});
+  String get cardSaveTitle => _get({'ko': '카드 저장', 'en': 'Save Card', 'ja': 'カードを保存', 'zh': '保存卡片'});
+  String get cardSaveName => _get({'ko': '저장할 이름', 'en': 'Card name', 'ja': '保存名', 'zh': '卡片名称'});
+  String get cardSaveHint => _get({'ko': '카드의 이름을 입력하세요', 'en': 'Enter card name', 'ja': 'カード名を入力してください', 'zh': '请输入卡片名称'});
+  String get cardNoTitle => _get({'ko': '제목 없음', 'en': 'Untitled', 'ja': '無題', 'zh': '无标题'});
+  String get cardImageFailed => _get({'ko': '카드 이미지 생성 실패', 'en': 'Failed to create card image', 'ja': 'カード画像の作成に失敗', 'zh': '创建卡片图片失败'});
   
   // ========== 메시지/기록 ==========
   String get messageHistory => _get({'ko': '발송 기록', 'en': 'Send History', 'ja': '送信履歴', 'zh': '发送记录'});

@@ -1060,7 +1060,8 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
 
   Future<void> _saveCurrentCard() async {
     // 저장 이름 기본값 로직 수정: 첫 줄만 추출 (빈 줄 제외)
-    String defaultName = "제목 없음";
+    final strings = ref.read(appStringsProvider);
+    String defaultName = strings.cardNoTitle;
     final cleanMessage = _message.trim();
     if (cleanMessage.isNotEmpty) {
       final lines = cleanMessage.split('\n');
@@ -1078,18 +1079,18 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     final proceed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("카드 저장"),
+        title: Text(strings.cardSaveTitle),
         content: TextField(
           controller: nameController,
-          decoration: const InputDecoration(
-            labelText: "저장할 이름",
-            hintText: "카드의 이름을 입력하세요",
+          decoration: InputDecoration(
+            labelText: strings.cardSaveName,
+            hintText: strings.cardSaveHint,
           ),
           autofocus: true,
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("취소")),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text("저장")),
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(strings.cancel)),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: Text(strings.save)),
         ],
       ),
     );
@@ -1207,14 +1208,14 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                    Row(
                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                      children: [
-                       const Text("저장된 카드 목록", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF333333))),
+                       Text(ref.watch(appStringsProvider).savedCardsTitle, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF333333))),
                        IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close)),
                      ],
                    ),
                   const Divider(),
                   Expanded(
                     child: savedCards.isEmpty 
-                      ? const Center(child: Text("저장된 메시지가 없습니다.", style: TextStyle(color: Colors.grey)))
+                      ? Center(child: Text(ref.watch(appStringsProvider).savedCardsEmpty, style: const TextStyle(color: Colors.grey)))
                       : ListView.builder(
                           itemCount: savedCards.length,
                           itemBuilder: (context, index) {
@@ -2215,7 +2216,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                 ),
                 clipBehavior: Clip.hardEdge,
                 child: _MarqueeText(
-                  text: "배경 이미지를 더블탭하시면 줌 모드로 전환됩니다. 줌 모드에서 이미지 크기와 위치를 조절하실 수 있습니다.",
+                  text: ref.watch(appStringsProvider).cardHintZoomMode,
                   durationSeconds: 0, // 텍스트 길이에 따라 자동 계산
                   onComplete: () {
                     if (mounted) setState(() => _showInitialHint = false);
@@ -2237,7 +2238,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                 ),
                 clipBehavior: Clip.hardEdge,
                 child: _MarqueeText(
-                  text: "두 손가락으로 벌리거나 줄여서 이미지 크기를 조정하실 수 있습니다. 한 손가락으로 드래그하시면 이미지를 이동하실 수 있습니다. 편집이 완료되시면 더블탭 또는 줌 모드 버튼을 눌러 종료해 주세요.",
+                  text: ref.watch(appStringsProvider).cardHintZoomEdit,
                   durationSeconds: 0, // 텍스트 길이에 따라 자동 계산
                   onComplete: () {
                     if (mounted) setState(() => _showZoomHint = false);
@@ -2259,8 +2260,8 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                   borderRadius: BorderRadius.circular(18),
                 ),
                 clipBehavior: Clip.hardEdge,
-                child: const _MarqueeText(
-                  text: "드래그 중입니다. 손가락을 움직여 이미지 위치를 조정해 주세요.",
+                child: _MarqueeText(
+                  text: ref.watch(appStringsProvider).cardHintDragging,
                   durationSeconds: 0, // 텍스트 길이에 따라 자동 계산
                 ),
               ),
@@ -2279,8 +2280,8 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                   borderRadius: BorderRadius.circular(18),
                 ),
                 clipBehavior: Clip.hardEdge,
-                child: const _MarqueeText(
-                  text: "확대/축소 중입니다. 두 손가락을 벌리거나 줄여서 이미지 크기를 조정해 주세요.",
+                child: _MarqueeText(
+                  text: ref.watch(appStringsProvider).cardHintPinching,
                   durationSeconds: 0, // 텍스트 길이에 따라 자동 계산
                 ),
               ),
@@ -3726,7 +3727,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   }
 }
 
-class RecipientManagerDialog extends StatefulWidget {
+class RecipientManagerDialog extends ConsumerStatefulWidget {
   final List<String> recipients;
   final String savedPath;
   final String messageContent; // Added message content
@@ -3743,10 +3744,10 @@ class RecipientManagerDialog extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<RecipientManagerDialog> createState() => _RecipientManagerDialogState();
+  ConsumerState<RecipientManagerDialog> createState() => _RecipientManagerDialogState();
 }
 
-class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
+class _RecipientManagerDialogState extends ConsumerState<RecipientManagerDialog> {
   List<String> _pendingRecipients = [];
   bool _isSending = false;
   int _sentCount = 0;
@@ -4104,11 +4105,11 @@ class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Row(
+                  Row(
                     children: [
-                      Icon(Icons.people_alt_rounded, color: Colors.white, size: 24),
-                      SizedBox(width: 12),
-                      Text("발송 대상 관리", style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+                      const Icon(Icons.people_alt_rounded, color: Colors.white, size: 24),
+                      const SizedBox(width: 12),
+                      Text(ref.watch(appStringsProvider).sendManagerTitle, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
                     ],
                   ),
                   if (_isSending)
@@ -4119,11 +4120,11 @@ class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
                          borderRadius: BorderRadius.circular(30),
                          border: Border.all(color: Colors.white.withOpacity(0.4), width: 1),
                        ),
-                       child: const Row(
+                       child: Row(
                          children: [
-                           SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)),
-                           SizedBox(width: 8),
-                           Text("발송 중...", style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold)),
+                           const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)),
+                           const SizedBox(width: 8),
+                           Text(ref.watch(appStringsProvider).sendProgress, style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold)),
                          ],
                        ),
                      ),
@@ -4149,7 +4150,7 @@ class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
                               borderRadius: BorderRadius.circular(20),
                               border: Border.all(color: Colors.grey[300]!),
                             ),
-                            child: Text("총 ${_localRecipients.length}명", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF5D4037))),
+                            child: Text(ref.watch(appStringsProvider).totalPersonCount(_localRecipients.length), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF5D4037))),
                           ),
                           if (!_isSending)
                           ElevatedButton.icon(
@@ -4166,7 +4167,7 @@ class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
                                }
                             },
                             icon: const Icon(Icons.person_add, size: 18),
-                            label: const Text("대상 추가"),
+                            label: Text(ref.watch(appStringsProvider).cardEditorAddRecipient),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.white,
                               foregroundColor: const Color(0xFFF29D86),
@@ -4278,7 +4279,7 @@ class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
-                                "단시간 다량 발송은 스팸 정책에 의해 제한될 수 있습니다.\n안전을 위해 '5건 발송 후 자동 계속' 해제를 권장합니다.",
+                                ref.watch(appStringsProvider).sendSpamWarning,
                                 style: TextStyle(fontSize: 13, color: Colors.brown[700], height: 1.4),
                               ),
                             ),
@@ -4325,10 +4326,10 @@ class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
                                 ),
                               ),
                               const SizedBox(width: 8),
-                              const Flexible(
+                              Flexible(
                                 child: Text(
-                                  "5건 발송 후 자동 계속", 
-                                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                                  ref.watch(appStringsProvider).sendAutoResume, 
+                                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
@@ -4382,7 +4383,7 @@ class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
                            _safeSetState(() => _isSending = false);
                          },
                          icon: const Icon(Icons.stop_circle_outlined, size: 20),
-                         label: const Text("중지"),
+                         label: Text(ref.watch(appStringsProvider).sendStop),
                          style: ElevatedButton.styleFrom(
                            backgroundColor: Colors.white,
                            foregroundColor: Colors.red,
@@ -4404,8 +4405,8 @@ class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
                         ),
                         label: Text(
                           _sentCount > 0 && _pendingRecipients.isNotEmpty 
-                            ? "계속 발송"
-                            : "발송 시작",
+                            ? ref.watch(appStringsProvider).sendContinue
+                            : ref.watch(appStringsProvider).sendStart,
                           style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                         ),
                         style: ElevatedButton.styleFrom(
