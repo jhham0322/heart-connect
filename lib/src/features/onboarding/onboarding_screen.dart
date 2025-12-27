@@ -308,40 +308,37 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           
           const SizedBox(height: 32),
           
-          // 언어 선택 (InkWell + showModalBottomSheet)
-          InkWell(
-            onTap: () => _showLanguageSelector(),
-            borderRadius: BorderRadius.circular(12),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFFF29D86).withAlpha(100)),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withAlpha(10),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.language, color: Color(0xFFF29D86), size: 22),
-                  const SizedBox(width: 10),
-                  Text(
-                    supportedLanguages[ref.watch(localeProvider).languageCode] ?? '한국어',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: Color(0xFF5D4037),
+          // 언어 선택 (Material + InkWell 구조로 변경하여 터치 보장)
+          Material(
+            color: Colors.white,
+            elevation: 2,
+            shadowColor: Colors.black.withAlpha(20),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: BorderSide(color: const Color(0xFFF29D86).withAlpha(100)),
+            ),
+            child: InkWell(
+              onTap: _showLanguageSelector,
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.language, color: Color(0xFFF29D86), size: 22),
+                    const SizedBox(width: 10),
+                    Text(
+                      supportedLanguages[ref.watch(localeProvider).languageCode] ?? '한국어',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xFF5D4037),
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  const Icon(Icons.arrow_drop_down, color: Color(0xFF5D4037), size: 24),
-                ],
+                    const SizedBox(width: 8),
+                    const Icon(Icons.arrow_drop_down, color: Color(0xFF5D4037), size: 24),
+                  ],
+                ),
               ),
             ),
           ),
