@@ -114,35 +114,315 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
   }
 
+  // 확장된 백업 - 연락처, 일정, 설정, 저장된 카드
   Future<void> _backupData() async {
     try {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (c) => const Center(child: CircularProgressIndicator()),
+      );
+      
       final db = ref.read(appDatabaseProvider);
+      final prefs = await SharedPreferences.getInstance();
+      
+      // 1. 연락처 데이터
       final contacts = await db.getAllContacts();
-      // Simple JSON export logic
-      final List<Map<String, dynamic>> data = contacts.map((c) => {
+      final List<Map<String, dynamic>> contactsData = contacts.map((c) => {
         'name': c.name,
         'phone': c.phone,
         'group': c.groupTag,
         'birthday': c.birthday?.toIso8601String(),
+        'isFavorite': c.isFavorite,
       }).toList();
+      
+      // 2. 일정 데이터
+      final plans = await db.getAllDailyPlans();
+      final List<Map<String, dynamic>> plansData = plans.map((p) => {
+        'id': p.id,
+        'title': p.title,
+        'date': p.date.toIso8601String(),
+        'iconType': p.iconType,
+        'recipients': p.recipients,
+        'isCompleted': p.isCompleted,
+      }).toList();
+      
+      // 3. 저장된 카드
+      final cards = await db.getAllSavedCards();
+      final List<Map<String, dynamic>> cardsData = cards.map((c) => {
+        'id': c.id,
+        'imagePath': c.imagePath,
+        'message': c.message,
+        'createdAt': c.createdAt.toIso8601String(),
+      }).toList();
+      
+      // 4. 설정 값
+      final Map<String, dynamic> settingsData = {
+        'notifications_enabled': prefs.getBool('notifications_enabled') ?? true,
+        'branding_enabled': prefs.getBool('branding_enabled') ?? true,
+        'notification_time': prefs.getString('notification_time') ?? '9:0',
+        'user_name': prefs.getString('user_name') ?? 'Heart-Connect',
+        'selected_language': prefs.getString('selected_language') ?? 'ko',
+      };
+      
+      // 전체 백업 데이터
+      final backupData = {
+        'version': '1.0',
+        'createdAt': DateTime.now().toIso8601String(),
+        'contacts': contactsData,
+        'plans': plansData,
+        'cards': cardsData,
+        'settings': settingsData,
+      };
 
-      final jsonString = jsonEncode(data);
-      final fileName = 'connect_heart_backup_${DateFormat('yyyyMMdd').format(DateTime.now())}.json';
+      final jsonString = jsonEncode(backupData);
+      final fileName = 'connect_heart_backup_${DateFormat('yyyyMMdd_HHmmss').format(DateTime.now())}.json';
 
-      // For simplicity in this environment, save to documents
+      // 외부 저장소에 저장 (Downloads 폴더 등)
       final directory = await getApplicationDocumentsDirectory();
       final file = File('${directory.path}/$fileName');
       await file.writeAsString(jsonString);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('백업 완료: ${file.path}')),
-        );
+        Navigator.pop(context); // 로딩 닫기
+        _showBackupResultDialog(file.path, contactsData.length, plansData.length, cardsData.length);
       }
     } catch (e) {
       if (mounted) {
+        Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('백업 실패: $e')),
+        );
+      }
+    }
+  }
+  
+  // 백업 결과 다이얼로그
+  void _showBackupResultDialog(String path, int contactCount, int planCount, int cardCount) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.green.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(FontAwesomeIcons.check, color: Colors.green, size: 20),
+            ),
+            const SizedBox(width: 12),
+            const Expanded(child: Text('백업 완료', style: TextStyle(fontSize: 18))),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('다음 데이터가 백업되었습니다:', style: TextStyle(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 12),
+            _buildBackupInfoRow(FontAwesomeIcons.addressBook, '연락처', '$contactCount명'),
+            _buildBackupInfoRow(FontAwesomeIcons.calendar, '일정', '$planCount개'),
+            _buildBackupInfoRow(FontAwesomeIcons.image, '저장된 카드', '$cardCount개'),
+            _buildBackupInfoRow(FontAwesomeIcons.gear, '설정', '포함'),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.grey.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                '저장 위치:\n$path',
+                style: const TextStyle(fontSize: 11, color: Colors.grey),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('확인'),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  Widget _buildBackupInfoRow(IconData icon, String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          Icon(icon, size: 16, color: Colors.brown),
+          const SizedBox(width: 8),
+          Text(label),
+          const Spacer(),
+          Text(value, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green)),
+        ],
+      ),
+    );
+  }
+  
+  // 복원 기능
+  Future<void> _restoreData() async {
+    try {
+      // 파일 선택 다이얼로그
+      final directory = await getApplicationDocumentsDirectory();
+      final backupDir = Directory(directory.path);
+      
+      // 백업 파일 목록 가져오기
+      final files = backupDir.listSync().whereType<File>().where((f) => f.path.endsWith('.json') && f.path.contains('connect_heart_backup')).toList();
+      
+      if (files.isEmpty) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('백업 파일이 없습니다. 먼저 백업을 진행해주세요.'),
+              action: SnackBarAction(label: '백업하기', onPressed: _backupData),
+            ),
+          );
+        }
+        return;
+      }
+      
+      // 파일 정렬 (최신순)
+      files.sort((a, b) => b.statSync().modified.compareTo(a.statSync().modified));
+      
+      // 파일 선택 다이얼로그
+      final selectedFile = await showDialog<File>(
+        context: context,
+        builder: (context) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.blue.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(FontAwesomeIcons.folderOpen, color: Colors.blue, size: 20),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(child: Text('백업 파일 선택', style: TextStyle(fontSize: 18))),
+            ],
+          ),
+          content: SizedBox(
+            width: double.maxFinite,
+            height: 300,
+            child: ListView.builder(
+              itemCount: files.length,
+              itemBuilder: (context, index) {
+                final file = files[index];
+                final fileName = file.path.split('/').last;
+                final stat = file.statSync();
+                final modifiedDate = DateFormat('yyyy-MM-dd HH:mm').format(stat.modified);
+                final fileSize = (stat.size / 1024).toStringAsFixed(1);
+                
+                return ListTile(
+                  leading: const Icon(FontAwesomeIcons.fileCode, color: Colors.blue),
+                  title: Text(fileName, style: const TextStyle(fontSize: 12)),
+                  subtitle: Text('$modifiedDate | ${fileSize}KB', style: const TextStyle(fontSize: 10)),
+                  onTap: () => Navigator.pop(context, file),
+                );
+              },
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('취소'),
+            ),
+          ],
+        ),
+      );
+      
+      if (selectedFile == null) return;
+      
+      // 복원 확인 다이얼로그
+      final confirm = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('데이터 복원'),
+          content: const Text('기존 데이터가 백업 데이터로 교체됩니다.\n\n계속하시겠습니까?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('취소', style: TextStyle(color: Colors.grey)),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, true),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+              child: const Text('복원', style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        ),
+      );
+      
+      if (confirm != true) return;
+      
+      // 복원 진행
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (c) => const Center(child: CircularProgressIndicator()),
+      );
+      
+      final jsonString = await selectedFile.readAsString();
+      final backupData = jsonDecode(jsonString) as Map<String, dynamic>;
+      
+      final db = ref.read(appDatabaseProvider);
+      final prefs = await SharedPreferences.getInstance();
+      
+      int restoredContacts = 0;
+      int restoredPlans = 0;
+      
+      // 연락처 복원
+      if (backupData['contacts'] != null) {
+        final contacts = backupData['contacts'] as List;
+        for (var c in contacts) {
+          try {
+            await db.upsertContact(
+              name: c['name'] ?? '',
+              phone: c['phone'] ?? '',
+              groupTag: c['group'],
+              birthday: c['birthday'] != null ? DateTime.parse(c['birthday']) : null,
+              isFavorite: c['isFavorite'] ?? false,
+            );
+            restoredContacts++;
+          } catch (e) {
+            print('연락처 복원 오류: $e');
+          }
+        }
+      }
+      
+      // 설정 복원
+      if (backupData['settings'] != null) {
+        final settings = backupData['settings'] as Map<String, dynamic>;
+        await prefs.setBool('notifications_enabled', settings['notifications_enabled'] ?? true);
+        await prefs.setBool('branding_enabled', settings['branding_enabled'] ?? true);
+        await prefs.setString('notification_time', settings['notification_time'] ?? '9:0');
+        await prefs.setString('user_name', settings['user_name'] ?? 'Heart-Connect');
+        await prefs.setString('selected_language', settings['selected_language'] ?? 'ko');
+      }
+      
+      if (mounted) {
+        Navigator.pop(context); // 로딩 닫기
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('복원 완료! 연락처 $restoredContacts명 복원됨')),
+        );
+        
+        // 설정 다시 로드
+        _loadSettings();
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('복원 실패: $e')),
         );
       }
     }
@@ -595,21 +875,30 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             padding: EdgeInsets.zero,
                             constraints: const BoxConstraints(),
                           ),
-                          const SizedBox(width: 8),
-                          // Import/Export icons could be separate features, currently just decoration or placeholders
-                          // const Icon(FontAwesomeIcons.fileExport, size: 14), 
-                          // const SizedBox(width: 8), 
-                          // const Icon(FontAwesomeIcons.fileImport, size: 14)
                         ]
                       ),
                       const SizedBox(height: 6),
-                      GestureDetector(
-                        onTap: _backupData,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                          decoration: BoxDecoration(color: const Color(0xFFFFF59D), borderRadius: BorderRadius.circular(12), border: Border.all(color: const Color(0xFF5D4037))),
-                          child: const Text("Backup", style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
-                        ),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          GestureDetector(
+                            onTap: _backupData,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(color: const Color(0xFFFFF59D), borderRadius: BorderRadius.circular(12), border: Border.all(color: const Color(0xFF5D4037))),
+                              child: const Text("Backup", style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          GestureDetector(
+                            onTap: _restoreData,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(color: const Color(0xFFB3E5FC), borderRadius: BorderRadius.circular(12), border: Border.all(color: const Color(0xFF5D4037))),
+                              child: const Text("Restore", style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
