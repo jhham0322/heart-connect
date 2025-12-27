@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:drift/drift.dart' hide Column; // Added for Value
 import 'package:permission_handler/permission_handler.dart'; // Added for permissions
 import 'package:url_launcher/url_launcher.dart'; // Added for opening URLs
+import 'package:shared_preferences/shared_preferences.dart'; // Added for preferences
 import '../../theme/app_theme.dart';
 import '../contacts/contact_service.dart';
 import 'home_view_model.dart';
@@ -63,8 +64,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     if (status.isGranted) {
       setState(() => _hasCalendarPermission = true);
       debugPrint('[HomeScreen] Calendar permission already granted');
-      // 네이버 캘린더 동기화 확인
-      _checkNaverCalendarSync();
+      // 지원 캘린더 안내 확인
+      _checkCalendarGuide();
     } else {
       setState(() => _hasCalendarPermission = false);
       
@@ -95,7 +96,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              '구글 캘린더, 네이버 캘린더의 일정을 가져오려면 캘린더 접근 권한이 필요합니다.',
+              '구글 캘린더, 삼성 캘린더의 일정을 가져오려면 캘린더 접근 권한이 필요합니다.',
               style: TextStyle(fontSize: 15),
             ),
             const SizedBox(height: 16),
@@ -144,9 +145,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('✓ 캘린더가 연동되었습니다!')),
                   );
-                  // 네이버 캘린더 동기화 확인 (잠시 후)
+                  // 지원 캘린더 안내 (잠시 후)
                   Future.delayed(const Duration(seconds: 1), () {
-                    _checkNaverCalendarSync();
+                    _checkCalendarGuide();
                   });
                 }
               } else if (result.isPermanentlyDenied) {
@@ -200,43 +201,42 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   // 네이버 캘린더 채널
   static const _calendarChannel = MethodChannel('com.heartconnect/calendar');
   
-  // 네이버 캘린더 동기화 확인 및 안내
-  Future<void> _checkNaverCalendarSync() async {
-    debugPrint('[HomeScreen] Checking Naver calendar sync...');
+  // 지원 캘린더 안내 (처음 한 번만 표시)
+  Future<void> _checkCalendarGuide() async {
+    debugPrint('[HomeScreen] Checking calendar guide...');
     if (!Platform.isAndroid) {
       debugPrint('[HomeScreen] Not Android, skipping');
       return;
     }
     
     try {
-      // 1. 네이버 캘린더 앱 설치 확인
-      final isInstalled = await _calendarChannel.invokeMethod('isNaverCalendarInstalled');
-      debugPrint('[HomeScreen] Naver calendar installed: $isInstalled');
-      if (isInstalled != true) {
-        debugPrint('[HomeScreen] Naver calendar not installed, skipping');
+      // SharedPreferences에서 이미 안내를 봤는지 확인
+      final prefs = await SharedPreferences.getInstance();
+      final hasSeenGuide = prefs.getBool('has_seen_calendar_guide') ?? false;
+      
+      if (hasSeenGuide) {
+        debugPrint('[HomeScreen] Already seen calendar guide, skipping');
         return;
       }
       
-      // 2. 시스템 캘린더에 네이버 계정 있는지 확인
-      final hasNaver = await _calendarChannel.invokeMethod('hasNaverCalendarEvents');
-      debugPrint('[HomeScreen] Has Naver in system calendar: $hasNaver');
-      if (hasNaver == true) {
-        debugPrint('[HomeScreen] Naver already synced, skipping');
-        return;
-      }
-      
-      // 3. 네이버 캘린더가 설치되어 있지만 동기화 안 됨 -> 안내
-      debugPrint('[HomeScreen] Showing Naver calendar sync dialog');
+      // 안내 다이얼로그 표시
+      debugPrint('[HomeScreen] Showing calendar guide dialog');
       if (mounted) {
-        _showNaverCalendarSyncDialog();
+        showCalendarGuideDialog(context, markAsSeen: true);
       }
     } catch (e) {
-      debugPrint('[HomeScreen] Naver calendar check error: $e');
+      debugPrint('[HomeScreen] Calendar guide check error: $e');
     }
   }
   
-  // 네이버 캘린더 동기화 안내 다이얼로그
-  void _showNaverCalendarSyncDialog() {
+  // 지원 캘린더 안내 다이얼로그 (정적 메서드 - 설정에서도 사용)
+  static Future<void> showCalendarGuideDialog(BuildContext context, {bool markAsSeen = false}) async {
+    // 확인 시 SharedPreferences에 저장
+    if (markAsSeen) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('has_seen_calendar_guide', true);
+    }
+    
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -246,41 +246,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.orange.withOpacity(0.2),
+                color: Colors.blue.withOpacity(0.2),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Icon(FontAwesomeIcons.triangleExclamation, color: Colors.orange, size: 20),
+              child: const Icon(FontAwesomeIcons.calendarCheck, color: Colors.blue, size: 20),
             ),
             const SizedBox(width: 12),
-            const Expanded(child: Text('네이버 캘린더 안내', style: TextStyle(fontSize: 18))),
+            const Expanded(child: Text('지원 캘린더 안내', style: TextStyle(fontSize: 18))),
           ],
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 미지원 이유 설명
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.red.withOpacity(0.3)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  Text('❌ 네이버 캘린더 미지원', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.red)),
-                  SizedBox(height: 8),
-                  Text(
-                    '네이버 캘린더는 Android 표준 캘린더 동기화(CalendarContract)를 지원하지 않아 앱에서 일정을 읽을 수 없습니다.',
-                    style: TextStyle(fontSize: 12, color: Colors.black87),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-            // 대안 안내
+            // 지원되는 캘린더
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
@@ -304,6 +283,30 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ],
               ),
             ),
+            const SizedBox(height: 16),
+            // 미지원 캘린더
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.red.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.red.withOpacity(0.3)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  Text('❌ 미지원 캘린더', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.red)),
+                  SizedBox(height: 8),
+                  Text('• 네이버 캘린더', style: TextStyle(fontSize: 13)),
+                  Text('• 카카오톡 캘린더', style: TextStyle(fontSize: 13)),
+                  SizedBox(height: 8),
+                  Text(
+                    'Android 표준 캘린더 동기화를 지원하지 않아 일정을 읽을 수 없습니다.',
+                    style: TextStyle(fontSize: 11, color: Colors.black54),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
         actions: [
@@ -315,6 +318,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
     );
   }
+
 
   @override
   void dispose() {

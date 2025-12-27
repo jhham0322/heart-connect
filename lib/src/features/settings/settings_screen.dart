@@ -11,6 +11,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:heart_connect/src/features/alarm/notification_service.dart';
 import 'package:heart_connect/src/features/contacts/contact_service.dart';
 import 'package:heart_connect/src/features/database/database_provider.dart';
+import 'package:heart_connect/src/features/home/home_screen.dart'; // For calendar guide
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -170,10 +171,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         uri = Uri.parse('https://calendar.google.com');
         appName = 'Google Calendar';
         break;
-      case 'naver':
-        // 네이버 캘린더
-        uri = Uri.parse('https://calendar.naver.com');
-        appName = 'Naver Calendar';
+      case 'samsung':
+        // 삼성 캘린더
+        uri = Uri.parse('content://com.samsung.android.calendar/time/');
+        appName = 'Samsung Calendar';
         break;
     }
     
@@ -189,8 +190,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             case 'google':
               packageName = 'com.google.android.calendar';
               break;
-            case 'naver':
-              packageName = 'com.nhn.android.calendar';
+            case 'samsung':
+              packageName = 'com.samsung.android.calendar';
               break;
           }
           
@@ -395,14 +396,35 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             onTap: () => _openCalendarApp('google'),
                           ),
                           const SizedBox(width: 8),
-                          // 네이버 캘린더
+                          // 삼성 캘린더
                           _buildCalendarButton(
-                            icon: FontAwesomeIcons.n,
-                            label: "Naver",
-                            color: const Color(0xFF4CAF50),
-                            onTap: () => _openCalendarApp('naver'),
+                            icon: FontAwesomeIcons.s,
+                            label: "Samsung",
+                            color: const Color(0xFF1E88E5),
+                            onTap: () => _openCalendarApp('samsung'),
                           ),
                         ],
+                      ),
+                      const SizedBox(height: 8),
+                      // 지원 캘린더 안내 버튼
+                      GestureDetector(
+                        onTap: () => _HomeScreenState.showCalendarGuideDialog(context),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.blue.withOpacity(0.3)),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: const [
+                              Icon(FontAwesomeIcons.circleInfo, size: 12, color: Colors.blue),
+                              SizedBox(width: 6),
+                              Text("지원 캘린더 안내", style: TextStyle(fontSize: 11, color: Colors.blue, fontWeight: FontWeight.bold)),
+                            ],
+                          ),
+                        ),
                       ),
                     ],
                   ),
