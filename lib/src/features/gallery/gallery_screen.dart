@@ -166,7 +166,10 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
   }
 
   Widget _buildCategoryItem(CategoryItem cat, AppStrings strings) {
-    final count = _categoryCounts[cat.id] ?? 0;
+    // favorites 카테고리는 실시간 watch로 카운트
+    final count = cat.id == 'favorites' 
+        ? ref.watch(favoritesProvider).length 
+        : (_categoryCounts[cat.id] ?? 0);
     final isNew = _hasNewItems[cat.id] ?? false;
     final localizedTitle = _getCategoryTitle(cat.id, strings);
 
@@ -659,7 +662,6 @@ class _GalleryDetailScreenState extends ConsumerState<GalleryDetailScreen> {
         assets: _deviceAssets, 
         initialIndex: index, 
         categoryName: widget.category.title,
-        ref: ref,
       )
     ));
   }
@@ -834,24 +836,22 @@ class _FullScreenViewerState extends ConsumerState<_FullScreenViewer> {
 }
 
 // --- Device Photo Full Screen Viewer ---
-class _DevicePhotoViewer extends StatefulWidget {
+class _DevicePhotoViewer extends ConsumerStatefulWidget {
   final List<AssetEntity> assets;
   final int initialIndex;
   final String categoryName;
-  final WidgetRef ref;
 
   const _DevicePhotoViewer({
     required this.assets, 
     required this.initialIndex, 
     required this.categoryName,
-    required this.ref,
   });
 
   @override
-  State<_DevicePhotoViewer> createState() => _DevicePhotoViewerState();
+  ConsumerState<_DevicePhotoViewer> createState() => _DevicePhotoViewerState();
 }
 
-class _DevicePhotoViewerState extends State<_DevicePhotoViewer> {
+class _DevicePhotoViewerState extends ConsumerState<_DevicePhotoViewer> {
   late PageController _pageController;
   late int _currentIndex;
   File? _currentFile;
@@ -869,7 +869,7 @@ class _DevicePhotoViewerState extends State<_DevicePhotoViewer> {
     if (mounted && file != null) {
       setState(() => _currentFile = file);
       // selection provider에 파일 경로 설정
-      widget.ref.read(currentSelectionProvider.notifier).state = file.path;
+      ref.read(currentSelectionProvider.notifier).state = file.path;
     }
   }
 
@@ -884,7 +884,7 @@ class _DevicePhotoViewerState extends State<_DevicePhotoViewer> {
   void dispose() {
     _pageController.dispose();
     // 선택 초기화
-    Future.microtask(() => widget.ref.read(currentSelectionProvider.notifier).state = null);
+    Future.microtask(() => ref.read(currentSelectionProvider.notifier).state = null);
     super.dispose();
   }
 
@@ -906,7 +906,7 @@ class _DevicePhotoViewerState extends State<_DevicePhotoViewer> {
           // Favorite Heart Button
           if (_currentFile != null)
             IconButton(
-              icon: widget.ref.watch(favoritesProvider).contains(_currentFile!.path)
+              icon: ref.watch(favoritesProvider).contains(_currentFile!.path)
                   ? const Stack(
                       children: [
                         Icon(FontAwesomeIcons.solidHeart, color: Color(0xFFFF7043), size: 24),
@@ -916,7 +916,7 @@ class _DevicePhotoViewerState extends State<_DevicePhotoViewer> {
                   : const Icon(FontAwesomeIcons.heart, color: Colors.white, size: 24),
               onPressed: () {
                 if (_currentFile != null) {
-                  widget.ref.read(favoritesProvider.notifier).toggleFavorite(_currentFile!.path);
+                  ref.read(favoritesProvider.notifier).toggleFavorite(_currentFile!.path);
                 }
               },
             ),
