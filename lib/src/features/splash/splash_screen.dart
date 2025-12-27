@@ -7,7 +7,7 @@ import 'package:heart_connect/src/features/contacts/contact_service.dart';
 import 'package:heart_connect/src/features/home/home_view_model.dart';
 import 'package:heart_connect/src/features/database/database_provider.dart';
 import 'package:heart_connect/src/features/calendar/calendar_service.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:heart_connect/src/features/onboarding/onboarding_screen.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   final VoidCallback onInitComplete;
@@ -29,6 +29,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with TickerProvider
   bool _isLoading = true;
   String _loadingStatus = '시작하는 중...';
   bool _isFinishing = false;
+  bool _showOnboarding = false;
 
   @override
   void initState() {
@@ -57,61 +58,103 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with TickerProvider
     );
     
     _heartController.repeat(reverse: true);
-    _startLoading();
+    _checkFirstRun();
+  }
+
+  Future<void> _checkFirstRun() async {
+    final prefs = await SharedPreferences.getInstance();
+    final isFirstRun = !(prefs.getBool('onboarding_complete') ?? false);
+    final userName = prefs.getString('user_name') ?? '';
+    
+    if (mounted) {
+      setState(() {
+        _userName = userName;
+        _showOnboarding = isFirstRun;
+      });
+    }
+    
+    if (!isFirstRun) {
+      // 이미 온보딩 완료 - 빠른 로딩
+      await _startLoading();
+    }
+  }
+
+  /// 온보딩 완료 후 호출
+  Future<void> _onOnboardingComplete() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('onboarding_complete', true);
+    
+    if (mounted) {
+      setState(() {
+        _showOnboarding = false;
+      });
+    }
+    
+    // 데이터 동기화 시작
+    await _syncDataAfterOnboarding();
+  }
+
+  /// 온보딩 후 데이터 동기화
+  Future<void> _syncDataAfterOnboarding() async {
+    final prefs = await SharedPreferences.getInstance();
+    final db = ref.read(appDatabaseProvider);
+    final calendarService = ref.read(calendarServiceProvider);
+    
+    try {
+      _updateStatus('데이터를 준비하는 중...');
+      
+      // Mock 데이터 정리
+      await db.deleteMockPlans();
+      
+      // 연락처 동기화
+      _updateStatus('연락처를 동기화하는 중...');
+      await ref.read(contactServiceProvider.notifier).syncContacts();
+      
+      // 캘린더 이벤트 동기화
+      _updateStatus('캘린더를 동기화하는 중...');
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      final endDate = today.add(const Duration(days: 45));
+      
+      try {
+        final calEvents = await calendarService.getEvents(today, endDate);
+        await _syncCalendarEvents(db, calEvents, today);
+      } catch (e) {
+        debugPrint('[Splash] 캘린더 동기화 오류: $e');
+      }
+      
+      // 공휴일/생일 일정 생성
+      _updateStatus('일정을 생성하는 중...');
+      await db.generateWeeklyPlans();
+      
+      // 초기화 완료 표시
+      await prefs.setBool('initial_setup_done', true);
+      await prefs.setInt('last_sync_time', now.millisecondsSinceEpoch);
+      
+      // 홈 데이터 로드
+      _updateStatus('화면을 준비하는 중...');
+      ref.read(homeViewModelProvider.notifier).refresh();
+      await _waitForHomeDataLoaded();
+      
+      _updateStatus('준비 완료!');
+      await Future.delayed(const Duration(milliseconds: 300));
+      _finishLoading();
+      
+    } catch (e) {
+      debugPrint('[Splash] 동기화 오류: $e');
+      _finishLoading();
+    }
   }
 
   Future<void> _startLoading() async {
     final stopwatch = Stopwatch()..start();
+    final prefs = await SharedPreferences.getInstance();
     
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final db = ref.read(appDatabaseProvider);
+      _updateStatus('환영합니다! 👋');
       
-      // 1. 사용자 이름 (즉시)
-      final userName = prefs.getString('user_name') ?? '';
-      if (mounted) setState(() => _userName = userName);
-      
-      // 2. 첫 실행 여부 확인
-      final isFirstRun = !(prefs.getBool('initial_setup_done') ?? false);
-      final lastSyncTime = prefs.getInt('last_sync_time') ?? 0;
-      
-      if (isFirstRun) {
-        // === 첫 실행: 전체 초기화 ===
-        debugPrint('[Splash] 첫 실행 - 전체 초기화');
-        
-        // 권한 요청
-        if (Platform.isAndroid || Platform.isIOS) {
-          _updateStatus('권한을 확인하는 중...');
-          await Permission.contacts.request();
-          await Permission.calendar.request();
-        }
-        
-        // Mock 데이터 정리 (한 번만)
-        await db.deleteMockPlans();
-        
-        // 연락처 동기화
-        _updateStatus('연락처를 가져오는 중...');
-        await ref.read(contactServiceProvider.notifier).syncContacts();
-        
-        // 공휴일/생일 일정 생성
-        _updateStatus('일정을 생성하는 중...');
-        await db.generateWeeklyPlans();
-        
-        // 초기화 완료 표시
-        await prefs.setBool('initial_setup_done', true);
-        await prefs.setInt('last_sync_time', DateTime.now().millisecondsSinceEpoch);
-        
-      } else {
-        // === 재실행: 빠른 로딩 ===
-        debugPrint('[Splash] 재실행 - 빠른 로딩');
-        _updateStatus('환영합니다! 👋');
-      }
-      
-      // 3. 홈 데이터 로드 (DB에서 빠르게)
-      _updateStatus('화면을 준비하는 중...');
+      // 홈 데이터 로드 (DB에서 빠르게)
       ref.read(homeViewModelProvider.notifier).refresh();
-      
-      // 4. 로딩 완료 대기
       await _waitForHomeDataLoaded();
       
       debugPrint('[Splash] 로딩 완료: ${stopwatch.elapsedMilliseconds}ms');
@@ -120,7 +163,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with TickerProvider
       await Future.delayed(const Duration(milliseconds: 150));
       _finishLoading();
       
-      // 5. 백그라운드 동기화 시작 (화면 표시 후)
+      // 백그라운드 동기화 시작
+      final lastSyncTime = prefs.getInt('last_sync_time') ?? 0;
       _startBackgroundSync(prefs, lastSyncTime);
       
     } catch (e) {
@@ -129,7 +173,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with TickerProvider
     }
   }
 
-  /// 백그라운드 동기화 (비동기, UI 차단 없음)
+  /// 백그라운드 동기화
   void _startBackgroundSync(SharedPreferences prefs, int lastSyncTime) {
     Future.delayed(const Duration(seconds: 2), () async {
       try {
@@ -138,33 +182,26 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with TickerProvider
         final now = DateTime.now();
         final hoursSinceLastSync = (now.millisecondsSinceEpoch - lastSyncTime) / (1000 * 60 * 60);
         
-        debugPrint('[BackgroundSync] 시작 (마지막 동기화: ${hoursSinceLastSync.toStringAsFixed(1)}시간 전)');
-        
-        // 1시간 이상 지났으면 동기화
         if (hoursSinceLastSync >= 1) {
-          // 연락처 변경 확인 및 동기화
+          debugPrint('[BackgroundSync] 동기화 시작...');
+          
           await ref.read(contactServiceProvider.notifier).syncContacts();
           
-          // 캘린더 이벤트 동기화 (비동기)
           final today = DateTime(now.year, now.month, now.day);
           final endDate = today.add(const Duration(days: 45));
-          final calEvents = await calendarService.getEvents(today, endDate);
           
-          // 새 이벤트만 DB에 추가
-          await _syncCalendarEvents(db, calEvents, today);
+          try {
+            final calEvents = await calendarService.getEvents(today, endDate);
+            await _syncCalendarEvents(db, calEvents, today);
+          } catch (e) {
+            debugPrint('[BackgroundSync] 캘린더 오류: $e');
+          }
           
-          // 공휴일/생일 일정 업데이트
           await db.generateWeeklyPlans();
-          
-          // 홈 화면 갱신
           ref.read(homeViewModelProvider.notifier).refresh();
-          
-          // 동기화 시간 업데이트
           await prefs.setInt('last_sync_time', now.millisecondsSinceEpoch);
           
           debugPrint('[BackgroundSync] 완료');
-        } else {
-          debugPrint('[BackgroundSync] 스킵 (최근 동기화됨)');
         }
       } catch (e) {
         debugPrint('[BackgroundSync] 오류: $e');
@@ -180,7 +217,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with TickerProvider
       for (var event in calEvents) {
         final eDate = DateTime(event.date.year, event.date.month, event.date.day);
         
-        // 이미 존재하는지 확인
         bool exists = false;
         try {
           plans.firstWhere((p) => 
@@ -195,17 +231,16 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with TickerProvider
         }
         
         if (!exists) {
-          // 새 이벤트 추가
           await db.insertPlanSimple(
             date: eDate,
             content: event.title,
             type: event.type,
           );
-          debugPrint('[BackgroundSync] 새 이벤트 추가: ${event.title}');
+          debugPrint('[Sync] 새 이벤트: ${event.title}');
         }
       }
     } catch (e) {
-      debugPrint('[BackgroundSync] 이벤트 동기화 오류: $e');
+      debugPrint('[Sync] 이벤트 동기화 오류: $e');
     }
   }
 
@@ -228,10 +263,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with TickerProvider
       },
     );
     
-    // 타임아웃 5초
     Timer(const Duration(seconds: 5), () {
       if (!completer.isCompleted) {
-        debugPrint('[Splash] 로딩 타임아웃');
         completer.complete();
         subscription.close();
       }
@@ -262,6 +295,14 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with TickerProvider
 
   @override
   Widget build(BuildContext context) {
+    // 온보딩 화면 표시
+    if (_showOnboarding) {
+      return OnboardingScreen(
+        onComplete: _onOnboardingComplete,
+      );
+    }
+    
+    // 스플래시 화면
     return AnimatedBuilder(
       animation: _fadeAnimation,
       builder: (context, child) {
