@@ -668,6 +668,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             });
                           },
                         )),
+                        // 수신자 추가 버튼
+                        ActionChip(
+                          avatar: const Icon(Icons.add, size: 16),
+                          label: const Text("추가"),
+                          onPressed: () async {
+                            final selected = await ContactPickerDialog.show(context);
+                            if (selected != null && selected.isNotEmpty) {
+                              setDialogState(() {
+                                for (final contact in selected) {
+                                  final existing = selectedRecipients.any((r) => r['phone'] == contact.phone);
+                                  if (!existing) {
+                                    selectedRecipients.add({'name': contact.name, 'phone': contact.phone});
+                                  }
+                                }
+                              });
+                            }
+                          },
+                        ),
                       ],
                     ),
                     const SizedBox(height: 16),
