@@ -1050,7 +1050,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const SizedBox(height: 16),
                 _buildSettingCard(
                   iconBg: const Color(0xFFFFAB91),
-                  icon: FontAwesomeIcons.wandMagicSparkles,
+                  icon: Icons.palette_outlined,
                   title: strings.settingsDesignSending,
                   desc: strings.settingsCardBranding,
                   descIcon: FontAwesomeIcons.heart,
@@ -1067,7 +1067,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const SizedBox(height: 16),
                 _buildSettingCard(
                   iconBg: const Color(0xFFFFF59D),
-                  icon: FontAwesomeIcons.cloudArrowUp,
+                  icon: Icons.cloud_upload_outlined,
                   title: strings.settingsDataManage,
                   desc: strings.settingsSyncContacts,
                   descIcon: FontAwesomeIcons.rotate,
@@ -1139,7 +1139,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 // 캘린더 연동 카드
                 _buildSettingCard(
                   iconBg: const Color(0xFFB3E5FC),
-                  icon: FontAwesomeIcons.calendar,
+                  icon: Icons.calendar_month_outlined,
                   title: strings.settingsCalendarSync,
                   desc: strings.settingsOpenCalendar,
                   descIcon: FontAwesomeIcons.arrowUpRightFromSquare,
