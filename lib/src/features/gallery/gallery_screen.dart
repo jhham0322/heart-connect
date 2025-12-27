@@ -517,12 +517,30 @@ class _GalleryDetailScreenState extends ConsumerState<GalleryDetailScreen> {
     // 기기 갤러리인 경우 _deviceAssets 사용
     final isEmpty = _isDeviceGallery ? _deviceAssets.isEmpty : _images.isEmpty;
     final itemCount = _isDeviceGallery ? _deviceAssets.length : _images.length;
+    final strings = ref.watch(appStringsProvider);
+    
+    // 카테고리 제목 다국어 처리
+    String localizedTitle;
+    switch (widget.category.id) {
+      case 'christmas': localizedTitle = strings.galleryChristmas; break;
+      case 'newyear': localizedTitle = strings.galleryNewYear; break;
+      case 'birthday': localizedTitle = strings.galleryBirthday; break;
+      case 'thanks': localizedTitle = strings.galleryThanks; break;
+      case 'motherDay': localizedTitle = strings.galleryMothersDay; break;
+      case 'teachersDay': localizedTitle = strings.galleryTeachersDay; break;
+      case 'tour': localizedTitle = strings.galleryTravel; break;
+      case 'hobby': localizedTitle = strings.galleryHobby; break;
+      case 'sports': localizedTitle = strings.gallerySports; break;
+      case 'my_photos': localizedTitle = strings.galleryMyPhotos; break;
+      case 'favorites': localizedTitle = strings.contactsFavorites; break;
+      default: localizedTitle = widget.category.title;
+    }
     
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       appBar: AppBar(
         title: Text(
-          widget.category.title,
+          localizedTitle,
           style: const TextStyle(
             color: AppTheme.textPrimary,
             fontSize: 20,
@@ -564,19 +582,24 @@ class _GalleryDetailScreenState extends ConsumerState<GalleryDetailScreen> {
                   return _buildDevicePhotoTile(index);
                 }
                 
-                // 일반 assets 이미지
-                final isFavorite = ref.watch(favoritesProvider).contains(_images[index]);
+                // 일반 assets 또는 파일 이미지
+                final imagePath = _images[index];
+                final isFilePath = imagePath.startsWith('/') || imagePath.contains(':\\');
+                final isFavorite = ref.watch(favoritesProvider).contains(imagePath);
+                
                 return GestureDetector(
                   onTap: () => _openImageViewer(index),
                   child: Hero(
-                    tag: _images[index],
+                    tag: imagePath,
                     child: Stack(
                       children: [
                         Container(
                           decoration: BoxDecoration(
                             color: Colors.grey[200],
                             image: DecorationImage(
-                              image: AssetImage(_images[index]),
+                              image: isFilePath 
+                                  ? FileImage(File(imagePath)) as ImageProvider
+                                  : AssetImage(imagePath),
                               fit: BoxFit.cover,
                             ),
                           ),
