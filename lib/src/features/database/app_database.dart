@@ -257,6 +257,13 @@ class AppDatabase extends _$AppDatabase {
     ).get();
   }
   
+  // 모든 일정 가져오기 (백업용)
+  Future<List<DailyPlan>> getAllDailyPlans() {
+    return (select(dailyPlans)
+      ..orderBy([(t) => OrderingTerm(expression: t.date)])
+    ).get();
+  }
+  
   Future<List<DailyPlan>> getFuturePlans(DateTime start) {
      return (select(dailyPlans)
       ..where((t) => t.date.isBiggerOrEqualValue(start))

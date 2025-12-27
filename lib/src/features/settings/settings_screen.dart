@@ -11,6 +11,8 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:heart_connect/src/features/alarm/notification_service.dart';
 import 'package:heart_connect/src/features/contacts/contact_service.dart';
 import 'package:heart_connect/src/features/database/database_provider.dart';
+import 'package:heart_connect/src/features/database/app_database.dart';
+import 'package:drift/drift.dart' hide Column;
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -385,13 +387,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         final contacts = backupData['contacts'] as List;
         for (var c in contacts) {
           try {
-            await db.upsertContact(
-              name: c['name'] ?? '',
-              phone: c['phone'] ?? '',
-              groupTag: c['group'],
-              birthday: c['birthday'] != null ? DateTime.parse(c['birthday']) : null,
-              isFavorite: c['isFavorite'] ?? false,
-            );
+            await db.upsertContact(ContactsCompanion(
+              name: Value(c['name'] ?? ''),
+              phone: Value(c['phone'] ?? ''),
+              groupTag: Value(c['group']),
+              birthday: Value(c['birthday'] != null ? DateTime.parse(c['birthday']) : null),
+              isFavorite: Value(c['isFavorite'] ?? false),
+            ));
             restoredContacts++;
           } catch (e) {
             print('연락처 복원 오류: $e');
