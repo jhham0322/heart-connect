@@ -153,6 +153,10 @@ class AppStrings {
   String get sendPending => _get({'ko': '대기 중', 'en': 'Pending', 'ja': '待機中', 'zh': '等待中'});
   String get sendTotalRecipients => _get({'ko': '총 수신자', 'en': 'Total recipients', 'ja': '受信者合計', 'zh': '总收件人'});
   String get sendAutoResume => _get({'ko': '5건 발송 후 자동 계속', 'en': 'Auto-continue after 5', 'ja': '5件送信後に自動続行', 'zh': '发送5条后自动继续'});
+  String get sendManagerTitle => _get({'ko': '발송 대상 관리', 'en': 'Recipient Manager', 'ja': '送信先管理', 'zh': '收件人管理'});
+  String get sendTotal => _get({'ko': '총', 'en': 'Total', 'ja': '合計', 'zh': '总计'});
+  String get sendPerson => _get({'ko': '명', 'en': '', 'ja': '人', 'zh': '人'});
+  String get sendSpamWarning => _get({'ko': '단시간 다량 발송은 스팸 정책에 의해 제한될 수 있습니다.\n안전을 위해 자동 계속 해제를 권장합니다.', 'en': 'Bulk sending may be limited by spam policies.\nDisabling auto-continue is recommended.', 'ja': '短時間での大量送信はスパムポリシーにより制限される場合があります。\n自動続行の無効化をお勧めします。', 'zh': '短时间内大量发送可能受到限制。\n建议关闭自动继续。'});
   
   // ========== 메시지/기록 ==========
   String get messageHistory => _get({'ko': '발송 기록', 'en': 'Send History', 'ja': '送信履歴', 'zh': '发送记录'});

@@ -27,6 +27,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:file_selector/file_selector.dart'; // File Picker
 import 'package:image/image.dart' as img; // JPEG 변환용
 import 'package:heart_connect/src/services/social_share_service.dart'; // 소셜 미디어 공유
+import 'package:heart_connect/src/l10n/app_strings.dart';
+import 'package:heart_connect/src/providers/locale_provider.dart';
 
 class AutoScrollingText extends StatefulWidget {
   final String text;
@@ -4336,7 +4338,8 @@ class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
                       ),
                     ),
                     const SizedBox(width: 16),
-                    TextButton.icon(
+                    // 공유 버튼 - 아이콘만 표시
+                    IconButton(
                       onPressed: _isSending ? null : () async {
                         // 소셜 미디어 공유 다이얼로그 표시
                         final platformId = await SocialShareService.showShareDialog(context);
@@ -4348,26 +4351,28 @@ class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
                           );
                         }
                       },
-                      icon: const Icon(Icons.share, size: 18),
-                      label: const Text("공유", style: TextStyle(fontSize: 14)),
-                      style: TextButton.styleFrom(
+                      icon: const Icon(Icons.share, size: 22),
+                      style: IconButton.styleFrom(
                         foregroundColor: const Color(0xFF1877F2),
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          side: const BorderSide(color: Color(0xFF1877F2)),
-                        ),
+                        backgroundColor: Colors.white,
+                        side: const BorderSide(color: Color(0xFF1877F2)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        padding: const EdgeInsets.all(10),
                       ),
+                      tooltip: '공유',
                     ),
                     const SizedBox(width: 8),
-                    TextButton(
+                    // 닫기 버튼 - 아이콘만 표시  
+                    IconButton(
                       onPressed: _isSending ? null : () => Navigator.pop(context),
-                      style: TextButton.styleFrom(
+                      icon: const Icon(Icons.close, size: 22),
+                      style: IconButton.styleFrom(
                         foregroundColor: Colors.grey[600],
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        backgroundColor: Colors.grey[100],
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        padding: const EdgeInsets.all(10),
                       ),
-                      child: const Text("닫기", style: TextStyle(fontSize: 15)),
+                      tooltip: '닫기',
                     ),
                     const SizedBox(width: 8),
                     // 발송 버튼
@@ -4383,7 +4388,7 @@ class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
                            foregroundColor: Colors.red,
                            elevation: 0,
                            side: const BorderSide(color: Colors.red),
-                           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                          ),
                       )
@@ -4398,13 +4403,15 @@ class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
                           size: 20
                         ),
                         label: Text(
-                          _sentCount > 0 && _pendingRecipients.isNotEmpty ? "계속 발송" : "발송 시작",
-                          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                          _sentCount > 0 && _pendingRecipients.isNotEmpty 
+                            ? "계속 발송"
+                            : "발송 시작",
+                          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                         ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFF29D86),
                           foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                           elevation: 2,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         ),
