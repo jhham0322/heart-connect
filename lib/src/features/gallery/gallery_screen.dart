@@ -602,22 +602,47 @@ class _GalleryDetailScreenState extends ConsumerState<GalleryDetailScreen> {
   Widget _buildDevicePhotoTile(int index) {
     final asset = _deviceAssets[index];
     
-    return FutureBuilder<Uint8List?>(
-      future: asset.thumbnailDataWithSize(const ThumbnailSize(200, 200)),
+    return FutureBuilder<List<dynamic>>(
+      future: Future.wait([
+        asset.thumbnailDataWithSize(const ThumbnailSize(200, 200)),
+        asset.file,
+      ]),
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.done && snapshot.data != null) {
+        if (snapshot.connectionState == ConnectionState.done && 
+            snapshot.data != null && 
+            snapshot.data![0] != null) {
+          final thumbnailData = snapshot.data![0] as Uint8List;
+          final file = snapshot.data![1] as File?;
+          final filePath = file?.path ?? '';
+          final isFavorite = ref.watch(favoritesProvider).contains(filePath);
+          
           return GestureDetector(
             onTap: () => _openDevicePhotoViewer(index),
             child: Hero(
               tag: asset.id,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  image: DecorationImage(
-                    image: MemoryImage(snapshot.data!),
-                    fit: BoxFit.cover,
+              child: Stack(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      image: DecorationImage(
+                        image: MemoryImage(thumbnailData),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
                   ),
-                ),
+                  if (isFavorite)
+                    const Positioned(
+                      top: 6,
+                      left: 6,
+                      child: Stack(
+                        children: [
+                          Icon(FontAwesomeIcons.solidHeart, color: Color(0xFFFF7043), size: 16),
+                          Icon(FontAwesomeIcons.heart, color: Colors.white, size: 16),
+                        ],
+                      ),
+                    ),
+                ],
               ),
             ),
           );
@@ -878,6 +903,23 @@ class _DevicePhotoViewerState extends State<_DevicePhotoViewer> {
           style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
         ),
         actions: [
+          // Favorite Heart Button
+          if (_currentFile != null)
+            IconButton(
+              icon: widget.ref.watch(favoritesProvider).contains(_currentFile!.path)
+                  ? const Stack(
+                      children: [
+                        Icon(FontAwesomeIcons.solidHeart, color: Color(0xFFFF7043), size: 24),
+                        Icon(FontAwesomeIcons.heart, color: Colors.white, size: 24),
+                      ],
+                    )
+                  : const Icon(FontAwesomeIcons.heart, color: Colors.white, size: 24),
+              onPressed: () {
+                if (_currentFile != null) {
+                  widget.ref.read(favoritesProvider.notifier).toggleFavorite(_currentFile!.path);
+                }
+              },
+            ),
           IconButton(
             icon: const Icon(Icons.close, color: Colors.white, size: 28),
             onPressed: () => Navigator.pop(context),

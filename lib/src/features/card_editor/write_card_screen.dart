@@ -3597,10 +3597,17 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                       ),
                       itemCount: categoryImages.length,
                       itemBuilder: (context, index) {
+                        final imagePath = categoryImages[index];
+                        final isFilePath = imagePath.startsWith('/') || imagePath.contains(':\\');
+                        
                         return GestureDetector(
                           onTap: () {
                             setState(() {
-                              _selectedImage = categoryImages[index];
+                              _selectedImage = imagePath;
+                              // 파일 경로인 경우 줌 리셋
+                              if (isFilePath) {
+                                _transformationController.value = Matrix4.identity();
+                              }
                               _saveDraft();
                             });
                             Navigator.pop(context);
@@ -3608,7 +3615,9 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                           },
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(8),
-                            child: Image.asset(categoryImages[index], fit: BoxFit.cover),
+                            child: isFilePath 
+                                ? Image.file(File(imagePath), fit: BoxFit.cover, errorBuilder: (_, __, ___) => Container(color: Colors.grey[300]))
+                                : Image.asset(imagePath, fit: BoxFit.cover),
                           ),
                         );
                       },
