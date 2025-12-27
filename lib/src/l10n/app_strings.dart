@@ -135,7 +135,8 @@ class AppStrings {
   String get galleryHalloween => _get({'ko': '할로윈', 'en': 'Halloween', 'ja': 'ハロウィン', 'zh': '万圣节'});
   String get galleryThanksgiving => _get({'ko': '추수감사절', 'en': 'Thanksgiving', 'ja': '感謝祭', 'zh': '感恩节'});
   String get galleryTravel => _get({'ko': '여행', 'en': 'Travel', 'ja': '旅行', 'zh': '旅行'});
-  String get galleryLetters => _get({'ko': '편지', 'en': 'Letters', 'ja': '手紙', 'zh': '信件'});
+  String get galleryHobby => _get({'ko': '취미', 'en': 'Hobby', 'ja': '趣味', 'zh': '爱好'});
+  String get gallerySports => _get({'ko': '스포츠', 'en': 'Sports', 'ja': 'スポーツ', 'zh': '运动'});
   String get galleryMyPhotos => _get({'ko': '내 사진', 'en': 'My Photos', 'ja': 'マイフォト', 'zh': '我的照片'});
   String get gallerySelectImage => _get({'ko': '이미지 선택', 'en': 'Select Image', 'ja': '画像を選択', 'zh': '选择图片'});
   

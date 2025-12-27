@@ -45,11 +45,10 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
       case 'motherDay': return strings.galleryMothersDay;
       case 'teachersDay': return strings.galleryTeachersDay;
       case 'tour': return strings.galleryTravel;
-      case 'halloween': return strings.galleryHalloween;
-      case 'thanksgiving': return strings.galleryThanksgiving;
+      case 'hobby': return strings.galleryHobby;
+      case 'sports': return strings.gallerySports;
       case 'my_photos': return strings.galleryMyPhotos;
       case 'favorites': return strings.contactsFavorites;
-      case 'letters': return strings.galleryLetters;
       default: return id;
     }
   }
@@ -73,8 +72,19 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
     Map<String, bool> newFlags = {};
 
     for (var cat in _categories) {
+       // my_photos: 추후 기기 갤러리 접근 구현
        if (cat.id == 'my_photos') {
          counts[cat.id] = 0; 
+         continue;
+       }
+       
+       // favorites: 하트 표시한 이미지 수
+       if (cat.id == 'favorites') {
+         final favorites = ref.read(favoritesProvider);
+         counts[cat.id] = favorites.length;
+         if (favorites.isNotEmpty) {
+           newFlags[cat.id] = true;
+         }
          continue;
        }
        
@@ -232,6 +242,23 @@ class _GalleryDetailScreenState extends ConsumerState<GalleryDetailScreen> {
   }
 
   Future<void> _loadImages() async {
+    // favorites 카테고리: 하트 표시한 이미지만 로드
+    if (widget.category.id == 'favorites') {
+      final favorites = ref.read(favoritesProvider);
+      setState(() {
+        _images = favorites.toList();
+        _isLoading = false;
+      });
+      return;
+    }
+
+    // my_photos 카테고리: 추후 구현 (기기 갤러리 접근 필요)
+    if (widget.category.id == 'my_photos') {
+      setState(() { _isLoading = false; });
+      return;
+    }
+
+    // 일반 카테고리: assets에서 로드
     List<String> allAssets = [];
     try {
       final manifest = await AssetManifest.loadFromAssetBundle(rootBundle);
@@ -249,11 +276,6 @@ class _GalleryDetailScreenState extends ConsumerState<GalleryDetailScreen> {
     }
 
     try {
-      if (widget.category.id == 'my_photos') {
-          setState(() { _isLoading = false; });
-          return;
-      }
-
       final targetPath = 'assets/images/cards/${widget.category.id}/';
       final paths = allAssets
           .where((key) => key.toLowerCase().contains(targetPath.toLowerCase()) && 
