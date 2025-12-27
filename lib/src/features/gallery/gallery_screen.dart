@@ -342,22 +342,107 @@ class _GalleryDetailScreenState extends ConsumerState<GalleryDetailScreen> {
   }
   
   void _showPermissionDeniedDialog() {
+    final strings = ref.read(appStringsProvider);
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: const Text('사진 접근 권한 필요'),
-        content: const Text('기기의 사진을 보려면 갤러리 접근 권한이 필요합니다.'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.orange.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(FontAwesomeIcons.images, color: Colors.orange, size: 20),
+            ),
+            const SizedBox(width: 12),
+            Expanded(child: Text(strings.photoPermissionTitle, style: const TextStyle(fontSize: 17))),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                strings.photoPermissionDesc,
+                style: const TextStyle(fontSize: 14, color: Colors.black87),
+              ),
+              const SizedBox(height: 20),
+              // 권한 설정 방법
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Colors.blue.withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.blue.withOpacity(0.2)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      strings.photoPermissionHowTo,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        color: Colors.blue,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(strings.photoPermissionStep1, style: const TextStyle(fontSize: 13)),
+                    const SizedBox(height: 6),
+                    Text(strings.photoPermissionStep2, style: const TextStyle(fontSize: 13)),
+                    const SizedBox(height: 6),
+                    Text(strings.photoPermissionStep3, style: const TextStyle(fontSize: 13)),
+                    const SizedBox(height: 6),
+                    Text(strings.photoPermissionStep4, style: const TextStyle(fontSize: 13)),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              // 안내 메시지
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.green.withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(FontAwesomeIcons.circleCheck, color: Colors.green, size: 16),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        strings.photoPermissionNote,
+                        style: const TextStyle(fontSize: 12, color: Colors.black54),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('취소'),
+            child: Text(strings.cancel),
           ),
-          ElevatedButton(
+          ElevatedButton.icon(
             onPressed: () {
               Navigator.pop(context);
               PhotoManager.openSetting();
             },
-            child: const Text('설정 열기'),
+            icon: const Icon(Icons.settings, size: 18),
+            label: Text(strings.openSettings),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.accentCoral,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            ),
           ),
         ],
       ),
@@ -459,7 +544,7 @@ class _GalleryDetailScreenState extends ConsumerState<GalleryDetailScreen> {
                  children: [
                     Icon(widget.category.icon, size: 64, color: Colors.grey[300]),
                     const SizedBox(height: 16),
-                    Text("No images in ${widget.category.title}", style: TextStyle(color: Colors.grey[500])),
+                    Text(ref.watch(appStringsProvider).galleryNoImages, style: TextStyle(color: Colors.grey[500])),
                  ],
                ))
            : GridView.builder(

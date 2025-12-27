@@ -401,6 +401,53 @@ class AppStrings {
   String get footerBgOpacity => _get({'ko': '배경 투명도', 'en': 'Background Opacity', 'ja': '背景透明度', 'zh': '背景透明度'});
   String get footerBgRadius => _get({'ko': '배경 둥근 모서리', 'en': 'Background Radius', 'ja': '背景の角丸', 'zh': '背景圆角'});
   
+  // ========== 사진 접근 권한 ==========
+  String get photoPermissionTitle => _get({'ko': '사진 접근 권한 필요', 'en': 'Photo Access Required', 'ja': '写真へのアクセス権限が必要', 'zh': '需要照片访问权限'});
+  String get photoPermissionDesc => _get({
+    'ko': '기기의 사진을 카드 배경으로 사용하려면\n갤러리 접근 권한이 필요합니다.',
+    'en': 'Gallery access permission is required\nto use device photos as card backgrounds.',
+    'ja': 'デバイスの写真をカード背景として使用するには\nギャラリーへのアクセス権限が必要です。',
+    'zh': '需要相册访问权限\n才能将设备照片用作卡片背景。'
+  });
+  String get photoPermissionHowTo => _get({
+    'ko': '📱 권한 설정 방법',
+    'en': '📱 How to Enable',
+    'ja': '📱 設定方法',
+    'zh': '📱 如何设置'
+  });
+  String get photoPermissionStep1 => _get({
+    'ko': '1. 아래 "설정 열기" 버튼을 누르세요',
+    'en': '1. Tap "Open Settings" below',
+    'ja': '1. 下の「設定を開く」をタップ',
+    'zh': '1. 点击下方"打开设置"'
+  });
+  String get photoPermissionStep2 => _get({
+    'ko': '2. "권한" 항목을 찾아 터치하세요',
+    'en': '2. Find and tap "Permissions"',
+    'ja': '2. 「権限」を探してタップ',
+    'zh': '2. 找到并点击"权限"'
+  });
+  String get photoPermissionStep3 => _get({
+    'ko': '3. "사진 및 동영상" 또는 "저장소"를 터치하세요',
+    'en': '3. Tap "Photos and videos" or "Storage"',
+    'ja': '3. 「写真と動画」または「ストレージ」をタップ',
+    'zh': '3. 点击"照片和视频"或"存储"'
+  });
+  String get photoPermissionStep4 => _get({
+    'ko': '4. "허용" 또는 "모든 사진 허용"을 선택하세요',
+    'en': '4. Select "Allow" or "Allow all photos"',
+    'ja': '4. 「許可」または「すべての写真を許可」を選択',
+    'zh': '4. 选择"允许"或"允许所有照片"'
+  });
+  String get photoPermissionNote => _get({
+    'ko': '⚡ 권한을 허용한 후 이 화면으로 돌아오면\n자동으로 사진이 표시됩니다.',
+    'en': '⚡ After allowing permission, return here\nand photos will load automatically.',
+    'ja': '⚡ 権限を許可した後、ここに戻ると\n自動的に写真が表示されます。',
+    'zh': '⚡ 允许权限后返回此页面\n照片将自动显示。'
+  });
+  String get openSettings => _get({'ko': '설정 열기', 'en': 'Open Settings', 'ja': '設定を開く', 'zh': '打开设置'});
+  String get galleryNoImages => _get({'ko': '이미지가 없습니다', 'en': 'No images', 'ja': '画像がありません', 'zh': '没有图片'});
+  
   // Helper method
   String _get(Map<String, String> translations) {
     return translations[languageCode] ?? translations['ko'] ?? translations['en'] ?? '';
