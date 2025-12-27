@@ -142,9 +142,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       final plans = await db.getAllDailyPlans();
       final List<Map<String, dynamic>> plansData = plans.map((p) => {
         'id': p.id,
-        'title': p.title,
+        'content': p.content,
         'date': p.date.toIso8601String(),
-        'iconType': p.iconType,
+        'type': p.type,
         'recipients': p.recipients,
         'isCompleted': p.isCompleted,
       }).toList();
@@ -153,8 +153,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       final cards = await db.getAllSavedCards();
       final List<Map<String, dynamic>> cardsData = cards.map((c) => {
         'id': c.id,
+        'name': c.name,
         'imagePath': c.imagePath,
-        'message': c.message,
+        'htmlContent': c.htmlContent,
+        'footerText': c.footerText,
         'createdAt': c.createdAt.toIso8601String(),
       }).toList();
       
