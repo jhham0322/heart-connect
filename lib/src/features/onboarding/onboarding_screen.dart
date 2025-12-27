@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:heart_connect/src/providers/locale_provider.dart';
 import 'package:heart_connect/src/l10n/app_strings.dart';
 
@@ -17,20 +18,25 @@ class OnboardingScreen extends ConsumerStatefulWidget {
 
 class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final PageController _pageController = PageController();
+  final TextEditingController _nameController = TextEditingController();
   int _currentPage = 0;
   bool _contactsGranted = false;
   bool _calendarGranted = false;
   bool _smsGranted = false;
+  bool _sendSmsGranted = false;
+  String _userName = '';
 
 
   @override
   void dispose() {
     _pageController.dispose();
+    _nameController.dispose();
     super.dispose();
   }
 
   void _nextPage() {
-    if (_currentPage < 3) {
+    // 총 6 페이지: 환영, 이름입력, 연락처권한, 캘린더권한, SMS읽기권한, SMS발송권한
+    if (_currentPage < 5) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 400),
         curve: Curves.easeInOut,
@@ -84,6 +90,43 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       _nextPage();
     }
   }
+  
+  Future<void> _requestSendSmsPermission() async {
+    if (Platform.isAndroid) {
+      // SEND_SMS 권한 요청 (permission_handler에서 지원)
+      final status = await Permission.sms.request();
+      setState(() {
+        _sendSmsGranted = status.isGranted;
+      });
+      // 권한 여부와 관계없이 다음 페이지로 (선택적)
+      _nextPage();
+    } else {
+      setState(() => _sendSmsGranted = true);
+      _nextPage();
+    }
+  }
+  
+  Future<void> _saveUserName() async {
+    final name = _nameController.text.trim();
+    if (name.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(ref.read(appStringsProvider).onboardingNameRequired),
+          backgroundColor: Colors.red[400],
+        ),
+      );
+      return;
+    }
+    
+    // 저장
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('user_name', name);
+    setState(() {
+      _userName = name;
+    });
+    
+    _nextPage();
+  }
 
   /// 언어 변경 (offset: -1 이전, +1 다음)
   void _changeLanguage(int offset) {
@@ -121,16 +164,16 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 padding: const EdgeInsets.all(20),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(4, (index) {
+                  children: List.generate(6, (index) {
                     return Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
-                      width: _currentPage == index ? 24 : 8,
-                      height: 8,
+                      margin: const EdgeInsets.symmetric(horizontal: 3),
+                      width: _currentPage == index ? 20 : 6,
+                      height: 6,
                       decoration: BoxDecoration(
                         color: _currentPage == index
                             ? const Color(0xFFF29D86)
                             : const Color(0xFFF29D86).withAlpha(80),
-                        borderRadius: BorderRadius.circular(4),
+                        borderRadius: BorderRadius.circular(3),
                       ),
                     );
                   }),
@@ -146,10 +189,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     setState(() => _currentPage = index);
                   },
                   children: [
-                    _buildWelcomePage(),
-                    _buildContactsPermissionPage(),
-                    _buildCalendarPermissionPage(),
-                    _buildSmsPermissionPage(),
+                    _buildWelcomePage(),           // 0: 환영
+                    _buildNameInputPage(),         // 1: 이름 입력 (NEW)
+                    _buildContactsPermissionPage(),// 2: 연락처 권한
+                    _buildCalendarPermissionPage(),// 3: 캘린더 권한
+                    _buildSmsPermissionPage(),     // 4: SMS 읽기 권한
+                    _buildSendSmsPermissionPage(), // 5: SMS 발송 권한 (NEW)
                   ],
                 ),
               ),
@@ -802,6 +847,266 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             onPressed: _nextPage,
             child: Text(
               ref.watch(appStringsProvider).permissionSkip,
+              style: TextStyle(
+                color: Colors.grey[600],
+                fontSize: 14,
+              ),
+            ),
+          ),
+          
+          const SizedBox(height: 40),
+        ],
+      ),
+    );
+  }
+  
+  /// 2. 사용자 이름 입력 페이지 (필수)
+  Widget _buildNameInputPage() {
+    final strings = ref.watch(appStringsProvider);
+    
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 32),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const SizedBox(height: 40),
+          
+          // 아이콘
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: const Color(0xFF4CAF50).withAlpha(30),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.person_rounded,
+              size: 60,
+              color: Color(0xFF4CAF50),
+            ),
+          ),
+          
+          const SizedBox(height: 32),
+          
+          // 제목
+          Text(
+            strings.onboardingEnterName,
+            style: const TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF5D4037),
+            ),
+            textAlign: TextAlign.center,
+          ),
+          
+          const SizedBox(height: 32),
+          
+          // 이름 입력 필드
+          TextField(
+            controller: _nameController,
+            decoration: InputDecoration(
+              labelText: strings.onboardingNameHint,
+              hintText: strings.onboardingNameHint,
+              prefixIcon: const Icon(Icons.edit, color: Color(0xFF4CAF50)),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: const BorderSide(color: Color(0xFF4CAF50)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: const BorderSide(color: Color(0xFF4CAF50), width: 2),
+              ),
+              filled: true,
+              fillColor: Colors.white,
+            ),
+            style: const TextStyle(fontSize: 18),
+            textAlign: TextAlign.center,
+            textCapitalization: TextCapitalization.words,
+          ),
+          
+          const SizedBox(height: 24),
+          
+          // 설명
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFFE8F5E9),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(Icons.info_outline, color: Color(0xFF388E3C), size: 20),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    strings.onboardingNameDesc,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.green[800],
+                      height: 1.5,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+          const SizedBox(height: 40),
+          
+          // 계속하기 버튼
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: _saveUserName,
+              icon: const Icon(Icons.arrow_forward),
+              label: Text(strings.onboardingContinue),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF4CAF50),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+            ),
+          ),
+          
+          const SizedBox(height: 40),
+        ],
+      ),
+    );
+  }
+  
+  /// 6. SMS 발송 권한 페이지
+  Widget _buildSendSmsPermissionPage() {
+    final strings = ref.watch(appStringsProvider);
+    
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 32),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const SizedBox(height: 40),
+          
+          // 아이콘
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: const Color(0xFF2196F3).withAlpha(30),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.send_rounded,
+              size: 50,
+              color: Color(0xFF2196F3),
+            ),
+          ),
+          
+          const SizedBox(height: 32),
+          
+          Text(
+            strings.permissionSendSms,
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF5D4037),
+            ),
+          ),
+          
+          const SizedBox(height: 24),
+          
+          // 설명 박스
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: const Color(0xFF2196F3).withAlpha(100)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.info_outline, color: Colors.blue[700], size: 20),
+                    const SizedBox(width: 8),
+                    Text(
+                      strings.permissionWhyNeeded,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue[700],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  strings.permissionSendSmsDesc,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.brown[700],
+                    height: 1.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+          const SizedBox(height: 16),
+          
+          // 개인정보 보호 안내
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFFE3F2FD),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(Icons.shield_rounded, color: Color(0xFF1565C0), size: 24),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    strings.permissionPrivacy,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.blue[900],
+                      height: 1.5,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+          const SizedBox(height: 40),
+          
+          // 버튼
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: _requestSendSmsPermission,
+              icon: const Icon(Icons.check_circle_outline),
+              label: Text(strings.permissionAllowSendSms),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF2196F3),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+            ),
+          ),
+          
+          const SizedBox(height: 12),
+          
+          TextButton(
+            onPressed: _nextPage,
+            child: Text(
+              strings.permissionSkip,
               style: TextStyle(
                 color: Colors.grey[600],
                 fontSize: 14,

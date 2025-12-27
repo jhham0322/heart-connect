@@ -5,11 +5,13 @@ import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import android.provider.CalendarContract
 import android.database.Cursor
+import android.telephony.SmsManager
 import java.util.Date
 
 class MainActivity : FlutterActivity() {
     private val CHANNEL = "com.heartconnect/ai"
     private val CALENDAR_CHANNEL = "com.heartconnect/calendar"
+    private val SMS_CHANNEL = "com.heartconnect/sms"
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -82,6 +84,48 @@ class MainActivity : FlutterActivity() {
                 }
             }
         }
+        
+        // SMS Channel - 네이티브 SMS 발송
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, SMS_CHANNEL).setMethodCallHandler { call, result ->
+            when (call.method) {
+                "sendSms" -> {
+                    val phone = call.argument<String>("phone")
+                    val message = call.argument<String>("message")
+                    
+                    if (phone != null && message != null) {
+                        try {
+                            sendSmsNative(phone, message)
+                            result.success(true)
+                        } catch (e: Exception) {
+                            android.util.Log.e("SMS", "발송 오류: ${e.message}")
+                            result.success(false)
+                        }
+                    } else {
+                        result.error("INVALID_ARGS", "Phone and message are required", null)
+                    }
+                }
+                else -> {
+                    result.notImplemented()
+                }
+            }
+        }
+    }
+    
+    /**
+     * 네이티브 SMS 발송
+     */
+    private fun sendSmsNative(phoneNumber: String, message: String) {
+        val smsManager = SmsManager.getDefault()
+        
+        // 긴 메시지는 분할
+        if (message.length > 160) {
+            val parts = smsManager.divideMessage(message)
+            smsManager.sendMultipartTextMessage(phoneNumber, null, parts, null, null)
+        } else {
+            smsManager.sendTextMessage(phoneNumber, null, message, null, null)
+        }
+        
+        android.util.Log.d("SMS", "SMS 발송 완료: $phoneNumber")
     }
     
     /**

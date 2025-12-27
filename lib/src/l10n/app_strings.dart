@@ -60,6 +60,18 @@ class AppStrings {
   String get permissionAllowSms => _get({'ko': 'SMS 접근 허용', 'en': 'Allow SMS Access', 'ja': 'SMSへのアクセスを許可', 'zh': '允许访问短信'});
   String get permissionSkipSms => _get({'ko': '권한을 허용하지 않으시면 문자 메시지 내역을 볼 수 없습니다.', 'en': 'If you don\'t allow permission, you won\'t be able to see message history.', 'ja': '権限を許可しない場合は、メッセージ履歴を表示できません。', 'zh': '如果不允许权限，您将无法查看短信记录。'});
   
+  // 사용자 이름 입력 (온보딩)
+  String get onboardingEnterName => _get({'ko': '사용하실 이름을 입력하세요', 'en': 'Enter your name', 'ja': 'お名前を入力してください', 'zh': '请输入您的名字'});
+  String get onboardingNameHint => _get({'ko': '이름 또는 별명', 'en': 'Name or nickname', 'ja': '名前またはニックネーム', 'zh': '姓名或昵称'});
+  String get onboardingNameDesc => _get({'ko': '이 이름은 카드의 서명(Footer)에 표시됩니다.\n설정에서 언제든지 변경할 수 있습니다.', 'en': 'This name will appear as your signature on cards.\nYou can change it anytime in Settings.', 'ja': 'この名前はカードの署名として表示されます。\n設定でいつでも変更できます。', 'zh': '此名称将显示为卡片上的签名。\n您可以随时在设置中更改。'});
+  String get onboardingNameRequired => _get({'ko': '이름을 입력해주세요', 'en': 'Please enter your name', 'ja': '名前を入力してください', 'zh': '请输入您的名字'});
+  String get onboardingContinue => _get({'ko': '계속하기', 'en': 'Continue', 'ja': '続ける', 'zh': '继续'});
+  
+  // SMS 발송 권한
+  String get permissionSendSms => _get({'ko': 'SMS 발송 권한', 'en': 'SMS Sending Permission', 'ja': 'SMS送信権限', 'zh': '短信发送权限'});
+  String get permissionSendSmsDesc => _get({'ko': '카드를 문자로 직접 발송하려면 SMS 발송 권한이 필요합니다.\n\n이 권한이 없으면 문자 앱을 통해서만 발송할 수 있습니다.', 'en': 'SMS sending permission is required to send cards directly via text message.\n\nWithout this permission, you can only send via the messaging app.', 'ja': 'カードを直接SMSで送信するには、SMS送信権限が必要です。\n\nこの権限がないと、メッセージアプリ経由でのみ送信できます。', 'zh': '需要短信发送权限才能直接通过短信发送卡片。\n\n没有此权限，您只能通过短信应用发送。'});
+  String get permissionAllowSendSms => _get({'ko': 'SMS 발송 허용', 'en': 'Allow SMS Sending', 'ja': 'SMS送信を許可', 'zh': '允许发送短信'});
+  
   // ========== 네비게이션 ==========
   String get navHome => _get({'ko': '홈', 'en': 'Home', 'ja': 'ホーム', 'zh': '首页'});
   String get navContacts => _get({'ko': '연락처', 'en': 'Contacts', 'ja': '連絡先', 'zh': '通讯录'});
