@@ -11,7 +11,6 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:heart_connect/src/features/alarm/notification_service.dart';
 import 'package:heart_connect/src/features/contacts/contact_service.dart';
 import 'package:heart_connect/src/features/database/database_provider.dart';
-import 'package:heart_connect/src/features/home/home_screen.dart'; // For calendar guide
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -150,6 +149,81 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         content: const Text("카드를 보낼 때 이미지 하단에 'Sent via ConnectHeart' 문구와 로고가 작게 표시됩니다.\n\n이 기능을 끄면 문구가 표시되지 않습니다."),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context), child: const Text("확인")),
+        ],
+      ),
+    );
+  }
+  
+  void _showCalendarGuide() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.blue.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(FontAwesomeIcons.calendarCheck, color: Colors.blue, size: 20),
+            ),
+            const SizedBox(width: 12),
+            const Expanded(child: Text('지원 캘린더 안내', style: TextStyle(fontSize: 18))),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.green.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.green.withOpacity(0.3)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  Text('✅ 지원되는 캘린더', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.green)),
+                  SizedBox(height: 8),
+                  Text('• 구글 캘린더', style: TextStyle(fontSize: 13)),
+                  Text('• 삼성 캘린더', style: TextStyle(fontSize: 13)),
+                  Text('• 기본 기기 캘린더', style: TextStyle(fontSize: 13)),
+                  SizedBox(height: 8),
+                  Text('위 캘린더에 일정을 등록하시면 앱에서 자동으로 표시됩니다.', style: TextStyle(fontSize: 12, color: Colors.black54)),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.red.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.red.withOpacity(0.3)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  Text('❌ 미지원 캘린더', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.red)),
+                  SizedBox(height: 8),
+                  Text('• 네이버 캘린더', style: TextStyle(fontSize: 13)),
+                  Text('• 카카오톡 캘린더', style: TextStyle(fontSize: 13)),
+                  SizedBox(height: 8),
+                  Text('Android 표준 캘린더 동기화를 지원하지 않아 일정을 읽을 수 없습니다.', style: TextStyle(fontSize: 11, color: Colors.black54)),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('확인'),
+          ),
         ],
       ),
     );
@@ -408,7 +482,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       const SizedBox(height: 8),
                       // 지원 캘린더 안내 버튼
                       GestureDetector(
-                        onTap: () => _HomeScreenState.showCalendarGuideDialog(context),
+                        onTap: _showCalendarGuide,
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
