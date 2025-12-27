@@ -221,7 +221,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  '마음이음은 소중한 사람들에게\n따뜻한 카드와 메시지를 보낼 수 있는 앱입니다.\n\n생일, 기념일, 특별한 날에\n진심을 담은 마음을 전해보세요.',
+                  '마음이음은 소중한 사람들에게\n따뜻한 카드와 메시지를\n보낼 수 있는 앱입니다.\n\n생일, 기념일, 특별한 날에\n진심을 담은 마음을 전해보세요.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 14,
