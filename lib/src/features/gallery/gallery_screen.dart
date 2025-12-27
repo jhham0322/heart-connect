@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -7,6 +9,7 @@ import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:photo_manager/photo_manager.dart';
 import '../../theme/app_theme.dart';
 import '../../l10n/app_strings.dart';
 import '../../providers/locale_provider.dart';
@@ -72,9 +75,33 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
     Map<String, bool> newFlags = {};
 
     for (var cat in _categories) {
-       // my_photos: 추후 기기 갤러리 접근 구현
+       // my_photos: 기기 갤러리의 사진 수 가져오기
        if (cat.id == 'my_photos') {
-         counts[cat.id] = 0; 
+         try {
+           final permission = await PhotoManager.requestPermissionExtend();
+           if (permission.isAuth) {
+             final albums = await PhotoManager.getAssetPathList(
+               type: RequestType.image,
+               filterOption: FilterOptionGroup(
+                 imageOption: const FilterOption(sizeConstraint: SizeConstraint(ignoreSize: true)),
+               ),
+             );
+             // 전체 이미지 수 계산
+             int totalCount = 0;
+             for (var album in albums) {
+               totalCount += await album.assetCountAsync;
+             }
+             counts[cat.id] = totalCount;
+             if (totalCount > 0) {
+               newFlags[cat.id] = true;
+             }
+           } else {
+             counts[cat.id] = 0;
+           }
+         } catch (e) {
+           debugPrint('Error getting my_photos count: $e');
+           counts[cat.id] = 0;
+         }
          continue;
        }
        
@@ -233,12 +260,108 @@ class GalleryDetailScreen extends ConsumerStatefulWidget {
 
 class _GalleryDetailScreenState extends ConsumerState<GalleryDetailScreen> {
   List<String> _images = [];
+  List<AssetEntity> _deviceAssets = []; // 기기 갤러리 사진용
   bool _isLoading = true;
+  bool _isDeviceGallery = false; // 기기 갤러리 여부
 
   @override
   void initState() {
     super.initState();
     _loadImages();
+  }
+
+  // 기기 갤러리에서 사진 로드
+  Future<void> _loadDevicePhotos() async {
+    setState(() {
+      _isLoading = true;
+      _isDeviceGallery = true;
+    });
+    
+    try {
+      final permission = await PhotoManager.requestPermissionExtend();
+      if (!permission.isAuth) {
+        // 권한 거부 시 설정으로 이동 안내
+        if (mounted) {
+          setState(() => _isLoading = false);
+          _showPermissionDeniedDialog();
+        }
+        return;
+      }
+      
+      // 모든 이미지 앨범 가져오기
+      final albums = await PhotoManager.getAssetPathList(
+        type: RequestType.image,
+        filterOption: FilterOptionGroup(
+          imageOption: const FilterOption(
+            sizeConstraint: SizeConstraint(ignoreSize: true),
+          ),
+          orders: [
+            const OrderOption(type: OrderOptionType.createDate, asc: false),
+          ],
+        ),
+      );
+      
+      if (albums.isEmpty) {
+        setState(() => _isLoading = false);
+        return;
+      }
+      
+      // 첫 번째 앨범 (보통 "최근 항목" 또는 "전체 사진")에서 가져오기
+      // 또는 모든 앨범을 합쳐서 가져오기
+      List<AssetEntity> allAssets = [];
+      
+      for (var album in albums) {
+        final count = await album.assetCountAsync;
+        if (count > 0) {
+          final assets = await album.getAssetListRange(start: 0, end: count);
+          for (var asset in assets) {
+            // 중복 제거
+            if (!allAssets.any((a) => a.id == asset.id)) {
+              allAssets.add(asset);
+            }
+          }
+        }
+      }
+      
+      // 최신순 정렬
+      allAssets.sort((a, b) => (b.createDateTime).compareTo(a.createDateTime));
+      
+      // 최대 200개만 가져오기 (성능 고려)
+      if (allAssets.length > 200) {
+        allAssets = allAssets.sublist(0, 200);
+      }
+      
+      setState(() {
+        _deviceAssets = allAssets;
+        _isLoading = false;
+      });
+    } catch (e) {
+      debugPrint('Error loading device photos: $e');
+      setState(() => _isLoading = false);
+    }
+  }
+  
+  void _showPermissionDeniedDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('사진 접근 권한 필요'),
+        content: const Text('기기의 사진을 보려면 갤러리 접근 권한이 필요합니다.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('취소'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              PhotoManager.openSetting();
+            },
+            child: const Text('설정 열기'),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _loadImages() async {
@@ -252,9 +375,9 @@ class _GalleryDetailScreenState extends ConsumerState<GalleryDetailScreen> {
       return;
     }
 
-    // my_photos 카테고리: 추후 구현 (기기 갤러리 접근 필요)
+    // my_photos 카테고리: 기기 갤러리에서 사진 로드
     if (widget.category.id == 'my_photos') {
-      setState(() { _isLoading = false; });
+      await _loadDevicePhotos();
       return;
     }
 
@@ -303,6 +426,10 @@ class _GalleryDetailScreenState extends ConsumerState<GalleryDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // 기기 갤러리인 경우 _deviceAssets 사용
+    final isEmpty = _isDeviceGallery ? _deviceAssets.isEmpty : _images.isEmpty;
+    final itemCount = _isDeviceGallery ? _deviceAssets.length : _images.length;
+    
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       appBar: AppBar(
@@ -325,7 +452,7 @@ class _GalleryDetailScreenState extends ConsumerState<GalleryDetailScreen> {
       ),
       body: _isLoading 
         ? const Center(child: CircularProgressIndicator())
-        : _images.isEmpty 
+        : isEmpty 
            ? Center(
                child: Column(
                  mainAxisAlignment: MainAxisAlignment.center,
@@ -336,14 +463,20 @@ class _GalleryDetailScreenState extends ConsumerState<GalleryDetailScreen> {
                  ],
                ))
            : GridView.builder(
-              padding: const EdgeInsets.only(bottom: 50),
+              padding: const EdgeInsets.only(bottom: 100),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 3,
                 crossAxisSpacing: 4,
                 mainAxisSpacing: 4,
               ),
-              itemCount: _images.length,
+              itemCount: itemCount,
               itemBuilder: (context, index) {
+                // 기기 갤러리인 경우
+                if (_isDeviceGallery) {
+                  return _buildDevicePhotoTile(index);
+                }
+                
+                // 일반 assets 이미지
                 final isFavorite = ref.watch(favoritesProvider).contains(_images[index]);
                 return GestureDetector(
                   onTap: () => _openImageViewer(index),
@@ -378,6 +511,47 @@ class _GalleryDetailScreenState extends ConsumerState<GalleryDetailScreen> {
               },
            ),
     );
+  }
+  
+  // 기기 사진 썸네일 빌더
+  Widget _buildDevicePhotoTile(int index) {
+    final asset = _deviceAssets[index];
+    
+    return FutureBuilder<Uint8List?>(
+      future: asset.thumbnailDataWithSize(const ThumbnailSize(200, 200)),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done && snapshot.data != null) {
+          return GestureDetector(
+            onTap: () => _openDevicePhotoViewer(index),
+            child: Hero(
+              tag: asset.id,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.grey[200],
+                  image: DecorationImage(
+                    image: MemoryImage(snapshot.data!),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }
+        return Container(color: Colors.grey[300]);
+      },
+    );
+  }
+  
+  // 기기 사진 전체화면 뷰어
+  void _openDevicePhotoViewer(int index) {
+    Navigator.push(context, MaterialPageRoute(builder: (_) => 
+      _DevicePhotoViewer(
+        assets: _deviceAssets, 
+        initialIndex: index, 
+        categoryName: widget.category.title,
+        ref: ref,
+      )
+    ));
   }
 }
 
@@ -544,6 +718,193 @@ class _FullScreenViewerState extends ConsumerState<_FullScreenViewer> {
             ),
           )
         ],
+      ),
+    );
+  }
+}
+
+// --- Device Photo Full Screen Viewer ---
+class _DevicePhotoViewer extends StatefulWidget {
+  final List<AssetEntity> assets;
+  final int initialIndex;
+  final String categoryName;
+  final WidgetRef ref;
+
+  const _DevicePhotoViewer({
+    required this.assets, 
+    required this.initialIndex, 
+    required this.categoryName,
+    required this.ref,
+  });
+
+  @override
+  State<_DevicePhotoViewer> createState() => _DevicePhotoViewerState();
+}
+
+class _DevicePhotoViewerState extends State<_DevicePhotoViewer> {
+  late PageController _pageController;
+  late int _currentIndex;
+  File? _currentFile;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.initialIndex;
+    _pageController = PageController(initialPage: widget.initialIndex);
+    _loadCurrentFile();
+  }
+  
+  Future<void> _loadCurrentFile() async {
+    final file = await widget.assets[_currentIndex].file;
+    if (mounted && file != null) {
+      setState(() => _currentFile = file);
+      // selection provider에 파일 경로 설정
+      widget.ref.read(currentSelectionProvider.notifier).state = file.path;
+    }
+  }
+
+  void _onPageChanged(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+    _loadCurrentFile();
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    // 선택 초기화
+    Future.microtask(() => widget.ref.read(currentSelectionProvider.notifier).state = null);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        title: Text(
+          widget.categoryName,
+          style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.close, color: Colors.white, size: 28),
+            onPressed: () => Navigator.pop(context),
+          ),
+          const SizedBox(width: 8),
+        ],
+      ),
+      body: Stack(
+        children: [
+          // Photo Gallery
+          PageView.builder(
+            controller: _pageController,
+            onPageChanged: _onPageChanged,
+            itemCount: widget.assets.length,
+            itemBuilder: (context, index) {
+              return _DevicePhotoPage(asset: widget.assets[index]);
+            },
+          ),
+
+          // Navigation Arrows
+          if (_currentIndex > 0)
+            Positioned(
+              left: 10,
+              top: size.height / 2 - 80,
+              child: IconButton(
+                icon: const Icon(Icons.arrow_back_ios, color: Colors.white70, size: 36),
+                onPressed: () {
+                  _pageController.previousPage(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+                },
+              ),
+            ),
+          if (_currentIndex < widget.assets.length - 1)
+            Positioned(
+              right: 10,
+              top: size.height / 2 - 80,
+              child: IconButton(
+                icon: const Icon(Icons.arrow_forward_ios, color: Colors.white70, size: 36),
+                onPressed: () {
+                  _pageController.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+                },
+              ),
+            ),
+
+          // Image Counter
+          Positioned(
+            top: 0,
+            left: 0, right: 0,
+            child: Center(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.black54,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  "${_currentIndex + 1} / ${widget.assets.length}",
+                  style: const TextStyle(color: Colors.white70, fontSize: 14, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+// Individual device photo page with async loading
+class _DevicePhotoPage extends StatefulWidget {
+  final AssetEntity asset;
+  
+  const _DevicePhotoPage({required this.asset});
+  
+  @override
+  State<_DevicePhotoPage> createState() => _DevicePhotoPageState();
+}
+
+class _DevicePhotoPageState extends State<_DevicePhotoPage> {
+  File? _file;
+  bool _isLoading = true;
+  
+  @override
+  void initState() {
+    super.initState();
+    _loadFile();
+  }
+  
+  Future<void> _loadFile() async {
+    final file = await widget.asset.file;
+    if (mounted) {
+      setState(() {
+        _file = file;
+        _isLoading = false;
+      });
+    }
+  }
+  
+  @override
+  Widget build(BuildContext context) {
+    if (_isLoading || _file == null) {
+      return const Center(child: CircularProgressIndicator(color: Colors.white));
+    }
+    
+    return PhotoView(
+      imageProvider: FileImage(_file!),
+      initialScale: PhotoViewComputedScale.contained,
+      minScale: PhotoViewComputedScale.contained,
+      maxScale: PhotoViewComputedScale.covered * 2,
+      heroAttributes: PhotoViewHeroAttributes(tag: widget.asset.id),
+      backgroundDecoration: const BoxDecoration(color: Colors.black),
+      loadingBuilder: (context, event) => const Center(
+        child: CircularProgressIndicator(color: Colors.white),
       ),
     );
   }
