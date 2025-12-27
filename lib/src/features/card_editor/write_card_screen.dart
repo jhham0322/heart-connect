@@ -2088,7 +2088,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                       children: [
                         Icon(Icons.image, color: !_isFrameMode ? Colors.white : const Color(0xFFF29D86), size: 18),
                         const SizedBox(width: 6),
-                        Text("배경", style: TextStyle(color: !_isFrameMode ? Colors.white : const Color(0xFF555555), fontSize: 12, fontWeight: FontWeight.w600)),
+                        Text(ref.watch(appStringsProvider).cardEditorBackground, style: TextStyle(color: !_isFrameMode ? Colors.white : const Color(0xFF555555), fontSize: 12, fontWeight: FontWeight.w600)),
                       ],
                     ),
                   ),
@@ -2133,12 +2133,12 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(color: Colors.white.withOpacity(0.5)),
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(Icons.style, color: Color(0xFFF29D86), size: 18),
                         SizedBox(width: 6),
-                        Text("글상자", style: TextStyle(color: Color(0xFF555555), fontSize: 12, fontWeight: FontWeight.w600)),
+                        Text(ref.watch(appStringsProvider).cardEditorTextBox, style: TextStyle(color: Color(0xFF555555), fontSize: 12, fontWeight: FontWeight.w600)),
                       ],
                     ),
                   ),
@@ -2381,7 +2381,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text("발송대상", style: TextStyle(fontSize: 11, color: Colors.grey)),
+                            Text(ref.watch(appStringsProvider).cardEditorRecipient, style: const TextStyle(fontSize: 11, color: Colors.grey)),
                             if (_recipients.isEmpty)
                               InkWell(
                                 onTap: _showRecipientPicker,
@@ -2391,14 +2391,14 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                                     color: const Color(0xFFF29D86),
                                     borderRadius: BorderRadius.circular(12),
                                   ),
-                                  child: const Row(
+                                  child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Icon(Icons.person_add, size: 14, color: Colors.white),
-                                      SizedBox(width: 4),
+                                      const Icon(Icons.person_add, size: 14, color: Colors.white),
+                                      const SizedBox(width: 4),
                                       Text(
-                                        "대상 추가",
-                                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+                                        ref.watch(appStringsProvider).cardEditorAddRecipient,
+                                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
                                       ),
                                     ],
                                   ),
@@ -3335,7 +3335,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                     children: [
                       const Icon(Icons.check_circle_outline, color: Color(0xFFF29D86), size: 28),
                       const SizedBox(width: 8),
-                      const Text("카드 이미지 확인", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+                      Text(ref.watch(appStringsProvider).cardPreviewTitle, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
                     ],
                   ),
                 ),
@@ -3344,10 +3344,10 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                 Expanded(
                   child: Column(
                     children: [
-                      const Text(
-                        "수신자들에게 발송될\n최종 이미지입니다.", 
+                      Text(
+                        ref.watch(appStringsProvider).cardPreviewDesc, 
                         textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.grey, fontSize: 14)
+                        style: const TextStyle(color: Colors.grey, fontSize: 14)
                       ),
                       const SizedBox(height: 8),
                       Container(
@@ -3358,10 +3358,10 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: const Color(0xFFB2EBF2)),
                         ),
-                        child: const Text(
-                          "더블탭으로 확대/축소, 드래그로 이동이 가능합니다.\n발송 전 이미지 결과물을 확인해 주세요.",
+                        child: Text(
+                          "${ref.watch(appStringsProvider).cardPreviewZoomHint}\n${ref.watch(appStringsProvider).cardPreviewCheckHint}",
                           textAlign: TextAlign.center,
-                          style: TextStyle(fontSize: 11, color: Color(0xFF006064), fontWeight: FontWeight.w500),
+                          style: const TextStyle(fontSize: 11, color: Color(0xFF006064), fontWeight: FontWeight.w500),
                         ),
                       ),
                       const SizedBox(height: 10),
@@ -3416,7 +3416,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                     children: [
                       TextButton(
                         onPressed: () => Navigator.pop(context, false),
-                        child: const Text("취소", style: TextStyle(color: Colors.grey, fontSize: 16)),
+                        child: Text(ref.watch(appStringsProvider).cancel, style: const TextStyle(color: Colors.grey, fontSize: 16)),
                       ),
                       const SizedBox(width: 10),
                       ElevatedButton(
@@ -3428,7 +3428,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                           textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                         ),
-                        child: const Text("확인 (다음 단계)"),
+                        child: Text(ref.watch(appStringsProvider).cardPreviewConfirm),
                       ),
                     ],
                   ),

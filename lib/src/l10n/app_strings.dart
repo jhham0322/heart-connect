@@ -139,6 +139,25 @@ class AppStrings {
   String get cardEditorShare => _get({'ko': '공유', 'en': 'Share', 'ja': '共有', 'zh': '分享'});
   String get cardEditorEnterMessage => _get({'ko': '메시지를 입력하세요', 'en': 'Enter your message', 'ja': 'メッセージを入力してください', 'zh': '请输入消息'});
   String get cardEditorGenerateAI => _get({'ko': 'AI 메시지 생성', 'en': 'Generate AI Message', 'ja': 'AIメッセージを生成', 'zh': 'AI生成消息'});
+  String get cardEditorTextBox => _get({'ko': '글상자', 'en': 'Text Box', 'ja': 'テキストボックス', 'zh': '文本框'});
+  String get cardEditorZoomHint => _get({'ko': '클탭하시면 줌 모드로 전환됩니다', 'en': 'Tap to enter zoom mode', 'ja': 'タップでズームモードに切替', 'zh': '点击进入缩放模式'});
+  String get cardEditorRecipient => _get({'ko': '발송대상', 'en': 'Recipient', 'ja': '送信先', 'zh': '收件人'});
+  String get cardEditorAddRecipient => _get({'ko': '대상 추가', 'en': 'Add', 'ja': '追加', 'zh': '添加'});
+  
+  // ========== 발송 대상 선택 다이얼로그 ==========
+  String get recipientSelectTitle => _get({'ko': '발송 대상 선택', 'en': 'Select Recipients', 'ja': '送信先を選択', 'zh': '选择收件人'});
+  String get recipientSearchHint => _get({'ko': '이름 또는 전화번호...', 'en': 'Name or phone number...', 'ja': '名前または電話番号...', 'zh': '姓名或电话号码...'});
+  String get recipientAddNew => _get({'ko': '새 연락처 추가', 'en': 'Add New Contact', 'ja': '新しい連絡先を追加', 'zh': '添加新联系人'});
+  String get recipientName => _get({'ko': '이름', 'en': 'Name', 'ja': '名前', 'zh': '姓名'});
+  String get recipientPhone => _get({'ko': '전화번호', 'en': 'Phone Number', 'ja': '電話番号', 'zh': '电话号码'});
+  String get recipientAdd => _get({'ko': '추가', 'en': 'Add', 'ja': '追加', 'zh': '添加'});
+  
+  // ========== 카드 이미지 확인 다이얼로그 ==========
+  String get cardPreviewTitle => _get({'ko': '카드 이미지 확인', 'en': 'Preview Card Image', 'ja': 'カード画像の確認', 'zh': '确认卡片图片'});
+  String get cardPreviewDesc => _get({'ko': '수신자들에게 발송될 최종 이미지입니다.', 'en': 'This is the final image to be sent.', 'ja': '受信者に送信される最終画像です。', 'zh': '这是将要发送给收件人的最终图片。'});
+  String get cardPreviewZoomHint => _get({'ko': '더블탭으로 확대/축소, 드래그로 이동이 가능합니다.', 'en': 'Double-tap to zoom, drag to move.', 'ja': 'ダブルタップで拡大/縮小、ドラッグで移動。', 'zh': '双击缩放，拖动移动。'});
+  String get cardPreviewCheckHint => _get({'ko': '발송 전 이미지 결과물을 확인해 주세요.', 'en': 'Please check the image before sending.', 'ja': '送信前に画像を確認してください。', 'zh': '发送前请确认图片。'});
+  String get cardPreviewConfirm => _get({'ko': '확인 (다음 단계)', 'en': 'Confirm (Next)', 'ja': '確認（次へ）', 'zh': '确认（下一步）'});
   
   // ========== 발송 ==========
   String get sendTitle => _get({'ko': '발송 관리', 'en': 'Send Manager', 'ja': '送信管理', 'zh': '发送管理'});
