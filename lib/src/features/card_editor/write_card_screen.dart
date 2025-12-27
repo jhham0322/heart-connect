@@ -2008,6 +2008,30 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
             ),
           ),
 
+          // 상단 페이드 그라데이션 오버레이 (이미지 잘림 부드럽게 처리)
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: MediaQuery.of(context).padding.top + 80,
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    const Color(0xFFFFFCF9),
+                    const Color(0xFFFFFCF9).withOpacity(0.95),
+                    const Color(0xFFFFFCF9).withOpacity(0.7),
+                    const Color(0xFFFFFCF9).withOpacity(0.3),
+                    Colors.transparent,
+                  ],
+                  stops: const [0.0, 0.3, 0.5, 0.7, 1.0],
+                ),
+              ),
+            ),
+          ),
+
           // Floating Header (이미지 위에 오버레이)
           Positioned(
             top: MediaQuery.of(context).padding.top + 8,
