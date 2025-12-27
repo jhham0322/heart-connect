@@ -428,10 +428,10 @@ class AppStrings {
     'zh': '2. 找到并点击"权限"'
   });
   String get photoPermissionStep3 => _get({
-    'ko': '3. "사진 및 동영상" 또는 "저장소"를 터치하세요',
-    'en': '3. Tap "Photos and videos" or "Storage"',
-    'ja': '3. 「写真と動画」または「ストレージ」をタップ',
-    'zh': '3. 点击"照片和视频"或"存储"'
+    'ko': '3. "사진 및 동영상"을 터치하세요',
+    'en': '3. Tap "Photos and videos"',
+    'ja': '3. 「写真と動画」をタップ',
+    'zh': '3. 点击"照片和视频"'
   });
   String get photoPermissionStep4 => _get({
     'ko': '4. "허용" 또는 "모든 사진 허용"을 선택하세요',
