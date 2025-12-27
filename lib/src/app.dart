@@ -5,6 +5,7 @@ import 'package:flutter_quill/flutter_quill.dart';
 import 'routing/app_router.dart';
 import 'theme/app_theme.dart';
 import 'package:heart_connect/src/features/alarm/notification_service.dart';
+import 'package:heart_connect/src/features/splash/splash_screen.dart';
 
 import 'dart:ui';
 
@@ -16,6 +17,8 @@ class MyApp extends ConsumerStatefulWidget {
 }
 
 class _MyAppState extends ConsumerState<MyApp> {
+  bool _showSplash = true;
+
   @override
   void initState() {
     super.initState();
@@ -25,9 +28,18 @@ class _MyAppState extends ConsumerState<MyApp> {
     });
   }
 
+  void _onSplashComplete() {
+    if (mounted) {
+      setState(() {
+        _showSplash = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final goRouter = ref.watch(goRouterProvider);
+    
     return MaterialApp.router(
       routerConfig: goRouter,
       title: 'Heart Connect',
@@ -51,6 +63,22 @@ class _MyAppState extends ConsumerState<MyApp> {
           PointerDeviceKind.stylus,
         },
       ),
+      builder: (context, child) {
+        return Stack(
+          children: [
+            // 메인 앱 콘텐츠
+            if (child != null) child,
+            
+            // 스플래시 오버레이
+            if (_showSplash)
+              Positioned.fill(
+                child: SplashScreen(
+                  onInitComplete: _onSplashComplete,
+                ),
+              ),
+          ],
+        );
+      },
     );
   }
 }
