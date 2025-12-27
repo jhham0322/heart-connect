@@ -353,6 +353,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get galleryNoImages => '画像がありません';
 
   @override
+  String get selectCategory => 'カテゴリを選択';
+
+  @override
   String get cardEditorTitle => 'カード編集';
 
   @override

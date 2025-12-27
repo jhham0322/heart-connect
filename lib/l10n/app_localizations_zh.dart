@@ -351,6 +351,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get galleryNoImages => '没有图片';
 
   @override
+  String get selectCategory => '选择分类';
+
+  @override
   String get cardEditorTitle => '编辑卡片';
 
   @override

@@ -5,9 +5,19 @@ import 'package:heart_connect/l10n/app_localizations_ko.dart';
 import 'package:heart_connect/l10n/app_localizations_en.dart';
 import 'package:heart_connect/l10n/app_localizations_ja.dart';
 import 'package:heart_connect/l10n/app_localizations_zh.dart';
+import 'package:heart_connect/l10n/app_localizations_fr.dart';
+import 'package:heart_connect/l10n/app_localizations_de.dart';
+import 'package:heart_connect/l10n/app_localizations_it.dart';
+import 'package:heart_connect/l10n/app_localizations_es.dart';
+import 'package:heart_connect/l10n/app_localizations_pt.dart';
+import 'package:heart_connect/l10n/app_localizations_ru.dart';
+import 'package:heart_connect/l10n/app_localizations_ar.dart';
+import 'package:heart_connect/l10n/app_localizations_tr.dart';
+import 'package:heart_connect/l10n/app_localizations_hi.dart';
+import 'package:heart_connect/l10n/app_localizations_id.dart';
 import 'package:heart_connect/src/providers/locale_provider.dart';
 
-/// languageCode에 맞는 AppLocalizations 인스턴스 생성
+/// languageCode에 맞는 AppLocalizations 인스턴스 생성 (G20 지원)
 AppLocalizations _getLocalizationsByCode(String languageCode) {
   switch (languageCode) {
     case 'en':
@@ -16,11 +26,32 @@ AppLocalizations _getLocalizationsByCode(String languageCode) {
       return AppLocalizationsJa();
     case 'zh':
       return AppLocalizationsZh();
+    case 'fr':
+      return AppLocalizationsFr();
+    case 'de':
+      return AppLocalizationsDe();
+    case 'it':
+      return AppLocalizationsIt();
+    case 'es':
+      return AppLocalizationsEs();
+    case 'pt':
+      return AppLocalizationsPt();
+    case 'ru':
+      return AppLocalizationsRu();
+    case 'ar':
+      return AppLocalizationsAr();
+    case 'tr':
+      return AppLocalizationsTr();
+    case 'hi':
+      return AppLocalizationsHi();
+    case 'id':
+      return AppLocalizationsId();
     case 'ko':
     default:
       return AppLocalizationsKo();
   }
 }
+
 
 /// AppStrings가 AppLocalizations를 래핑하여 기존 코드 호환성 유지
 /// ref.watch(appStringsProvider)로 계속 사용 가능
@@ -161,6 +192,7 @@ class AppStrings {
   String get galleryMyPhotos => _fallback(_l10n?.galleryMyPhotos, '내 사진');
   String get gallerySelectImage => _fallback(_l10n?.gallerySelectImage, '이미지 선택');
   String get galleryNoImages => _fallback(_l10n?.galleryNoImages, '이미지가 없습니다');
+  String get selectCategory => _fallback(_l10n?.selectCategory, '카테고리 선택');
   
   // ========== 카드 편집 ==========
   String get cardEditorTitle => _fallback(_l10n?.cardEditorTitle, '카드 편집');

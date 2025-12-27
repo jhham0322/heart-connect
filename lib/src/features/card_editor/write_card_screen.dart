@@ -3473,7 +3473,9 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
+      builder: (context) {
+        final strings = context.strings;
+        return Container(
         height: 500,
         decoration: const BoxDecoration(
           color: Colors.white,
@@ -3483,9 +3485,9 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
           children: [
             const SizedBox(height: 12),
             Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(2))),
-            const Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Text("Select Category", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(strings.selectCategory, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             ),
             Expanded(
               child: GridView.builder(
@@ -3504,6 +3506,22 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                       // Option: Show disabled or implement logic for these
                       // For now, let's just skip "my_photos" as it needs device permission logic
                       if (cat.id == 'my_photos') return const SizedBox.shrink(); 
+                  }
+                  
+                  // 카테고리 타이틀 다국어 처리
+                  String localizedTitle;
+                  switch (cat.id) {
+                    case 'christmas': localizedTitle = strings.galleryChristmas; break;
+                    case 'newyear': localizedTitle = strings.galleryNewYear; break;
+                    case 'birthday': localizedTitle = strings.galleryBirthday; break;
+                    case 'thanks': localizedTitle = strings.galleryThanks; break;
+                    case 'motherDay': localizedTitle = strings.galleryMothersDay; break;
+                    case 'teachersDay': localizedTitle = strings.galleryTeachersDay; break;
+                    case 'tour': localizedTitle = strings.galleryTravel; break;
+                    case 'hobby': localizedTitle = strings.galleryHobby; break;
+                    case 'sports': localizedTitle = strings.gallerySports; break;
+                    case 'favorites': localizedTitle = strings.contactsFavorites; break;
+                    default: localizedTitle = cat.title;
                   }
 
                   return InkWell(
@@ -3524,7 +3542,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                           child: Icon(cat.icon, color: cat.color, size: 28),
                         ),
                         const SizedBox(height: 8),
-                        Text(cat.title, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600), textAlign: TextAlign.center),
+                        Text(localizedTitle, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600), textAlign: TextAlign.center),
                       ],
                     ),
                   );
@@ -3533,7 +3551,8 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
             ),
           ],
         ),
-      ),
+      );
+      },
     );
   }
 

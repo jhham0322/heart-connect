@@ -358,6 +358,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get galleryNoImages => 'No images';
 
   @override
+  String get selectCategory => 'Select Category';
+
+  @override
   String get cardEditorTitle => 'Edit Card';
 
   @override
