@@ -20,6 +20,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   int _currentPage = 0;
   bool _contactsGranted = false;
   bool _calendarGranted = false;
+  bool _smsGranted = false;
 
 
   @override
@@ -29,7 +30,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   void _nextPage() {
-    if (_currentPage < 2) {
+    if (_currentPage < 3) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 400),
         curve: Curves.easeInOut,
@@ -65,6 +66,21 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       }
     } else {
       setState(() => _calendarGranted = true);
+      _nextPage();
+    }
+  }
+
+  Future<void> _requestSmsPermission() async {
+    if (Platform.isAndroid || Platform.isIOS) {
+      final status = await Permission.sms.request();
+      setState(() {
+        _smsGranted = status.isGranted;
+      });
+      if (status.isGranted) {
+        _nextPage();
+      }
+    } else {
+      setState(() => _smsGranted = true);
       _nextPage();
     }
   }
@@ -105,7 +121,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 padding: const EdgeInsets.all(20),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(3, (index) {
+                  children: List.generate(4, (index) {
                     return Container(
                       margin: const EdgeInsets.symmetric(horizontal: 4),
                       width: _currentPage == index ? 24 : 8,
@@ -133,6 +149,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     _buildWelcomePage(),
                     _buildContactsPermissionPage(),
                     _buildCalendarPermissionPage(),
+                    _buildSmsPermissionPage(),
                   ],
                 ),
               ),
@@ -627,6 +644,149 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               label: Text(ref.watch(appStringsProvider).permissionAllowCalendar),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF2196F3),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+            ),
+          ),
+          
+          const SizedBox(height: 12),
+          
+          TextButton(
+            onPressed: _nextPage,
+            child: Text(
+              ref.watch(appStringsProvider).permissionSkip,
+              style: TextStyle(
+                color: Colors.grey[600],
+                fontSize: 14,
+              ),
+            ),
+          ),
+          
+          const SizedBox(height: 40),
+        ],
+      ),
+    );
+  }
+
+  /// 4. SMS 권한 요청 페이지
+  Widget _buildSmsPermissionPage() {
+    return SingleChildScrollView(
+      physics: const ClampingScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 32),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const SizedBox(height: 40),
+          
+          // 아이콘
+          Container(
+            width: 100,
+            height: 100,
+            decoration: BoxDecoration(
+              color: const Color(0xFFFF9800).withAlpha(30),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.sms_rounded,
+              size: 50,
+              color: Color(0xFFFF9800),
+            ),
+          ),
+          
+          const SizedBox(height: 32),
+          
+          Text(
+            ref.watch(appStringsProvider).permissionSms,
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF5D4037),
+            ),
+          ),
+          
+          const SizedBox(height: 24),
+          
+          // 설명 박스
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: const Color(0xFFFF9800).withAlpha(100)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.info_outline, color: Colors.orange[700], size: 20),
+                    const SizedBox(width: 8),
+                    Text(
+                      ref.watch(appStringsProvider).permissionWhyNeeded,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.orange[700],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  ref.watch(appStringsProvider).permissionSmsDesc,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.brown[700],
+                    height: 1.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+          const SizedBox(height: 16),
+          
+          // 개인정보 보호 안내
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFF3E0),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(Icons.shield_rounded, color: Color(0xFFE65100), size: 24),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    '${ref.watch(appStringsProvider).permissionPrivacy}\n\n${ref.watch(appStringsProvider).permissionSkipSms}',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.orange[900],
+                      height: 1.5,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+          const SizedBox(height: 40),
+          
+          // 버튼들
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: _requestSmsPermission,
+              icon: const Icon(Icons.check_circle_outline),
+              label: Text(ref.watch(appStringsProvider).permissionAllowSms),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFFF9800),
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(

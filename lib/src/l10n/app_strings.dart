@@ -55,6 +55,10 @@ class AppStrings {
   String get permissionSkip => _get({'ko': '나중에 설정하기', 'en': 'Set up later', 'ja': '後で設定する', 'zh': '稍后设置'});
   String get permissionSkipContacts => _get({'ko': '권한을 허용하지 않으시면 수동으로 연락처를 입력해야 합니다.', 'en': 'If you don\'t allow permission, you\'ll need to enter contacts manually.', 'ja': '権限を許可しない場合は、連絡先を手動で入力する必要があります。', 'zh': '如果不允许权限，您需要手动输入联系人。'});
   String get permissionSkipCalendar => _get({'ko': '권한을 허용하지 않으시면 수동으로 일정을 입력해야 합니다.', 'en': 'If you don\'t allow permission, you\'ll need to enter events manually.', 'ja': '権限を許可しない場合は、スケジュールを手動で入力する必要があります。', 'zh': '如果不允许权限，您需要手动输入日程。'});
+  String get permissionSms => _get({'ko': 'SMS 접근 권한', 'en': 'SMS Permission', 'ja': 'SMSへのアクセス権限', 'zh': '短信访问权限'});
+  String get permissionSmsDesc => _get({'ko': 'SMS 정보는 연락처와 주고받은 문자 메시지 내역을 확인하기 위해 필요합니다.\n\n카드를 보낸 후 문자로 안부를 주고받은 기록을 볼 수 있어요!', 'en': 'SMS permission is needed to view message history with your contacts.\n\nYou can see your text conversations after sending cards!', 'ja': 'SMS権限は連絡先とのメッセージ履歴を確認するために必要です。\n\nカード送信後のやり取りを確認できます！', 'zh': '短信权限用于查看与联系人的短信记录。\n\n发送卡片后可以查看短信往来记录！'});
+  String get permissionAllowSms => _get({'ko': 'SMS 접근 허용', 'en': 'Allow SMS Access', 'ja': 'SMSへのアクセスを許可', 'zh': '允许访问短信'});
+  String get permissionSkipSms => _get({'ko': '권한을 허용하지 않으시면 문자 메시지 내역을 볼 수 없습니다.', 'en': 'If you don\'t allow permission, you won\'t be able to see message history.', 'ja': '権限を許可しない場合は、メッセージ履歴を表示できません。', 'zh': '如果不允许权限，您将无法查看短信记录。'});
   
   // ========== 네비게이션 ==========
   String get navHome => _get({'ko': '홈', 'en': 'Home', 'ja': 'ホーム', 'zh': '首页'});
