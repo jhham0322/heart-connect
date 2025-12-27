@@ -68,6 +68,68 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     }
   }
 
+  /// 언어 선택 BottomSheet
+  void _showLanguageSelector() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 12),
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const Padding(
+              padding: EdgeInsets.all(16),
+              child: Text(
+                '언어 선택',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF5D4037)),
+              ),
+            ),
+            Flexible(
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: supportedLanguages.length,
+                itemBuilder: (context, index) {
+                  final entry = supportedLanguages.entries.elementAt(index);
+                  final isSelected = entry.key == ref.read(localeProvider).languageCode;
+                  return ListTile(
+                    leading: isSelected
+                        ? const Icon(Icons.check_circle, color: Color(0xFFF29D86))
+                        : const Icon(Icons.circle_outlined, color: Colors.grey),
+                    title: Text(
+                      entry.value,
+                      style: TextStyle(
+                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                        color: isSelected ? const Color(0xFFF29D86) : const Color(0xFF5D4037),
+                      ),
+                    ),
+                    onTap: () {
+                      ref.read(localeProvider.notifier).setLocale(entry.key);
+                      Navigator.pop(context);
+                    },
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -155,7 +217,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(24),
               child: Image.asset(
-                'assets/icons/heart_icon.png',
+                'assets/icons/onboarding_heart.png',
                 width: 160,
                 height: 160,
                 fit: BoxFit.cover,
@@ -246,31 +308,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           
           const SizedBox(height: 32),
           
-          // 언어 선택 (PopupMenuButton 사용)
-          PopupMenuButton<String>(
-            initialValue: ref.watch(localeProvider).languageCode,
-            onSelected: (value) {
-              ref.read(localeProvider.notifier).setLocale(value);
-            },
-            offset: const Offset(0, 50),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            itemBuilder: (context) {
-              return supportedLanguages.entries.map((entry) {
-                return PopupMenuItem<String>(
-                  value: entry.key,
-                  child: Row(
-                    children: [
-                      if (entry.key == ref.watch(localeProvider).languageCode)
-                        const Icon(Icons.check, color: Color(0xFFF29D86), size: 18)
-                      else
-                        const SizedBox(width: 18),
-                      const SizedBox(width: 8),
-                      Text(entry.value, style: const TextStyle(fontSize: 15)),
-                    ],
-                  ),
-                );
-              }).toList();
-            },
+          // 언어 선택 (InkWell + showModalBottomSheet)
+          InkWell(
+            onTap: () => _showLanguageSelector(),
+            borderRadius: BorderRadius.circular(12),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
               decoration: BoxDecoration(
