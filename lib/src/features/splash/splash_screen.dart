@@ -24,7 +24,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with TickerProvider
   
   String _userName = '';
   bool _isLoading = true;
-  String _loadingStatus = '데이터를 불러오는 중...';
+  String _loadingStatus = '시작하는 중...';
 
   @override
   void initState() {
@@ -38,12 +38,12 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with TickerProvider
     
     // 페이드 아웃 컨트롤러
     _fadeController = AnimationController(
-      duration: const Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 400),
       vsync: this,
     );
     
     // 하트 크기 애니메이션 (펄스 효과)
-    _heartScale = Tween<double>(begin: 0.8, end: 1.0).animate(
+    _heartScale = Tween<double>(begin: 0.85, end: 1.0).animate(
       CurvedAnimation(
         parent: _heartController,
         curve: Curves.easeInOut,
@@ -51,7 +51,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with TickerProvider
     );
     
     // 하트 회전 애니메이션
-    _heartRotate = Tween<double>(begin: -0.05, end: 0.05).animate(
+    _heartRotate = Tween<double>(begin: -0.03, end: 0.03).animate(
       CurvedAnimation(
         parent: _heartController,
         curve: Curves.easeInOut,
@@ -69,62 +69,116 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with TickerProvider
     // 하트 애니메이션 반복
     _heartController.repeat(reverse: true);
     
-    // 데이터 로드 시작
-    _loadAllData();
+    // 빠른 로딩 시작
+    _fastLoad();
   }
 
-  Future<void> _loadAllData() async {
+  /// 빠른 로딩 - 로컬 캐시 데이터만 로드
+  Future<void> _fastLoad() async {
     try {
-      // 1. 사용자 이름 로드
-      _updateStatus('설정을 불러오는 중...');
       final prefs = await SharedPreferences.getInstance();
-      final userName = prefs.getString('user_name') ?? '';
       
+      // 1. 사용자 이름 로드 (즉시)
+      final userName = prefs.getString('user_name') ?? '';
       if (mounted) {
         setState(() {
           _userName = userName;
         });
       }
       
-      // 2. 권한 확인 (Android/iOS)
+      // 2. 이전에 동기화된 적 있는지 확인
+      final lastSyncTime = prefs.getInt('last_sync_time') ?? 0;
+      final hasData = lastSyncTime > 0;
+      
+      if (hasData) {
+        // 이미 데이터가 있으면 로컬 DB에서 빠르게 로드
+        _updateStatus('환영합니다! 👋');
+        
+        // 홈 데이터만 빠르게 새로고침 (DB에서 로드)
+        ref.read(homeViewModelProvider.notifier).refresh();
+        
+        // 짧은 대기 후 화면 표시
+        await Future.delayed(const Duration(milliseconds: 800));
+        
+        // 화면 표시 후 백그라운드에서 동기화
+        _finishAndStartBackgroundSync(prefs);
+      } else {
+        // 첫 실행 - 전체 동기화 필요
+        await _firstTimeFullSync(prefs);
+      }
+    } catch (e) {
+      debugPrint('[Splash] 로딩 오류: $e');
+      _finishLoading();
+    }
+  }
+
+  /// 첫 실행 시 전체 동기화
+  Future<void> _firstTimeFullSync(SharedPreferences prefs) async {
+    try {
+      // 권한 확인 (Android/iOS)
       if (Platform.isAndroid || Platform.isIOS) {
         _updateStatus('권한을 확인하는 중...');
         await Permission.contacts.request();
         await Permission.calendar.request();
       }
       
-      // 3. 연락처 동기화
-      _updateStatus('연락처를 동기화하는 중...');
+      // 연락처 동기화
+      _updateStatus('연락처를 가져오는 중...');
       await ref.read(contactServiceProvider.notifier).syncContacts();
       
-      // 4. 홈 데이터 로드
+      // 홈 데이터 로드
       _updateStatus('일정을 불러오는 중...');
       ref.read(homeViewModelProvider.notifier).refresh();
       
-      // 5. 추가 대기 (UI가 렌더링될 시간)
-      _updateStatus('화면을 준비하는 중...');
-      await Future.delayed(const Duration(milliseconds: 500));
+      // 동기화 시간 저장
+      await prefs.setInt('last_sync_time', DateTime.now().millisecondsSinceEpoch);
       
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
+      _updateStatus('준비 완료!');
+      await Future.delayed(const Duration(milliseconds: 300));
+      
+      _finishLoading();
+    } catch (e) {
+      debugPrint('[Splash] 첫 동기화 오류: $e');
+      _finishLoading();
+    }
+  }
+
+  /// 화면 표시 후 백그라운드 동기화 시작
+  void _finishAndStartBackgroundSync(SharedPreferences prefs) {
+    _finishLoading();
+    
+    // 백그라운드에서 천천히 동기화 (UI 표시 후)
+    Future.delayed(const Duration(seconds: 2), () {
+      _backgroundSync(prefs);
+    });
+  }
+
+  /// 백그라운드 동기화 - UI에 영향 없이 천천히 실행
+  Future<void> _backgroundSync(SharedPreferences prefs) async {
+    try {
+      debugPrint('[BackgroundSync] 백그라운드 동기화 시작');
+      
+      // 마지막 동기화 시간 확인
+      final lastSync = prefs.getInt('last_sync_time') ?? 0;
+      final now = DateTime.now().millisecondsSinceEpoch;
+      final hoursSinceLastSync = (now - lastSync) / (1000 * 60 * 60);
+      
+      // 1시간 이상 지났으면 연락처 동기화
+      if (hoursSinceLastSync >= 1) {
+        debugPrint('[BackgroundSync] 연락처 동기화 중...');
+        await ref.read(contactServiceProvider.notifier).syncContacts();
         
-        // 페이드 아웃 후 완료 콜백
-        await _fadeController.forward();
-        widget.onInitComplete();
+        debugPrint('[BackgroundSync] 홈 데이터 새로고침...');
+        ref.read(homeViewModelProvider.notifier).refresh();
+        
+        // 동기화 시간 업데이트
+        await prefs.setInt('last_sync_time', now);
+        debugPrint('[BackgroundSync] 동기화 완료');
+      } else {
+        debugPrint('[BackgroundSync] 최근 동기화됨, 스킵 (${hoursSinceLastSync.toStringAsFixed(1)}시간 전)');
       }
     } catch (e) {
-      debugPrint('[Splash] 로딩 오류: $e');
-      // 에러가 있어도 진행
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-        await Future.delayed(const Duration(milliseconds: 300));
-        await _fadeController.forward();
-        widget.onInitComplete();
-      }
+      debugPrint('[BackgroundSync] 동기화 오류: $e');
     }
   }
   
@@ -134,6 +188,17 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with TickerProvider
         _loadingStatus = status;
       });
     }
+  }
+
+  void _finishLoading() async {
+    if (!mounted) return;
+    
+    setState(() {
+      _isLoading = false;
+    });
+    
+    await _fadeController.forward();
+    widget.onInitComplete();
   }
 
   @override
@@ -227,7 +292,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with TickerProvider
                   // 환영 메시지
                   AnimatedOpacity(
                     opacity: _userName.isNotEmpty ? 1.0 : 0.0,
-                    duration: const Duration(milliseconds: 500),
+                    duration: const Duration(milliseconds: 300),
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                       decoration: BoxDecoration(
@@ -257,29 +322,32 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with TickerProvider
                   const Spacer(flex: 2),
                   
                   // 로딩 표시
-                  if (_isLoading)
-                    Column(
+                  AnimatedOpacity(
+                    opacity: _isLoading ? 1.0 : 0.0,
+                    duration: const Duration(milliseconds: 200),
+                    child: Column(
                       children: [
                         SizedBox(
-                          width: 30,
-                          height: 30,
+                          width: 24,
+                          height: 24,
                           child: CircularProgressIndicator(
-                            strokeWidth: 3,
+                            strokeWidth: 2.5,
                             valueColor: AlwaysStoppedAnimation<Color>(
                               const Color(0xFFFF8A65).withAlpha(180),
                             ),
                           ),
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 12),
                         Text(
                           _loadingStatus,
                           style: TextStyle(
-                            fontSize: 14,
+                            fontSize: 13,
                             color: const Color(0xFF795548).withAlpha(180),
                           ),
                         ),
                       ],
                     ),
+                  ),
                   
                   const Spacer(),
                 ],
