@@ -1716,6 +1716,7 @@ class _ContactPickerDialog extends ConsumerStatefulWidget {
 
 class _ContactPickerDialogState extends ConsumerState<_ContactPickerDialog> {
   String _searchQuery = "";
+  String _selectedFilter = '전체';
   final Set<String> _selectedPhones = {};
   List<Contact> _contacts = [];
 
@@ -1723,6 +1724,10 @@ class _ContactPickerDialogState extends ConsumerState<_ContactPickerDialog> {
   void initState() {
     super.initState();
     _loadContacts();
+    // 다이얼로그 열 때 키보드 숨기기
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      FocusManager.instance.primaryFocus?.unfocus();
+    });
   }
 
   Future<void> _loadContacts() async {
@@ -1753,92 +1758,153 @@ class _ContactPickerDialogState extends ConsumerState<_ContactPickerDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final filtered = _contacts.where((c) => 
-      c.name.contains(_searchQuery) || c.phone.contains(_searchQuery)
-    ).toList();
+    // 필터링된 연락처 목록
+    final filtered = _contacts.where((contact) {
+      // 검색어 필터
+      final matchesSearch = _searchQuery.isEmpty ||
+          contact.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+          contact.phone.contains(_searchQuery);
+      
+      // 카테고리 필터
+      bool matchesCategory = true;
+      if (_selectedFilter == '즐겨찾기') {
+        matchesCategory = contact.isFavorite;
+      } else if (_selectedFilter == '가족') {
+        final tag = contact.groupTag?.toLowerCase() ?? '';
+        matchesCategory = tag.contains('가족') || tag.contains('family');
+      }
+      
+      return matchesSearch && matchesCategory;
+    }).toList();
 
     return AlertDialog(
-      title: const Text("Select Contacts"),
+      title: const Text("발송 대상 선택"),
       content: SizedBox(
         width: double.maxFinite,
-        height: 400,
+        height: 450,
         child: Column(
           children: [
+            // 검색창
             TextField(
-              decoration: const InputDecoration(
-                labelText: "Search",
-                prefixIcon: Icon(Icons.search),
-                border: OutlineInputBorder(),
+              autofocus: false,
+              decoration: InputDecoration(
+                hintText: '이름 또는 전화번호 검색',
+                prefixIcon: const Icon(Icons.search, color: Color(0xFFF29D86)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(color: Color(0xFFF29D86)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(color: Color(0xFFF29D86), width: 2),
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               ),
-              onChanged: (val) => setState(() => _searchQuery = val),
+              onChanged: (value) => setState(() => _searchQuery = value),
             ),
             const SizedBox(height: 10),
+            
+            // 필터 버튼들
+            Row(
+              children: [
+                _buildFilterChip('전체', Icons.people),
+                const SizedBox(width: 8),
+                _buildFilterChip('즐겨찾기', Icons.star),
+                const SizedBox(width: 8),
+                _buildFilterChip('가족', Icons.family_restroom),
+              ],
+            ),
+            const SizedBox(height: 10),
+            
+            // 연락처 목록
             Expanded(
-              child: ListView.builder(
-                itemCount: filtered.length,
-                itemBuilder: (context, index) {
-                  final contact = filtered[index];
-                  final isSelected = _selectedPhones.contains(contact.phone);
-                  return CheckboxListTile(
-                    value: isSelected,
-                    title: Text(contact.name),
-                    subtitle: Text(formatPhone(contact.phone)),
-                    onChanged: (val) {
-                       setState(() {
-                          if (val == true) {
-                             _selectedPhones.add(contact.phone);
-                          } else {
-                             _selectedPhones.remove(contact.phone);
-                          }
-                       });
-                    },
-                  );
-                },
+              child: filtered.isEmpty
+                  ? Center(
+                      child: Text(
+                        _searchQuery.isNotEmpty 
+                            ? "검색 결과가 없습니다."
+                            : "저장된 연락처가 없습니다.",
+                        style: const TextStyle(color: Colors.grey),
+                      ),
+                    )
+                  : ListView.builder(
+                      itemCount: filtered.length,
+                      itemBuilder: (context, index) {
+                        final contact = filtered[index];
+                        final isSelected = _selectedPhones.contains(contact.phone);
+                        return CheckboxListTile(
+                          value: isSelected,
+                          title: Row(
+                            children: [
+                              Expanded(child: Text(contact.name)),
+                              if (contact.isFavorite == true)
+                                const Icon(Icons.star, color: Colors.amber, size: 16),
+                            ],
+                          ),
+                          subtitle: Text(formatPhone(contact.phone)),
+                          activeColor: const Color(0xFFF29D86),
+                          onChanged: (bool? value) {
+                            setState(() {
+                              if (value == true) {
+                                _selectedPhones.add(contact.phone);
+                              } else {
+                                _selectedPhones.remove(contact.phone);
+                              }
+                            });
+                          },
+                        );
+                      },
+                    ),
+            ),
+            const SizedBox(height: 16),
+            
+            // 새 연락처 추가 버튼
+            OutlinedButton.icon(
+              onPressed: _handleAddNew,
+              icon: const Icon(Icons.person_add, size: 18),
+              label: const Text("새 연락처 추가"),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: const Color(0xFFF29D86),
+                side: const BorderSide(color: Color(0xFFF29D86)),
               ),
             ),
           ],
         ),
       ),
       actions: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            // Add New Button
-            ElevatedButton.icon(
-              onPressed: _handleAddNew,
-              icon: const Icon(Icons.person_add, size: 16),
-              label: const Text("Add New"),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFF29D86),
-                foregroundColor: Colors.white,
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-              ),
-            ),
-            const SizedBox(width: 8),
-            // Cancel Button
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Cancel"),
-            ),
-            const SizedBox(width: 8),
-            // Select Button
-            ElevatedButton(
-              onPressed: () {
-                final selected = _contacts.where((c) => _selectedPhones.contains(c.phone)).map((c) => {
-                  'name': c.name,
-                  'phone': c.phone,
-                }).toList();
-                print('ContactPicker: Selected ${selected.length} contacts');
-                widget.onSelected(selected);
-                Navigator.pop(context);
-              },
-              child: Text("Select (${_selectedPhones.length})"),
-            ),
-          ],
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text("취소", style: TextStyle(color: Colors.grey)),
+        ),
+        TextButton(
+          onPressed: () {
+            final selected = _contacts.where((c) => _selectedPhones.contains(c.phone)).map((c) => {
+              'name': c.name,
+              'phone': c.phone,
+            }).toList();
+            widget.onSelected(selected);
+            Navigator.pop(context);
+          },
+          child: const Text("확인", style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFF29D86))),
         ),
       ],
     );
   }
+  
+  Widget _buildFilterChip(String label, IconData icon) {
+    final isActive = _selectedFilter == label;
+    return ChoiceChip(
+      label: Text(label),
+      avatar: Icon(icon, size: 16, color: isActive ? Colors.white : Colors.grey[700]),
+      selected: isActive,
+      selectedColor: const Color(0xFFF29D86),
+      labelStyle: TextStyle(
+        color: isActive ? Colors.white : Colors.grey[700],
+        fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+      ),
+      onSelected: (selected) {
+        setState(() => _selectedFilter = label);
+      },
+    );
+  }
 }
-
