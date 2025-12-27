@@ -1257,31 +1257,44 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 12),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Expanded(
+                      flex: 3,
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(title, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
+                          Text(
+                            title, 
+                            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                           const SizedBox(height: 4),
                           GestureDetector(
                             onTap: onDescTap,
                             child: Row(
                               children: [
-                                if (descIcon != null) ...[Icon(descIcon, size: 12, color: const Color(0xFF795548)), const SizedBox(width: 4)],
-                                Text(desc, style: const TextStyle(color: Color(0xFF795548), fontSize: 13, fontWeight: FontWeight.w600)),
-                                if (onDescTap != null) ...[const SizedBox(width: 4), const Icon(Icons.help_outline, size: 12, color: Colors.grey)],
+                                if (descIcon != null) ...[Icon(descIcon, size: 10, color: const Color(0xFF795548)), const SizedBox(width: 3)],
+                                Flexible(
+                                  child: Text(
+                                    desc, 
+                                    style: const TextStyle(color: Color(0xFF795548), fontSize: 11, fontWeight: FontWeight.w600),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                if (onDescTap != null) ...[const SizedBox(width: 3), const Icon(Icons.help_outline, size: 10, color: Colors.grey)],
                               ],
                             ),
                           ),
                         ],
                       ),
                     ),
-                    if (action != null) action,
+                    if (action != null) Flexible(flex: 4, child: action),
                   ],
                 ),
               ),
