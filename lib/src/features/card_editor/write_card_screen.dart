@@ -26,6 +26,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:file_selector/file_selector.dart'; // File Picker
 import 'package:image/image.dart' as img; // JPEG 변환용
+import 'package:heart_connect/src/services/social_share_service.dart'; // 소셜 미디어 공유
 
 class AutoScrollingText extends StatefulWidget {
   final String text;
@@ -4335,16 +4336,40 @@ class _RecipientManagerDialogState extends State<RecipientManagerDialog> {
                       ),
                     ),
                     const SizedBox(width: 16),
+                    TextButton.icon(
+                      onPressed: _isSending ? null : () async {
+                        // 소셜 미디어 공유 다이얼로그 표시
+                        final platformId = await SocialShareService.showShareDialog(context);
+                        if (platformId != null) {
+                          await SocialShareService.shareImage(
+                            imagePath: widget.savedPath,
+                            platformId: platformId,
+                            text: widget.messageContent.isNotEmpty ? widget.messageContent : '마음을 전합니다 💝',
+                          );
+                        }
+                      },
+                      icon: const Icon(Icons.share, size: 18),
+                      label: const Text("공유", style: TextStyle(fontSize: 14)),
+                      style: TextButton.styleFrom(
+                        foregroundColor: const Color(0xFF1877F2),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          side: const BorderSide(color: Color(0xFF1877F2)),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
                     TextButton(
                       onPressed: _isSending ? null : () => Navigator.pop(context),
                       style: TextButton.styleFrom(
                         foregroundColor: Colors.grey[600],
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       child: const Text("닫기", style: TextStyle(fontSize: 15)),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 8),
                     // 발송 버튼
                     if (_isSending)
                       ElevatedButton.icon(
