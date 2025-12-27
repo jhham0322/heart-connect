@@ -75,6 +75,7 @@ dependency_overrides:
   riverpod_generator: ^2.4.0
 
 flutter:
+  generate: true
   uses-material-design: true
   
   assets:

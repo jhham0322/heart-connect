@@ -7,7 +7,6 @@ import 'theme/app_theme.dart';
 import 'package:heart_connect/src/features/alarm/notification_service.dart';
 import 'package:heart_connect/src/features/splash/splash_screen.dart';
 import 'package:heart_connect/src/providers/locale_provider.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'dart:ui';
 
@@ -50,7 +49,6 @@ class _MyAppState extends ConsumerState<MyApp> {
       theme: AppTheme.lightTheme,
       locale: locale,
       localizationsDelegates: const [
-        AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
@@ -61,6 +59,16 @@ class _MyAppState extends ConsumerState<MyApp> {
         Locale('en'),
         Locale('ja'),
         Locale('zh'),
+        Locale('de'),
+        Locale('fr'),
+        Locale('es'),
+        Locale('pt'),
+        Locale('it'),
+        Locale('ru'),
+        Locale('ar'),
+        Locale('hi'),
+        Locale('tr'),
+        Locale('id'),
       ],
       scrollBehavior: const MaterialScrollBehavior().copyWith(
         dragDevices: {
