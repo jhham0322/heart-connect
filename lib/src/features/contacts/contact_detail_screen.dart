@@ -6,6 +6,7 @@ import 'dart:io';
 import '../database/app_database.dart';
 import '../database/database_provider.dart';
 import '../card_editor/write_card_screen.dart';
+import '../message/sms_service.dart';
 import '../../utils/phone_formatter.dart';
 import 'current_contact_provider.dart';
 
@@ -88,6 +89,7 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
             padding: const EdgeInsets.all(20),
             child: Row(
               children: [
+                // 프로필 사진 표시 (photoData가 있으면 사진, 없으면 이모지)
                 Container(
                   width: 80, height: 80,
                   decoration: BoxDecoration(
@@ -95,7 +97,18 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
                     shape: BoxShape.circle,
                     border: Border.all(color: const Color(0xFF5D4037), width: 2),
                   ),
-                  child: const Center(child: Text("👩🏻", style: TextStyle(fontSize: 40))),
+                  child: ClipOval(
+                    child: contact.photoData != null && contact.photoData!.isNotEmpty
+                        ? Image.file(
+                            File(contact.photoData!),
+                            fit: BoxFit.cover,
+                            width: 80,
+                            height: 80,
+                            errorBuilder: (context, error, stackTrace) => 
+                                const Center(child: Text("👤", style: TextStyle(fontSize: 40))),
+                          )
+                        : const Center(child: Text("👤", style: TextStyle(fontSize: 40))),
+                  ),
                 ),
                 const SizedBox(width: 20),
                 Expanded(
@@ -161,15 +174,27 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
             ),
           ),
 
-          // History List
+          // SMS 메시지 목록 (문자 기준)
           Expanded(
-            child: FutureBuilder<List<HistoryData>>(
-              future: database.getHistoryForContact(contact.id),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
+            child: FutureBuilder<List<AppSmsMessage>>(
+              future: ref.read(smsServiceProvider).getMessagesForPhone(contact.phone),
+              builder: (context, smsSnapshot) {
+                if (smsSnapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
-                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                
+                final smsMessages = smsSnapshot.data ?? [];
+                
+                // 검색 필터
+                var filteredMessages = smsMessages;
+                if (_searchQuery.isNotEmpty) {
+                  final query = _searchQuery.toLowerCase();
+                  filteredMessages = smsMessages.where((msg) {
+                    return (msg.body?.toLowerCase() ?? '').contains(query);
+                  }).toList();
+                }
+                
+                if (filteredMessages.isEmpty) {
                   return const Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -181,93 +206,78 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
                     ),
                   );
                 }
-
-                var history = snapshot.data!;
-                // Filter by search query
-                if (_searchQuery.isNotEmpty) {
-                  final query = _searchQuery.toLowerCase();
-                  history = history.where((item) {
-                    final message = item.message?.toLowerCase() ?? '';
-                    return message.contains(query);
-                  }).toList();
-                }
-
-                if (history.isEmpty && _searchQuery.isNotEmpty) {
-                   return const Center(
+                
+                if (filteredMessages.isEmpty && _searchQuery.isNotEmpty) {
+                  return const Center(
                     child: Text("검색 결과가 없습니다."),
                   );
                 }
-
-                // Sort by date descending
-                history.sort((a, b) => b.eventDate.compareTo(a.eventDate));
-
+                
                 return ListView.builder(
                   padding: const EdgeInsets.all(16),
-                  itemCount: history.length,
+                  itemCount: filteredMessages.length,
                   itemBuilder: (context, index) {
-                    final item = history[index];
+                    final msg = filteredMessages[index];
+                    final isSent = msg.kind == 'sent';
                     
                     return Container(
-                      margin: const EdgeInsets.only(bottom: 24),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(color: Colors.black.withOpacity(0.08), offset: const Offset(0, 4), blurRadius: 12),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      margin: const EdgeInsets.only(bottom: 12),
+                      child: Row(
+                        mainAxisAlignment: isSent ? MainAxisAlignment.end : MainAxisAlignment.start,
                         children: [
-                          // Image Area
-                          if (item.imagePath != null && item.imagePath!.isNotEmpty)
-                            ClipRRect(
-                              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-                              child: Image.file(
-                                File(item.imagePath!),
-                                width: double.infinity,
-                                height: 300, 
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) => Container(
-                                  height: 200,
-                                  color: Colors.grey[200],
-                                  child: const Center(child: Icon(Icons.broken_image, color: Colors.grey)),
-                                ),
-                              ),
+                          Container(
+                            constraints: BoxConstraints(
+                              maxWidth: MediaQuery.of(context).size.width * 0.75,
                             ),
-                          
-                          // Content Area
-                          Padding(
-                            padding: const EdgeInsets.all(20),
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: isSent ? const Color(0xFFF29D86).withOpacity(0.2) : Colors.white,
+                              borderRadius: BorderRadius.only(
+                                topLeft: const Radius.circular(16),
+                                topRight: const Radius.circular(16),
+                                bottomLeft: isSent ? const Radius.circular(16) : const Radius.circular(4),
+                                bottomRight: isSent ? const Radius.circular(4) : const Radius.circular(16),
+                              ),
+                              border: isSent 
+                                  ? Border.all(color: const Color(0xFFF29D86), width: 1) 
+                                  : Border.all(color: Colors.grey.shade300),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.05),
+                                  offset: const Offset(0, 2),
+                                  blurRadius: 6,
+                                ),
+                              ],
+                            ),
                             child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                              crossAxisAlignment: isSent ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                               children: [
                                 Row(
+                                  mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                       decoration: BoxDecoration(
-                                        color: const Color(0xFFEFEBE9),
-                                        borderRadius: BorderRadius.circular(10),
+                                        color: isSent ? const Color(0xFFF29D86) : const Color(0xFF8D6E63),
+                                        borderRadius: BorderRadius.circular(8),
                                       ),
                                       child: Text(
-                                        item.type == 'SENT' ? "보낸 카드" : "받은 카드",
-                                        style: const TextStyle(fontSize: 11, color: Color(0xFF5D4037), fontWeight: FontWeight.bold),
+                                        isSent ? "보냄" : "받음",
+                                        style: const TextStyle(fontSize: 10, color: Colors.white, fontWeight: FontWeight.bold),
                                       ),
                                     ),
-                                    const Spacer(),
+                                    const SizedBox(width: 8),
                                     Text(
-                                      DateFormat('yyyy.MM.dd HH:mm').format(item.eventDate),
-                                      style: const TextStyle(fontSize: 12, color: Color(0xFF8D6E63)),
+                                      msg.date != null ? DateFormat('MM.dd HH:mm').format(msg.date!) : '',
+                                      style: const TextStyle(fontSize: 11, color: Color(0xFF8D6E63)),
                                     ),
                                   ],
                                 ),
-                                const SizedBox(height: 12),
-                                if (item.message != null && item.message!.isNotEmpty)
-                                  Text(
-                                    item.message!,
-                                    style: const TextStyle(fontSize: 16, color: Color(0xFF3E2723), height: 1.5),
-                                  ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  msg.body ?? '',
+                                  style: const TextStyle(fontSize: 14, color: Color(0xFF3E2723), height: 1.4),
+                                ),
                               ],
                             ),
                           ),

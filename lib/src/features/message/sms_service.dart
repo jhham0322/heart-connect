@@ -67,10 +67,105 @@ class SmsService {
       body: m.body,
       date: m.date,
       read: m.isRead,
-      kind: m.kind.toString(),
+      kind: m.kind == SmsMessageKind.sent ? 'sent' : 'inbox',
     )).toList();
 
     return filtered;
+  }
+  
+  /// 특정 전화번호와 주고받은 SMS 메시지 가져오기
+  Future<List<AppSmsMessage>> getMessagesForPhone(String phone) async {
+    final normalizedPhone = _normalizeNumber(phone);
+    
+    if (kIsWeb || Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
+      // Mock data for desktop
+      return _getMockMessagesForPhone(normalizedPhone);
+    }
+    
+    // Mobile: Request permissions and fetch SMS
+    final permission = await Permission.sms.status;
+    if (!permission.isGranted) {
+      final result = await Permission.sms.request();
+      if (!result.isGranted) {
+        return [];
+      }
+    }
+    
+    final SmsQuery query = SmsQuery();
+    
+    // 받은 메시지
+    final List<SmsMessage> inboxMessages = await query.querySms(
+      kinds: [SmsQueryKind.inbox],
+      sort: true,
+    );
+    
+    // 보낸 메시지
+    final List<SmsMessage> sentMessages = await query.querySms(
+      kinds: [SmsQueryKind.sent],
+      sort: true,
+    );
+    
+    // 모든 메시지 합치기
+    final allMessages = <AppSmsMessage>[];
+    
+    // 받은 메시지 필터링
+    for (final msg in inboxMessages) {
+      if (msg.address == null) continue;
+      final normalizedSender = _normalizeNumber(msg.address!);
+      if (_isMatch(normalizedSender, normalizedPhone)) {
+        allMessages.add(AppSmsMessage(
+          id: msg.id,
+          address: msg.address,
+          body: msg.body,
+          date: msg.date,
+          read: msg.isRead,
+          kind: 'received',
+        ));
+      }
+    }
+    
+    // 보낸 메시지 필터링
+    for (final msg in sentMessages) {
+      if (msg.address == null) continue;
+      final normalizedRecipient = _normalizeNumber(msg.address!);
+      if (_isMatch(normalizedRecipient, normalizedPhone)) {
+        allMessages.add(AppSmsMessage(
+          id: msg.id,
+          address: msg.address,
+          body: msg.body,
+          date: msg.date,
+          read: true,
+          kind: 'sent',
+        ));
+      }
+    }
+    
+    // 날짜순 정렬 (최신순)
+    allMessages.sort((a, b) => (b.date ?? DateTime.now()).compareTo(a.date ?? DateTime.now()));
+    
+    return allMessages;
+  }
+  
+  List<AppSmsMessage> _getMockMessagesForPhone(String phone) {
+    final now = DateTime.now();
+    return [
+      AppSmsMessage(
+        body: "테스트 메시지입니다.",
+        date: now.subtract(const Duration(hours: 1)),
+        address: phone,
+        read: true,
+        kind: 'received',
+        id: 1,
+      ),
+      AppSmsMessage(
+        body: "네, 알겠습니다!",
+        date: now.subtract(const Duration(hours: 2)),
+        address: phone,
+        read: true,
+        kind: 'sent',
+        id: 2,
+      ),
+    ];
   }
 
   String _normalizeNumber(String phone) {
