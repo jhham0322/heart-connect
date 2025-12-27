@@ -39,20 +39,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       initialPage: 0,
     );
     
-    // 앱 시작 시 데이터 동기화 및 권한 확인
+    // 앱 시작 시 권한 확인 (스플래시에서 데이터는 이미 로드됨)
     WidgetsBinding.instance.addPostFrameCallback((_) async {
        try {
-         // 0. 캘린더 권한 확인 (Android/iOS만)
+         // 캘린더 권한 확인 (Android/iOS만)
          if (Platform.isAndroid || Platform.isIOS) {
            await _checkCalendarPermission();
          }
-         
-         // 1. 주소록 동기화 (Windows는 Mock 데이터 생성)
-         await ref.read(contactServiceProvider.notifier).syncContacts();
-         // 2. 홈 모델 새로고침
-         ref.read(homeViewModelProvider.notifier).refresh();
        } catch (e) {
-         debugPrint("Init Sync Error: $e");
+         debugPrint("Init Error: $e");
        }
     });
   }

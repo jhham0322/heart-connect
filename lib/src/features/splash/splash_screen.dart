@@ -1,17 +1,21 @@
-import 'dart:math' as math;
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:heart_connect/src/features/contacts/contact_service.dart';
+import 'package:heart_connect/src/features/home/home_view_model.dart';
+import 'package:permission_handler/permission_handler.dart';
 
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends ConsumerStatefulWidget {
   final VoidCallback onInitComplete;
   
   const SplashScreen({super.key, required this.onInitComplete});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMixin {
+class _SplashScreenState extends ConsumerState<SplashScreen> with TickerProviderStateMixin {
   late AnimationController _heartController;
   late AnimationController _fadeController;
   late Animation<double> _heartScale;
@@ -20,6 +24,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
   
   String _userName = '';
   bool _isLoading = true;
+  String _loadingStatus = '데이터를 불러오는 중...';
 
   @override
   void initState() {
@@ -65,12 +70,13 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
     _heartController.repeat(reverse: true);
     
     // 데이터 로드 시작
-    _loadData();
+    _loadAllData();
   }
 
-  Future<void> _loadData() async {
+  Future<void> _loadAllData() async {
     try {
-      // 사용자 이름 로드
+      // 1. 사용자 이름 로드
+      _updateStatus('설정을 불러오는 중...');
       final prefs = await SharedPreferences.getInstance();
       final userName = prefs.getString('user_name') ?? '';
       
@@ -80,8 +86,24 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
         });
       }
       
-      // 최소 2초 대기 (애니메이션을 보여주기 위해)
-      await Future.delayed(const Duration(milliseconds: 2000));
+      // 2. 권한 확인 (Android/iOS)
+      if (Platform.isAndroid || Platform.isIOS) {
+        _updateStatus('권한을 확인하는 중...');
+        await Permission.contacts.request();
+        await Permission.calendar.request();
+      }
+      
+      // 3. 연락처 동기화
+      _updateStatus('연락처를 동기화하는 중...');
+      await ref.read(contactServiceProvider.notifier).syncContacts();
+      
+      // 4. 홈 데이터 로드
+      _updateStatus('일정을 불러오는 중...');
+      await ref.read(homeViewModelProvider.notifier).refresh();
+      
+      // 5. 추가 대기 (UI가 렌더링될 시간)
+      _updateStatus('화면을 준비하는 중...');
+      await Future.delayed(const Duration(milliseconds: 500));
       
       if (mounted) {
         setState(() {
@@ -93,14 +115,24 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
         widget.onInitComplete();
       }
     } catch (e) {
+      debugPrint('[Splash] 로딩 오류: $e');
       // 에러가 있어도 진행
       if (mounted) {
         setState(() {
           _isLoading = false;
         });
+        await Future.delayed(const Duration(milliseconds: 300));
         await _fadeController.forward();
         widget.onInitComplete();
       }
+    }
+  }
+  
+  void _updateStatus(String status) {
+    if (mounted) {
+      setState(() {
+        _loadingStatus = status;
+      });
     }
   }
 
@@ -240,7 +272,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          '데이터를 불러오는 중...',
+                          _loadingStatus,
                           style: TextStyle(
                             fontSize: 14,
                             color: const Color(0xFF795548).withOpacity(0.7),
