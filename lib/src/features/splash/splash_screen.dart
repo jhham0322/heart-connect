@@ -99,7 +99,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with TickerProvider
       
       // 4. 홈 데이터 로드
       _updateStatus('일정을 불러오는 중...');
-      await ref.read(homeViewModelProvider.notifier).refresh();
+      ref.read(homeViewModelProvider.notifier).refresh();
       
       // 5. 추가 대기 (UI가 렌더링될 시간)
       _updateStatus('화면을 준비하는 중...');
@@ -185,7 +185,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with TickerProvider
                               shape: BoxShape.circle,
                               gradient: RadialGradient(
                                 colors: [
-                                  const Color(0xFFFF8A65).withOpacity(0.3),
+                                  const Color(0xFFFF8A65).withAlpha(76),
                                   Colors.transparent,
                                 ],
                               ),
@@ -231,11 +231,11 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with TickerProvider
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.7),
+                        color: Colors.white.withAlpha(180),
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFFFF8A65).withOpacity(0.2),
+                            color: const Color(0xFFFF8A65).withAlpha(51),
                             blurRadius: 15,
                             offset: const Offset(0, 5),
                           ),
@@ -266,7 +266,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with TickerProvider
                           child: CircularProgressIndicator(
                             strokeWidth: 3,
                             valueColor: AlwaysStoppedAnimation<Color>(
-                              const Color(0xFFFF8A65).withOpacity(0.7),
+                              const Color(0xFFFF8A65).withAlpha(180),
                             ),
                           ),
                         ),
@@ -275,7 +275,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with TickerProvider
                           _loadingStatus,
                           style: TextStyle(
                             fontSize: 14,
-                            color: const Color(0xFF795548).withOpacity(0.7),
+                            color: const Color(0xFF795548).withAlpha(180),
                           ),
                         ),
                       ],
