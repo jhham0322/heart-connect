@@ -6,6 +6,8 @@ import 'routing/app_router.dart';
 import 'theme/app_theme.dart';
 import 'package:heart_connect/src/features/alarm/notification_service.dart';
 import 'package:heart_connect/src/features/splash/splash_screen.dart';
+import 'package:heart_connect/src/providers/locale_provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'dart:ui';
 
@@ -39,22 +41,26 @@ class _MyAppState extends ConsumerState<MyApp> {
   @override
   Widget build(BuildContext context) {
     final goRouter = ref.watch(goRouterProvider);
+    final locale = ref.watch(localeProvider);
     
     return MaterialApp.router(
       routerConfig: goRouter,
       title: 'Heart Connect',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      // Localization for Flutter Quill
+      locale: locale,
       localizationsDelegates: const [
+        AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
         FlutterQuillLocalizations.delegate,
       ],
       supportedLocales: const [
-        Locale('en'),
         Locale('ko'),
+        Locale('en'),
+        Locale('ja'),
+        Locale('zh'),
       ],
       scrollBehavior: const MaterialScrollBehavior().copyWith(
         dragDevices: {

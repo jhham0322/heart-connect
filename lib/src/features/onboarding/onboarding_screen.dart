@@ -1,22 +1,25 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:heart_connect/src/providers/locale_provider.dart';
 
 /// 첫 실행 시 온보딩 화면
-class OnboardingScreen extends StatefulWidget {
+class OnboardingScreen extends ConsumerStatefulWidget {
   final VoidCallback onComplete;
   
   const OnboardingScreen({super.key, required this.onComplete});
 
   @override
-  State<OnboardingScreen> createState() => _OnboardingScreenState();
+  ConsumerState<OnboardingScreen> createState() => _OnboardingScreenState();
 }
 
-class _OnboardingScreenState extends State<OnboardingScreen> {
+class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
   bool _contactsGranted = false;
   bool _calendarGranted = false;
+
 
   @override
   void dispose() {
@@ -233,7 +236,49 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ),
           ),
           
-          const SizedBox(height: 60),
+          const SizedBox(height: 32),
+          
+          // 언어 선택
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: const Color(0xFFF29D86).withAlpha(100)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.language, color: Color(0xFFF29D86), size: 20),
+                const SizedBox(width: 8),
+                DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    value: ref.watch(localeProvider).languageCode,
+                    isDense: true,
+                    icon: const Icon(Icons.arrow_drop_down, color: Color(0xFF5D4037)),
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF5D4037),
+                    ),
+                    items: supportedLanguages.entries.map((entry) {
+                      return DropdownMenuItem<String>(
+                        value: entry.key,
+                        child: Text(entry.value),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      if (value != null) {
+                        ref.read(localeProvider.notifier).setLocale(value);
+                      }
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+          const SizedBox(height: 24),
           
           // 시작하기 버튼
           SizedBox(
