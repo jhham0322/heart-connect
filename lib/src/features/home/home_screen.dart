@@ -1758,6 +1758,25 @@ class _ContactPickerDialogState extends ConsumerState<_ContactPickerDialog> {
 
   @override
   Widget build(BuildContext context) {
+    // 가족 필터용 키워드 정의
+    const familyKeywords = [
+      // 배우자
+      '아내', '남편', '부인', '배우자', '와이프', '신랑', '신부', 'wife', 'husband',
+      // 자녀
+      '아들', '딸', '자녀', '막내', '첫째', '둘째', '셋째', '애기', '아기', '손자', '손녀', 'son', 'daughter',
+      // 부모
+      '어머니', '아버지', '엄마', '아빠', '모친', '부친', 'mother', 'father', 'mom', 'dad',
+      // 형제
+      '형', '누나', '오빠', '언니', '동생', '형제', '자매', '남동생', '여동생', 'brother', 'sister',
+      // 친척
+      '이모', '삼촌', '고모', '숙부', '숙모', '조카', '사촌', '친척',
+      '할머니', '할아버지', '장인', '장모', '시아버지', '시어머니',
+      '며느리', '사위', 'uncle', 'aunt', 'grandma', 'grandpa', 'cousin'
+    ];
+    
+    // 내 성(한국식 이름 기준)
+    const myFamilyName = '함'; // TODO: 설정에서 변경 가능하도록
+
     // 필터링된 연락처 목록
     final filtered = _contacts.where((contact) {
       // 검색어 필터
@@ -1770,8 +1789,27 @@ class _ContactPickerDialogState extends ConsumerState<_ContactPickerDialog> {
       if (_selectedFilter == '즐겨찾기') {
         matchesCategory = contact.isFavorite;
       } else if (_selectedFilter == '가족') {
+        // 1. groupTag에 가족/family 포함
         final tag = contact.groupTag?.toLowerCase() ?? '';
-        matchesCategory = tag.contains('가족') || tag.contains('family');
+        if (tag.contains('가족') || tag.contains('family')) {
+          matchesCategory = true;
+        } else {
+          // 2. 이름에 가족 관련 단어 포함
+          final nameLower = contact.name.toLowerCase();
+          bool hasKeyword = false;
+          for (var keyword in familyKeywords) {
+            if (nameLower.contains(keyword.toLowerCase())) {
+              hasKeyword = true;
+              break;
+            }
+          }
+          if (hasKeyword) {
+            matchesCategory = true;
+          } else {
+            // 3. 성씨가 같으면 가족
+            matchesCategory = contact.name.isNotEmpty && contact.name[0] == myFamilyName;
+          }
+        }
       }
       
       return matchesSearch && matchesCategory;
