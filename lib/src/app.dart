@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:heart_connect/l10n/app_localizations.dart';
 import 'routing/app_router.dart';
 import 'theme/app_theme.dart';
 import 'package:heart_connect/src/features/alarm/notification_service.dart';
@@ -9,6 +10,7 @@ import 'package:heart_connect/src/features/splash/splash_screen.dart';
 import 'package:heart_connect/src/providers/locale_provider.dart';
 
 import 'dart:ui';
+
 
 class MyApp extends ConsumerStatefulWidget {
   const MyApp({super.key});
@@ -49,6 +51,7 @@ class _MyAppState extends ConsumerState<MyApp> {
       theme: AppTheme.lightTheme,
       locale: locale,
       localizationsDelegates: const [
+        AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
