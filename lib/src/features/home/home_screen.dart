@@ -441,6 +441,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Widget _buildEmptyTodayState() {
+    final strings = ref.watch(appStringsProvider);
      return Center(
        child: Container(
           margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
@@ -462,18 +463,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
              children: [
                 const Icon(FontAwesomeIcons.calendarCheck, size: 40, color: AppTheme.accentCoral),
                 const SizedBox(height: 16),
-                const Text(
-                   "No plans for today",
-                   style: TextStyle(
+                Text(
+                   strings.homeNoEvents,
+                   style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: AppTheme.textPrimary,
                    ),
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                   "Check upcoming events or create a new plan.",
-                   style: TextStyle(
+                Text(
+                   strings.scheduleAddToCalendar,
+                   style: const TextStyle(
                       fontSize: 14,
                       color: AppTheme.textSecondary,
                    ),
