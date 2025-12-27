@@ -2,8 +2,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:heart_connect/src/services/localization_service.dart';
 import 'package:heart_connect/src/providers/locale_provider.dart';
+import 'package:heart_connect/src/l10n/app_strings.dart';
 
 /// 첫 실행 시 온보딩 화면
 class OnboardingScreen extends ConsumerStatefulWidget {
@@ -189,7 +189,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           
           // 앱 이름
           Text(
-            Tr.get(Texts.appName, ref),
+            ref.watch(appStringsProvider).appName,
             style: const TextStyle(
               fontSize: 36,
               fontWeight: FontWeight.bold,
@@ -200,9 +200,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           
           const SizedBox(height: 8),
           
-          Text(
-            Tr.get(Texts.appNameEn, ref),
-            style: const TextStyle(
+          const Text(
+            'Heart-Connect',
+            style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w500,
               color: Color(0xFF8D6E63),
@@ -235,7 +235,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  Tr.get(Texts.onboardingWelcomeTitle, ref),
+                  ref.watch(appStringsProvider).onboardingWelcome,
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontSize: 20,
@@ -246,7 +246,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  Tr.get(Texts.onboardingWelcomeDesc, ref),
+                  '${ref.watch(appStringsProvider).onboardingDesc1}\n${ref.watch(appStringsProvider).onboardingDesc2}\n${ref.watch(appStringsProvider).onboardingDesc3}\n${ref.watch(appStringsProvider).onboardingDesc4}\n\n${ref.watch(appStringsProvider).onboardingDesc5}\n${ref.watch(appStringsProvider).onboardingDesc6}\n${ref.watch(appStringsProvider).onboardingDesc7}',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 14,
@@ -357,7 +357,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 elevation: 3,
               ),
               child: Text(
-                Tr.get(Texts.startButton, ref),
+                ref.watch(appStringsProvider).onboardingStart,
                 style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
@@ -396,7 +396,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           const SizedBox(height: 32),
           
           Text(
-            Tr.get(Texts.contactsPermTitle, ref),
+            ref.watch(appStringsProvider).permissionContacts,
             style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
@@ -422,7 +422,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     Icon(Icons.info_outline, color: Colors.green[700], size: 20),
                     const SizedBox(width: 8),
                     Text(
-                      Tr.get(Texts.contactsPermWhy, ref),
+                      ref.watch(appStringsProvider).permissionWhyNeeded,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -433,7 +433,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  Tr.get(Texts.contactsPermDesc, ref),
+                  ref.watch(appStringsProvider).permissionContactsDesc,
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.brown[700],
@@ -460,7 +460,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    Tr.get(Texts.contactsPermPrivacy, ref),
+                    '${ref.watch(appStringsProvider).permissionPrivacy}\n\n${ref.watch(appStringsProvider).permissionSkipContacts}',
                     style: TextStyle(
                       fontSize: 13,
                       color: Colors.green[800],
@@ -480,7 +480,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             child: ElevatedButton.icon(
               onPressed: _requestContactsPermission,
               icon: const Icon(Icons.check_circle_outline),
-              label: Text(Tr.get(Texts.contactsPermButton, ref)),
+              label: Text(ref.watch(appStringsProvider).permissionAllowContacts),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF4CAF50),
                 foregroundColor: Colors.white,
@@ -497,7 +497,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           TextButton(
             onPressed: _nextPage,
             child: Text(
-              Tr.get(Texts.skipSettings, ref),
+              ref.watch(appStringsProvider).permissionSkip,
               style: TextStyle(
                 color: Colors.grey[600],
                 fontSize: 14,
@@ -538,7 +538,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           const SizedBox(height: 32),
           
           Text(
-            Tr.get(Texts.calendarPermTitle, ref),
+            ref.watch(appStringsProvider).permissionCalendar,
             style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
@@ -564,7 +564,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     Icon(Icons.info_outline, color: Colors.blue[700], size: 20),
                     const SizedBox(width: 8),
                     Text(
-                      Tr.get(Texts.calendarPermWhy, ref),
+                      ref.watch(appStringsProvider).permissionWhyNeeded,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -575,7 +575,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  Tr.get(Texts.calendarPermDesc, ref),
+                  ref.watch(appStringsProvider).permissionCalendarDesc,
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.brown[700],
@@ -602,7 +602,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    Tr.get(Texts.calendarPermPrivacy, ref),
+                    '${ref.watch(appStringsProvider).permissionPrivacy}\n\n${ref.watch(appStringsProvider).permissionSkipCalendar}',
                     style: TextStyle(
                       fontSize: 13,
                       color: Colors.blue[800],
@@ -622,7 +622,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             child: ElevatedButton.icon(
               onPressed: _requestCalendarPermission,
               icon: const Icon(Icons.check_circle_outline),
-              label: Text(Tr.get(Texts.calendarPermButton, ref)),
+              label: Text(ref.watch(appStringsProvider).permissionAllowCalendar),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF2196F3),
                 foregroundColor: Colors.white,
@@ -639,7 +639,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           TextButton(
             onPressed: _nextPage,
             child: Text(
-              Tr.get(Texts.skipSettings, ref),
+              ref.watch(appStringsProvider).permissionSkip,
               style: TextStyle(
                 color: Colors.grey[600],
                 fontSize: 14,
