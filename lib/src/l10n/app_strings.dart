@@ -206,6 +206,38 @@ class AppStrings {
   String get eventMeeting => _get({'ko': '모임', 'en': 'Meeting', 'ja': '集まり', 'zh': '聚会'});
   String get eventOther => _get({'ko': '기타', 'en': 'Other', 'ja': 'その他', 'zh': '其他'});
   
+  // ========== 일정 관리 다이얼로그 ==========
+  String get scheduleEdit => _get({'ko': '일정 수정', 'en': 'Edit', 'ja': '編集', 'zh': '编辑'});
+  String get scheduleAdd => _get({'ko': '일정 추가', 'en': 'Add', 'ja': '追加', 'zh': '添加'});
+  String get scheduleAddNew => _get({'ko': '새 일정', 'en': 'New', 'ja': '新規', 'zh': '新建'});
+  String get scheduleTitle => _get({'ko': '제목', 'en': 'Title', 'ja': 'タイトル', 'zh': '标题'});
+  String get scheduleRecipients => _get({'ko': '수신자', 'en': 'To', 'ja': '宛先', 'zh': '收件人'});
+  String get scheduleDate => _get({'ko': '날짜', 'en': 'Date', 'ja': '日付', 'zh': '日期'});
+  String get scheduleIconType => _get({'ko': '아이콘', 'en': 'Icon', 'ja': 'アイコン', 'zh': '图标'});
+  String get scheduleAddToCalendar => _get({'ko': '캘린더에 추가', 'en': 'Add to Calendar', 'ja': 'カレンダーに追加', 'zh': '添加到日历'});
+  String get scheduleAddedSuccess => _get({'ko': '일정이 추가되었습니다!', 'en': 'Schedule added!', 'ja': 'スケジュール追加！', 'zh': '日程已添加！'});
+  
+  // ========== 일정 옵션 메뉴 ==========
+  String get planEdit => _get({'ko': '수정', 'en': 'Edit', 'ja': '編集', 'zh': '编辑'});
+  String get planDelete => _get({'ko': '삭제', 'en': 'Delete', 'ja': '削除', 'zh': '删除'});
+  String get planMoveToEnd => _get({'ko': '끝으로 이동', 'en': 'Move to End', 'ja': '最後に移動', 'zh': '移到末尾'});
+  String get planReschedule => _get({'ko': '날짜 변경', 'en': 'Reschedule', 'ja': '日程変更', 'zh': '改期'});
+  String get planChangeIcon => _get({'ko': '아이콘 변경', 'en': 'Change Icon', 'ja': 'アイコン変更', 'zh': '更改图标'});
+  String get planSelectIcon => _get({'ko': '아이콘 선택', 'en': 'Select Icon', 'ja': 'アイコン選択', 'zh': '选择图标'});
+  String planDeleteConfirm(String title) => _get({'ko': '"$title"을(를) 삭제하시겠습니까?', 'en': 'Delete "$title"?', 'ja': '「$title」を削除しますか？', 'zh': '删除"$title"？'});
+  
+  // ========== 아이콘 타입 (짧은 버전) ==========
+  String get iconNormal => _get({'ko': '일반', 'en': 'Normal', 'ja': '通常', 'zh': '普通'});
+  String get iconHoliday => _get({'ko': '휴일', 'en': 'Holiday', 'ja': '祝日', 'zh': '节日'});
+  String get iconBirthday => _get({'ko': '생일', 'en': 'Birthday', 'ja': '誕生日', 'zh': '生日'});
+  String get iconAnniversary => _get({'ko': '기념일', 'en': 'Anniv.', 'ja': '記念日', 'zh': '纪念'});
+  String get iconWork => _get({'ko': '업무', 'en': 'Work', 'ja': '仕事', 'zh': '工作'});
+  String get iconPersonal => _get({'ko': '개인', 'en': 'Personal', 'ja': '個人', 'zh': '个人'});
+  String get iconImportant => _get({'ko': '중요', 'en': 'Important', 'ja': '重要', 'zh': '重要'});
+  
+  // ========== 카드 ==========
+  String get cardWrite => _get({'ko': '작성', 'en': 'Write', 'ja': '作成', 'zh': '写'});
+  
   // ========== 언어 선택 ==========
   String get languageSelection => _get({'ko': '언어 선택', 'en': 'Select Language', 'ja': '言語選択', 'zh': '选择语言'});
   String get previousLanguage => _get({'ko': '이전 언어', 'en': 'Previous Language', 'ja': '前の言語', 'zh': '上一语言'});

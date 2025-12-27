@@ -491,7 +491,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                    ),
-                   child: const Text("Add Schedule"),
+                   child: Text(strings.scheduleAdd),
                 )
              ],
           ),
@@ -582,7 +582,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              "Add Schedule",
+              ref.watch(appStringsProvider).scheduleAdd,
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -591,7 +591,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              "Add to Calendar & App",
+              ref.watch(appStringsProvider).scheduleAddToCalendar,
               style: TextStyle(
                 fontSize: 14,
                 color: AppTheme.textSecondary.withOpacity(0.8),
@@ -604,10 +604,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   void _showAddEventDialog(BuildContext context) {
+    final strings = ref.watch(appStringsProvider);
     final titleController = TextEditingController();
     DateTime selectedDate = DateTime.now();
     String selectedType = 'Normal'; // Default
     List<Map<String, String>> selectedRecipients = [];
+    
+    // Helper function to get localized icon type label
+    String getIconTypeLabel(String type) {
+      switch (type) {
+        case 'Normal': return strings.iconNormal;
+        case 'Holiday': return strings.iconHoliday;
+        case 'Birthday': return strings.iconBirthday;
+        case 'Anniversary': return strings.iconAnniversary;
+        case 'Work': return strings.iconWork;
+        case 'Personal': return strings.iconPersonal;
+        case 'Important': return strings.iconImportant;
+        default: return type;
+      }
+    }
 
     // Icons map for selection
     final Map<String, IconData> typeIcons = {
@@ -636,7 +651,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
-              title: const Text("Add New Schedule"),
+              title: Text(strings.scheduleAddNew),
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -644,13 +659,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   children: [
                     TextField(
                       controller: titleController,
-                      decoration: const InputDecoration(
-                        labelText: "Title",
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        labelText: strings.scheduleTitle,
+                        border: const OutlineInputBorder(),
                       ),
                     ),
                     const SizedBox(height: 16),
-                    const Text("Recipients", style: TextStyle(fontWeight: FontWeight.bold)),
+                    Text(strings.scheduleRecipients, style: const TextStyle(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
                     Wrap(
                       spacing: 8,
@@ -667,7 +682,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         // 수신자 추가 버튼
                         ActionChip(
                           avatar: const Icon(Icons.add, size: 16),
-                          label: const Text("추가"),
+                          label: Text(strings.add),
                           onPressed: () async {
                             final selected = await ContactPickerDialog.show(context);
                             if (selected != null && selected.isNotEmpty) {
@@ -686,7 +701,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                     const SizedBox(height: 16),
                     ListTile(
-                      title: Text("Date: ${DateFormat('yyyy-MM-dd').format(selectedDate)}"),
+                      title: Text("${strings.scheduleDate}: ${DateFormat('yyyy-MM-dd').format(selectedDate)}"),
                       trailing: const Icon(FontAwesomeIcons.calendar),
                       onTap: () async {
                         final picked = await showDatePicker(
@@ -703,7 +718,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       },
                     ),
                     const SizedBox(height: 16),
-                    const Text("Icon Type", style: TextStyle(fontWeight: FontWeight.bold)),
+                    Text(strings.scheduleIconType, style: const TextStyle(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 10),
                     Wrap(
                       spacing: 12,
@@ -737,7 +752,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                entry.key, 
+                                getIconTypeLabel(entry.key), 
                                 style: TextStyle(
                                   fontSize: 10, 
                                   color: isSelected ? typeColors[entry.key] : Colors.grey
@@ -754,7 +769,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text("Cancel"),
+                  child: Text(strings.cancel),
                 ),
                 ElevatedButton(
                   onPressed: () {
@@ -767,12 +782,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       );
                       Navigator.pop(context);
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Schedule added to Calendar & App!")),
+                        SnackBar(content: Text(strings.scheduleAddedSuccess)),
                       );
                     }
                   },
                   style: ElevatedButton.styleFrom(backgroundColor: AppTheme.accentCoral, foregroundColor: Colors.white),
-                  child: const Text("Add"),
+                  child: Text(strings.add),
                 ),
               ],
             );
@@ -894,10 +909,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(FontAwesomeIcons.pen, size: 14),
-                      const SizedBox(width: 8),
+                      const Icon(FontAwesomeIcons.penNib, size: 16),
+                      const SizedBox(width: 6),
                       Text(
-                        strings.homeWriteCard,
+                        strings.cardWrite,
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 15,
@@ -953,6 +968,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   void _showEditPlanDialog(BuildContext context, DailyPlan plan) {
+    final strings = ref.watch(appStringsProvider);
     final titleController = TextEditingController(text: plan.content);
     DateTime selectedDate = plan.date;
     String selectedType = plan.type;
@@ -963,6 +979,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         selectedRecipients = decoded.map((e) => Map<String, String>.from(e)).toList();
       } catch (e) {
         debugPrint('Error parsing recipients: $e');
+      }
+    }
+    
+    // Helper function for icon type labels
+    String getIconTypeLabel(String type) {
+      switch (type) {
+        case 'Normal': return strings.iconNormal;
+        case 'Holiday': return strings.iconHoliday;
+        case 'Birthday': return strings.iconBirthday;
+        case 'Anniversary': return strings.iconAnniversary;
+        case 'Work': return strings.iconWork;
+        case 'Personal': return strings.iconPersonal;
+        case 'Important': return strings.iconImportant;
+        default: return type;
       }
     }
 
@@ -993,7 +1023,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
-              title: const Text("Edit Schedule"),
+              title: Text(strings.scheduleEdit),
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -1001,13 +1031,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   children: [
                     TextField(
                       controller: titleController,
-                      decoration: const InputDecoration(
-                        labelText: "Title",
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        labelText: strings.scheduleTitle,
+                        border: const OutlineInputBorder(),
                       ),
                     ),
                     const SizedBox(height: 16),
-                    const Text("Recipients", style: TextStyle(fontWeight: FontWeight.bold)),
+                    Text(strings.scheduleRecipients, style: const TextStyle(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
                     Wrap(
                       spacing: 8,
@@ -1023,7 +1053,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         )),
                         ActionChip(
                           avatar: const Icon(Icons.add, size: 16),
-                          label: const Text("Add"),
+                          label: Text(strings.add),
                           onPressed: () {
                             _showContactPicker(context, (selected) {
                               setDialogState(() {
@@ -1040,7 +1070,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                     const SizedBox(height: 16),
                     ListTile(
-                      title: Text("Date: ${DateFormat('yyyy-MM-dd').format(selectedDate)}"),
+                      title: Text("${strings.scheduleDate}: ${DateFormat('yyyy-MM-dd').format(selectedDate)}"),
                       trailing: const Icon(FontAwesomeIcons.calendar),
                       onTap: () async {
                         final picked = await showDatePicker(
@@ -1057,7 +1087,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       },
                     ),
                     const SizedBox(height: 16),
-                    const Text("Icon Type", style: TextStyle(fontWeight: FontWeight.bold)),
+                    Text(strings.scheduleIconType, style: const TextStyle(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 10),
                     Wrap(
                       spacing: 12,
@@ -1090,7 +1120,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 ),
                               ),
                               const SizedBox(height: 4),
-                              Text(entry.key, style: const TextStyle(fontSize: 10)),
+                              Text(getIconTypeLabel(entry.key), style: TextStyle(fontSize: 10, color: isSelected ? typeColors[entry.key] : Colors.grey)),
                             ],
                           ),
                         );
@@ -1102,7 +1132,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text("Cancel"),
+                  child: Text(strings.cancel),
                 ),
                 ElevatedButton(
                     onPressed: () {
@@ -1123,7 +1153,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     backgroundColor: AppTheme.accentCoral,
                     foregroundColor: Colors.white,
                   ),
-                  child: const Text("Save"),
+                  child: Text(strings.save),
                 ),
               ],
             );
@@ -1134,6 +1164,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   void _showPlanOptions(BuildContext context, DailyPlan plan) {
+    final strings = ref.watch(appStringsProvider);
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -1146,7 +1177,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             children: [
               ListTile(
                 leading: const Icon(FontAwesomeIcons.pen),
-                title: const Text('Edit Plan'),
+                title: Text(strings.planEdit),
                 onTap: () {
                   Navigator.pop(context);
                   _showEditPlanDialog(context, plan);
@@ -1154,7 +1185,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
               ListTile(
                 leading: const Icon(FontAwesomeIcons.trash, color: Colors.redAccent),
-                title: const Text('Delete Plan', style: TextStyle(color: Colors.redAccent)),
+                title: Text(strings.planDelete, style: const TextStyle(color: Colors.redAccent)),
                 onTap: () {
                   Navigator.pop(context);
                   _confirmDelete(context, plan);
@@ -1162,7 +1193,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
               ListTile(
                 leading: const Icon(FontAwesomeIcons.arrowDown),
-                title: const Text('Move to End of Today'),
+                title: Text(strings.planMoveToEnd),
                 onTap: () {
                   Navigator.pop(context);
                   ref.read(homeViewModelProvider.notifier).movePlanToEnd(plan.id);
@@ -1170,7 +1201,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
               ListTile(
                 leading: const Icon(FontAwesomeIcons.calendarDays),
-                title: const Text('Reschedule Date'),
+                title: Text(strings.planReschedule),
                 onTap: () {
                   Navigator.pop(context);
                   _pickNewDate(context, plan);
@@ -1178,7 +1209,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
               ListTile(
                 leading: const Icon(FontAwesomeIcons.icons),
-                title: const Text('Change Icon'),
+                title: Text(strings.planChangeIcon),
                 onTap: () {
                   Navigator.pop(context);
                   _pickNewIcon(context, plan);
@@ -1192,6 +1223,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   void _pickNewIcon(BuildContext context, DailyPlan plan) {
+    final strings = ref.watch(appStringsProvider);
+    
+    // Helper function for icon type labels
+    String getIconTypeLabel(String type) {
+      switch (type) {
+        case 'Normal': return strings.iconNormal;
+        case 'Holiday': return strings.iconHoliday;
+        case 'Birthday': return strings.iconBirthday;
+        case 'Anniversary': return strings.iconAnniversary;
+        case 'Work': return strings.iconWork;
+        case 'Personal': return strings.iconPersonal;
+        case 'Important': return strings.iconImportant;
+        default: return type;
+      }
+    }
+    
     showModalBottomSheet(
       context: context,
       builder: (context) {
@@ -1199,21 +1246,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Text('Select Icon', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(strings.planSelectIcon, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               ),
               Wrap(
                 spacing: 20,
                 runSpacing: 20,
                 children: [
-                  _iconOption(context, plan, 'Normal', FontAwesomeIcons.calendarDay, Colors.blue),
-                  _iconOption(context, plan, 'Holiday', FontAwesomeIcons.flag, Colors.redAccent),
-                  _iconOption(context, plan, 'Birthday', FontAwesomeIcons.cakeCandles, Colors.orangeAccent),
-                  _iconOption(context, plan, 'Anniversary', FontAwesomeIcons.heart, Colors.pinkAccent),
-                  _iconOption(context, plan, 'Work', FontAwesomeIcons.briefcase, Colors.brown),
-                  _iconOption(context, plan, 'Personal', FontAwesomeIcons.user, Colors.green),
-                  _iconOption(context, plan, 'Important', FontAwesomeIcons.star, Colors.amber),
+                  _iconOption(context, plan, 'Normal', FontAwesomeIcons.calendarDay, Colors.blue, getIconTypeLabel('Normal')),
+                  _iconOption(context, plan, 'Holiday', FontAwesomeIcons.flag, Colors.redAccent, getIconTypeLabel('Holiday')),
+                  _iconOption(context, plan, 'Birthday', FontAwesomeIcons.cakeCandles, Colors.orangeAccent, getIconTypeLabel('Birthday')),
+                  _iconOption(context, plan, 'Anniversary', FontAwesomeIcons.heart, Colors.pinkAccent, getIconTypeLabel('Anniversary')),
+                  _iconOption(context, plan, 'Work', FontAwesomeIcons.briefcase, Colors.brown, getIconTypeLabel('Work')),
+                  _iconOption(context, plan, 'Personal', FontAwesomeIcons.user, Colors.green, getIconTypeLabel('Personal')),
+                  _iconOption(context, plan, 'Important', FontAwesomeIcons.star, Colors.amber, getIconTypeLabel('Important')),
                 ],
               ),
               const SizedBox(height: 20),
@@ -1224,7 +1271,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
   
-  Widget _iconOption(BuildContext context, DailyPlan plan, String type, IconData icon, Color color) {
+  Widget _iconOption(BuildContext context, DailyPlan plan, String type, IconData icon, Color color, String label) {
     return GestureDetector(
       onTap: () {
         ref.read(homeViewModelProvider.notifier).updatePlanIcon(plan.id, type);
@@ -1237,29 +1284,30 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             child: Icon(icon, color: color),
           ),
           const SizedBox(height: 4),
-          Text(type, style: const TextStyle(fontSize: 12)),
+          Text(label, style: const TextStyle(fontSize: 12)),
         ],
       ),
     );
   }
 
   void _confirmDelete(BuildContext context, DailyPlan plan) {
+    final strings = ref.watch(appStringsProvider);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Plan'),
-        content: Text('Are you sure you want to delete "${plan.content}"?'),
+        title: Text(strings.planDelete),
+        content: Text(strings.planDeleteConfirm(plan.content)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(strings.cancel),
           ),
           TextButton(
             onPressed: () {
               ref.read(homeViewModelProvider.notifier).deletePlan(plan.id);
               Navigator.pop(context);
             },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: Text(strings.delete, style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
