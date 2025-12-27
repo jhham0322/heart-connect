@@ -798,6 +798,80 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
+  // 커스텀 달력 아이콘 위젯 (다국어 지원)
+  Widget _buildCalendarIconWidget(BuildContext context, DateTime date) {
+    final locale = Localizations.localeOf(context).languageCode;
+    
+    // 월 이름을 짧은 형식으로 표시 (JAN, FEB, ... 또는 1월, 2월, ...)
+    String monthName;
+    if (locale == 'ko') {
+      monthName = '${date.month}월';
+    } else if (locale == 'ja') {
+      monthName = '${date.month}月';
+    } else if (locale == 'zh') {
+      monthName = '${date.month}月';
+    } else {
+      // 영어 및 기타 - 짧은 월 이름
+      const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+      monthName = months[date.month - 1];
+    }
+    
+    return Container(
+      width: 80,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.15),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // 빨간색 헤더 (월)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            decoration: const BoxDecoration(
+              color: Color(0xFFEF5350),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+            ),
+            child: Text(
+              monthName,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
+            ),
+          ),
+          // 흰색 바디 (일)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(bottom: Radius.circular(12)),
+            ),
+            child: Text(
+              '${date.day}',
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF3E2723),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildDailyPlanCard(DailyPlan plan, bool isActive) {
     final strings = ref.watch(appStringsProvider);
     // Determine Icon and Emoji based on plan type
@@ -858,11 +932,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // 이모지
-          Text(
-            emoji,
-            style: const TextStyle(fontSize: 72),
-          ),
+          // 커스텀 달력 아이콘 (다국어 지원)
+          _buildCalendarIconWidget(context, plan.date),
           const SizedBox(height: 16),
           // 제목
           Text(
