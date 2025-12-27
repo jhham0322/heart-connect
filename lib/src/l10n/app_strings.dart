@@ -1,7 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:heart_connect/l10n/app_localizations.dart';
+import 'package:heart_connect/l10n/app_localizations_ko.dart';
+import 'package:heart_connect/l10n/app_localizations_en.dart';
+import 'package:heart_connect/l10n/app_localizations_ja.dart';
+import 'package:heart_connect/l10n/app_localizations_zh.dart';
 import 'package:heart_connect/src/providers/locale_provider.dart';
+
+/// languageCode에 맞는 AppLocalizations 인스턴스 생성
+AppLocalizations _getLocalizationsByCode(String languageCode) {
+  switch (languageCode) {
+    case 'en':
+      return AppLocalizationsEn();
+    case 'ja':
+      return AppLocalizationsJa();
+    case 'zh':
+      return AppLocalizationsZh();
+    case 'ko':
+    default:
+      return AppLocalizationsKo();
+  }
+}
 
 /// AppStrings가 AppLocalizations를 래핑하여 기존 코드 호환성 유지
 /// ref.watch(appStringsProvider)로 계속 사용 가능
@@ -411,18 +430,17 @@ class AppStrings {
   String get openSettings => _fallback(_l10n?.openSettings, '설정 열기');
 }
 
-/// AppStrings Provider - BuildContext를 사용하여 AppLocalizations를 가져옴
+/// AppStrings Provider - languageCode에 맞는 인스턴스 자동 생성
 final appStringsProvider = Provider<AppStrings>((ref) {
-  // 이 Provider는 context 없이는 AppLocalizations를 가져올 수 없음
-  // 따라서 localeProvider만 사용하여 languageCode를 설정
   final locale = ref.watch(localeProvider);
-  return AppStrings(null, locale.languageCode);
+  final l10n = _getLocalizationsByCode(locale.languageCode);
+  return AppStrings(l10n, locale.languageCode);
 });
 
 /// Context-aware Provider
 final appStringsWithContextProvider = Provider.family<AppStrings, BuildContext>((ref, context) {
-  final l10n = AppLocalizations.of(context);
   final locale = ref.watch(localeProvider);
+  final l10n = AppLocalizations.of(context) ?? _getLocalizationsByCode(locale.languageCode);
   return AppStrings(l10n, locale.languageCode);
 });
 
@@ -430,6 +448,8 @@ final appStringsWithContextProvider = Provider.family<AppStrings, BuildContext>(
 extension AppStringsExtension on BuildContext {
   AppStrings get strings {
     final l10n = AppLocalizations.of(this);
-    return AppStrings(l10n, l10n?.localeName ?? 'ko');
+    final langCode = l10n?.localeName ?? 'ko';
+    return AppStrings(l10n ?? _getLocalizationsByCode(langCode), langCode);
   }
 }
+
