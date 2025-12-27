@@ -239,15 +239,20 @@ class _ContactPickerDialogState extends ConsumerState<ContactPickerDialog> {
             ),
             const SizedBox(height: 10),
             
-            // 필터 버튼들
-            Row(
-              children: [
-                _buildFilterChip('전체', Icons.people),
-                const SizedBox(width: 8),
-                _buildFilterChip('즐겨찾기', Icons.star),
-                const SizedBox(width: 8),
-                _buildFilterChip('가족', Icons.family_restroom),
-              ],
+            // 필터 버튼들 (좁은 화면에서 아이콘만 표시)
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final isNarrow = constraints.maxWidth < 280;
+                return Row(
+                  children: [
+                    Expanded(child: _buildFilterChip('전체', Icons.people, isNarrow)),
+                    const SizedBox(width: 6),
+                    Expanded(child: _buildFilterChip('즐겨찾기', Icons.star, isNarrow)),
+                    const SizedBox(width: 6),
+                    Expanded(child: _buildFilterChip('가족', Icons.family_restroom, isNarrow)),
+                  ],
+                );
+              },
             ),
             const SizedBox(height: 10),
             
@@ -335,8 +340,27 @@ class _ContactPickerDialogState extends ConsumerState<ContactPickerDialog> {
     );
   }
   
-  Widget _buildFilterChip(String label, IconData icon) {
+  Widget _buildFilterChip(String label, IconData icon, bool isNarrow) {
     final isActive = _selectedFilter == label;
+    
+    // 좁은 화면에서는 아이콘만 표시 (툴팁으로 라벨 제공)
+    if (isNarrow) {
+      return Tooltip(
+        message: label,
+        child: FilterChip(
+          label: Icon(icon, size: 18, color: isActive ? Colors.white : Colors.grey[700]),
+          selected: isActive,
+          selectedColor: const Color(0xFFF29D86),
+          backgroundColor: Colors.grey[200],
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          onSelected: (selected) {
+            setState(() => _selectedFilter = label);
+          },
+        ),
+      );
+    }
+    
+    // 넓은 화면에서는 아이콘 + 텍스트
     return ChoiceChip(
       label: Text(label),
       avatar: Icon(icon, size: 16, color: isActive ? Colors.white : Colors.grey[700]),
@@ -345,7 +369,9 @@ class _ContactPickerDialogState extends ConsumerState<ContactPickerDialog> {
       labelStyle: TextStyle(
         color: isActive ? Colors.white : Colors.grey[700],
         fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+        fontSize: 12,
       ),
+      padding: const EdgeInsets.symmetric(horizontal: 4),
       onSelected: (selected) {
         setState(() => _selectedFilter = label);
       },
