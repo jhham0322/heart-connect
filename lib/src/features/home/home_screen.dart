@@ -1438,7 +1438,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                 )
               : ListView.builder(
-                  padding: const EdgeInsets.only(bottom: 80),
+                  padding: const EdgeInsets.only(bottom: 120),
                   physics: const AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
                   itemCount: events.length,
                   itemBuilder: (context, index) {
