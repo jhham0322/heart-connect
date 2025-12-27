@@ -8,6 +8,8 @@ import 'package:heart_connect/src/features/home/home_view_model.dart';
 import 'package:heart_connect/src/features/database/database_provider.dart';
 import 'package:heart_connect/src/features/calendar/calendar_service.dart';
 import 'package:heart_connect/src/features/onboarding/onboarding_screen.dart';
+import 'package:heart_connect/src/services/localization_service.dart';
+import 'package:heart_connect/src/providers/locale_provider.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   final VoidCallback onInitComplete;
@@ -356,9 +358,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with TickerProvider
                   ),
                   
                   const SizedBox(height: 24),
-                  const Text(
-                    'Heart-Connect',
-                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Color(0xFF5D4037), letterSpacing: 1.2),
+                  Text(
+                    Tr.get(Texts.appNameEn, ref),
+                    style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Color(0xFF5D4037), letterSpacing: 1.2),
                   ),
                   
                   const SizedBox(height: 40),
@@ -375,7 +377,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with TickerProvider
                         boxShadow: [BoxShadow(color: const Color(0xFFFF8A65).withAlpha(51), blurRadius: 15, offset: const Offset(0, 5))],
                       ),
                       child: Text(
-                        _userName.isNotEmpty ? '안녕하세요, $_userName 님! 👋' : '',
+                        _userName.isNotEmpty 
+                            ? Tr.getWithArgs(Texts.splashWelcome, {'name': _userName}, ref)
+                            : '',
                         style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Color(0xFF795548)),
                       ),
                     ),
@@ -395,6 +399,15 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with TickerProvider
                           child: CircularProgressIndicator(
                             strokeWidth: 2.5,
                             valueColor: AlwaysStoppedAnimation<Color>(const Color(0xFFFF8A65).withAlpha(180)),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          _dataSynced ? Tr.get(Texts.readyComplete, ref) : Tr.get(Texts.dataSyncing, ref),
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: const Color(0xFF5D4037).withAlpha(150),
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                         const SizedBox(height: 12),

@@ -17,6 +17,8 @@ import '../database/app_database.dart'; // Import for DailyPlan
 import '../database/database_provider.dart'; // Added for appDatabaseProvider
 import '../../utils/phone_formatter.dart'; // Added phone formatter utility
 import '../../widgets/contact_picker_dialog.dart'; // Common contact picker dialog
+import 'package:heart_connect/src/services/localization_service.dart';
+import 'package:heart_connect/src/providers/locale_provider.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});

@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:heart_connect/src/services/localization_service.dart';
 import 'package:heart_connect/src/providers/locale_provider.dart';
 
 /// 첫 실행 시 온보딩 화면
@@ -187,9 +188,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           const SizedBox(height: 32),
           
           // 앱 이름
-          const Text(
-            '마음이음',
-            style: TextStyle(
+          Text(
+            Tr.get(Texts.appName, ref),
+            style: const TextStyle(
               fontSize: 36,
               fontWeight: FontWeight.bold,
               color: Color(0xFF5D4037),
@@ -199,9 +200,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           
           const SizedBox(height: 8),
           
-          const Text(
-            'Heart-Connect',
-            style: TextStyle(
+          Text(
+            Tr.get(Texts.appNameEn, ref),
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w500,
               color: Color(0xFF8D6E63),
@@ -233,10 +234,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   size: 40,
                 ),
                 const SizedBox(height: 16),
-                const Text(
-                  '기쁨과 감사의 마음을\n주변 사람들과 나누세요',
+                Text(
+                  Tr.get(Texts.onboardingWelcomeTitle, ref),
                   textAlign: TextAlign.center,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF5D4037),
@@ -245,7 +246,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  '마음이음은\n소중한 사람들에게\n따뜻한 카드와 메시지를\n보낼 수 있는 앱입니다.\n\n생일, 기념일, 특별한 날에\n진심을 담은 마음을\n전해보세요.',
+                  Tr.get(Texts.onboardingWelcomeDesc, ref),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 14,
@@ -355,9 +356,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 ),
                 elevation: 3,
               ),
-              child: const Text(
-                '시작하기',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              child: Text(
+                Tr.get(Texts.startButton, ref),
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
           ),
@@ -394,9 +395,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           
           const SizedBox(height: 32),
           
-          const Text(
-            '연락처 접근 권한',
-            style: TextStyle(
+          Text(
+            Tr.get(Texts.contactsPermTitle, ref),
+            style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
               color: Color(0xFF5D4037),
@@ -421,7 +422,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     Icon(Icons.info_outline, color: Colors.green[700], size: 20),
                     const SizedBox(width: 8),
                     Text(
-                      '왜 필요한가요?',
+                      Tr.get(Texts.contactsPermWhy, ref),
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -432,8 +433,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  '연락처 정보는 가족, 친구들에게 카드를 보내기 위해 필요합니다.\n\n'
-                  '저장된 연락처에서 수신자를 쉽게 선택할 수 있어요.',
+                  Tr.get(Texts.contactsPermDesc, ref),
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.brown[700],
@@ -460,10 +460,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    '🔒 개인정보 보호 안내\n\n'
-                    '수집되는 정보는 사용자님의 핸드폰 안에서만 사용되며, '
-                    '핸드폰 밖으로 반출되지 않습니다.\n\n'
-                    '권한을 허용하지 않으시면 수동으로 연락처를 입력해야 합니다.',
+                    Tr.get(Texts.contactsPermPrivacy, ref),
                     style: TextStyle(
                       fontSize: 13,
                       color: Colors.green[800],
@@ -483,7 +480,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             child: ElevatedButton.icon(
               onPressed: _requestContactsPermission,
               icon: const Icon(Icons.check_circle_outline),
-              label: const Text('연락처 접근 허용'),
+              label: Text(Tr.get(Texts.contactsPermButton, ref)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF4CAF50),
                 foregroundColor: Colors.white,
@@ -500,7 +497,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           TextButton(
             onPressed: _nextPage,
             child: Text(
-              '나중에 설정하기',
+              Tr.get(Texts.skipSettings, ref),
               style: TextStyle(
                 color: Colors.grey[600],
                 fontSize: 14,
@@ -540,9 +537,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           
           const SizedBox(height: 32),
           
-          const Text(
-            '캘린더 접근 권한',
-            style: TextStyle(
+          Text(
+            Tr.get(Texts.calendarPermTitle, ref),
+            style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
               color: Color(0xFF5D4037),
@@ -567,7 +564,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     Icon(Icons.info_outline, color: Colors.blue[700], size: 20),
                     const SizedBox(width: 8),
                     Text(
-                      '왜 필요한가요?',
+                      Tr.get(Texts.calendarPermWhy, ref),
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -578,8 +575,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  '캘린더 정보는 가족과 친구의 생일, 기념일, 이벤트 정보를 가져오기 위해 필요합니다.\n\n'
-                  '중요한 날을 놓치지 않고 미리 알림을 받을 수 있어요!',
+                  Tr.get(Texts.calendarPermDesc, ref),
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.brown[700],
@@ -606,10 +602,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    '🔒 개인정보 보호 안내\n\n'
-                    '수집되는 정보는 사용자님의 핸드폰 안에서만 사용되며, '
-                    '핸드폰 밖으로 반출되지 않습니다.\n\n'
-                    '권한을 허용하지 않으시면 수동으로 일정을 입력해야 합니다.',
+                    Tr.get(Texts.calendarPermPrivacy, ref),
                     style: TextStyle(
                       fontSize: 13,
                       color: Colors.blue[800],
@@ -629,7 +622,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             child: ElevatedButton.icon(
               onPressed: _requestCalendarPermission,
               icon: const Icon(Icons.check_circle_outline),
-              label: const Text('캘린더 접근 허용'),
+              label: Text(Tr.get(Texts.calendarPermButton, ref)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF2196F3),
                 foregroundColor: Colors.white,
@@ -646,7 +639,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           TextButton(
             onPressed: _nextPage,
             child: Text(
-              '나중에 설정하기',
+              Tr.get(Texts.skipSettings, ref),
               style: TextStyle(
                 color: Colors.grey[600],
                 fontSize: 14,

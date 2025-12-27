@@ -16,6 +16,8 @@ import 'package:drift/drift.dart' hide Column;
 import 'package:file_selector/file_selector.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:heart_connect/src/utils/app_version.dart';
+import 'package:heart_connect/src/services/localization_service.dart';
+import 'package:heart_connect/src/providers/locale_provider.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -28,26 +30,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   bool _notificationsEnabled = true;
   TimeOfDay _notificationTime = const TimeOfDay(hour: 9, minute: 0);
   bool _brandingEnabled = true;
+  bool _brandingEnabled = true;
   String _userName = 'Heart-Connect';
-  String _selectedLanguage = 'ko';
   
-  // G20 언어 목록
-  final Map<String, String> _languages = {
-    'en': 'English',
-    'ko': '한국어',
-    'ja': '日本語',
-    'zh': '中文',
-    'de': 'Deutsch',
-    'fr': 'Français',
-    'es': 'Español',
-    'pt': 'Português',
-    'it': 'Italiano',
-    'ru': 'Русский',
-    'ar': 'العربية',
-    'hi': 'हिन्दी',
-    'tr': 'Türkçe',
-    'id': 'Bahasa Indonesia',
-  };
+  // _selectedLanguage는 ref.watch(localeProvider)로 대체
+  // _languages 맵은 supportedLanguages (locale_provider.dart)로 대체
 
   @override
   void initState() {
@@ -61,7 +48,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       _notificationsEnabled = prefs.getBool('notifications_enabled') ?? true;
       _brandingEnabled = prefs.getBool('branding_enabled') ?? true;
       _userName = prefs.getString('user_name') ?? 'Heart-Connect';
-      _selectedLanguage = prefs.getString('selected_language') ?? 'ko';
+      // _selectedLanguage 로직 제거
       
       final timeStr = prefs.getString('notification_time');
       if (timeStr != null) {
@@ -76,7 +63,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     await prefs.setBool('notifications_enabled', _notificationsEnabled);
     await prefs.setBool('branding_enabled', _brandingEnabled);
     await prefs.setString('user_name', _userName);
-    await prefs.setString('selected_language', _selectedLanguage);
+    // selected_language 저장 로직 제거
     await prefs.setString('notification_time', '${_notificationTime.hour}:${_notificationTime.minute}');
   }
 
@@ -813,46 +800,38 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               child: const Icon(FontAwesomeIcons.globe, color: Colors.green, size: 20),
             ),
             const SizedBox(width: 12),
-            const Expanded(child: Text('언어 설정', style: TextStyle(fontSize: 18))),
+            Expanded(child: Text(Tr.get(Texts.language, ref), style: const TextStyle(fontSize: 18))),
           ],
         ),
         content: SizedBox(
           width: double.maxFinite,
-          height: 350,
+          height: 400,
           child: ListView.builder(
-            itemCount: _languages.length,
+            shrinkWrap: true,
+            itemCount: supportedLanguages.length,
             itemBuilder: (context, index) {
-              final entry = _languages.entries.elementAt(index);
-              final isSelected = _selectedLanguage == entry.key;
+              final entry = supportedLanguages.entries.elementAt(index);
+              final isSelected = ref.read(localeProvider).languageCode == entry.key;
               
-              return ListTile(
-                leading: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: isSelected ? Colors.green.withOpacity(0.2) : Colors.grey.withOpacity(0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Text(
-                    entry.key.toUpperCase(),
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 10,
-                      color: isSelected ? Colors.green : Colors.grey,
-                    ),
-                  ),
-                ),
+              return RadioListTile<String>(
                 title: Text(entry.value),
-                trailing: isSelected ? const Icon(Icons.check_circle, color: Colors.green) : null,
-                onTap: () {
-                  setState(() {
-                    _selectedLanguage = entry.key;
-                  });
-                  _saveSettings();
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('언어가 ${entry.value}로 변경되었습니다. (앱 재시작 필요)')),
-                  );
+                value: entry.key,
+                groupValue: ref.watch(localeProvider).languageCode,
+                activeColor: Colors.green,
+                onChanged: (value) async {
+                  if (value != null) {
+                    ref.read(localeProvider.notifier).setLocale(value);
+                    Navigator.pop(context);
+                  }
                 },
+                secondary: Text(
+                  entry.key.toUpperCase(), 
+                  style: TextStyle(
+                    color: Colors.grey, 
+                    fontSize: 12,
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal
+                  )
+                ),
               );
             },
           ),
@@ -860,7 +839,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('취소'),
+            child: Text(Tr.get(Texts.cancel, ref), style: const TextStyle(color: Colors.grey)),
           ),
         ],
       ),
