@@ -6,12 +6,17 @@ import io.flutter.plugin.common.MethodChannel
 import android.provider.CalendarContract
 import android.database.Cursor
 import android.telephony.SmsManager
+import android.content.Intent
+import android.net.Uri
+import androidx.core.content.FileProvider
+import java.io.File
 import java.util.Date
 
 class MainActivity : FlutterActivity() {
     private val CHANNEL = "com.heartconnect/ai"
     private val CALENDAR_CHANNEL = "com.heartconnect/calendar"
     private val SMS_CHANNEL = "com.heartconnect/sms"
+    private val MMS_CHANNEL = "com.heartconnect/mms"
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -108,6 +113,89 @@ class MainActivity : FlutterActivity() {
                     result.notImplemented()
                 }
             }
+        }
+        
+        // MMS Channel - Intent로 문자 앱 열기 (이미지 첨부)
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, MMS_CHANNEL).setMethodCallHandler { call, result ->
+            when (call.method) {
+                "sendMms" -> {
+                    val phone = call.argument<String>("phone")
+                    val imagePath = call.argument<String>("imagePath")
+                    val message = call.argument<String>("message") ?: ""
+                    
+                    if (phone != null && imagePath != null) {
+                        try {
+                            val success = sendMmsIntent(phone, imagePath, message)
+                            result.success(success)
+                        } catch (e: Exception) {
+                            android.util.Log.e("MMS", "MMS Intent 오류: ${e.message}")
+                            result.success(false)
+                        }
+                    } else {
+                        result.error("INVALID_ARGS", "Phone and imagePath are required", null)
+                    }
+                }
+                else -> {
+                    result.notImplemented()
+                }
+            }
+        }
+    }
+    
+    /**
+     * MMS Intent로 문자 앱 열기 (이미지 첨부)
+     */
+    private fun sendMmsIntent(phoneNumber: String, imagePath: String, message: String): Boolean {
+        return try {
+            val imageFile = File(imagePath)
+            if (!imageFile.exists()) {
+                android.util.Log.e("MMS", "이미지 파일 없음: $imagePath")
+                return false
+            }
+            
+            // FileProvider를 통해 URI 생성
+            val imageUri = FileProvider.getUriForFile(
+                this,
+                "${packageName}.fileprovider",
+                imageFile
+            )
+            
+            // MMS Intent 생성
+            val intent = Intent(Intent.ACTION_SEND).apply {
+                type = "image/*"
+                putExtra("address", phoneNumber)
+                putExtra("sms_body", message)
+                putExtra(Intent.EXTRA_STREAM, imageUri)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                
+                // 기본 메시지 앱으로 보내기
+                setPackage(getDefaultSmsPackage())
+            }
+            
+            // 기본 SMS 앱이 없으면 chooser 사용
+            if (intent.resolveActivity(packageManager) == null) {
+                intent.setPackage(null)
+                startActivity(Intent.createChooser(intent, "문자로 보내기"))
+            } else {
+                startActivity(intent)
+            }
+            
+            android.util.Log.d("MMS", "MMS Intent 성공: $phoneNumber")
+            true
+        } catch (e: Exception) {
+            android.util.Log.e("MMS", "MMS Intent 오류: ${e.message}")
+            false
+        }
+    }
+    
+    /**
+     * 기본 SMS 앱 패키지명 가져오기
+     */
+    private fun getDefaultSmsPackage(): String? {
+        return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
+            android.provider.Telephony.Sms.getDefaultSmsPackage(this)
+        } else {
+            null
         }
     }
     

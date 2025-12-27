@@ -27,6 +27,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:file_selector/file_selector.dart'; // File Picker
 import 'package:image/image.dart' as img; // JPEG 변환용
 import 'package:heart_connect/src/services/social_share_service.dart'; // 소셜 미디어 공유
+import 'package:heart_connect/src/services/mms_intent_service.dart'; // MMS Intent 발송
 import 'package:heart_connect/src/l10n/app_strings.dart';
 import 'package:heart_connect/src/providers/locale_provider.dart';
 
@@ -3938,7 +3939,7 @@ class _RecipientManagerDialogState extends ConsumerState<RecipientManagerDialog>
   Future<void> _startSending() async {
     if (_isSending) return;
     
-    // 1. 즉시 상태 업데이트 (버튼 클릭 등 사용자 인터랙션에서는 setState 직접 호출이 반응성 좋음)
+    // 1. 즉시 상태 업데이트
     setState(() {
       _isSending = true;
       if (_pendingRecipients.isEmpty) {
@@ -3949,120 +3950,121 @@ class _RecipientManagerDialogState extends ConsumerState<RecipientManagerDialog>
       }
     });
     
-    // 2. 실제 발송 로직은 UI 렌더링 후 실행되도록 약간의 딜레이 부여
-    // 이렇게 하면 "발송 중..." 상태가 화면에 그려질 시간을 확보함
-    await Future.delayed(const Duration(milliseconds: 100));
-    
-    await _executeSendingLoop();
+    // 2. MMS Intent 순차 발송
+    await _executeMmsIntentSending();
   }
   
-  /// 실제 발송 루프 - UI 업데이트와 분리되어 실행됨
-  Future<void> _executeSendingLoop() async {
+  /// MMS Intent 순차 발송 - 한 명씩 문자 앱을 열어 사용자가 발송
+  Future<void> _executeMmsIntentSending() async {
     while (_pendingRecipients.isNotEmpty && _isSending) {
       if (!mounted) break;
 
-      int batchSize = 5;
-      if (_pendingRecipients.length < batchSize) batchSize = _pendingRecipients.length;
-      final batch = _pendingRecipients.take(batchSize).toList();
-
-      // Wait 3 seconds
-      await Future.delayed(const Duration(seconds: 3));
+      final item = _pendingRecipients.first;
       
-      if (!mounted || !_isSending) break;
-
-      // Process batch (DB inserts)
-      for (var item in batch) {
-         try {
-           // 먼저 대시 포맷 전화번호 추출 시도
-           String? phoneForDb = _extractDashedPhone(item);
-           debugPrint('[발송] 아이템: $item, 대시형식 추출: $phoneForDb');
-           
-           // 대시 포맷이 없으면 숫자만 추출하여 포맷팅
-           if (phoneForDb == null) {
-             // 괄호 안의 내용도 확인 (예: "이름 (01012345678)")
-             String rawDigits = item;
-             final parenMatch = RegExp(r'\(([^)]+)\)').firstMatch(item);
-             if (parenMatch != null) {
-               rawDigits = parenMatch.group(1) ?? item;
-             }
-             final digits = rawDigits.replaceAll(RegExp(r'[^0-9]'), '');
-             debugPrint('[발송] 숫자 추출: $digits (길이: ${digits.length})');
-             if (digits.length >= 10 && digits.length <= 11) {
-               phoneForDb = _formatPhoneDigits(digits);
-               debugPrint('[발송] 포맷팅 결과: $phoneForDb');
-             }
-           }
-           
-           if (phoneForDb != null) {
-             // Try to find contact
-             var contact = await (widget.database.select(widget.database.contacts)..where((t) => t.phone.equals(phoneForDb!))).getSingleOrNull();
-             
-             if (contact != null) {
-               await widget.database.insertHistory(HistoryCompanion(
-                  contactId: Value(contact.id),
-                  type: const Value('SENT'),
-                  message: Value(widget.messageContent), 
-                  imagePath: Value(widget.savedPath),
-                  eventDate: Value(DateTime.now()),
-                ));
-               _successCount++;
-             } else {
-               // 연락처가 DB에 없으면 새로 생성하고 발송 성공 처리
-               // item에서 이름 추출 (전화번호 앞부분)
-               String extractedName = item;
-               final phoneIndex = item.indexOf(phoneForDb!);
-               if (phoneIndex > 0) {
-                 extractedName = item.substring(0, phoneIndex).replaceAll(RegExp(r'[()]'), '').trim();
-               }
-               
-               // 빈 이름이면 전화번호로 대체
-               if (extractedName.isEmpty) {
-                 extractedName = phoneForDb;
-               }
-               
-               final newId = await widget.database.insertContact(ContactsCompanion(
-                 name: Value(extractedName),
-                 phone: Value(phoneForDb),
-               ));
-               await widget.database.insertHistory(HistoryCompanion(
-                  contactId: Value(newId),
-                  type: const Value('SENT'),
-                  message: Value(widget.messageContent), 
-                  imagePath: Value(widget.savedPath),
-                  eventDate: Value(DateTime.now()),
-                ));
-                _successCount++;
-             }
-           } else {
-             _failureCount++;
-           }
-         } catch (e) {
-           _failureCount++;
-           debugPrint("Send Error: $e");
-         }
+      // 전화번호 추출
+      String? phoneNumber = _extractDashedPhone(item);
+      if (phoneNumber == null) {
+        final parenMatch = RegExp(r'\(([^)]+)\)').firstMatch(item);
+        String rawDigits = parenMatch != null ? (parenMatch.group(1) ?? item) : item;
+        final digits = rawDigits.replaceAll(RegExp(r'[^0-9]'), '');
+        if (digits.length >= 10 && digits.length <= 11) {
+          phoneNumber = digits;
+        }
       }
-
-      if (!mounted) break;
-
-      // 배치 완료 후 상태 업데이트 - 다음 프레임에 예약
-      for (var item in batch) {
+      
+      if (phoneNumber != null) {
+        debugPrint('[MMS발송] 수신자: $item, 전화번호: $phoneNumber');
+        
+        // MMS Intent로 문자 앱 열기
+        final success = await MmsIntentService.sendMmsIntent(
+          phoneNumber: phoneNumber,
+          imagePath: widget.savedPath,
+          message: widget.messageContent,
+        );
+        
+        if (success) {
+          // DB에 발송 기록 저장
+          try {
+            final phoneForDb = _formatPhoneDigits(phoneNumber.replaceAll('-', ''));
+            var contact = await (widget.database.select(widget.database.contacts)
+              ..where((t) => t.phone.equals(phoneForDb))).getSingleOrNull();
+            
+            if (contact == null) {
+              // 연락처가 없으면 새로 생성
+              String extractedName = item;
+              final phoneIndex = item.indexOf(phoneForDb);
+              if (phoneIndex > 0) {
+                extractedName = item.substring(0, phoneIndex).replaceAll(RegExp(r'[()]'), '').trim();
+              }
+              if (extractedName.isEmpty) extractedName = phoneForDb;
+              
+              final newId = await widget.database.insertContact(ContactsCompanion(
+                name: Value(extractedName),
+                phone: Value(phoneForDb),
+              ));
+              
+              // 새로 생성된 연락처로 History 저장
+              await widget.database.insertHistory(HistoryCompanion(
+                contactId: Value(newId),
+                type: const Value('SENT'),
+                message: Value(widget.messageContent),
+                imagePath: Value(widget.savedPath),
+                eventDate: Value(DateTime.now()),
+              ));
+              _successCount++;
+            } else {
+              await widget.database.insertHistory(HistoryCompanion(
+                contactId: Value(contact.id),
+                type: const Value('SENT'),
+                message: Value(widget.messageContent),
+                imagePath: Value(widget.savedPath),
+                eventDate: Value(DateTime.now()),
+              ));
+              _successCount++;
+            }
+          } catch (e) {
+            debugPrint('[MMS발송] DB 저장 오류: $e');
+            _failureCount++;
+          }
+        } else {
+          _failureCount++;
+        }
+        
+        // 현재 수신자 완료
         _pendingRecipients.remove(item);
-      }
-      _sentCount += batchSize;
-      
-      // UI 업데이트
-      _safeSetState(() {});
-
-      if (!_autoContinue && _pendingRecipients.isNotEmpty) {
-        _isSending = false;
-        _safeSetState(() {});
-        break;
+        _sentCount++;
+        
+        // UI 업데이트
+        if (mounted) {
+          setState(() {});
+        }
+        
+        // 다음 수신자가 있으면 사용자에게 확인
+        if (_pendingRecipients.isNotEmpty && _isSending) {
+          // 다음 발송 대기 (사용자가 문자 앱에서 발송 후 돌아올 시간)
+          if (!_autoContinue) {
+            // 자동 계속이 아니면 중지
+            _isSending = false;
+            if (mounted) setState(() {});
+            break;
+          } else {
+            // 자동 계속이면 잠시 대기 후 다음 발송
+            await Future.delayed(const Duration(seconds: 2));
+          }
+        }
+      } else {
+        // 전화번호 추출 실패
+        _pendingRecipients.remove(item);
+        _failureCount++;
+        _sentCount++;
+        if (mounted) setState(() {});
       }
     }
     
-    if (mounted && _isSending && _pendingRecipients.isEmpty) {
+    // 발송 완료
+    if (mounted && _pendingRecipients.isEmpty) {
       _isSending = false;
-      _safeSetState(() {
+      setState(() {
         _showResultPopup();
       });
     }
