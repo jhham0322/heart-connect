@@ -98,6 +98,21 @@ class AppStrings {
   String get contactsFavorites => _get({'ko': '즐겨찾기', 'en': 'Favorites', 'ja': 'お気に入り', 'zh': '收藏'});
   String get contactsEmpty => _get({'ko': '연락처가 없습니다', 'en': 'No contacts', 'ja': '連絡先がありません', 'zh': '没有联系人'});
   String get contactsSearchHint => _get({'ko': '이름 또는 전화번호 검색', 'en': 'Search name or phone number', 'ja': '名前または電話番号で検索', 'zh': '搜索姓名或电话号码'});
+  String get contactsMyPeople => _get({'ko': '내 사람들', 'en': 'My People', 'ja': 'マイピープル', 'zh': '我的人脉'});
+  String get contactsMemories => _get({'ko': '추억 기록', 'en': 'Memories', 'ja': '思い出', 'zh': '回忆记录'});
+  String get contactsRecent => _get({'ko': '최근 연락', 'en': 'Recent', 'ja': '最近', 'zh': '最近联系'});
+  String get contactsSearchPlaceholder => _get({'ko': '이름, 태그 검색', 'en': 'Search name, tag', 'ja': '名前、タグで検索', 'zh': '搜索姓名、标签'});
+  String get contactsNoMemories => _get({'ko': '아직 추억 기록이 없습니다.', 'en': 'No memories yet.', 'ja': 'まだ思い出がありません。', 'zh': '还没有回忆记录。'});
+  
+  // ========== 공유하기 ==========
+  String get shareTitle => _get({'ko': '공유하기', 'en': 'Share', 'ja': '共有する', 'zh': '分享'});
+  String get shareOtherApps => _get({'ko': '기타 앱으로 공유', 'en': 'Share to other apps', 'ja': '他のアプリで共有', 'zh': '分享到其他应用'});
+  String get shareKakaoTalk => _get({'ko': '카카오톡', 'en': 'KakaoTalk', 'ja': 'カカオトーク', 'zh': 'KakaoTalk'});
+  String get shareInstagram => _get({'ko': '인스타그램', 'en': 'Instagram', 'ja': 'Instagram', 'zh': 'Instagram'});
+  String get shareFacebook => _get({'ko': '페이스북', 'en': 'Facebook', 'ja': 'Facebook', 'zh': 'Facebook'});
+  String get shareTwitter => _get({'ko': 'X (트위터)', 'en': 'X (Twitter)', 'ja': 'X (Twitter)', 'zh': 'X (Twitter)'});
+  String get shareWhatsApp => _get({'ko': 'WhatsApp', 'en': 'WhatsApp', 'ja': 'WhatsApp', 'zh': 'WhatsApp'});
+  String get shareTelegram => _get({'ko': '텔레그램', 'en': 'Telegram', 'ja': 'Telegram', 'zh': 'Telegram'});
   String get contactsSendCard => _get({'ko': '카드 보내기', 'en': 'Send Card', 'ja': 'カードを送る', 'zh': '发送卡片'});
   String get contactsCall => _get({'ko': '전화', 'en': 'Call', 'ja': '電話', 'zh': '打电话'});
   String get contactsMessage => _get({'ko': '문자', 'en': 'Message', 'ja': 'メッセージ', 'zh': '短信'});
@@ -252,13 +267,6 @@ class AppStrings {
   String get dateNextWeek => _get({'ko': '다음 주', 'en': 'Next week', 'ja': '来週', 'zh': '下周'});
   String get dateThisMonth => _get({'ko': '이번 달', 'en': 'This month', 'ja': '今月', 'zh': '本月'});
   String daysRemaining(int days) => _get({'ko': '$days일 남음', 'en': '$days days left', 'ja': 'あと$days日', 'zh': '还剩$days天'});
-  
-  // ========== 소셜 공유 ==========
-  String get shareTitle => _get({'ko': '공유하기', 'en': 'Share', 'ja': '共有', 'zh': '分享'});
-  String get shareViaKakao => _get({'ko': '카카오톡으로 공유', 'en': 'Share via KakaoTalk', 'ja': 'カカオトークで共有', 'zh': '通过KakaoTalk分享'});
-  String get shareViaInstagram => _get({'ko': '인스타그램으로 공유', 'en': 'Share via Instagram', 'ja': 'Instagramで共有', 'zh': '通过Instagram分享'});
-  String get shareViaWhatsApp => _get({'ko': '왓츠앱으로 공유', 'en': 'Share via WhatsApp', 'ja': 'WhatsAppで共有', 'zh': '通过WhatsApp分享'});
-  String get shareMore => _get({'ko': '더 많은 앱으로 공유', 'en': 'Share via more apps', 'ja': '他のアプリで共有', 'zh': '通过更多应用分享'});
   
   // ========== 이벤트 종류 ==========
   String get eventBirthday => _get({'ko': '생일', 'en': 'Birthday', 'ja': '誕生日', 'zh': '生日'});

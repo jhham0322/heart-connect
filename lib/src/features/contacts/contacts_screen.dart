@@ -13,6 +13,8 @@ import 'contact_detail_screen.dart';
 import '../../utils/phone_formatter.dart';
 import 'current_contact_provider.dart';
 import 'contact_service.dart';
+import '../../l10n/app_strings.dart';
+import '../../providers/locale_provider.dart';
 
 class ContactsScreen extends ConsumerStatefulWidget {
   const ContactsScreen({super.key});

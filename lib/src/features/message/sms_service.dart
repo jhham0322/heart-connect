@@ -56,10 +56,15 @@ class SmsService {
       sort: true, // Sorts by date desc by default
     );
 
-    // Filter by contact numbers
+    // Filter by contact numbers AND mobile phone only
     final filtered = messages.where((msg) {
       if (msg.address == null) return false;
       final normalizedSender = _normalizeNumber(msg.address!);
+      
+      // 1. 핸드폰 번호만 필터링 (010, 011 등)
+      if (!_isMobilePhone(msg.address!)) return false;
+      
+      // 2. 내 연락처에 있는 사람만
       return contactNumbers.any((cNum) => _isMatch(normalizedSender, cNum));
     }).map((m) => AppSmsMessage(
       id: m.id,
@@ -170,6 +175,26 @@ class SmsService {
 
   String _normalizeNumber(String phone) {
     return phone.replaceAll(RegExp(r'\D'), '');
+  }
+  
+  /// 핸드폰 번호인지 확인 (010, 011, 016, 017, 018, 019로 시작)
+  bool _isMobilePhone(String phone) {
+    final normalized = _normalizeNumber(phone);
+    // 한국 핸드폰: 010, 011, 016, 017, 018, 019
+    // 국가코드 포함: 8210, 82010 등
+    if (normalized.startsWith('010') || 
+        normalized.startsWith('011') ||
+        normalized.startsWith('016') ||
+        normalized.startsWith('017') ||
+        normalized.startsWith('018') ||
+        normalized.startsWith('019')) {
+      return normalized.length >= 10 && normalized.length <= 11;
+    }
+    // 국가코드 포함 (+82)
+    if (normalized.startsWith('8210') || normalized.startsWith('82010')) {
+      return normalized.length >= 12 && normalized.length <= 13;
+    }
+    return false;
   }
 
   bool _isMatch(String sender, String contact) {

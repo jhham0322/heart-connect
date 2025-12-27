@@ -48,11 +48,22 @@ class ContactService extends AsyncNotifier<void> {
         debugPrint('Error getting my name: $e');
       }
 
-      // 4. Sync contacts to DB
+      // 4. Sync contacts to DB (핸드폰 번호만)
       for (var c in deviceContacts) {
         if (c.phones.isEmpty) continue;
         
-        final normalizedPhone = c.phones.first.number.replaceAll(RegExp(r'\D'), ''); 
+        // 핸드폰 번호 찾기 (010, 011 등으로 시작하는 번호)
+        String? mobilePhone;
+        for (var phone in c.phones) {
+          final normalized = phone.number.replaceAll(RegExp(r'\D'), '');
+          if (_isMobilePhone(normalized)) {
+            mobilePhone = normalized;
+            break;
+          }
+        }
+        
+        // 핸드폰 번호가 없으면 스킵
+        if (mobilePhone == null) continue;
         
         // starred 연락처 확인
         final isStarred = c.isStarred;
@@ -78,7 +89,7 @@ class ContactService extends AsyncNotifier<void> {
         }
         
         final companion = ContactsCompanion(
-          phone: Value(normalizedPhone),
+          phone: Value(mobilePhone),
           name: Value(c.displayName),
           groupTag: Value(groupTag),
           isFavorite: Value(isStarred), // 스타 여부 저장
@@ -95,6 +106,24 @@ class ContactService extends AsyncNotifier<void> {
       // Windows/Web/Mac: Seed Mock Data
       await _seedMockData(db);
     }
+  }
+  
+  /// 핸드폰 번호인지 확인 (010, 011, 016, 017, 018, 019로 시작)
+  bool _isMobilePhone(String normalized) {
+    // 한국 핸드폰: 010, 011, 016, 017, 018, 019
+    if (normalized.startsWith('010') || 
+        normalized.startsWith('011') ||
+        normalized.startsWith('016') ||
+        normalized.startsWith('017') ||
+        normalized.startsWith('018') ||
+        normalized.startsWith('019')) {
+      return normalized.length >= 10 && normalized.length <= 11;
+    }
+    // 국가코드 포함 (+82)
+    if (normalized.startsWith('8210') || normalized.startsWith('82010')) {
+      return normalized.length >= 12 && normalized.length <= 13;
+    }
+    return false;
   }
   
   /// 통화 기록을 읽어서 연락처의 최근 연락 날짜 업데이트
