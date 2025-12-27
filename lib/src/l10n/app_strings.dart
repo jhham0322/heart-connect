@@ -87,6 +87,11 @@ class AppStrings {
   String get contactsMessage => _get({'ko': '문자', 'en': 'Message', 'ja': 'メッセージ', 'zh': '短信'});
   String get contactsBirthday => _get({'ko': '생일', 'en': 'Birthday', 'ja': '誕生日', 'zh': '生日'});
   String get contactsAnniversary => _get({'ko': '기념일', 'en': 'Anniversary', 'ja': '記念日', 'zh': '纪念日'});
+  String get contactsNoHistory => _get({'ko': '주고받은 내역이 없습니다.', 'en': 'No message history.', 'ja': 'やり取りした履歴がありません。', 'zh': '没有消息记录。'});
+  String get contactsSearchContent => _get({'ko': '내용 검색', 'en': 'Search content', 'ja': '内容を検索', 'zh': '搜索内容'});
+  String get contactsNoSearchResult => _get({'ko': '검색 결과가 없습니다.', 'en': 'No search results.', 'ja': '検索結果がありません。', 'zh': '没有搜索结果。'});
+  String get contactsMessageSent => _get({'ko': '보냄', 'en': 'Sent', 'ja': '送信', 'zh': '已发送'});
+  String get contactsMessageReceived => _get({'ko': '받음', 'en': 'Received', 'ja': '受信', 'zh': '已接收'});
   
   // ========== 갤러리/카드 선택 ==========
   String get galleryTitle => _get({'ko': '카드 갤러리', 'en': 'Card Gallery', 'ja': 'カードギャラリー', 'zh': '卡片库'});

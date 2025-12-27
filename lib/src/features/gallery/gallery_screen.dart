@@ -8,19 +8,21 @@ import 'package:photo_view/photo_view_gallery.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../theme/app_theme.dart';
+import '../../l10n/app_strings.dart';
+import '../../providers/locale_provider.dart';
 import 'favorites_provider.dart';
 import 'gallery_selection_provider.dart';
 
 import 'gallery_data.dart';
 
-class GalleryScreen extends StatefulWidget {
+class GalleryScreen extends ConsumerStatefulWidget {
   const GalleryScreen({super.key});
 
   @override
-  State<GalleryScreen> createState() => _GalleryScreenState();
+  ConsumerState<GalleryScreen> createState() => _GalleryScreenState();
 }
 
-class _GalleryScreenState extends State<GalleryScreen> {
+class _GalleryScreenState extends ConsumerState<GalleryScreen> {
   // Categories
   final List<CategoryItem> _categories = galleryCategories;
 
@@ -31,6 +33,25 @@ class _GalleryScreenState extends State<GalleryScreen> {
   void initState() {
     super.initState();
     _scanAssets();
+  }
+  
+  // Helper function to get localized category title
+  String _getCategoryTitle(String id, AppStrings strings) {
+    switch (id) {
+      case 'christmas': return strings.galleryChristmas;
+      case 'newyear': return strings.galleryNewYear;
+      case 'birthday': return strings.galleryBirthday;
+      case 'thanks': return strings.galleryThanks;
+      case 'motherDay': return strings.galleryMothersDay;
+      case 'teachersDay': return strings.galleryTeachersDay;
+      case 'tour': return strings.galleryTravel;
+      case 'halloween': return strings.galleryHalloween;
+      case 'thanksgiving': return strings.galleryThanksgiving;
+      case 'my_photos': return strings.galleryMyPhotos;
+      case 'favorites': return strings.contactsFavorites;
+      case 'letters': return strings.galleryLetters;
+      default: return id;
+    }
   }
 
   Future<void> _scanAssets() async {
@@ -79,10 +100,12 @@ class _GalleryScreenState extends State<GalleryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final strings = ref.watch(appStringsProvider);
+    
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       appBar: AppBar(
-        title: const Text("Gallery", style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(strings.navGallery, style: const TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
         backgroundColor: Colors.white,
         elevation: 0,
@@ -100,14 +123,15 @@ class _GalleryScreenState extends State<GalleryScreen> {
             _categories.insert(newIndex, element);
           });
         },
-        children: _categories.map((cat) => _buildCategoryItem(cat)).toList(),
+        children: _categories.map((cat) => _buildCategoryItem(cat, strings)).toList(),
       ),
     );
   }
 
-  Widget _buildCategoryItem(CategoryItem cat) {
+  Widget _buildCategoryItem(CategoryItem cat, AppStrings strings) {
     final count = _categoryCounts[cat.id] ?? 0;
     final isNew = _hasNewItems[cat.id] ?? false;
+    final localizedTitle = _getCategoryTitle(cat.id, strings);
 
     return GestureDetector(
       key: ValueKey(cat.id),
@@ -137,13 +161,14 @@ class _GalleryScreenState extends State<GalleryScreen> {
                 Icon(cat.icon, size: 36, color: Colors.white),
                 const SizedBox(height: 8),
                 Text(
-                  cat.title, 
+                  localizedTitle, 
                   style: const TextStyle(
                     color: Colors.white, 
                     fontWeight: FontWeight.bold, 
                     fontSize: 13,
                     shadows: [Shadow(color: Colors.black26, blurRadius: 2, offset: Offset(0,1))]
-                  )
+                  ),
+                  textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 4),
                 Container(

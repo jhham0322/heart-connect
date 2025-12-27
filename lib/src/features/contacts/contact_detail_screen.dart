@@ -3,11 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'dart:io';
+import 'dart:convert';
 import '../database/app_database.dart';
 import '../database/database_provider.dart';
 import '../card_editor/write_card_screen.dart';
 import '../message/sms_service.dart';
 import '../../utils/phone_formatter.dart';
+import '../../l10n/app_strings.dart';
+import '../../providers/locale_provider.dart';
 import 'current_contact_provider.dart';
 
 class ContactDetailScreen extends ConsumerStatefulWidget {
@@ -44,6 +47,7 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final database = ref.watch(appDatabaseProvider);
+    final strings = ref.watch(appStringsProvider);
     final contact = widget.contact;
 
     return Scaffold(
@@ -89,7 +93,7 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
             padding: const EdgeInsets.all(20),
             child: Row(
               children: [
-                // 프로필 사진 표시 (photoData가 있으면 사진, 없으면 이모지)
+                // 프로필 사진 표시 (photoData가 있으면 Base64 이미지, 없으면 이모지)
                 Container(
                   width: 80, height: 80,
                   decoration: BoxDecoration(
@@ -99,8 +103,8 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
                   ),
                   child: ClipOval(
                     child: contact.photoData != null && contact.photoData!.isNotEmpty
-                        ? Image.file(
-                            File(contact.photoData!),
+                        ? Image.memory(
+                            base64Decode(contact.photoData!),
                             fit: BoxFit.cover,
                             width: 80,
                             height: 80,
@@ -158,7 +162,7 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
                 decoration: InputDecoration(
                   icon: const Icon(FontAwesomeIcons.magnifyingGlass, color: Color(0xFF795548), size: 18),
                   border: InputBorder.none,
-                  hintText: "내용 검색",
+                  hintText: strings.contactsSearchContent,
                   hintStyle: const TextStyle(color: Color(0xFFBCAAA4)),
                   suffixIcon: _searchQuery.isNotEmpty
                       ? IconButton(
@@ -195,21 +199,21 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
                 }
                 
                 if (filteredMessages.isEmpty) {
-                  return const Center(
+                  return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(FontAwesomeIcons.paperPlane, size: 48, color: Colors.grey),
                         SizedBox(height: 16),
-                        Text("주고받은 내역이 없습니다."),
+                        Text(strings.contactsNoHistory),
                       ],
                     ),
                   );
                 }
                 
                 if (filteredMessages.isEmpty && _searchQuery.isNotEmpty) {
-                  return const Center(
-                    child: Text("검색 결과가 없습니다."),
+                  return Center(
+                    child: Text(strings.contactsNoSearchResult),
                   );
                 }
                 
@@ -262,7 +266,7 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
                                         borderRadius: BorderRadius.circular(8),
                                       ),
                                       child: Text(
-                                        isSent ? "보냄" : "받음",
+                                        isSent ? strings.contactsMessageSent : strings.contactsMessageReceived,
                                         style: const TextStyle(fontSize: 10, color: Colors.white, fontWeight: FontWeight.bold),
                                       ),
                                     ),
