@@ -13,6 +13,9 @@ import 'package:heart_connect/src/features/contacts/contact_service.dart';
 import 'package:heart_connect/src/features/database/database_provider.dart';
 import 'package:heart_connect/src/features/database/app_database.dart';
 import 'package:drift/drift.dart' hide Column;
+import 'package:file_selector/file_selector.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:heart_connect/src/utils/app_version.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -87,6 +90,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         _notificationTime = picked;
       });
       _saveSettings();
+      NotificationService.updateSchedule(); // 스케줄 업데이트
     }
   }
 
@@ -427,6 +431,181 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('복원 실패: $e')),
+        );
+      }
+    }
+  }
+  
+  // 데이터 내보내기 (공유 기능 사용)
+  Future<void> _exportData() async {
+    try {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (c) => const Center(child: CircularProgressIndicator()),
+      );
+      
+      final db = ref.read(appDatabaseProvider);
+      final prefs = await SharedPreferences.getInstance();
+      
+      // 백업 데이터 생성 (기존 백업 로직 재사용)
+      final contacts = await db.getAllContacts();
+      final plans = await db.getAllDailyPlans();
+      final cards = await db.getAllSavedCards();
+      
+      final backupData = {
+        'version': '1.0',
+        'createdAt': DateTime.now().toIso8601String(),
+        'contacts': contacts.map((c) => {
+          'name': c.name,
+          'phone': c.phone,
+          'group': c.groupTag,
+          'birthday': c.birthday?.toIso8601String(),
+          'isFavorite': c.isFavorite,
+        }).toList(),
+        'plans': plans.map((p) => {
+          'id': p.id,
+          'content': p.content,
+          'date': p.date.toIso8601String(),
+          'type': p.type,
+          'recipients': p.recipients,
+          'isCompleted': p.isCompleted,
+        }).toList(),
+        'cards': cards.map((c) => {
+          'id': c.id,
+          'name': c.name,
+          'imagePath': c.imagePath,
+          'htmlContent': c.htmlContent,
+          'footerText': c.footerText,
+          'createdAt': c.createdAt.toIso8601String(),
+        }).toList(),
+        'settings': {
+          'notifications_enabled': prefs.getBool('notifications_enabled') ?? true,
+          'branding_enabled': prefs.getBool('branding_enabled') ?? true,
+          'notification_time': prefs.getString('notification_time') ?? '9:0',
+          'user_name': prefs.getString('user_name') ?? 'Heart-Connect',
+          'selected_language': prefs.getString('selected_language') ?? 'ko',
+        },
+      };
+
+      final jsonString = jsonEncode(backupData);
+      final fileName = 'connect_heart_export_${DateFormat('yyyyMMdd_HHmmss').format(DateTime.now())}.json';
+
+      // 임시 파일에 저장
+      final directory = await getApplicationDocumentsDirectory();
+      final file = File('${directory.path}/$fileName');
+      await file.writeAsString(jsonString);
+
+      if (mounted) {
+        Navigator.pop(context);
+        
+        // 공유 다이얼로그 표시
+        await Share.shareXFiles(
+          [XFile(file.path)],
+          subject: 'ConnectHeart 데이터 백업',
+          text: 'ConnectHeart 앱 데이터 백업 파일입니다.',
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('내보내기 실패: $e')),
+        );
+      }
+    }
+  }
+  
+  // 데이터 가져오기 (파일 선택)
+  Future<void> _importData() async {
+    try {
+      // 파일 선택
+      const XTypeGroup typeGroup = XTypeGroup(
+        label: 'JSON',
+        extensions: ['json'],
+      );
+      
+      final XFile? file = await openFile(acceptedTypeGroups: [typeGroup]);
+      
+      if (file == null) return;
+      
+      // 확인 다이얼로그
+      final confirm = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('데이터 가져오기'),
+          content: Text('선택한 파일: ${file.name}\n\n기존 데이터가 교체됩니다. 계속하시겠습니까?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('취소', style: TextStyle(color: Colors.grey)),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, true),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+              child: const Text('가져오기', style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        ),
+      );
+      
+      if (confirm != true) return;
+      
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (c) => const Center(child: CircularProgressIndicator()),
+      );
+      
+      final jsonString = await file.readAsString();
+      final backupData = jsonDecode(jsonString) as Map<String, dynamic>;
+      
+      final db = ref.read(appDatabaseProvider);
+      final prefs = await SharedPreferences.getInstance();
+      
+      int restoredContacts = 0;
+      
+      // 연락처 복원
+      if (backupData['contacts'] != null) {
+        final contacts = backupData['contacts'] as List;
+        for (var c in contacts) {
+          try {
+            await db.upsertContact(ContactsCompanion(
+              name: Value(c['name'] ?? ''),
+              phone: Value(c['phone'] ?? ''),
+              groupTag: Value(c['group']),
+              birthday: Value(c['birthday'] != null ? DateTime.parse(c['birthday']) : null),
+              isFavorite: Value(c['isFavorite'] ?? false),
+            ));
+            restoredContacts++;
+          } catch (e) {
+            print('연락처 가져오기 오류: $e');
+          }
+        }
+      }
+      
+      // 설정 복원
+      if (backupData['settings'] != null) {
+        final settings = backupData['settings'] as Map<String, dynamic>;
+        await prefs.setBool('notifications_enabled', settings['notifications_enabled'] ?? true);
+        await prefs.setBool('branding_enabled', settings['branding_enabled'] ?? true);
+        await prefs.setString('notification_time', settings['notification_time'] ?? '9:0');
+        await prefs.setString('user_name', settings['user_name'] ?? 'Heart-Connect');
+        await prefs.setString('selected_language', settings['selected_language'] ?? 'ko');
+      }
+      
+      if (mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('가져오기 완료! 연락처 $restoredContacts명')),
+        );
+        _loadSettings();
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('가져오기 실패: $e')),
         );
       }
     }
@@ -835,6 +1014,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             onChanged: (v) {
                               setState(() => _notificationsEnabled = v);
                               _saveSettings();
+                              NotificationService.updateSchedule(); // 스케줄 업데이트
                             },
                           ),
                         ],
@@ -904,6 +1084,29 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           ),
                         ],
                       ),
+                      const SizedBox(height: 6),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          GestureDetector(
+                            onTap: _exportData,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(color: const Color(0xFFC8E6C9), borderRadius: BorderRadius.circular(12), border: Border.all(color: const Color(0xFF5D4037))),
+                              child: const Text("Export", style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          GestureDetector(
+                            onTap: _importData,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(color: const Color(0xFFFFE0B2), borderRadius: BorderRadius.circular(12), border: Border.all(color: const Color(0xFF5D4037))),
+                              child: const Text("Import", style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
@@ -968,7 +1171,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   iconBg: const Color(0xFFFFF59D),
                   icon: FontAwesomeIcons.circleInfo,
                   title: "App Info & Support",
-                  desc: "Version v1.0.0",
+                  desc: "Version ${AppVersion.shortVersion}",
                   action: TextButton(
                     onPressed: _contactUs,
                     child: const Text("Contact Us", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.brown, decoration: TextDecoration.underline)),

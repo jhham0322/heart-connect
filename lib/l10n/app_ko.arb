@@ -1,0 +1,73 @@
+{
+  "@@locale": "ko",
+  "appTitle": "ConnectHeart",
+  "notifications": "알림",
+  "receiveAlerts": "알림 받기",
+  "setTime": "시간 설정",
+  "test": "테스트",
+  "designSending": "디자인 & 발송",
+  "cardBranding": "카드 하단 브랜딩",
+  "dataManagement": "데이터 관리",
+  "syncContacts": "연락처 동기화",
+  "backup": "백업",
+  "restore": "복원",
+  "export": "내보내기",
+  "import": "가져오기",
+  "calendarSync": "캘린더 연동",
+  "openCalendarApp": "외부 캘린더 앱 열기",
+  "supportedCalendar": "지원 캘린더 안내",
+  "appInfo": "앱 정보 & 지원",
+  "version": "버전",
+  "contactUs": "문의하기",
+  "account": "계정",
+  "language": "언어",
+  "exit": "종료",
+  "myNameNickname": "내 이름/별명",
+  "nameOrNickname": "이름 또는 별명",
+  "cardDisplayName": "카드에 표시될 이름",
+  "nameUsedFooter": "이 이름은 카드 쓰기 화면의 Footer(서명)에 사용됩니다.",
+  "cancel": "취소",
+  "save": "저장",
+  "confirm": "확인",
+  "languageSetting": "언어 설정",
+  "languageChanged": "언어가 {language}로 변경되었습니다. (앱 재시작 필요)",
+  "@languageChanged": {
+    "placeholders": {
+      "language": {
+        "type": "String"
+      }
+    }
+  },
+  "backupComplete": "백업 완료",
+  "backupDataSaved": "다음 데이터가 백업되었습니다:",
+  "contacts": "연락처",
+  "schedules": "일정",
+  "savedCards": "저장된 카드",
+  "settings": "설정",
+  "included": "포함",
+  "savePath": "저장 위치",
+  "restoreData": "데이터 복원",
+  "restoreWarning": "기존 데이터가 백업 데이터로 교체됩니다.\n\n계속하시겠습니까?",
+  "restore": "복원",
+  "selectBackupFile": "백업 파일 선택",
+  "noBackupFile": "백업 파일이 없습니다. 먼저 백업을 진행해주세요.",
+  "doBackup": "백업하기",
+  "restoreComplete": "복원 완료! 연락처 {count}명 복원됨",
+  "@restoreComplete": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "supportedCalendars": "지원되는 캘린더",
+  "googleCalendar": "구글 캘린더",
+  "samsungCalendar": "삼성 캘린더",
+  "calendarAutoDisplay": "위 캘린더에 일정을 등록하시면 앱에서 자동으로 표시됩니다.",
+  "unsupportedCalendars": "미지원 캘린더",
+  "naverCalendar": "네이버 캘린더",
+  "kakaoCalendar": "카카오톡 캘린더",
+  "noStandardSync": "Android 표준 캘린더 동기화를 지원하지 않아 일정을 읽을 수 없습니다.",
+  "notificationTitle": "💝 ConnectHeart",
+  "notificationBody": "오늘 소중한 사람에게 마음을 전해보세요!"
+}

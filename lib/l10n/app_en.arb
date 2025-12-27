@@ -1,0 +1,73 @@
+{
+  "@@locale": "en",
+  "appTitle": "ConnectHeart",
+  "notifications": "Notifications",
+  "receiveAlerts": "Receive Alerts",
+  "setTime": "Set Time",
+  "test": "Test",
+  "designSending": "Design & Sending",
+  "cardBranding": "Card Footer Branding",
+  "dataManagement": "Data Management",
+  "syncContacts": "Sync Contacts",
+  "backup": "Backup",
+  "restore": "Restore",
+  "export": "Export",
+  "import": "Import",
+  "calendarSync": "Calendar Sync",
+  "openCalendarApp": "Open Calendar App",
+  "supportedCalendar": "Supported Calendars",
+  "appInfo": "App Info & Support",
+  "version": "Version",
+  "contactUs": "Contact Us",
+  "account": "Account",
+  "language": "Language",
+  "exit": "Exit",
+  "myNameNickname": "My Name/Nickname",
+  "nameOrNickname": "Name or Nickname",
+  "cardDisplayName": "Name displayed on card",
+  "nameUsedFooter": "This name is used for the Footer (signature) on the card writing screen.",
+  "cancel": "Cancel",
+  "save": "Save",
+  "confirm": "Confirm",
+  "languageSetting": "Language Setting",
+  "languageChanged": "Language changed to {language}. (App restart required)",
+  "@languageChanged": {
+    "placeholders": {
+      "language": {
+        "type": "String"
+      }
+    }
+  },
+  "backupComplete": "Backup Complete",
+  "backupDataSaved": "The following data has been backed up:",
+  "contacts": "Contacts",
+  "schedules": "Schedules",
+  "savedCards": "Saved Cards",
+  "settings": "Settings",
+  "included": "Included",
+  "savePath": "Save Path",
+  "restoreData": "Restore Data",
+  "restoreWarning": "Existing data will be replaced with backup data.\n\nDo you want to continue?",
+  "restore": "Restore",
+  "selectBackupFile": "Select Backup File",
+  "noBackupFile": "No backup file found. Please backup first.",
+  "doBackup": "Backup Now",
+  "restoreComplete": "Restore complete! {count} contacts restored",
+  "@restoreComplete": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "supportedCalendars": "Supported Calendars",
+  "googleCalendar": "Google Calendar",
+  "samsungCalendar": "Samsung Calendar",
+  "calendarAutoDisplay": "Events registered in the above calendars will be automatically displayed in the app.",
+  "unsupportedCalendars": "Unsupported Calendars",
+  "naverCalendar": "Naver Calendar",
+  "kakaoCalendar": "Kakao Calendar",
+  "noStandardSync": "Cannot read events as they do not support Android standard calendar sync.",
+  "notificationTitle": "💝 ConnectHeart",
+  "notificationBody": "Send your heart to someone special today!"
+}
