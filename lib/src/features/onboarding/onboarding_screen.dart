@@ -372,6 +372,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   /// 2. 연락처 권한 요청 페이지
   Widget _buildContactsPermissionPage() {
     return SingleChildScrollView(
+      physics: const ClampingScrollPhysics(),
       padding: const EdgeInsets.symmetric(horizontal: 32),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -514,6 +515,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   /// 3. 캘린더 권한 요청 페이지
   Widget _buildCalendarPermissionPage() {
     return SingleChildScrollView(
+      physics: const ClampingScrollPhysics(),
       padding: const EdgeInsets.symmetric(horizontal: 32),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
