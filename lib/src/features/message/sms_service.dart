@@ -198,11 +198,23 @@ class SmsService {
   }
 
   bool _isMatch(String sender, String contact) {
-    // Check if one ends with the other (handling country codes)
+    // 둘 다 숫자만 있어야 함
+    if (sender.isEmpty || contact.isEmpty) return false;
+    
+    // 완전 일치
     if (sender == contact) return true;
-    if (sender.length > contact.length) return sender.endsWith(contact);
-    if (contact.length > sender.length) return contact.endsWith(sender);
-    return false;
+    
+    // 최소 8자리 이상이어야 비교 가능 (010-XXXX-XXXX의 8자리)
+    if (sender.length < 8 || contact.length < 8) return false;
+    
+    // 휴대폰 번호 형식 체크 (발신자가 휴대폰 번호가 아니면 무시)
+    if (!_isMobilePhone(sender)) return false;
+    
+    // 마지막 8자리가 정확히 일치해야 함
+    final senderLast8 = sender.substring(sender.length - 8);
+    final contactLast8 = contact.substring(contact.length - 8);
+    
+    return senderLast8 == contactLast8;
   }
 
   List<AppSmsMessage> _getMockMessages(Set<String> contactNumbers) {

@@ -3839,19 +3839,20 @@ class _RecipientManagerDialogState extends ConsumerState<RecipientManagerDialog>
 
   void _showResultPopup() {
     if (!mounted) return;
+    final strings = ref.read(appStringsProvider);
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: const Text("발송 완료"),
-        content: Text("성공: $_successCount건\n실패: $_failureCount건"),
+        title: Text(strings.sendComplete),
+        content: Text("${strings.sendResultSuccess(_successCount)}\n${strings.sendResultFailed(_failureCount)}"),
         actions: [
           TextButton(
             onPressed: () {
               Navigator.pop(context); // 팝업 닫기
               if (mounted) Navigator.pop(context); // 발송 관리 화면 닫기
             },
-            child: const Text("확인"),
+            child: Text(strings.ok),
           ),
         ],
       ),
@@ -4343,7 +4344,7 @@ class _RecipientManagerDialogState extends ConsumerState<RecipientManagerDialog>
                     IconButton(
                       onPressed: _isSending ? null : () async {
                         // 소셜 미디어 공유 다이얼로그 표시
-                        final platformId = await SocialShareService.showShareDialog(context);
+                        final platformId = await SocialShareService.showShareDialog(context, strings: ref.read(appStringsProvider));
                         if (platformId != null) {
                           await SocialShareService.shareImage(
                             imagePath: widget.savedPath,

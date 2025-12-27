@@ -283,6 +283,11 @@ class AppStrings {
   String get dateNextWeek => _get({'ko': '다음 주', 'en': 'Next week', 'ja': '来週', 'zh': '下周'});
   String get dateThisMonth => _get({'ko': '이번 달', 'en': 'This month', 'ja': '今月', 'zh': '本月'});
   String daysRemaining(int days) => _get({'ko': '$days일 남음', 'en': '$days days left', 'ja': 'あと$days日', 'zh': '还剩$days天'});
+  String daysAgo(int days) => _get({'ko': '$days일 전', 'en': '$days days ago', 'ja': '$days日前', 'zh': '$days天前'});
+  
+  // ========== 발송 결과 다이얼로그 ==========
+  String sendResultSuccess(int count) => _get({'ko': '성공: $count건', 'en': 'Success: $count', 'ja': '成功: $count件', 'zh': '成功: $count条'});
+  String sendResultFailed(int count) => _get({'ko': '실패: $count건', 'en': 'Failed: $count', 'ja': '失敗: $count件', 'zh': '失败: $count条'});
   
   // ========== 이벤트 종류 ==========
   String get eventBirthday => _get({'ko': '생일', 'en': 'Birthday', 'ja': '誕生日', 'zh': '生日'});

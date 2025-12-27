@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:heart_connect/src/l10n/app_strings.dart';
 
 /// 소셜 미디어 공유 서비스
 class SocialShareService {
@@ -171,7 +172,22 @@ class SocialShareService {
   }
 
   /// 공유 플랫폼 선택 다이얼로그 표시
-  static Future<String?> showShareDialog(BuildContext context) async {
+  /// [strings]는 다국어 처리를 위해 선택적으로 전달 가능
+  static Future<String?> showShareDialog(BuildContext context, {AppStrings? strings}) async {
+    // 플랫폼 이름 다국어 처리
+    final localizedPlatforms = strings != null ? [
+      SocialPlatform(id: 'share', name: strings.shareOtherApps, icon: Icons.share, color: Colors.blueGrey),
+      SocialPlatform(id: 'kakaotalk', name: strings.shareKakaoTalk, icon: Icons.chat_bubble, color: const Color(0xFFFEE500), packageAndroid: 'com.kakao.talk', schemeIOS: 'kakaotalk://'),
+      SocialPlatform(id: 'instagram', name: strings.shareInstagram, icon: Icons.camera_alt, color: const Color(0xFFE4405F), packageAndroid: 'com.instagram.android', schemeIOS: 'instagram://'),
+      SocialPlatform(id: 'facebook', name: strings.shareFacebook, icon: Icons.facebook, color: const Color(0xFF1877F2), packageAndroid: 'com.facebook.katana', schemeIOS: 'fb://'),
+      SocialPlatform(id: 'x', name: strings.shareTwitter, icon: Icons.alternate_email, color: Colors.black, packageAndroid: 'com.twitter.android', schemeIOS: 'twitter://'),
+      SocialPlatform(id: 'whatsapp', name: strings.shareWhatsApp, icon: Icons.message, color: const Color(0xFF25D366), packageAndroid: 'com.whatsapp', schemeIOS: 'whatsapp://'),
+      SocialPlatform(id: 'telegram', name: strings.shareTelegram, icon: Icons.send, color: const Color(0xFF0088CC), packageAndroid: 'org.telegram.messenger', schemeIOS: 'tg://'),
+    ] : platforms;
+    
+    final shareTitle = strings?.shareTitle ?? '공유하기';
+    final cancelLabel = strings?.cancel ?? '취소';
+    
     return await showModalBottomSheet<String>(
       context: context,
       backgroundColor: Colors.transparent,
@@ -193,9 +209,9 @@ class SocialShareService {
               ),
             ),
             const SizedBox(height: 20),
-            const Text(
-              '공유하기',
-              style: TextStyle(
+            Text(
+              shareTitle,
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: Color(0xFF5D4037),
@@ -206,7 +222,7 @@ class SocialShareService {
               spacing: 16,
               runSpacing: 16,
               alignment: WrapAlignment.center,
-              children: platforms.map((platform) {
+              children: localizedPlatforms.map((platform) {
                 return _ShareButton(
                   platform: platform,
                   onTap: () => Navigator.pop(context, platform.id),
@@ -217,7 +233,7 @@ class SocialShareService {
             SafeArea(
               child: TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('취소', style: TextStyle(color: Colors.grey)),
+                child: Text(cancelLabel, style: const TextStyle(color: Colors.grey)),
               ),
             ),
           ],

@@ -766,18 +766,19 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
   String _formatDate(DateTime date) {
     final now = DateTime.now();
     final diff = now.difference(date);
+    final strings = ref.read(appStringsProvider);
     
     if (date.year == now.year && date.month == now.month && date.day == now.day) {
-      return "오늘";
+      return strings.dateToday;
     }
     
     final yesterday = now.subtract(const Duration(days: 1));
     if (date.year == yesterday.year && date.month == yesterday.month && date.day == yesterday.day) {
-      return "어제";
+      return strings.dateYesterday;
     }
     
     if (diff.inDays < 7) {
-      return "${diff.inDays}일 전";
+      return strings.daysAgo(diff.inDays);
     }
     
     return DateFormat('MM.dd').format(date);
