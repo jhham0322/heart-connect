@@ -68,66 +68,17 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     }
   }
 
-  /// 언어 선택 BottomSheet
-  void _showLanguageSelector() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 12),
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const Padding(
-              padding: EdgeInsets.all(16),
-              child: Text(
-                '언어 선택',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF5D4037)),
-              ),
-            ),
-            Flexible(
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: supportedLanguages.length,
-                itemBuilder: (context, index) {
-                  final entry = supportedLanguages.entries.elementAt(index);
-                  final isSelected = entry.key == ref.read(localeProvider).languageCode;
-                  return ListTile(
-                    leading: isSelected
-                        ? const Icon(Icons.check_circle, color: Color(0xFFF29D86))
-                        : const Icon(Icons.circle_outlined, color: Colors.grey),
-                    title: Text(
-                      entry.value,
-                      style: TextStyle(
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                        color: isSelected ? const Color(0xFFF29D86) : const Color(0xFF5D4037),
-                      ),
-                    ),
-                    onTap: () {
-                      ref.read(localeProvider.notifier).setLocale(entry.key);
-                      Navigator.pop(context);
-                    },
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 20),
-          ],
-        ),
-      ),
-    );
+  /// 언어 변경 (offset: -1 이전, +1 다음)
+  void _changeLanguage(int offset) {
+    final currentCode = ref.read(localeProvider).languageCode;
+    final codes = supportedLanguages.keys.toList();
+    final currentIndex = codes.indexOf(currentCode);
+    
+    int nextIndex = (currentIndex + offset) % codes.length;
+    if (nextIndex < 0) nextIndex += codes.length; // 음수 나머지 처리
+    
+    final nextCode = codes[nextIndex];
+    ref.read(localeProvider.notifier).setLocale(nextCode);
   }
 
   @override
@@ -309,32 +260,82 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           const SizedBox(height: 32),
           
           
-          // 언어 선택 (OutlinedButton으로 표준 위젯 사용)
-          OutlinedButton.icon(
-            onPressed: _showLanguageSelector,
-            icon: const Icon(Icons.language, color: Color(0xFFF29D86), size: 20),
-            label: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  supportedLanguages[ref.watch(localeProvider).languageCode] ?? '한국어',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: Color(0xFF5D4037),
-                  ),
+          // 언어 선택 (좌우 스와이프 및 화살표)
+          Container(
+            width: 200,
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(30),
+              border: Border.all(color: const Color(0xFFF29D86).withAlpha(100)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withAlpha(10),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
                 ),
-                const SizedBox(width: 8),
-                const Icon(Icons.arrow_drop_down, color: Color(0xFF5D4037), size: 18),
               ],
             ),
-            style: OutlinedButton.styleFrom(
-              backgroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              side: BorderSide(color: const Color(0xFFF29D86).withAlpha(100)),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              elevation: 2,
-              shadowColor: Colors.black.withAlpha(20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // 왼쪽 화살표
+                IconButton(
+                  onPressed: () => _changeLanguage(-1),
+                  icon: const Icon(Icons.chevron_left_rounded),
+                  color: const Color(0xFFF29D86),
+                  iconSize: 28,
+                  splashRadius: 20,
+                  tooltip: '이전 언어',
+                ),
+                
+                // 언어 텍스트 (스와이프 감지)
+                Expanded(
+                  child: GestureDetector(
+                    onHorizontalDragEnd: (details) {
+                      if (details.primaryVelocity! > 0) {
+                        _changeLanguage(-1); // 오른쪽으로 스와이프 -> 이전 (왼쪽)
+                      } else if (details.primaryVelocity! < 0) {
+                        _changeLanguage(1); // 왼쪽으로 스와이프 -> 다음 (오른쪽)
+                      }
+                    },
+                    child: Container(
+                      color: Colors.transparent, // 터치 영역 확보
+                      height: 40,
+                      alignment: Alignment.center,
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 300),
+                        transitionBuilder: (child, animation) {
+                          return FadeTransition(
+                            opacity: animation,
+                            child: ScaleTransition(scale: animation, child: child),
+                          );
+                        },
+                        child: Text(
+                          supportedLanguages[ref.watch(localeProvider).languageCode] ?? '한국어',
+                          key: ValueKey(ref.watch(localeProvider).languageCode),
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF5D4037),
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                
+                // 오른쪽 화살표
+                IconButton(
+                  onPressed: () => _changeLanguage(1),
+                  icon: const Icon(Icons.chevron_right_rounded),
+                  color: const Color(0xFFF29D86),
+                  iconSize: 28,
+                  splashRadius: 20,
+                  tooltip: '다음 언어',
+                ),
+              ],
             ),
           ),
           
