@@ -2958,6 +2958,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                                         child: Padding(
                                           padding: const EdgeInsets.only(right: 15, bottom: -25),
                                           child: GestureDetector(
+                                            behavior: HitTestBehavior.opaque, // 전체 영역 탭 가능
                                             onTap: () {
                                               _footerFocusNode.requestFocus();
                                               setState(() {
