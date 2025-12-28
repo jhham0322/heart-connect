@@ -12,7 +12,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get appName => 'ハートコネクト';
 
   @override
-  String get ok => 'OK';
+  String get ok => '確認';
 
   @override
   String get cancel => 'キャンセル';
@@ -75,25 +75,25 @@ class AppLocalizationsJa extends AppLocalizations {
   String get onboardingStart => '始める';
 
   @override
-  String get onboardingWelcome => '喜びと感謝の気持ちを\n周りの人と分かち合いましょう';
+  String get onboardingWelcome => '喜びと感謝の気持ちを\n大切な人たちと分かち合いましょう';
 
   @override
   String get onboardingDesc1 => 'ハートコネクトは';
 
   @override
-  String get onboardingDesc2 => '大切な人に';
+  String get onboardingDesc2 => '大切な人たちに';
 
   @override
   String get onboardingDesc3 => '温かいカードとメッセージを';
 
   @override
-  String get onboardingDesc4 => '送れるアプリです。';
+  String get onboardingDesc4 => '送ることができるアプリです。';
 
   @override
   String get onboardingDesc5 => '誕生日、記念日、特別な日に';
 
   @override
-  String get onboardingDesc6 => '真心を込めた気持ちを';
+  String get onboardingDesc6 => '心からの気持ちを';
 
   @override
   String get onboardingDesc7 => '伝えてみてください。';
@@ -105,7 +105,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get onboardingNameHint => '名前またはニックネーム';
 
   @override
-  String get onboardingNameDesc => 'この名前はカードの署名として表示されます。\n設定でいつでも変更できます。';
+  String get onboardingNameDesc => 'この名前はカードの署名（フッター）に表示されます。\n設定でいつでも変更できます。';
 
   @override
   String get onboardingNameRequired => '名前を入力してください';
@@ -124,15 +124,15 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get permissionContactsDesc =>
-      '連絡先情報は家族や友人にカードを送るために必要です。\n\n保存した連絡先から受信者を簡単に選択できます。';
+      '家族や友人にカードを送るために連絡先情報が必要です。\n\n保存された連絡先から宛先を簡単に選択できます。';
 
   @override
   String get permissionCalendarDesc =>
-      'カレンダー情報は家族や友人の誕生日、記念日、イベント情報を取得するために必要です。\n\n大切な日を見逃さずにリマインダーを受け取れます！';
+      '家族や友人の誕生日、記念日、イベント情報を取得するためにカレンダー情報が必要です。\n\n大切な日を逃さないようにリマインダーを受け取ることができます！';
 
   @override
   String get permissionPrivacy =>
-      '🔒 プライバシーに関するお知らせ\n\n収集された情報はお使いの端末内でのみ使用され、外部に送信されることはありません。';
+      '🔒 プライバシー保護\n\n収集された情報はユーザーのスマートフォン内でのみ使用され、外部に送信されることはありません。';
 
   @override
   String get permissionAllow => 'アクセスを許可';
@@ -144,33 +144,33 @@ class AppLocalizationsJa extends AppLocalizations {
   String get permissionAllowCalendar => 'カレンダーへのアクセスを許可';
 
   @override
-  String get permissionSkip => '後で設定する';
+  String get permissionSkip => 'あとで設定';
 
   @override
-  String get permissionSkipContacts => '権限を許可しない場合は、連絡先を手動で入力する必要があります。';
+  String get permissionSkipContacts => '権限を許可しない場合、連絡先を手動で入力する必要があります。';
 
   @override
-  String get permissionSkipCalendar => '権限を許可しない場合は、スケジュールを手動で入力する必要があります。';
+  String get permissionSkipCalendar => '権限を許可しない場合、予定を手動で入力する必要があります。';
 
   @override
   String get permissionSms => 'SMSへのアクセス権限';
 
   @override
   String get permissionSmsDesc =>
-      'SMS権限は連絡先とのメッセージ履歴を確認するために必要です。\n\nカード送信後のやり取りを確認できます！';
+      '連絡先とのメッセージ履歴を確認するためにSMS情報が必要です。\n\nカードを送った後、安否確認などのメッセージ履歴を見ることができます！';
 
   @override
   String get permissionAllowSms => 'SMSへのアクセスを許可';
 
   @override
-  String get permissionSkipSms => '権限を許可しない場合は、メッセージ履歴を表示できません。';
+  String get permissionSkipSms => '権限を許可しない場合、メッセージ履歴を見ることができません。';
 
   @override
   String get permissionSendSms => 'SMS送信権限';
 
   @override
   String get permissionSendSmsDesc =>
-      'カードを直接SMSで送信するには、SMS送信権限が必要です。\n\nこの権限がないと、メッセージアプリ経由でのみ送信できます。';
+      'テキストメッセージで直接カードを送信するには、SMS送信権限が必要です。\n\nこの権限がない場合、メッセージアプリ経由でのみ送信できます。';
 
   @override
   String get permissionAllowSendSms => 'SMS送信を許可';
@@ -191,10 +191,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get navSettings => '設定';
 
   @override
-  String get homeUpcoming => '予定されているイベント';
+  String get homeUpcoming => '今後の予定';
 
   @override
-  String get homeNoEvents => '予定されているイベントはありません';
+  String get homeNoEvents => '予定がありません';
 
   @override
   String get homeQuickSend => 'クイック送信';
@@ -203,13 +203,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get homeRecentCards => '最近送ったカード';
 
   @override
-  String get homeWriteCard => 'カードを作成';
+  String get homeWriteCard => 'カードを書く';
 
   @override
-  String get homeDaysLeft => '日後';
+  String get homeDaysLeft => '日残り';
 
   @override
-  String get homeDDay => '当日';
+  String get homeDDay => 'D-Day';
 
   @override
   String get contactsTitle => '連絡先';
@@ -221,10 +221,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get contactsFamily => '家族';
 
   @override
-  String get contactsFriends => '友人';
+  String get contactsFriends => '友達';
 
   @override
-  String get contactsWork => '仕事';
+  String get contactsWork => '職場';
 
   @override
   String get contactsOthers => 'その他';
@@ -236,7 +236,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get contactsEmpty => '連絡先がありません';
 
   @override
-  String get contactsSearchHint => '名前または電話番号で検索';
+  String get contactsSearchHint => '名前または電話番号を検索';
 
   @override
   String get contactsMyPeople => 'マイピープル';
@@ -245,13 +245,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get contactsMemories => '思い出';
 
   @override
-  String get contactsRecent => '最近';
+  String get contactsRecent => '最近の連絡';
 
   @override
-  String get contactsSearchPlaceholder => '名前、タグで検索';
+  String get contactsSearchPlaceholder => '名前、タグ検索';
 
   @override
-  String get contactsNoMemories => 'まだ思い出がありません。';
+  String get contactsNoMemories => '思い出がまだありません。';
 
   @override
   String get contactsSendCard => 'カードを送る';
@@ -269,10 +269,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get contactsAnniversary => '記念日';
 
   @override
-  String get contactsNoHistory => 'やり取りした履歴がありません。';
+  String get contactsNoHistory => 'やり取りの履歴がありません。';
 
   @override
-  String get contactsSearchContent => '内容を検索';
+  String get contactsSearchContent => '内容検索';
 
   @override
   String get contactsNoSearchResult => '検索結果がありません。';
@@ -284,7 +284,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get contactsMessageReceived => '受信';
 
   @override
-  String get shareTitle => '共有する';
+  String get shareTitle => '共有';
 
   @override
   String get shareOtherApps => '他のアプリで共有';
@@ -347,25 +347,25 @@ class AppLocalizationsJa extends AppLocalizations {
   String get galleryMyPhotos => 'マイフォト';
 
   @override
-  String get gallerySelectImage => '画像を選択';
+  String get gallerySelectImage => '画像選択';
 
   @override
   String get galleryNoImages => '画像がありません';
 
   @override
-  String get selectCategory => 'カテゴリを選択';
+  String get selectCategory => 'カテゴリ選択';
 
   @override
   String get cardEditorTitle => 'カード編集';
 
   @override
-  String get cardEditorAddText => 'テキストを追加';
+  String get cardEditorAddText => 'テキスト追加';
 
   @override
-  String get cardEditorAddSticker => 'ステッカーを追加';
+  String get cardEditorAddSticker => 'ステッカー追加';
 
   @override
-  String get cardEditorAddImage => '画像を追加';
+  String get cardEditorAddImage => '画像追加';
 
   @override
   String get cardEditorBackground => '背景';
@@ -395,13 +395,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get cardEditorEnterMessage => 'メッセージを入力してください';
 
   @override
-  String get cardEditorGenerateAI => 'AIメッセージを生成';
+  String get cardEditorGenerateAI => 'AIメッセージ生成';
 
   @override
   String get cardEditorTextBox => 'テキストボックス';
 
   @override
-  String get cardEditorZoomHint => 'タップでズームモードに切替';
+  String get cardEditorZoomHint => 'ダブルタップでズームモードに切り替わります';
 
   @override
   String get cardEditorRecipient => '送信先';
@@ -410,7 +410,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get cardEditorAddRecipient => '追加';
 
   @override
-  String get recipientSelectTitle => '送信先を選択';
+  String get recipientSelectTitle => '送信先選択';
 
   @override
   String get recipientSearchHint => '名前または電話番号...';
@@ -428,13 +428,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get recipientAdd => '追加';
 
   @override
-  String get cardPreviewTitle => 'カード画像の確認';
+  String get cardPreviewTitle => 'カード画像確認';
 
   @override
-  String get cardPreviewDesc => '受信者に送信される最終画像です。';
+  String get cardPreviewDesc => '受信者に送信される最終イメージです。';
 
   @override
-  String get cardPreviewZoomHint => 'ダブルタップで拡大/縮小、ドラッグで移動。';
+  String get cardPreviewZoomHint => 'ダブルタップで拡大/縮小、ドラッグで移動できます。';
 
   @override
   String get cardPreviewCheckHint => '送信前に画像を確認してください。';
@@ -449,7 +449,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get sendRecipients => '受信者';
 
   @override
-  String get sendAddRecipient => '受信者を追加';
+  String get sendAddRecipient => '受信者追加';
 
   @override
   String get sendStart => '送信開始';
@@ -458,10 +458,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get sendStop => '送信停止';
 
   @override
-  String get sendContinue => '送信を続ける';
+  String get sendContinue => '送信継続';
 
   @override
-  String get sendProgress => '送信中';
+  String get sendProgress => '送信進行中';
 
   @override
   String get sendComplete => '送信完了';
@@ -473,36 +473,36 @@ class AppLocalizationsJa extends AppLocalizations {
   String get sendPending => '待機中';
 
   @override
-  String get sendTotalRecipients => '受信者合計';
+  String get sendTotalRecipients => '総受信者数';
 
   @override
-  String get sendAutoResume => '5件送信後に自動続行';
+  String get sendAutoResume => '5件送信後に自動継続';
 
   @override
   String get sendManagerTitle => '送信先管理';
 
   @override
-  String get sendTotal => '合計';
+  String get sendTotal => '計';
 
   @override
-  String get sendPerson => '人';
+  String get sendPerson => '名';
 
   @override
   String get sendSpamWarning =>
-      '短時間での大量送信はスパムポリシーにより制限される場合があります。\n自動続行の無効化をお勧めします。';
+      '短時間の大量送信はスパムポリシーにより制限される可能性があります。\n安全のため自動継続の解除をお勧めします。';
 
   @override
   String totalPersonCount(int count) {
-    return '合計 $count人';
+    return '計 $count名';
   }
 
   @override
   String get cardHintZoomMode =>
-      '背景画像をダブルタップするとズームモードに切り替わります。ズームモードで画像サイズと位置を調整できます。';
+      '背景画像をダブルタップするとズームモードになります。ズームモードで画像のサイズと位置を調整できます。';
 
   @override
   String get cardHintZoomEdit =>
-      'ピンチで画像サイズを調整できます。一本指でドラッグして移動できます。編集が完了したらダブルタップまたはズームボタンを押して終了してください。';
+      '2本の指でピンチして画像のサイズを調整できます。1本の指でドラッグして画像を移動できます。編集が完了したらダブルタップまたはズームモードボタンを押して終了してください。';
 
   @override
   String get cardHintDragging => '画像移動中...';
@@ -514,22 +514,22 @@ class AppLocalizationsJa extends AppLocalizations {
   String get savedCardsTitle => '保存されたカード';
 
   @override
-  String get savedCardsEmpty => '保存されたカードがありません。';
+  String get savedCardsEmpty => '保存されたメッセージがありません。';
 
   @override
-  String get cardSaveTitle => 'カードを保存';
+  String get cardSaveTitle => 'カード保存';
 
   @override
   String get cardSaveName => '保存名';
 
   @override
-  String get cardSaveHint => 'カード名を入力してください';
+  String get cardSaveHint => 'カードの名前を入力してください';
 
   @override
   String get cardNoTitle => '無題';
 
   @override
-  String get cardImageFailed => 'カード画像の作成に失敗';
+  String get cardImageFailed => 'カード画像の生成に失敗しました';
 
   @override
   String get messageHistory => '送信履歴';
@@ -538,7 +538,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get messageNoHistory => '送信履歴がありません';
 
   @override
-  String get messageSent => '送信済み';
+  String get messageSent => '送信完了';
 
   @override
   String get messageViewed => '確認済み';
@@ -559,22 +559,22 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settingsNotifications => '通知';
 
   @override
-  String get settingsNotificationTime => '通知時刻';
+  String get settingsNotificationTime => '通知時間';
 
   @override
-  String get settingsReceiveAlerts => 'アラートを受け取る';
+  String get settingsReceiveAlerts => '通知を受け取る';
 
   @override
   String get settingsSetTime => '時間設定';
 
   @override
-  String get settingsDesignSending => 'デザイン';
+  String get settingsDesignSending => 'デザイン/送信';
 
   @override
-  String get settingsCardBranding => 'カードブランディング';
+  String get settingsCardBranding => 'カード下部ブランディング';
 
   @override
-  String get settingsDataManage => 'データ';
+  String get settingsDataManage => 'データ管理';
 
   @override
   String get settingsBranding => 'ブランディング表示';
@@ -583,10 +583,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settingsSync => '同期';
 
   @override
-  String get settingsSyncContacts => '連絡先を同期';
+  String get settingsSyncContacts => '連絡先同期';
 
   @override
-  String get settingsSyncCalendar => 'カレンダーを同期';
+  String get settingsSyncCalendar => 'カレンダー同期';
 
   @override
   String get settingsBackup => 'バックアップ';
@@ -601,19 +601,19 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settingsImport => 'インポート';
 
   @override
-  String get settingsCalendarSync => 'カレンダー';
+  String get settingsCalendarSync => 'カレンダー連携';
 
   @override
   String get settingsOpenCalendar => 'カレンダーを開く';
 
   @override
-  String get settingsCalendarGuide => 'カレンダーガイド';
+  String get settingsCalendarGuide => '対応カレンダー案内';
 
   @override
   String get settingsAppInfo => 'アプリ情報';
 
   @override
-  String get settingsContactUs => 'お問合せ';
+  String get settingsContactUs => 'お問い合わせ';
 
   @override
   String get settingsAccount => 'アカウント';
@@ -622,7 +622,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settingsExit => '終了';
 
   @override
-  String get settingsMyName => '名前/ニックネーム';
+  String get settingsMyName => '自分の名前/ニックネーム';
 
   @override
   String get settingsNameOrNickname => '名前またはニックネーム';
@@ -631,10 +631,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settingsNameHint => 'カードに表示される名前';
 
   @override
-  String get settingsNameUsageInfo => 'この名前はカードのフッター署名に使用されます。';
+  String get settingsNameUsageInfo => 'この名前はカード作成画面のフッター（署名）に使用されます。';
 
   @override
-  String get settingsAbout => 'アプリ情報';
+  String get settingsAbout => 'アプリについて';
 
   @override
   String get settingsVersion => 'バージョン';
@@ -649,16 +649,16 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settingsHelp => 'ヘルプ';
 
   @override
-  String get settingsExternalCalendarGuide => '外部カレンダー連携ガイド';
+  String get settingsExternalCalendarGuide => '外部カレンダー連携案内';
 
   @override
   String get settingsTest => 'テスト';
 
   @override
-  String get settingsGoogleCalendar => 'Google';
+  String get settingsGoogleCalendar => 'Google カレンダー';
 
   @override
-  String get settingsSamsungCalendar => 'Samsung';
+  String get settingsSamsungCalendar => 'Samsung カレンダー';
 
   @override
   String get settingsDarkMode => 'ダークモード';
@@ -679,7 +679,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get splashSyncingCalendar => 'カレンダーを同期中...';
 
   @override
-  String get splashGeneratingSchedules => 'スケジュールを作成中...';
+  String get splashGeneratingSchedules => '予定を生成中...';
 
   @override
   String get splashPreparingScreen => '画面を準備中...';
@@ -689,7 +689,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String helloUser(String name) {
-    return 'こんにちは、$name さん！👋';
+    return 'こんにちは、$nameさん！👋';
   }
 
   @override
@@ -702,7 +702,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get errorPermission => '権限が必要です';
 
   @override
-  String get errorLoadFailed => 'データの読み込みに失敗しました';
+  String get errorLoadFailed => 'データを読み込めませんでした';
 
   @override
   String get errorSaveFailed => '保存に失敗しました';
@@ -711,7 +711,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get errorSendFailed => '送信に失敗しました';
 
   @override
-  String get errorImageFailed => '画像の処理に失敗しました';
+  String get errorImageFailed => '画像処理に失敗しました';
 
   @override
   String get confirmDelete => '本当に削除しますか？';
@@ -742,7 +742,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String daysRemaining(int days) {
-    return 'あと$days日';
+    return '残り$days日';
   }
 
   @override
@@ -776,19 +776,19 @@ class AppLocalizationsJa extends AppLocalizations {
   String get eventOther => 'その他';
 
   @override
-  String get scheduleEdit => '編集';
+  String get scheduleEdit => '予定編集';
 
   @override
-  String get scheduleAdd => '追加';
+  String get scheduleAdd => '予定追加';
 
   @override
-  String get scheduleAddNew => '新規';
+  String get scheduleAddNew => '新しい予定';
 
   @override
   String get scheduleTitle => 'タイトル';
 
   @override
-  String get scheduleRecipients => '宛先';
+  String get scheduleRecipients => '受信者';
 
   @override
   String get scheduleDate => '日付';
@@ -800,10 +800,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get scheduleAddToCalendar => 'カレンダーに追加';
 
   @override
-  String get scheduleAddedSuccess => 'スケジュール追加！';
+  String get scheduleAddedSuccess => '予定が追加されました！';
 
   @override
-  String get planEdit => '編集';
+  String get planEdit => '修正';
 
   @override
   String get planDelete => '削除';
@@ -812,7 +812,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get planMoveToEnd => '最後に移動';
 
   @override
-  String get planReschedule => '日程変更';
+  String get planReschedule => '日付変更';
 
   @override
   String get planChangeIcon => 'アイコン変更';
@@ -826,10 +826,10 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get iconNormal => '通常';
+  String get iconNormal => '一般';
 
   @override
-  String get iconHoliday => '祝日';
+  String get iconHoliday => '休日';
 
   @override
   String get iconBirthday => '誕生日';
@@ -871,7 +871,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get textBoxPreviewText => 'スタイルプレビュー';
 
   @override
-  String get textBoxShapeRounded => '丸み';
+  String get textBoxShapeRounded => '角丸';
 
   @override
   String get textBoxShapeSquare => '四角';
@@ -892,31 +892,31 @@ class AppLocalizationsJa extends AppLocalizations {
   String get textBoxOpacity => '透明度';
 
   @override
-  String get textBoxBorderRadius => '角の丸み';
+  String get textBoxBorderRadius => '角丸半径';
 
   @override
-  String get textBoxBorder => 'ボーダー';
+  String get textBoxBorder => '枠線';
 
   @override
-  String get textBoxBorderWidth => 'ボーダー幅';
+  String get textBoxBorderWidth => '枠線の太さ';
 
   @override
-  String get textBoxFooterStyle => 'フッター(送信者)背景スタイル';
+  String get textBoxFooterStyle => 'フッター（差出人）背景スタイル';
 
   @override
-  String get textBoxFooterHint => 'フォントサイズと色は上部ツールバーでフッターを選択して変更してください。';
+  String get textBoxFooterHint => '文字サイズと色は、フッターを選択後、上部のツールバーで変更してください。';
 
   @override
   String get textBoxPreview => 'スタイルプレビュー';
 
   @override
-  String get textBoxSender => '送信者';
+  String get textBoxSender => '差出人';
 
   @override
-  String get textBoxShapeLabel => 'テキストボックス形状';
+  String get textBoxShapeLabel => 'ボックス形状';
 
   @override
-  String get shapeRounded => '丸み';
+  String get shapeRounded => '角丸';
 
   @override
   String get shapeRectangle => '四角';
@@ -955,10 +955,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get footerBgOpacity => '背景透明度';
 
   @override
-  String get footerBgRadius => '背景の角丸';
+  String get footerBgRadius => '背景角丸';
 
   @override
-  String get contactPickerTitle => '送信先を選択';
+  String get contactPickerTitle => '送信先選択';
 
   @override
   String get contactPickerSearchHint => '名前または電話番号...';
@@ -973,10 +973,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get contactPickerFamily => '家族';
 
   @override
-  String get contactPickerAddNew => '新しい連絡先を追加';
+  String get contactPickerAddNew => '連絡先追加';
 
   @override
-  String get addContactTitle => '新しい連絡先を追加';
+  String get addContactTitle => '新しい連絡先';
 
   @override
   String get addContactName => '名前';
@@ -994,11 +994,11 @@ class AppLocalizationsJa extends AppLocalizations {
   String get editorTextBox => 'テキスト';
 
   @override
-  String get photoPermissionTitle => '写真へのアクセス権限が必要';
+  String get photoPermissionTitle => '写真へのアクセス権限';
 
   @override
   String get photoPermissionDesc =>
-      'デバイスの写真をカード背景として使用するには\nギャラリーへのアクセス権限が必要です。';
+      '端末の写真をカードの背景として使用するには\nギャラリーへのアクセス権限が必要です。';
 
   @override
   String get photoPermissionHowTo => '📱 設定方法';
@@ -1007,7 +1007,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get photoPermissionStep1 => '1. 下の「設定を開く」をタップ';
 
   @override
-  String get photoPermissionStep2 => '2. 「権限」を探してタップ';
+  String get photoPermissionStep2 => '2. 「権限」または「許可」をタップ';
 
   @override
   String get photoPermissionStep3 => '3. 「写真と動画」をタップ';
@@ -1016,7 +1016,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get photoPermissionStep4 => '4. 「許可」または「すべての写真を許可」を選択';
 
   @override
-  String get photoPermissionNote => '⚡ 権限を許可した後、ここに戻ると\n自動的に写真が表示されます。';
+  String get photoPermissionNote => '⚡ 権限を許可した後、この画面に戻ると\n自動的に写真が表示されます。';
 
   @override
   String get openSettings => '設定を開く';

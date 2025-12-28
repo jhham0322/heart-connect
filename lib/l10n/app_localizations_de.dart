@@ -9,657 +9,666 @@ class AppLocalizationsDe extends AppLocalizations {
   AppLocalizationsDe([String locale = 'de']) : super(locale);
 
   @override
-  String get appName => '마음이음';
+  String get appName => 'HerzVerbindung';
 
   @override
-  String get ok => '확인';
+  String get ok => 'OK';
 
   @override
-  String get cancel => '취소';
+  String get cancel => 'Abbrechen';
 
   @override
-  String get close => '닫기';
+  String get close => 'Schließen';
 
   @override
-  String get save => '저장';
+  String get save => 'Speichern';
 
   @override
-  String get delete => '삭제';
+  String get delete => 'Löschen';
 
   @override
-  String get edit => '편집';
+  String get edit => 'Bearbeiten';
 
   @override
-  String get add => '추가';
+  String get add => 'Hinzufügen';
 
   @override
-  String get search => '검색';
+  String get search => 'Suchen';
 
   @override
-  String get loading => '로딩 중...';
+  String get loading => 'Laden...';
 
   @override
-  String get error => '오류';
+  String get error => 'Fehler';
 
   @override
-  String get success => '성공';
+  String get success => 'Erfolg';
 
   @override
-  String get warning => '경고';
+  String get warning => 'Warnung';
 
   @override
-  String get retry => '다시 시도';
+  String get retry => 'Wiederholen';
 
   @override
-  String get next => '다음';
+  String get next => 'Weiter';
 
   @override
-  String get previous => '이전';
+  String get previous => 'Zurück';
 
   @override
-  String get done => '완료';
+  String get done => 'Fertig';
 
   @override
-  String get all => '전체';
+  String get all => 'Alle';
 
   @override
-  String get today => '오늘';
+  String get today => 'Heute';
 
   @override
-  String get yesterday => '어제';
+  String get yesterday => 'Gestern';
 
   @override
-  String get tomorrow => '내일';
+  String get tomorrow => 'Morgen';
 
   @override
-  String get onboardingStart => '시작하기';
+  String get onboardingStart => 'Starten';
 
   @override
-  String get onboardingWelcome => '기쁨과 감사의 마음을\n주변 사람들과 나누세요';
+  String get onboardingWelcome =>
+      'Teilen Sie Freude und Dankbarkeit\nmit den Menschen um Sie herum';
 
   @override
-  String get onboardingDesc1 => '마음이음은';
+  String get onboardingDesc1 => 'HerzVerbindung ist';
 
   @override
-  String get onboardingDesc2 => '소중한 사람들에게';
+  String get onboardingDesc2 => 'eine App, mit der Sie';
 
   @override
-  String get onboardingDesc3 => '따뜻한 카드와 메시지를';
+  String get onboardingDesc3 => 'herzliche Karten und Nachrichten';
 
   @override
-  String get onboardingDesc4 => '보낼 수 있는 앱입니다.';
+  String get onboardingDesc4 => 'an Ihre Liebsten senden können.';
 
   @override
-  String get onboardingDesc5 => '생일, 기념일, 특별한 날에';
+  String get onboardingDesc5 =>
+      'An Geburtstagen, Jubiläen und besonderen Tagen,';
 
   @override
-  String get onboardingDesc6 => '진심을 담은 마음을';
+  String get onboardingDesc6 => 'teilen Sie Ihre';
 
   @override
-  String get onboardingDesc7 => '전해보세요.';
+  String get onboardingDesc7 => 'aufrichtigen Gefühle.';
 
   @override
-  String get onboardingEnterName => '사용하실 이름을 입력하세요';
+  String get onboardingEnterName => 'Geben Sie Ihren Namen ein';
 
   @override
-  String get onboardingNameHint => '이름 또는 별명';
+  String get onboardingNameHint => 'Name oder Spitzname';
 
   @override
   String get onboardingNameDesc =>
-      '이 이름은 카드의 서명(Footer)에 표시됩니다.\n설정에서 언제든지 변경할 수 있습니다.';
+      'Dieser Name erscheint als Unterschrift (Footer) auf Karten.\nSie können ihn jederzeit in den Einstellungen ändern.';
 
   @override
-  String get onboardingNameRequired => '이름을 입력해주세요';
+  String get onboardingNameRequired => 'Bitte geben Sie Ihren Namen ein';
 
   @override
-  String get onboardingContinue => '계속하기';
+  String get onboardingContinue => 'Weiter';
 
   @override
-  String get permissionContacts => '연락처 접근 권한';
+  String get permissionContacts => 'Zugriff auf Kontakte';
 
   @override
-  String get permissionCalendar => '캘린더 접근 권한';
+  String get permissionCalendar => 'Zugriff auf Kalender';
 
   @override
-  String get permissionWhyNeeded => '왜 필요한가요?';
+  String get permissionWhyNeeded => 'Warum ist das nötig?';
 
   @override
   String get permissionContactsDesc =>
-      '연락처 정보는 가족, 친구들에게 카드를 보내기 위해 필요합니다.\n\n저장된 연락처에서 수신자를 쉽게 선택할 수 있어요.';
+      'Kontaktinformationen werden benötigt, um Karten an Familie und Freunde zu senden.\n\nSie können Empfänger einfach aus Ihren gespeicherten Kontakten auswählen.';
 
   @override
   String get permissionCalendarDesc =>
-      '캘린더 정보는 가족과 친구의 생일, 기념일, 이벤트 정보를 가져오기 위해 필요합니다.\n\n중요한 날을 놓치지 않고 미리 알림을 받을 수 있어요!';
+      'Kalenderinformationen werden benötigt, um Geburtstage, Jubiläen und Ereignisse Ihrer Familie und Freunde abzurufen.\n\nSie erhalten Erinnerungen, damit Sie keine wichtigen Tage verpassen!';
 
   @override
   String get permissionPrivacy =>
-      '🔒 개인정보 보호 안내\n\n수집되는 정보는 사용자님의 핸드폰 안에서만 사용되며, 핸드폰 밖으로 반출되지 않습니다.';
+      '🔒 Datenschutzhinweis\n\nDie gesammelten Informationen werden nur auf Ihrem Telefon verwendet und niemals nach außen übertragen.';
 
   @override
-  String get permissionAllow => '접근 허용';
+  String get permissionAllow => 'Zugriff erlauben';
 
   @override
-  String get permissionAllowContacts => '연락처 접근 허용';
+  String get permissionAllowContacts => 'Kontakte erlauben';
 
   @override
-  String get permissionAllowCalendar => '캘린더 접근 허용';
+  String get permissionAllowCalendar => 'Kalender erlauben';
 
   @override
-  String get permissionSkip => '나중에 설정하기';
+  String get permissionSkip => 'Später einrichten';
 
   @override
-  String get permissionSkipContacts => '권한을 허용하지 않으시면 수동으로 연락처를 입력해야 합니다.';
+  String get permissionSkipContacts =>
+      'Wenn Sie die Erlaubnis nicht erteilen, müssen Sie Kontakte manuell eingeben.';
 
   @override
-  String get permissionSkipCalendar => '권한을 허용하지 않으시면 수동으로 일정을 입력해야 합니다.';
+  String get permissionSkipCalendar =>
+      'Wenn Sie die Erlaubnis nicht erteilen, müssen Sie Ereignisse manuell eingeben.';
 
   @override
-  String get permissionSms => 'SMS 접근 권한';
+  String get permissionSms => 'SMS-Zugriff';
 
   @override
   String get permissionSmsDesc =>
-      'SMS 정보는 연락처와 주고받은 문자 메시지 내역을 확인하기 위해 필요합니다.\n\n카드를 보낸 후 문자로 안부를 주고받은 기록을 볼 수 있어요!';
+      'SMS-Informationen werden benötigt, um den Nachrichtenverlauf mit Kontakten anzuzeigen.\n\nSie können Ihren SMS-Verlauf nach dem Senden von Karten sehen!';
 
   @override
-  String get permissionAllowSms => 'SMS 접근 허용';
+  String get permissionAllowSms => 'SMS erlauben';
 
   @override
-  String get permissionSkipSms => '권한을 허용하지 않으시면 문자 메시지 내역을 볼 수 없습니다.';
+  String get permissionSkipSms =>
+      'Ohne Erlaubnis können Sie den Nachrichtenverlauf nicht sehen.';
 
   @override
-  String get permissionSendSms => 'SMS 발송 권한';
+  String get permissionSendSms => 'SMS senden';
 
   @override
   String get permissionSendSmsDesc =>
-      '카드를 문자로 직접 발송하려면 SMS 발송 권한이 필요합니다.\n\n이 권한이 없으면 문자 앱을 통해서만 발송할 수 있습니다.';
+      'Die Berechtigung zum Senden von SMS ist erforderlich, um Karten direkt per SMS zu versenden.\n\nOhne diese Berechtigung können Sie nur über die Nachrichten-App senden.';
 
   @override
-  String get permissionAllowSendSms => 'SMS 발송 허용';
+  String get permissionAllowSendSms => 'SMS-Versand erlauben';
 
   @override
-  String get navHome => '홈';
+  String get navHome => 'Home';
 
   @override
-  String get navContacts => '연락처';
+  String get navContacts => 'Kontakte';
 
   @override
-  String get navGallery => '갤러리';
+  String get navGallery => 'Galerie';
 
   @override
-  String get navMessages => '메시지';
+  String get navMessages => 'Nachrichten';
 
   @override
-  String get navSettings => '설정';
+  String get navSettings => 'Einstellungen';
 
   @override
-  String get homeUpcoming => '다가오는 일정';
+  String get homeUpcoming => 'Kommende Events';
 
   @override
-  String get homeNoEvents => '예정된 일정이 없습니다';
+  String get homeNoEvents => 'Keine geplanten Ereignisse';
 
   @override
-  String get homeQuickSend => '빠른 발송';
+  String get homeQuickSend => 'Schnellversand';
 
   @override
-  String get homeRecentCards => '최근 보낸 카드';
+  String get homeRecentCards => 'Kürzlich gesendet';
 
   @override
-  String get homeWriteCard => '카드 작성';
+  String get homeWriteCard => 'Karte schreiben';
 
   @override
-  String get homeDaysLeft => '일 남음';
+  String get homeDaysLeft => 'Tage übrig';
 
   @override
   String get homeDDay => 'D-Day';
 
   @override
-  String get contactsTitle => '연락처';
+  String get contactsTitle => 'Kontakte';
 
   @override
-  String get contactsAll => '전체';
+  String get contactsAll => 'Alle';
 
   @override
-  String get contactsFamily => '가족';
+  String get contactsFamily => 'Familie';
 
   @override
-  String get contactsFriends => '친구';
+  String get contactsFriends => 'Freunde';
 
   @override
-  String get contactsWork => '직장';
+  String get contactsWork => 'Arbeit';
 
   @override
-  String get contactsOthers => '기타';
+  String get contactsOthers => 'Sonstige';
 
   @override
-  String get contactsFavorites => '즐겨찾기';
+  String get contactsFavorites => 'Favoriten';
 
   @override
-  String get contactsEmpty => '연락처가 없습니다';
+  String get contactsEmpty => 'Keine Kontakte';
 
   @override
-  String get contactsSearchHint => '이름 또는 전화번호 검색';
+  String get contactsSearchHint => 'Name oder Nummer suchen';
 
   @override
-  String get contactsMyPeople => '내 사람들';
+  String get contactsMyPeople => 'Meine Leute';
 
   @override
-  String get contactsMemories => '추억 기록';
+  String get contactsMemories => 'Erinnerungen';
 
   @override
-  String get contactsRecent => '최근 연락';
+  String get contactsRecent => 'Kürzlich';
 
   @override
-  String get contactsSearchPlaceholder => '이름, 태그 검색';
+  String get contactsSearchPlaceholder => 'Name, Tag suchen';
 
   @override
-  String get contactsNoMemories => '아직 추억 기록이 없습니다.';
+  String get contactsNoMemories => 'Noch keine Erinnerungen.';
 
   @override
-  String get contactsSendCard => '카드 보내기';
+  String get contactsSendCard => 'Karte senden';
 
   @override
-  String get contactsCall => '전화';
+  String get contactsCall => 'Anrufen';
 
   @override
-  String get contactsMessage => '문자';
+  String get contactsMessage => 'Nachricht';
 
   @override
-  String get contactsBirthday => '생일';
+  String get contactsBirthday => 'Geburtstag';
 
   @override
-  String get contactsAnniversary => '기념일';
+  String get contactsAnniversary => 'Jubiläum';
 
   @override
-  String get contactsNoHistory => '주고받은 내역이 없습니다.';
+  String get contactsNoHistory => 'Kein Verlauf.';
 
   @override
-  String get contactsSearchContent => '내용 검색';
+  String get contactsSearchContent => 'Inhalt suchen';
 
   @override
-  String get contactsNoSearchResult => '검색 결과가 없습니다.';
+  String get contactsNoSearchResult => 'Keine Suchergebnisse.';
 
   @override
-  String get contactsMessageSent => '보냄';
+  String get contactsMessageSent => 'Gesendet';
 
   @override
-  String get contactsMessageReceived => '받음';
+  String get contactsMessageReceived => 'Empfangen';
 
   @override
-  String get shareTitle => '공유하기';
+  String get shareTitle => 'Teilen';
 
   @override
-  String get shareOtherApps => '기타 앱으로 공유';
+  String get shareOtherApps => 'Andere Apps';
 
   @override
-  String get shareKakaoTalk => '카카오톡';
+  String get shareKakaoTalk => 'KakaoTalk';
 
   @override
-  String get shareInstagram => '인스타그램';
+  String get shareInstagram => 'Instagram';
 
   @override
-  String get shareFacebook => '페이스북';
+  String get shareFacebook => 'Facebook';
 
   @override
-  String get shareTwitter => 'X (트위터)';
+  String get shareTwitter => 'X (Twitter)';
 
   @override
   String get shareWhatsApp => 'WhatsApp';
 
   @override
-  String get shareTelegram => '텔레그램';
+  String get shareTelegram => 'Telegram';
 
   @override
-  String get galleryTitle => '카드 갤러리';
+  String get galleryTitle => 'Kartengalerie';
 
   @override
-  String get galleryBirthday => '생일';
+  String get galleryBirthday => 'Geburtstag';
 
   @override
-  String get galleryChristmas => '크리스마스';
+  String get galleryChristmas => 'Weihnachten';
 
   @override
-  String get galleryNewYear => '새해';
+  String get galleryNewYear => 'Neujahr';
 
   @override
-  String get galleryThanks => '감사';
+  String get galleryThanks => 'Danke';
 
   @override
-  String get galleryMothersDay => '어버이날';
+  String get galleryMothersDay => 'Elterntag';
 
   @override
-  String get galleryTeachersDay => '스승의 날';
+  String get galleryTeachersDay => 'Lehrertag';
 
   @override
-  String get galleryHalloween => '할로윈';
+  String get galleryHalloween => 'Halloween';
 
   @override
-  String get galleryThanksgiving => '추수감사절';
+  String get galleryThanksgiving => 'Erntedankfest';
 
   @override
-  String get galleryTravel => '여행';
+  String get galleryTravel => 'Reisen';
 
   @override
-  String get galleryHobby => '취미';
+  String get galleryHobby => 'Hobby';
 
   @override
-  String get gallerySports => '스포츠';
+  String get gallerySports => 'Sport';
 
   @override
-  String get galleryMyPhotos => '내 사진';
+  String get galleryMyPhotos => 'Meine Fotos';
 
   @override
-  String get gallerySelectImage => '이미지 선택';
+  String get gallerySelectImage => 'Bild wählen';
 
   @override
-  String get galleryNoImages => '이미지가 없습니다';
+  String get galleryNoImages => 'Keine Bilder';
 
   @override
-  String get selectCategory => '카테고리 선택';
+  String get selectCategory => 'Kategorie wählen';
 
   @override
-  String get cardEditorTitle => '카드 편집';
+  String get cardEditorTitle => 'Karte bearbeiten';
 
   @override
-  String get cardEditorAddText => '텍스트 추가';
+  String get cardEditorAddText => 'Text';
 
   @override
-  String get cardEditorAddSticker => '스티커 추가';
+  String get cardEditorAddSticker => 'Sticker';
 
   @override
-  String get cardEditorAddImage => '이미지 추가';
+  String get cardEditorAddImage => 'Bild';
 
   @override
-  String get cardEditorBackground => '배경';
+  String get cardEditorBackground => 'Hintergrund';
 
   @override
-  String get cardEditorFont => '폰트';
+  String get cardEditorFont => 'Schriftart';
 
   @override
-  String get cardEditorColor => '색상';
+  String get cardEditorColor => 'Farbe';
 
   @override
-  String get cardEditorSize => '크기';
+  String get cardEditorSize => 'Größe';
 
   @override
-  String get cardEditorPreview => '미리보기';
+  String get cardEditorPreview => 'Vorschau';
 
   @override
-  String get cardEditorSend => '발송';
+  String get cardEditorSend => 'Senden';
 
   @override
-  String get cardEditorSave => '저장';
+  String get cardEditorSave => 'Speichern';
 
   @override
-  String get cardEditorShare => '공유';
+  String get cardEditorShare => 'Teilen';
 
   @override
-  String get cardEditorEnterMessage => '메시지를 입력하세요';
+  String get cardEditorEnterMessage => 'Nachricht eingeben';
 
   @override
-  String get cardEditorGenerateAI => 'AI 메시지 생성';
+  String get cardEditorGenerateAI => 'AI Nachricht';
 
   @override
-  String get cardEditorTextBox => '글상자';
+  String get cardEditorTextBox => 'Textfeld';
 
   @override
-  String get cardEditorZoomHint => '더블탭하시면 줌 모드로 전환됩니다';
+  String get cardEditorZoomHint => 'Doppeltippen für Zoom';
 
   @override
-  String get cardEditorRecipient => '발송대상';
+  String get cardEditorRecipient => 'Empfänger';
 
   @override
-  String get cardEditorAddRecipient => '대상 추가';
+  String get cardEditorAddRecipient => 'Hinzufügen';
 
   @override
-  String get recipientSelectTitle => '발송 대상 선택';
+  String get recipientSelectTitle => 'Empfänger wählen';
 
   @override
-  String get recipientSearchHint => '이름 또는 전화번호...';
+  String get recipientSearchHint => 'Name oder Nummer...';
 
   @override
-  String get recipientAddNew => '새 연락처 추가';
+  String get recipientAddNew => 'Neuer Kontakt';
 
   @override
-  String get recipientName => '이름';
+  String get recipientName => 'Name';
 
   @override
-  String get recipientPhone => '전화번호';
+  String get recipientPhone => 'Telefonnummer';
 
   @override
-  String get recipientAdd => '추가';
+  String get recipientAdd => 'Hinzufügen';
 
   @override
-  String get cardPreviewTitle => '카드 이미지 확인';
+  String get cardPreviewTitle => 'Vorschau';
 
   @override
-  String get cardPreviewDesc => '수신자들에게 발송될 최종 이미지입니다.';
+  String get cardPreviewDesc =>
+      'Dies ist das endgültige Bild, das gesendet wird.';
 
   @override
-  String get cardPreviewZoomHint => '더블탭으로 확대/축소, 드래그로 이동이 가능합니다.';
+  String get cardPreviewZoomHint =>
+      'Doppeltippen zum Zoomen, Ziehen zum Bewegen.';
 
   @override
-  String get cardPreviewCheckHint => '발송 전 이미지 결과물을 확인해 주세요.';
+  String get cardPreviewCheckHint =>
+      'Bitte überprüfen Sie das Bild vor dem Senden.';
 
   @override
-  String get cardPreviewConfirm => '확인 (다음 단계)';
+  String get cardPreviewConfirm => 'Bestätigen (Weiter)';
 
   @override
-  String get sendTitle => '발송 관리';
+  String get sendTitle => 'Versandmanager';
 
   @override
-  String get sendRecipients => '수신자';
+  String get sendRecipients => 'Empfänger';
 
   @override
-  String get sendAddRecipient => '수신자 추가';
+  String get sendAddRecipient => 'Empfänger hinzufügen';
 
   @override
-  String get sendStart => '발송 시작';
+  String get sendStart => 'Starten';
 
   @override
-  String get sendStop => '발송 중지';
+  String get sendStop => 'Stoppen';
 
   @override
-  String get sendContinue => '계속 발송';
+  String get sendContinue => 'Fortsetzen';
 
   @override
-  String get sendProgress => '발송 진행 중';
+  String get sendProgress => 'Versand läuft';
 
   @override
-  String get sendComplete => '발송 완료';
+  String get sendComplete => 'Versand abgeschlossen';
 
   @override
-  String get sendFailed => '발송 실패';
+  String get sendFailed => 'Fehlgeschlagen';
 
   @override
-  String get sendPending => '대기 중';
+  String get sendPending => 'Ausstehend';
 
   @override
-  String get sendTotalRecipients => '총 수신자';
+  String get sendTotalRecipients => 'Gesamtempfänger';
 
   @override
-  String get sendAutoResume => '5건 발송 후 자동 계속';
+  String get sendAutoResume => 'Auto-Fortsetzung nach 5';
 
   @override
-  String get sendManagerTitle => '발송 대상 관리';
+  String get sendManagerTitle => 'Empfängermanager';
 
   @override
-  String get sendTotal => '총';
+  String get sendTotal => 'Gesamt';
 
   @override
-  String get sendPerson => '명';
+  String get sendPerson => '';
 
   @override
   String get sendSpamWarning =>
-      '단시간 다량 발송은 스팸 정책에 의해 제한될 수 있습니다.\n안전을 위해 자동 계속 해제를 권장합니다.';
+      'Der Massenversand in kurzer Zeit kann durch Spam-Richtlinien eingeschränkt werden.\nEs wird empfohlen, die automatische Fortsetzung zu deaktivieren.';
 
   @override
   String totalPersonCount(int count) {
-    return '총 $count명';
+    return 'Gesamt: $count';
   }
 
   @override
   String get cardHintZoomMode =>
-      '배경 이미지를 더블탭하시면 줌 모드로 전환됩니다. 줌 모드에서 이미지 크기와 위치를 조절하실 수 있습니다.';
+      'Doppeltippen Sie auf den Hintergrund, um den Zoom-Modus zu aktivieren. Dort können Sie Größe und Position anpassen.';
 
   @override
   String get cardHintZoomEdit =>
-      '두 손가락으로 벌리거나 줄여서 이미지 크기를 조정하실 수 있습니다. 한 손가락으로 드래그하시면 이미지를 이동하실 수 있습니다. 편집이 완료되시면 더블탭 또는 줌 모드 버튼을 눌러 종료해 주세요.';
+      'Zum Ändern der Größe kneifen. Zum Bewegen mit einem Finger ziehen. Zum Beenden doppeltippen.';
 
   @override
-  String get cardHintDragging => '이미지 이동 중...';
+  String get cardHintDragging => 'Bild wird bewegt...';
 
   @override
-  String get cardHintPinching => '이미지 크기 조절 중...';
+  String get cardHintPinching => 'Größe wird geändert...';
 
   @override
-  String get savedCardsTitle => '저장된 카드 목록';
+  String get savedCardsTitle => 'Gespeicherte Karten';
 
   @override
-  String get savedCardsEmpty => '저장된 메시지가 없습니다.';
+  String get savedCardsEmpty => 'Keine gespeicherten Nachrichten.';
 
   @override
-  String get cardSaveTitle => '카드 저장';
+  String get cardSaveTitle => 'Karte speichern';
 
   @override
-  String get cardSaveName => '저장할 이름';
+  String get cardSaveName => 'Name';
 
   @override
-  String get cardSaveHint => '카드의 이름을 입력하세요';
+  String get cardSaveHint => 'Kartennamen eingeben';
 
   @override
-  String get cardNoTitle => '제목 없음';
+  String get cardNoTitle => 'Ohne Titel';
 
   @override
-  String get cardImageFailed => '카드 이미지 생성 실패';
+  String get cardImageFailed => 'Kartenbild konnte nicht erstellt werden';
 
   @override
-  String get messageHistory => '발송 기록';
+  String get messageHistory => 'Verlauf';
 
   @override
-  String get messageNoHistory => '발송 기록이 없습니다';
+  String get messageNoHistory => 'Kein Verlauf';
 
   @override
-  String get messageSent => '발송 완료';
+  String get messageSent => 'Gesendet';
 
   @override
-  String get messageViewed => '확인함';
+  String get messageViewed => 'Gesehen';
 
   @override
-  String get settingsTitle => '설정';
+  String get settingsTitle => 'Einstellungen';
 
   @override
-  String get settingsProfile => '프로필';
+  String get settingsProfile => 'Profil';
 
   @override
-  String get settingsName => '이름';
+  String get settingsName => 'Name';
 
   @override
-  String get settingsLanguage => '언어';
+  String get settingsLanguage => 'Sprache';
 
   @override
-  String get settingsNotifications => '알림';
+  String get settingsNotifications => 'Benachrichtigungen';
 
   @override
-  String get settingsNotificationTime => '알림 시간';
+  String get settingsNotificationTime => 'Zeit';
 
   @override
-  String get settingsReceiveAlerts => '알림 받기';
+  String get settingsReceiveAlerts => 'Benachrichtigungen erhalten';
 
   @override
-  String get settingsSetTime => '시간 설정';
+  String get settingsSetTime => 'Zeit einstellen';
 
   @override
-  String get settingsDesignSending => '디자인/발송';
+  String get settingsDesignSending => 'Design/Versand';
 
   @override
-  String get settingsCardBranding => '카드 하단 브랜딩';
+  String get settingsCardBranding => 'Karten-Branding';
 
   @override
-  String get settingsDataManage => '데이터 관리';
+  String get settingsDataManage => 'Datenverwaltung';
 
   @override
-  String get settingsBranding => '브랜딩 표시';
+  String get settingsBranding => 'Branding anzeigen';
 
   @override
-  String get settingsSync => '동기화';
+  String get settingsSync => 'Sync';
 
   @override
-  String get settingsSyncContacts => '연락처 동기화';
+  String get settingsSyncContacts => 'Kontakte synchronisieren';
 
   @override
-  String get settingsSyncCalendar => '캘린더 동기화';
+  String get settingsSyncCalendar => 'Kalender synchronisieren';
 
   @override
-  String get settingsBackup => '백업';
+  String get settingsBackup => 'Backup';
 
   @override
-  String get settingsRestore => '복원';
+  String get settingsRestore => 'Wiederherstellen';
 
   @override
-  String get settingsExport => '내보내기';
+  String get settingsExport => 'Exportieren';
 
   @override
-  String get settingsImport => '가져오기';
+  String get settingsImport => 'Importieren';
 
   @override
-  String get settingsCalendarSync => '캘린더 연동';
+  String get settingsCalendarSync => 'Kalender';
 
   @override
-  String get settingsOpenCalendar => '캘린더 열기';
+  String get settingsOpenCalendar => 'Kalender öffnen';
 
   @override
-  String get settingsCalendarGuide => '지원 캘린더 안내';
+  String get settingsCalendarGuide => 'Kalender-Leitfaden';
 
   @override
-  String get settingsAppInfo => '앱 정보';
+  String get settingsAppInfo => 'App Info';
 
   @override
-  String get settingsContactUs => '문의하기';
+  String get settingsContactUs => 'Kontakt';
 
   @override
-  String get settingsAccount => '계정';
+  String get settingsAccount => 'Konto';
 
   @override
-  String get settingsExit => '나가기';
+  String get settingsExit => 'Beenden';
 
   @override
-  String get settingsMyName => '내 이름/별명';
+  String get settingsMyName => 'Mein Name';
 
   @override
-  String get settingsNameOrNickname => '이름 또는 별명';
+  String get settingsNameOrNickname => 'Name oder Spitzname';
 
   @override
-  String get settingsNameHint => '카드에 표시될 이름';
+  String get settingsNameHint => 'Angezeigter Name';
 
   @override
-  String get settingsNameUsageInfo => '이 이름은 카드 쓰기 화면의 Footer(서명)에 사용됩니다.';
+  String get settingsNameUsageInfo =>
+      'Dieser Name wird als Signatur auf Karten verwendet.';
 
   @override
-  String get settingsAbout => '앱 정보';
+  String get settingsAbout => 'Über';
 
   @override
-  String get settingsVersion => '버전';
+  String get settingsVersion => 'Version';
 
   @override
-  String get settingsPrivacy => '개인정보 처리방침';
+  String get settingsPrivacy => 'Datenschutz';
 
   @override
-  String get settingsTerms => '이용약관';
+  String get settingsTerms => 'Nutzungsbedingungen';
 
   @override
-  String get settingsHelp => '도움말';
+  String get settingsHelp => 'Hilfe';
 
   @override
-  String get settingsExternalCalendarGuide => '외부 캘린더 연동 안내';
+  String get settingsExternalCalendarGuide => 'Externer Kalender';
 
   @override
-  String get settingsTest => '테스트';
+  String get settingsTest => 'Test';
 
   @override
-  String get settingsGoogleCalendar => 'Google 캘린더';
+  String get settingsGoogleCalendar => 'Google';
 
   @override
-  String get settingsSamsungCalendar => 'Samsung 캘린더';
+  String get settingsSamsungCalendar => 'Samsung';
 
   @override
   String get settingsDarkMode => 'Dunkelmodus';
@@ -668,356 +677,360 @@ class AppLocalizationsDe extends AppLocalizations {
   String get settingsDarkModeDesc => 'Dunkles Thema verwenden';
 
   @override
-  String get splashPreparing => '준비 중...';
+  String get splashPreparing => 'Vorbereitung...';
 
   @override
-  String get splashLoadingData => '데이터를 불러오는 중...';
+  String get splashLoadingData => 'Daten werden geladen...';
 
   @override
-  String get splashSyncingContacts => '연락처를 동기화하는 중...';
+  String get splashSyncingContacts => 'Kontakte werden synchronisiert...';
 
   @override
-  String get splashSyncingCalendar => '캘린더를 동기화하는 중...';
+  String get splashSyncingCalendar => 'Kalender wird synchronisiert...';
 
   @override
-  String get splashGeneratingSchedules => '일정을 생성하는 중...';
+  String get splashGeneratingSchedules => 'Termine werden erstellt...';
 
   @override
-  String get splashPreparingScreen => '화면을 준비하는 중...';
+  String get splashPreparingScreen => 'Bildschirm wird vorbereitet...';
 
   @override
-  String get splashReady => '준비 완료!';
+  String get splashReady => 'Bereit!';
 
   @override
   String helloUser(String name) {
-    return '안녕하세요, $name 님! 👋';
+    return 'Hallo, $name! 👋';
   }
 
   @override
-  String get errorNetwork => '네트워크 오류가 발생했습니다';
+  String get errorNetwork => 'Netzwerkfehler';
 
   @override
-  String get errorUnknown => '알 수 없는 오류가 발생했습니다';
+  String get errorUnknown => 'Unbekannter Fehler';
 
   @override
-  String get errorPermission => '권한이 필요합니다';
+  String get errorPermission => 'Berechtigung erforderlich';
 
   @override
-  String get errorLoadFailed => '데이터를 불러오지 못했습니다';
+  String get errorLoadFailed => 'Laden fehlgeschlagen';
 
   @override
-  String get errorSaveFailed => '저장에 실패했습니다';
+  String get errorSaveFailed => 'Speichern fehlgeschlagen';
 
   @override
-  String get errorSendFailed => '발송에 실패했습니다';
+  String get errorSendFailed => 'Senden fehlgeschlagen';
 
   @override
-  String get errorImageFailed => '이미지 처리에 실패했습니다';
+  String get errorImageFailed => 'Bildverarbeitung fehlgeschlagen';
 
   @override
-  String get confirmDelete => '정말 삭제하시겠습니까?';
+  String get confirmDelete => 'Wirklich löschen?';
 
   @override
-  String get confirmExit => '변경사항을 저장하지 않고 나가시겠습니까?';
+  String get confirmExit => 'Ohne Speichern beenden?';
 
   @override
-  String get confirmSend => '발송하시겠습니까?';
+  String get confirmSend => 'Senden?';
 
   @override
-  String get dateToday => '오늘';
+  String get dateToday => 'Heute';
 
   @override
-  String get dateTomorrow => '내일';
+  String get dateTomorrow => 'Morgen';
 
   @override
-  String get dateYesterday => '어제';
+  String get dateYesterday => 'Gestern';
 
   @override
-  String get dateThisWeek => '이번 주';
+  String get dateThisWeek => 'Diese Woche';
 
   @override
-  String get dateNextWeek => '다음 주';
+  String get dateNextWeek => 'Nächste Woche';
 
   @override
-  String get dateThisMonth => '이번 달';
+  String get dateThisMonth => 'Diesen Monat';
 
   @override
   String daysRemaining(int days) {
-    return '$days일 남음';
+    return 'noch $days Tage';
   }
 
   @override
   String daysAgo(int days) {
-    return '$days일 전';
+    return 'vor $days Tagen';
   }
 
   @override
   String sendResultSuccess(int count) {
-    return '성공: $count건';
+    return 'Erfolg: $count';
   }
 
   @override
   String sendResultFailed(int count) {
-    return '실패: $count건';
+    return 'Fehler: $count';
   }
 
   @override
-  String get eventBirthday => '생일';
+  String get eventBirthday => 'Geburtstag';
 
   @override
-  String get eventAnniversary => '기념일';
+  String get eventAnniversary => 'Jubiläum';
 
   @override
-  String get eventHoliday => '공휴일';
+  String get eventHoliday => 'Feiertag';
 
   @override
-  String get eventMeeting => '모임';
+  String get eventMeeting => 'Treffen';
 
   @override
-  String get eventOther => '기타';
+  String get eventOther => 'Sonstiges';
 
   @override
-  String get scheduleEdit => '일정 수정';
+  String get scheduleEdit => 'Bearbeiten';
 
   @override
-  String get scheduleAdd => '일정 추가';
+  String get scheduleAdd => 'Hinzufügen';
 
   @override
-  String get scheduleAddNew => '새 일정';
+  String get scheduleAddNew => 'Neu';
 
   @override
-  String get scheduleTitle => '제목';
+  String get scheduleTitle => 'Titel';
 
   @override
-  String get scheduleRecipients => '수신자';
+  String get scheduleRecipients => 'Empfänger';
 
   @override
-  String get scheduleDate => '날짜';
+  String get scheduleDate => 'Datum';
 
   @override
-  String get scheduleIconType => '아이콘';
+  String get scheduleIconType => 'Icon';
 
   @override
-  String get scheduleAddToCalendar => '캘린더에 추가';
+  String get scheduleAddToCalendar => 'Zum Kalender';
 
   @override
-  String get scheduleAddedSuccess => '일정이 추가되었습니다!';
+  String get scheduleAddedSuccess => 'Hinzugefügt!';
 
   @override
-  String get planEdit => '수정';
+  String get planEdit => 'Ändern';
 
   @override
-  String get planDelete => '삭제';
+  String get planDelete => 'Löschen';
 
   @override
-  String get planMoveToEnd => '끝으로 이동';
+  String get planMoveToEnd => 'Ans Ende';
 
   @override
-  String get planReschedule => '날짜 변경';
+  String get planReschedule => 'Verschieben';
 
   @override
-  String get planChangeIcon => '아이콘 변경';
+  String get planChangeIcon => 'Icon ändern';
 
   @override
-  String get planSelectIcon => '아이콘 선택';
+  String get planSelectIcon => 'Icon wählen';
 
   @override
   String planDeleteConfirm(String title) {
-    return '\"$title\"을(를) 삭제하시겠습니까?';
+    return '\"$title\" löschen?';
   }
 
   @override
-  String get iconNormal => '일반';
+  String get iconNormal => 'Normal';
 
   @override
-  String get iconHoliday => '휴일';
+  String get iconHoliday => 'Urlaub';
 
   @override
-  String get iconBirthday => '생일';
+  String get iconBirthday => 'Geburtstag';
 
   @override
-  String get iconAnniversary => '기념일';
+  String get iconAnniversary => 'Jubiläum';
 
   @override
-  String get iconWork => '업무';
+  String get iconWork => 'Arbeit';
 
   @override
-  String get iconPersonal => '개인';
+  String get iconPersonal => 'Privat';
 
   @override
-  String get iconImportant => '중요';
+  String get iconImportant => 'Wichtig';
 
   @override
-  String get cardWrite => '작성';
+  String get cardWrite => 'Schreiben';
 
   @override
-  String get languageSelection => '언어 선택';
+  String get languageSelection => 'Sprache wählen';
 
   @override
-  String get previousLanguage => '이전 언어';
+  String get previousLanguage => 'Vorherige Sprache';
 
   @override
-  String get nextLanguage => '다음 언어';
+  String get nextLanguage => 'Nächste Sprache';
 
   @override
-  String get previewTitle => '미리보기';
+  String get previewTitle => 'Vorschau';
 
   @override
-  String get previewConfirm => '이 이미지로 발송하시겠습니까?';
+  String get previewConfirm => 'Mit diesem Bild senden?';
 
   @override
-  String get textBoxStyleTitle => '글상자 스타일';
+  String get textBoxStyleTitle => 'Textfeldstil';
 
   @override
-  String get textBoxPreviewText => '스타일 미리보기';
+  String get textBoxPreviewText => 'Vorschau';
 
   @override
-  String get textBoxShapeRounded => '둥근';
+  String get textBoxShapeRounded => 'Rund';
 
   @override
-  String get textBoxShapeSquare => '직각';
+  String get textBoxShapeSquare => 'Eckig';
 
   @override
-  String get textBoxShapeBevel => '모따기';
+  String get textBoxShapeBevel => 'Abgeschrägt';
 
   @override
-  String get textBoxShapeCircle => '원형';
+  String get textBoxShapeCircle => 'Kreis';
 
   @override
-  String get textBoxShapeBubble => '말풍선';
+  String get textBoxShapeBubble => 'Blase';
 
   @override
-  String get textBoxBackgroundColor => '배경 색상';
+  String get textBoxBackgroundColor => 'Hintergrundfarbe';
 
   @override
-  String get textBoxOpacity => '투명도';
+  String get textBoxOpacity => 'Deckkraft';
 
   @override
-  String get textBoxBorderRadius => '둥근 모서리';
+  String get textBoxBorderRadius => 'Radius';
 
   @override
-  String get textBoxBorder => '테두리';
+  String get textBoxBorder => 'Rahmen';
 
   @override
-  String get textBoxBorderWidth => '테두리 두께';
+  String get textBoxBorderWidth => 'Rahmendicke';
 
   @override
-  String get textBoxFooterStyle => '푸터 (보낸 사람) 배경 스타일';
+  String get textBoxFooterStyle => 'Footer-Stil';
 
   @override
-  String get textBoxFooterHint => '글자 크기와 색상은 푸터를 선택 후 상단 툴바에서 변경하세요.';
+  String get textBoxFooterHint =>
+      'Wählen Sie den Footer aus, um Schriftgröße und Farbe in der oberen Leiste zu ändern.';
 
   @override
-  String get textBoxPreview => '스타일 미리보기';
+  String get textBoxPreview => 'Vorschau';
 
   @override
-  String get textBoxSender => '보낸 사람';
+  String get textBoxSender => 'Von';
 
   @override
-  String get textBoxShapeLabel => '글상자 모양';
+  String get textBoxShapeLabel => 'Form';
 
   @override
-  String get shapeRounded => '둥근';
+  String get shapeRounded => 'Rund';
 
   @override
-  String get shapeRectangle => '직각';
+  String get shapeRectangle => 'Rechteck';
 
   @override
-  String get shapeBevel => '모따기';
+  String get shapeBevel => 'Abgeschrägt';
 
   @override
-  String get shapeCircle => '원형';
+  String get shapeCircle => 'Kreis';
 
   @override
-  String get shapeBubbleLeft => '말풍선(좌)';
+  String get shapeBubbleLeft => 'Blase(L)';
 
   @override
-  String get shapeBubbleCenter => '말풍선(중)';
+  String get shapeBubbleCenter => 'Blase(M)';
 
   @override
-  String get shapeBubbleRight => '말풍선(우)';
+  String get shapeBubbleRight => 'Blase(R)';
 
   @override
-  String get shapeHeart => '하트';
+  String get shapeHeart => 'Herz';
 
   @override
-  String get shapeStar => '별';
+  String get shapeStar => 'Stern';
 
   @override
-  String get shapeDiamond => '다이아';
+  String get shapeDiamond => 'Diamant';
 
   @override
-  String get shapeHexagon => '육각형';
+  String get shapeHexagon => 'Sechseck';
 
   @override
-  String get shapeCloud => '구름';
+  String get shapeCloud => 'Wolke';
 
   @override
-  String get footerBgOpacity => '배경 투명도';
+  String get footerBgOpacity => 'Hintergrund-Deckkraft';
 
   @override
-  String get footerBgRadius => '배경 둥근 모서리';
+  String get footerBgRadius => 'Hintergrund-Radius';
 
   @override
-  String get contactPickerTitle => '발송 대상 선택';
+  String get contactPickerTitle => 'Empfänger wählen';
 
   @override
-  String get contactPickerSearchHint => '이름 또는 전화번호...';
+  String get contactPickerSearchHint => 'Name oder Nummer...';
 
   @override
-  String get contactPickerAllContacts => '전체';
+  String get contactPickerAllContacts => 'Alle';
 
   @override
-  String get contactPickerFavorites => '즐겨찾기';
+  String get contactPickerFavorites => 'Favoriten';
 
   @override
-  String get contactPickerFamily => '가족';
+  String get contactPickerFamily => 'Familie';
 
   @override
-  String get contactPickerAddNew => '새 연락처 추가';
+  String get contactPickerAddNew => 'Neuer Kontakt';
 
   @override
-  String get addContactTitle => '새 연락처 추가';
+  String get addContactTitle => 'Neuer Kontakt';
 
   @override
-  String get addContactName => '이름';
+  String get addContactName => 'Name';
 
   @override
-  String get addContactPhone => '전화번호';
+  String get addContactPhone => 'Telefonnummer';
 
   @override
-  String get addContactAdd => '추가';
+  String get addContactAdd => 'Hinzufügen';
 
   @override
-  String get editorBackground => '배경';
+  String get editorBackground => 'Hintergrund';
 
   @override
-  String get editorTextBox => '글상자';
+  String get editorTextBox => 'Text';
 
   @override
-  String get photoPermissionTitle => '사진 접근 권한 필요';
+  String get photoPermissionTitle => 'Fotozugriff erforderlich';
 
   @override
-  String get photoPermissionDesc => '기기의 사진을 카드 배경으로 사용하려면\n갤러리 접근 권한이 필요합니다.';
+  String get photoPermissionDesc =>
+      'Um Gerätefotos als Kartenhintergrund zu verwenden,\nist der Zugriff auf die Galerie erforderlich.';
 
   @override
-  String get photoPermissionHowTo => '📱 권한 설정 방법';
+  String get photoPermissionHowTo => '📱 Aktivierung';
 
   @override
-  String get photoPermissionStep1 => '1. 아래 \"설정 열기\" 버튼을 누르세요';
+  String get photoPermissionStep1 =>
+      '1. Tippen Sie unten auf \"Einstellungen öffnen\"';
 
   @override
-  String get photoPermissionStep2 => '2. \"권한\" 항목을 찾아 터치하세요';
+  String get photoPermissionStep2 => '2. Tippen Sie auf \"Berechtigungen\"';
 
   @override
-  String get photoPermissionStep3 => '3. \"사진 및 동영상\"을 터치하세요';
+  String get photoPermissionStep3 => '3. Tippen Sie auf \"Fotos und Videos\"';
 
   @override
-  String get photoPermissionStep4 => '4. \"허용\" 또는 \"모든 사진 허용\"을 선택하세요';
+  String get photoPermissionStep4 => '4. Wählen Sie \"Zulassen\"';
 
   @override
-  String get photoPermissionNote => '⚡ 권한을 허용한 후 이 화면으로 돌아오면\n자동으로 사진이 표시됩니다.';
+  String get photoPermissionNote =>
+      '⚡ Nach dem Zulassen kehren Sie hierher zurück\nund Fotos werden automatisch geladen.';
 
   @override
-  String get openSettings => '설정 열기';
+  String get openSettings => 'Einstellungen öffnen';
 }

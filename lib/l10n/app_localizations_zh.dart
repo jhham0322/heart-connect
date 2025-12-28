@@ -12,7 +12,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get appName => '心连心';
 
   @override
-  String get ok => '确认';
+  String get ok => '确定';
 
   @override
   String get cancel => '取消';
@@ -75,63 +75,63 @@ class AppLocalizationsZh extends AppLocalizations {
   String get onboardingStart => '开始';
 
   @override
-  String get onboardingWelcome => '与周围的人分享\n喜悦和感恩';
+  String get onboardingWelcome => '与身边的人分享\n喜悦与感激之情';
 
   @override
-  String get onboardingDesc1 => '心连心是';
+  String get onboardingDesc1 => '心连心';
 
   @override
-  String get onboardingDesc2 => '一款可以向';
+  String get onboardingDesc2 => '是一款可以让您';
 
   @override
-  String get onboardingDesc3 => '珍贵的人发送';
+  String get onboardingDesc3 => '向珍视的人发送';
 
   @override
-  String get onboardingDesc4 => '温暖卡片和消息的应用。';
+  String get onboardingDesc4 => '温馨卡片和信息的应用。';
 
   @override
-  String get onboardingDesc5 => '在生日、纪念日、特别的日子';
+  String get onboardingDesc5 => '在生日、纪念日等特别的日子里，';
 
   @override
-  String get onboardingDesc6 => '传递真心的';
+  String get onboardingDesc6 => '请传达您';
 
   @override
-  String get onboardingDesc7 => '心意吧。';
+  String get onboardingDesc7 => '真挚的心意。';
 
   @override
   String get onboardingEnterName => '请输入您的名字';
 
   @override
-  String get onboardingNameHint => '姓名或昵称';
+  String get onboardingNameHint => '名字或昵称';
 
   @override
-  String get onboardingNameDesc => '此名称将显示为卡片上的签名。\n您可以随时在设置中更改。';
+  String get onboardingNameDesc => '此名字将显示在卡片的签名（页脚）处。\n随时可以在设置中更改。';
 
   @override
-  String get onboardingNameRequired => '请输入您的名字';
+  String get onboardingNameRequired => '请输入名字';
 
   @override
   String get onboardingContinue => '继续';
 
   @override
-  String get permissionContacts => '通讯录访问权限';
+  String get permissionContacts => '通讯录权限';
 
   @override
-  String get permissionCalendar => '日历访问权限';
+  String get permissionCalendar => '日历权限';
 
   @override
-  String get permissionWhyNeeded => '为什么需要？';
+  String get permissionWhyNeeded => '为什么需要此权限？';
 
   @override
   String get permissionContactsDesc =>
-      '通讯录信息用于向家人和朋友发送卡片。\n\n您可以轻松从保存的联系人中选择收件人。';
+      '需要通讯录信息以便向家人和朋友发送卡片。\n\n您可以轻松地从保存的联系人中选择收件人。';
 
   @override
   String get permissionCalendarDesc =>
-      '日历信息用于获取家人和朋友的生日、纪念日和活动信息。\n\n这样您就不会错过重要的日子！';
+      '需要日历信息来获取家人和朋友的生日、纪念日及活动信息。\n\n我们会提醒您，以免错过重要的日子！';
 
   @override
-  String get permissionPrivacy => '🔒 隐私保护说明\n\n收集的信息仅在您的手机中使用，不会导出到手机外。';
+  String get permissionPrivacy => '🔒 隐私保护说明\n\n收集的信息仅在您的手机内部使用，绝不会发送到外部。';
 
   @override
   String get permissionAllow => '允许访问';
@@ -143,32 +143,32 @@ class AppLocalizationsZh extends AppLocalizations {
   String get permissionAllowCalendar => '允许访问日历';
 
   @override
-  String get permissionSkip => '稍后设置';
+  String get permissionSkip => '以后再说';
 
   @override
-  String get permissionSkipContacts => '如果不允许权限，您需要手动输入联系人。';
+  String get permissionSkipContacts => '如果不允许此权限，您需要手动输入联系人。';
 
   @override
-  String get permissionSkipCalendar => '如果不允许权限，您需要手动输入日程。';
+  String get permissionSkipCalendar => '如果不允许此权限，您需要手动输入日程。';
 
   @override
-  String get permissionSms => '短信访问权限';
+  String get permissionSms => '短信权限';
 
   @override
-  String get permissionSmsDesc => '短信权限用于查看与联系人的短信记录。\n\n发送卡片后可以查看短信往来记录！';
+  String get permissionSmsDesc => '需要短信信息来查看与联系人的消息记录。\n\n发送卡片后，您可以查看互通的问候消息！';
 
   @override
   String get permissionAllowSms => '允许访问短信';
 
   @override
-  String get permissionSkipSms => '如果不允许权限，您将无法查看短信记录。';
+  String get permissionSkipSms => '如果不允许此权限，您将无法查看消息记录。';
 
   @override
-  String get permissionSendSms => '短信发送权限';
+  String get permissionSendSms => '发送短信权限';
 
   @override
   String get permissionSendSmsDesc =>
-      '需要短信发送权限才能直接通过短信发送卡片。\n\n没有此权限，您只能通过短信应用发送。';
+      '要通过短信直接发送卡片，需要发送短信的权限。\n\n如果没有此权限，您只能通过短信应用发送。';
 
   @override
   String get permissionAllowSendSms => '允许发送短信';
@@ -177,10 +177,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get navHome => '首页';
 
   @override
-  String get navContacts => '通讯录';
+  String get navContacts => '联系人';
 
   @override
-  String get navGallery => '图库';
+  String get navGallery => '画廊';
 
   @override
   String get navMessages => '消息';
@@ -189,10 +189,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get navSettings => '设置';
 
   @override
-  String get homeUpcoming => '即将到来的日程';
+  String get homeUpcoming => '近期日程';
 
   @override
-  String get homeNoEvents => '没有预定的日程';
+  String get homeNoEvents => '暂无预定日程';
 
   @override
   String get homeQuickSend => '快速发送';
@@ -204,13 +204,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get homeWriteCard => '写卡片';
 
   @override
-  String get homeDaysLeft => '天后';
+  String get homeDaysLeft => '天剩余';
 
   @override
-  String get homeDDay => '当天';
+  String get homeDDay => 'D-Day';
 
   @override
-  String get contactsTitle => '通讯录';
+  String get contactsTitle => '联系人';
 
   @override
   String get contactsAll => '全部';
@@ -222,7 +222,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get contactsFriends => '朋友';
 
   @override
-  String get contactsWork => '工作';
+  String get contactsWork => '同事';
 
   @override
   String get contactsOthers => '其他';
@@ -237,7 +237,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get contactsSearchHint => '搜索姓名或电话号码';
 
   @override
-  String get contactsMyPeople => '我的人脉';
+  String get contactsMyPeople => '特别关注';
 
   @override
   String get contactsMemories => '回忆记录';
@@ -249,16 +249,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get contactsSearchPlaceholder => '搜索姓名、标签';
 
   @override
-  String get contactsNoMemories => '还没有回忆记录。';
+  String get contactsNoMemories => '暂无回忆记录。';
 
   @override
   String get contactsSendCard => '发送卡片';
 
   @override
-  String get contactsCall => '打电话';
+  String get contactsCall => '拨打电话';
 
   @override
-  String get contactsMessage => '短信';
+  String get contactsMessage => '发送短信';
 
   @override
   String get contactsBirthday => '生日';
@@ -267,13 +267,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get contactsAnniversary => '纪念日';
 
   @override
-  String get contactsNoHistory => '没有消息记录。';
+  String get contactsNoHistory => '没有往来记录。';
 
   @override
   String get contactsSearchContent => '搜索内容';
 
   @override
-  String get contactsNoSearchResult => '没有搜索结果。';
+  String get contactsNoSearchResult => '无搜索结果。';
 
   @override
   String get contactsMessageSent => '已发送';
@@ -306,7 +306,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get shareTelegram => 'Telegram';
 
   @override
-  String get galleryTitle => '卡片库';
+  String get galleryTitle => '卡片画廊';
 
   @override
   String get galleryBirthday => '生日';
@@ -342,7 +342,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get gallerySports => '运动';
 
   @override
-  String get galleryMyPhotos => '我的照片';
+  String get galleryMyPhotos => '我的相册';
 
   @override
   String get gallerySelectImage => '选择图片';
@@ -390,16 +390,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cardEditorShare => '分享';
 
   @override
-  String get cardEditorEnterMessage => '请输入消息';
+  String get cardEditorEnterMessage => '请输入您的留言';
 
   @override
-  String get cardEditorGenerateAI => 'AI生成消息';
+  String get cardEditorGenerateAI => 'AI生成留言';
 
   @override
   String get cardEditorTextBox => '文本框';
 
   @override
-  String get cardEditorZoomHint => '点击进入缩放模式';
+  String get cardEditorZoomHint => '双击进入缩放模式';
 
   @override
   String get cardEditorRecipient => '收件人';
@@ -429,16 +429,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cardPreviewTitle => '确认卡片图片';
 
   @override
-  String get cardPreviewDesc => '这是将要发送给收件人的最终图片。';
+  String get cardPreviewDesc => '这是发送给收件人的最终图片。';
 
   @override
-  String get cardPreviewZoomHint => '双击缩放，拖动移动。';
+  String get cardPreviewZoomHint => '双击可缩放，拖动可移动。';
 
   @override
-  String get cardPreviewCheckHint => '发送前请确认图片。';
+  String get cardPreviewCheckHint => '发送前请确认图片效果。';
 
   @override
-  String get cardPreviewConfirm => '确认（下一步）';
+  String get cardPreviewConfirm => '确认 (下一步)';
 
   @override
   String get sendTitle => '发送管理';
@@ -480,13 +480,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get sendManagerTitle => '收件人管理';
 
   @override
-  String get sendTotal => '总计';
+  String get sendTotal => '共';
 
   @override
   String get sendPerson => '人';
 
   @override
-  String get sendSpamWarning => '短时间内大量发送可能受到限制。\n建议关闭自动继续。';
+  String get sendSpamWarning => '短时间内大量发送可能会受到垃圾短信政策限制。\n为了安全，建议取消自动继续。';
 
   @override
   String totalPersonCount(int count) {
@@ -494,28 +494,28 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get cardHintZoomMode => '双击背景图片进入缩放模式。您可以在缩放模式下调整图片大小和位置。';
+  String get cardHintZoomMode => '双击背景图片进入缩放模式。在缩放模式下可以调整图片大小和位置。';
 
   @override
-  String get cardHintZoomEdit => '双指捏合调整图片大小。单指拖动移动图片。完成后双击或按缩放按钮退出。';
+  String get cardHintZoomEdit => '双指捏合可缩放图片。单指拖动可移动图片。编辑完成后双击或点击缩放模式按钮退出。';
 
   @override
-  String get cardHintDragging => '移动图片中...';
+  String get cardHintDragging => '正在移动图片...';
 
   @override
-  String get cardHintPinching => '调整图片大小中...';
+  String get cardHintPinching => '正在调整大小...';
 
   @override
   String get savedCardsTitle => '已保存的卡片';
 
   @override
-  String get savedCardsEmpty => '没有保存的卡片。';
+  String get savedCardsEmpty => '没有保存的消息。';
 
   @override
   String get cardSaveTitle => '保存卡片';
 
   @override
-  String get cardSaveName => '卡片名称';
+  String get cardSaveName => '保存名称';
 
   @override
   String get cardSaveHint => '请输入卡片名称';
@@ -530,10 +530,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get messageHistory => '发送记录';
 
   @override
-  String get messageNoHistory => '没有发送记录';
+  String get messageNoHistory => '无发送记录';
 
   @override
-  String get messageSent => '已发送';
+  String get messageSent => '发送完成';
 
   @override
   String get messageViewed => '已查看';
@@ -545,7 +545,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsProfile => '个人资料';
 
   @override
-  String get settingsName => '姓名';
+  String get settingsName => '名字';
 
   @override
   String get settingsLanguage => '语言';
@@ -557,28 +557,28 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsNotificationTime => '通知时间';
 
   @override
-  String get settingsReceiveAlerts => '接收提醒';
+  String get settingsReceiveAlerts => '接收通知';
 
   @override
   String get settingsSetTime => '设置时间';
 
   @override
-  String get settingsDesignSending => '设计';
+  String get settingsDesignSending => '设计/发送';
 
   @override
-  String get settingsCardBranding => '卡片品牌';
+  String get settingsCardBranding => '卡片底部品牌标识';
 
   @override
-  String get settingsDataManage => '数据';
+  String get settingsDataManage => '数据管理';
 
   @override
-  String get settingsBranding => '显示品牌';
+  String get settingsBranding => '显示品牌标识';
 
   @override
   String get settingsSync => '同步';
 
   @override
-  String get settingsSyncContacts => '同步通讯录';
+  String get settingsSyncContacts => '同步联系人';
 
   @override
   String get settingsSyncCalendar => '同步日历';
@@ -596,13 +596,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsImport => '导入';
 
   @override
-  String get settingsCalendarSync => '日历';
+  String get settingsCalendarSync => '日历关联';
 
   @override
   String get settingsOpenCalendar => '打开日历';
 
   @override
-  String get settingsCalendarGuide => '日历指南';
+  String get settingsCalendarGuide => '支持的日历说明';
 
   @override
   String get settingsAppInfo => '应用信息';
@@ -617,16 +617,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsExit => '退出';
 
   @override
-  String get settingsMyName => '我的名字';
+  String get settingsMyName => '我的名字/昵称';
 
   @override
-  String get settingsNameOrNickname => '姓名或昵称';
+  String get settingsNameOrNickname => '名字或昵称';
 
   @override
   String get settingsNameHint => '卡片上显示的名字';
 
   @override
-  String get settingsNameUsageInfo => '此名称将用于卡片的页脚签名。';
+  String get settingsNameUsageInfo => '此名字将用于卡片编辑页面的页脚（签名）。';
 
   @override
   String get settingsAbout => '关于应用';
@@ -638,22 +638,22 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsPrivacy => '隐私政策';
 
   @override
-  String get settingsTerms => '使用条款';
+  String get settingsTerms => '服务条款';
 
   @override
   String get settingsHelp => '帮助';
 
   @override
-  String get settingsExternalCalendarGuide => '外部日历连接指南';
+  String get settingsExternalCalendarGuide => '外部日历关联说明';
 
   @override
   String get settingsTest => '测试';
 
   @override
-  String get settingsGoogleCalendar => 'Google';
+  String get settingsGoogleCalendar => 'Google 日历';
 
   @override
-  String get settingsSamsungCalendar => 'Samsung';
+  String get settingsSamsungCalendar => 'Samsung 日历';
 
   @override
   String get settingsDarkMode => '深色模式';
@@ -668,7 +668,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get splashLoadingData => '正在加载数据...';
 
   @override
-  String get splashSyncingContacts => '正在同步通讯录...';
+  String get splashSyncingContacts => '正在同步联系人...';
 
   @override
   String get splashSyncingCalendar => '正在同步日历...';
@@ -677,18 +677,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get splashGeneratingSchedules => '正在生成日程...';
 
   @override
-  String get splashPreparingScreen => '正在准备屏幕...';
+  String get splashPreparingScreen => '正在准备画面...';
 
   @override
-  String get splashReady => '准备完成！';
+  String get splashReady => '准备就绪！';
 
   @override
   String helloUser(String name) {
-    return '你好，$name！👋';
+    return '您好，$name！👋';
   }
 
   @override
-  String get errorNetwork => '网络错误';
+  String get errorNetwork => '发生网络错误';
 
   @override
   String get errorUnknown => '发生未知错误';
@@ -712,10 +712,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get confirmDelete => '确定要删除吗？';
 
   @override
-  String get confirmExit => '不保存更改就退出吗？';
+  String get confirmExit => '要在不保存更改的情况下退出吗？';
 
   @override
-  String get confirmSend => '确定要发送吗？';
+  String get confirmSend => '确定发送吗？';
 
   @override
   String get dateToday => '今天';
@@ -737,7 +737,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String daysRemaining(int days) {
-    return '还剩$days天';
+    return '剩 $days天';
   }
 
   @override
@@ -762,7 +762,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get eventAnniversary => '纪念日';
 
   @override
-  String get eventHoliday => '节日';
+  String get eventHoliday => '节假日';
 
   @override
   String get eventMeeting => '聚会';
@@ -771,13 +771,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get eventOther => '其他';
 
   @override
-  String get scheduleEdit => '编辑';
+  String get scheduleEdit => '编辑日程';
 
   @override
-  String get scheduleAdd => '添加';
+  String get scheduleAdd => '添加日程';
 
   @override
-  String get scheduleAddNew => '新建';
+  String get scheduleAddNew => '新日程';
 
   @override
   String get scheduleTitle => '标题';
@@ -798,16 +798,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get scheduleAddedSuccess => '日程已添加！';
 
   @override
-  String get planEdit => '编辑';
+  String get planEdit => '修改';
 
   @override
   String get planDelete => '删除';
 
   @override
-  String get planMoveToEnd => '移到末尾';
+  String get planMoveToEnd => '移至末尾';
 
   @override
-  String get planReschedule => '改期';
+  String get planReschedule => '更改日期';
 
   @override
   String get planChangeIcon => '更改图标';
@@ -817,20 +817,20 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String planDeleteConfirm(String title) {
-    return '删除\"$title\"？';
+    return '要删除“$title”吗？';
   }
 
   @override
-  String get iconNormal => '普通';
+  String get iconNormal => '一般';
 
   @override
-  String get iconHoliday => '节日';
+  String get iconHoliday => '假日';
 
   @override
   String get iconBirthday => '生日';
 
   @override
-  String get iconAnniversary => '纪念';
+  String get iconAnniversary => '纪念日';
 
   @override
   String get iconWork => '工作';
@@ -842,7 +842,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get iconImportant => '重要';
 
   @override
-  String get cardWrite => '写';
+  String get cardWrite => '编写';
 
   @override
   String get languageSelection => '选择语言';
@@ -857,7 +857,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get previewTitle => '预览';
 
   @override
-  String get previewConfirm => '使用此图片发送？';
+  String get previewConfirm => '要使用此图片发送吗？';
 
   @override
   String get textBoxStyleTitle => '文本框样式';
@@ -869,10 +869,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get textBoxShapeRounded => '圆角';
 
   @override
-  String get textBoxShapeSquare => '直角';
+  String get textBoxShapeSquare => '方角';
 
   @override
-  String get textBoxShapeBevel => '斜角';
+  String get textBoxShapeBevel => '切角';
 
   @override
   String get textBoxShapeCircle => '圆形';
@@ -896,16 +896,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get textBoxBorderWidth => '边框宽度';
 
   @override
-  String get textBoxFooterStyle => '页脚（发件人）背景样式';
+  String get textBoxFooterStyle => '页脚(寄件人)背景样式';
 
   @override
-  String get textBoxFooterHint => '请在顶部工具栏中选择页脚后更改字体大小和颜色。';
+  String get textBoxFooterHint => '请选中页脚后，在顶部工具栏更改字体大小和颜色。';
 
   @override
   String get textBoxPreview => '样式预览';
 
   @override
-  String get textBoxSender => '发件人';
+  String get textBoxSender => '寄件人';
 
   @override
   String get textBoxShapeLabel => '文本框形状';
@@ -914,10 +914,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get shapeRounded => '圆角';
 
   @override
-  String get shapeRectangle => '直角';
+  String get shapeRectangle => '方角';
 
   @override
-  String get shapeBevel => '斜角';
+  String get shapeBevel => '切角';
 
   @override
   String get shapeCircle => '圆形';
@@ -944,7 +944,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get shapeHexagon => '六边形';
 
   @override
-  String get shapeCloud => '云形';
+  String get shapeCloud => '云朵';
 
   @override
   String get footerBgOpacity => '背景透明度';
@@ -953,10 +953,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get footerBgRadius => '背景圆角';
 
   @override
-  String get contactPickerTitle => '选择收件人';
+  String get contactPickerTitle => '选择发送对象';
 
   @override
-  String get contactPickerSearchHint => '姓名或电话...';
+  String get contactPickerSearchHint => '姓名或电话号码...';
 
   @override
   String get contactPickerAllContacts => '全部';
@@ -986,31 +986,31 @@ class AppLocalizationsZh extends AppLocalizations {
   String get editorBackground => '背景';
 
   @override
-  String get editorTextBox => '文本框';
+  String get editorTextBox => '文本';
 
   @override
   String get photoPermissionTitle => '需要照片访问权限';
 
   @override
-  String get photoPermissionDesc => '需要相册访问权限\n才能将设备照片用作卡片背景。';
+  String get photoPermissionDesc => '要使用设备中的照片作为卡片背景，\n需要访问相册的权限。';
 
   @override
-  String get photoPermissionHowTo => '📱 如何设置';
+  String get photoPermissionHowTo => '📱 设置方法';
 
   @override
-  String get photoPermissionStep1 => '1. 点击下方\"打开设置\"';
+  String get photoPermissionStep1 => '1. 点击下方的“打开设置”按钮';
 
   @override
-  String get photoPermissionStep2 => '2. 找到并点击\"权限\"';
+  String get photoPermissionStep2 => '2. 找到并点击“权限”';
 
   @override
-  String get photoPermissionStep3 => '3. 点击\"照片和视频\"';
+  String get photoPermissionStep3 => '3. 点击“照片和视频”';
 
   @override
-  String get photoPermissionStep4 => '4. 选择\"允许\"或\"允许所有照片\"';
+  String get photoPermissionStep4 => '4. 选择“允许”或“允许所有照片”';
 
   @override
-  String get photoPermissionNote => '⚡ 允许权限后返回此页面\n照片将自动显示。';
+  String get photoPermissionNote => '⚡ 允许权限后返回此画面，\n照片将自动显示。';
 
   @override
   String get openSettings => '打开设置';
