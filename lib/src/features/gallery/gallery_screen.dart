@@ -541,7 +541,7 @@ class _GalleryDetailScreenState extends ConsumerState<GalleryDetailScreen> {
       appBar: AppBar(
         title: Text(
           localizedTitle,
-          style: const TextStyle(
+          style: TextStyle(
             color: AppTheme.textPrimary,
             fontSize: 20,
             fontWeight: FontWeight.bold,
@@ -552,7 +552,7 @@ class _GalleryDetailScreenState extends ConsumerState<GalleryDetailScreen> {
         elevation: 0,
         titleSpacing: 0, 
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppTheme.textPrimary),
+          icon: Icon(Icons.arrow_back, color: AppTheme.textPrimary),
           onPressed: () => context.pop(),
         ),
       ),

@@ -656,6 +656,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsSamsungCalendar => 'Samsung';
 
   @override
+  String get settingsDarkMode => '深色模式';
+
+  @override
+  String get settingsDarkModeDesc => '使用深色主题';
+
+  @override
   String get splashPreparing => '准备中...';
 
   @override

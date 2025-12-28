@@ -662,6 +662,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsSamsungCalendar => 'Samsung 캘린더';
 
   @override
+  String get settingsDarkMode => 'Темный режим';
+
+  @override
+  String get settingsDarkModeDesc => 'Использовать темную тему';
+
+  @override
   String get splashPreparing => '준비 중...';
 
   @override

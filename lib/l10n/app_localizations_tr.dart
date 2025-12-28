@@ -662,6 +662,12 @@ class AppLocalizationsTr extends AppLocalizations {
   String get settingsSamsungCalendar => 'Samsung 캘린더';
 
   @override
+  String get settingsDarkMode => 'Karanlık mod';
+
+  @override
+  String get settingsDarkModeDesc => 'Karanlık temayı kullan';
+
+  @override
   String get splashPreparing => '준비 중...';
 
   @override

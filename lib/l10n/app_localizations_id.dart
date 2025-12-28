@@ -662,6 +662,12 @@ class AppLocalizationsId extends AppLocalizations {
   String get settingsSamsungCalendar => 'Samsung 캘린더';
 
   @override
+  String get settingsDarkMode => 'Mode gelap';
+
+  @override
+  String get settingsDarkModeDesc => 'Gunakan tema gelap';
+
+  @override
   String get splashPreparing => '준비 중...';
 
   @override

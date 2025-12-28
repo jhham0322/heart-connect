@@ -235,6 +235,8 @@
   "settingsTest": "テスト",
   "settingsGoogleCalendar": "Google",
   "settingsSamsungCalendar": "Samsung",
+  "settingsDarkMode": "ダークモード",
+  "settingsDarkModeDesc": "暗いテーマを使用",
   
   "splashPreparing": "準備中...",
   "splashLoadingData": "データを読み込み中...",

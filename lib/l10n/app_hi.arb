@@ -235,6 +235,8 @@
   "settingsTest": "테스트",
   "settingsGoogleCalendar": "Google 캘린더",
   "settingsSamsungCalendar": "Samsung 캘린더",
+  "settingsDarkMode": "डार्क मोड",
+  "settingsDarkModeDesc": "डार्क थीम का उपयोग करें",
   
   "splashPreparing": "준비 중...",
   "splashLoadingData": "데이터를 불러오는 중...",

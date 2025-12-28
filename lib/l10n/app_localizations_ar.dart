@@ -662,6 +662,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settingsSamsungCalendar => 'Samsung 캘린더';
 
   @override
+  String get settingsDarkMode => 'الوضع الداكن';
+
+  @override
+  String get settingsDarkModeDesc => 'استخدام السمة الداكنة';
+
+  @override
   String get splashPreparing => '준비 중...';
 
   @override

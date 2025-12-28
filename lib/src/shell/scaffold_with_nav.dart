@@ -55,7 +55,7 @@ class ScaffoldWithNav extends ConsumerWidget {
                       const SizedBox(width: 8),
                       Text(
                         ref.watch(appStringsProvider).appName,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
                           color: AppTheme.textPrimary,
@@ -66,11 +66,11 @@ class ScaffoldWithNav extends ConsumerWidget {
                   Row(
                     children: [
                       IconButton(
-                        icon: const Icon(FontAwesomeIcons.bell, size: 20, color: AppTheme.textPrimary),
+                        icon: Icon(FontAwesomeIcons.bell, size: 20, color: AppTheme.textPrimary),
                         onPressed: () {},
                       ),
                       IconButton(
-                        icon: const Icon(FontAwesomeIcons.gear, size: 20, color: AppTheme.textPrimary),
+                        icon: Icon(FontAwesomeIcons.gear, size: 20, color: AppTheme.textPrimary),
                         onPressed: () => context.push('/settings'),
                       ),
                     ],

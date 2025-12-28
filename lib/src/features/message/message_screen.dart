@@ -27,7 +27,7 @@ class MessageScreen extends ConsumerWidget {
         centerTitle: false,
         actions: [
           IconButton(
-            icon: const Icon(FontAwesomeIcons.rotateRight, size: 20, color: AppTheme.textSecondary),
+            icon: Icon(FontAwesomeIcons.rotateRight, size: 20, color: AppTheme.textSecondary),
             onPressed: () {
               ref.refresh(messageListProvider);
             },
@@ -104,7 +104,7 @@ class MessageScreen extends ConsumerWidget {
                     CircleAvatar(
                       radius: 16,
                       backgroundColor: AppTheme.accentCoral.withOpacity(0.1),
-                      child: const Icon(FontAwesomeIcons.user, size: 14, color: AppTheme.accentCoral),
+                      child: Icon(FontAwesomeIcons.user, size: 14, color: AppTheme.accentCoral),
                     ),
                     const SizedBox(width: 10),
                     Text(
@@ -160,7 +160,7 @@ class MessageScreen extends ConsumerWidget {
                 children: [
                   CircleAvatar(
                     backgroundColor: AppTheme.accentCoral.withOpacity(0.1),
-                    child: const Icon(FontAwesomeIcons.user, size: 18, color: AppTheme.accentCoral),
+                    child: Icon(FontAwesomeIcons.user, size: 18, color: AppTheme.accentCoral),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -217,7 +217,7 @@ class MessageScreen extends ConsumerWidget {
                 children: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text("Close", style: TextStyle(color: AppTheme.textSecondary)),
+                    child: Text("Close", style: TextStyle(color: AppTheme.textSecondary)),
                   ),
                   const SizedBox(width: 12),
                   ElevatedButton.icon(

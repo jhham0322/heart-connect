@@ -235,6 +235,8 @@
   "settingsTest": "测试",
   "settingsGoogleCalendar": "Google",
   "settingsSamsungCalendar": "Samsung",
+  "settingsDarkMode": "深色模式",
+  "settingsDarkModeDesc": "使用深色主题",
   
   "splashPreparing": "准备中...",
   "splashLoadingData": "正在加载数据...",

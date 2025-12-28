@@ -265,7 +265,7 @@ class DesignTokens {
         iconTheme: IconThemeData(color: textPrimary),
         titleTextStyle: headline3,
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: bgCard,
         elevation: 4,
         shape: RoundedRectangleBorder(borderRadius: borderRadiusXl),
@@ -278,7 +278,7 @@ class DesignTokens {
         fillColor: bgSecondary,
         border: OutlineInputBorder(borderRadius: borderRadiusMd),
       ),
-      dialogTheme: DialogTheme(
+      dialogTheme: DialogThemeData(
         backgroundColor: bgDialog,
         shape: RoundedRectangleBorder(borderRadius: borderRadius2xl),
       ),

@@ -461,7 +461,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           child: Column(
              mainAxisSize: MainAxisSize.min,
              children: [
-                const Icon(FontAwesomeIcons.calendarCheck, size: 40, color: AppTheme.accentCoral),
+                Icon(FontAwesomeIcons.calendarCheck, size: 40, color: AppTheme.accentCoral),
                 const SizedBox(height: 16),
                 Text(
                    strings.homeNoEvents,
@@ -1421,7 +1421,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
               IconButton(
                 onPressed: () => _showAddEventDialog(context),
-                icon: const Icon(FontAwesomeIcons.plus, size: 18, color: AppTheme.textSecondary),
+                icon: Icon(FontAwesomeIcons.plus, size: 18, color: AppTheme.textSecondary),
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
               ),
@@ -1434,7 +1434,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ? Center(
                   child: Padding(
                     padding: const EdgeInsets.all(20.0),
-                    child: Text(strings.homeNoEvents, style: const TextStyle(color: AppTheme.textSecondary)),
+                    child: Text(strings.homeNoEvents, style: TextStyle(color: AppTheme.textSecondary)),
                   ),
                 )
               : ListView.builder(
@@ -1592,7 +1592,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
             // Edit Button
             IconButton(
-              icon: const Icon(FontAwesomeIcons.penToSquare, size: 16, color: AppTheme.textSecondary),
+              icon: Icon(FontAwesomeIcons.penToSquare, size: 16, color: AppTheme.textSecondary),
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
               onPressed: () {

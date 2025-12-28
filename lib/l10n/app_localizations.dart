@@ -1406,6 +1406,18 @@ abstract class AppLocalizations {
   /// **'Samsung 캘린더'**
   String get settingsSamsungCalendar;
 
+  /// No description provided for @settingsDarkMode.
+  ///
+  /// In ko, this message translates to:
+  /// **'다크 모드'**
+  String get settingsDarkMode;
+
+  /// No description provided for @settingsDarkModeDesc.
+  ///
+  /// In ko, this message translates to:
+  /// **'어두운 테마 사용'**
+  String get settingsDarkModeDesc;
+
   /// No description provided for @splashPreparing.
   ///
   /// In ko, this message translates to:

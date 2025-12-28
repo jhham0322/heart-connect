@@ -667,6 +667,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsSamsungCalendar => 'Samsung';
 
   @override
+  String get settingsDarkMode => 'Dark Mode';
+
+  @override
+  String get settingsDarkModeDesc => 'Use dark theme';
+
+  @override
   String get splashPreparing => 'Preparing...';
 
   @override
