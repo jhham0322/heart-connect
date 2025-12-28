@@ -152,37 +152,8 @@ class MainActivity : FlutterActivity() {
                 else -> {
                     result.notImplemented()
                 }
-            }
         }
     }
-    
-    /**
-     * 기기에 등록된 사용자 이름 가져오기 (Google 계정 이름)
-     */
-    private fun getDeviceOwnerName(): String? {
-        return try {
-            val accountManager = android.accounts.AccountManager.get(this)
-            val accounts = accountManager.getAccountsByType("com.google")
-            
-            if (accounts.isNotEmpty()) {
-                // Google 계정 이메일에서 이름 부분만 추출 (@ 앞부분)
-                val email = accounts[0].name
-                val namePart = email.substringBefore("@")
-                
-                // 숫자나 특수문자가 많으면 이름으로 부적합하므로 null 반환
-                if (namePart.any { it.isLetter() }) {
-                    // 첫 글자 대문자로
-                    namePart.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
-                } else {
-                    null
-                }
-            } else {
-                null
-            }
-        } catch (e: Exception) {
-            android.util.Log.e("DeviceInfo", "사용자 이름 가져오기 실패: ${e.message}")
-            null
-        }
     }
     
     /**
@@ -413,5 +384,104 @@ class MainActivity : FlutterActivity() {
 
     private fun refineWithGeminiNano(message: String, callback: (String?, String?) -> Unit) {
         callback(null, "AICore not available yet. Using server API.")
+    }
+
+    /**
+     * 기기 소유자 이름 가져오기 - 여러 방법 시도
+     * 1. 주소록의 "본인" 프로필 (Profile)
+     * 2. 블루투스 기기 이름
+     * 3. Google 계정 이름
+     */
+    private fun getDeviceOwnerName(): String? {
+        var resultName: String? = null
+        
+        // 1. 주소록의 본인 프로필에서 이름 가져오기
+        if (resultName == null) {
+            try {
+                val profileUri = android.provider.ContactsContract.Profile.CONTENT_URI
+                val projection = arrayOf(
+                    android.provider.ContactsContract.Profile.DISPLAY_NAME_PRIMARY
+                )
+                val cursor = contentResolver.query(profileUri, projection, null, null, null)
+                if (cursor != null) {
+                    if (cursor.moveToFirst()) {
+                        val displayName = cursor.getString(0)
+                        if (!displayName.isNullOrBlank()) {
+                            android.util.Log.d("DeviceInfo", "프로필에서 이름 가져옴: $displayName")
+                            resultName = displayName
+                        }
+                    }
+                    cursor.close()
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("DeviceInfo", "프로필 조회 실패: ${e.message}")
+            }
+        }
+
+        // 2. 블루투스 기기 이름에서 가져오기 (보통 "XXX의 Galaxy" 형태)
+        if (resultName == null) {
+            try {
+                val bluetoothAdapter = android.bluetooth.BluetoothAdapter.getDefaultAdapter()
+                val deviceName = bluetoothAdapter?.name
+                if (!deviceName.isNullOrBlank()) {
+                    // "함정훈의 Galaxy S24" 형태에서 이름 추출
+                    val patterns = listOf(
+                        "(.+?)의\\s*.+".toRegex(),  // "이름의 Galaxy..."
+                        "(.+?)'s\\s*.+".toRegex(),  // "Name's Galaxy..."
+                        "(.+?)\\s*-\\s*.+".toRegex() // "이름 - Galaxy..."
+                    )
+                    for (pattern in patterns) {
+                        val match = pattern.find(deviceName)
+                        if (match != null) {
+                            val extractedName = match.groupValues[1].trim()
+                            if (extractedName.isNotBlank() && extractedName.length >= 2) {
+                                android.util.Log.d("DeviceInfo", "블루투스 이름에서 추출: $extractedName")
+                                resultName = extractedName
+                                break
+                            }
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("DeviceInfo", "블루투스 이름 조회 실패: ${e.message}")
+            }
+        }
+
+        // 3. Google 계정 표시 이름 또는 이메일 앞부분
+        if (resultName == null) {
+            try {
+                val accountManager = android.accounts.AccountManager.get(this)
+                val accounts = accountManager.getAccountsByType("com.google")
+                
+                if (accounts.isNotEmpty()) {
+                    val email = accounts[0].name
+                    if (email.contains("@")) {
+                        val namePart = email.substringBefore("@")
+                        // 이메일 앞부분에서 이름 추출 시도
+                        // 숫자만 있거나 너무 짧으면 무시
+                        var hasLetter = false
+                        for (c in namePart) {
+                            if (c.isLetter()) {
+                                hasLetter = true
+                                break
+                            }
+                        }
+                        if (hasLetter && namePart.length >= 2) {
+                            // 첫 글자 대문자화
+                            val formattedName = namePart.substring(0, 1).uppercase() + namePart.substring(1)
+                            android.util.Log.d("DeviceInfo", "Google 계정에서 추출: $formattedName")
+                            resultName = formattedName
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("DeviceInfo", "Google 계정 조회 실패: ${e.message}")
+            }
+        }
+
+        if (resultName == null) {
+            android.util.Log.d("DeviceInfo", "이름을 찾을 수 없음")
+        }
+        return resultName
     }
 }

@@ -337,9 +337,6 @@ w: file:///C:/src/flutter/packages/flutter_tools/gradle/src/main/kotlin/plugins/
 > Task :flutter_local_notifications:compileReleaseJavaWithJavac
 > Task :flutter_plugin_android_lifecycle:javaPreCompileRelease UP-TO-DATE
 > Task :flutter_local_notifications:bundleLibCompileToJarRelease
-> Task :flutter_plugin_android_lifecycle:compileReleaseJavaWithJavac
-> Task :flutter_plugin_android_lifecycle:bundleLibCompileToJarRelease UP-TO-DATE
-> Task :flutter_sms_inbox:javaPreCompileRelease UP-TO-DATE
 
 > Task :device_calendar:compileReleaseKotlin
 w: file:///C:/Users/ham03_4mb3gaz/AppData/Local/Pub/Cache/hosted/pub.dev/device_calendar-4.3.3/android/src/main/kotlin/com/builttoroam/devicecalendar/CalendarDelegate.kt:349:13 This is a delicate API and its use requires care. Make sure you fully read and understand documentation of the declaration that is marked as a delicate API.
@@ -704,6 +701,7 @@ gedFileStorage(FilePageCache.java:437)
 		Suppressed: java.lang.IllegalStateException: Storage for [E:\work2025\A
 pp\ConnectHeart\build\device_calendar\kotlin\compileReleaseKotlin\cacheab
 le\caches-jvm\lookups\file-to-id.tab] is already registered
+Failed to compile with Kotlin daemon: java.lang.Exception
 			at org.jetbrains.kotlin.com.intellij.util.io.FilePageCache.registerPag
 edFileStorage(FilePageCache.java:410)
 			at org.jetbrains.kotlin.com.intellij.util.io.PagedFileStorage.<init>(P
@@ -751,18 +749,6 @@ okups\file-to-id.tab] registration stack trace
 				at org.jetbrains.kotlin.com.intellij.util.io.FilePageCache.registerPa
 gedFileStorage(FilePageCache.java:437)
 				... 44 more
-Failed to compile with Kotlin daemon: java.lang.Exception
-	at org.jetbrains.kotlin.daemon.common.CompileService$CallResult$Error.get(CompileService.kt:69)
-	at org.jetbrains.kotlin.daemon.common.CompileService$CallResult$Error.get(CompileService.kt:65)
-	at org.jetbrains.kotlin.compilerRunner.GradleKotlinCompilerWork.compileWithDaemon(GradleKotlinCompilerWork.kt:240)
-	at org.jetbrains.kotlin.compilerRunner.GradleKotlinCompilerWork.compileWithDaemonOrFallbackImpl(GradleKotlinCompilerWork.kt:159)
-	at org.jetbrains.kotlin.compilerRunner.GradleKotlinCompilerWork.run(GradleKotlinCompilerWork.kt:111)
-	at org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction.execute(GradleCompilerRunnerWithWorkers.kt:74)
-	at org.gradle.workers.internal.DefaultWorkerServer.execute(DefaultWorkerServer.java:63)
-	at org.gradle.workers.internal.NoIsolationWorkerFactory$1$1.create(NoIsolationWorkerFactory.java:66)
-	at org.gradle.workers.internal.NoIsolationWorkerFactory$1$1.create(NoIsolationWorkerFactory.java:62)
-	at org.gradle.internal.classloader.ClassLoaderUtils.executeInClassloader(ClassLoaderUtils.java:100)
-	at org.gradle.workers.internal.NoIsolationWorkerFactory$1.lambda$execute$0(NoIsolationWorkerFactory.java:62)
 	Suppressed: java.lang.Exception: Could not close incremental caches in E
 :\work2025\App\ConnectHeart\build\device_calendar\kotlin\compileReleaseKo
 tlin\cacheable\caches-jvm\inputs: source-to-output.tab
@@ -820,6 +806,17 @@ puts\source-to-output.tab] registration stack trace
 gedFileStorage(FilePageCache.java:437)
 				... 44 more
 
+	at org.jetbrains.kotlin.daemon.common.CompileService$CallResult$Error.get(CompileService.kt:69)
+	at org.jetbrains.kotlin.daemon.common.CompileService$CallResult$Error.get(CompileService.kt:65)
+	at org.jetbrains.kotlin.compilerRunner.GradleKotlinCompilerWork.compileWithDaemon(GradleKotlinCompilerWork.kt:240)
+	at org.jetbrains.kotlin.compilerRunner.GradleKotlinCompilerWork.compileWithDaemonOrFallbackImpl(GradleKotlinCompilerWork.kt:159)
+	at org.jetbrains.kotlin.compilerRunner.GradleKotlinCompilerWork.run(GradleKotlinCompilerWork.kt:111)
+	at org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction.execute(GradleCompilerRunnerWithWorkers.kt:74)
+	at org.gradle.workers.internal.DefaultWorkerServer.execute(DefaultWorkerServer.java:63)
+	at org.gradle.workers.internal.NoIsolationWorkerFactory$1$1.create(NoIsolationWorkerFactory.java:66)
+	at org.gradle.workers.internal.NoIsolationWorkerFactory$1$1.create(NoIsolationWorkerFactory.java:62)
+	at org.gradle.internal.classloader.ClassLoaderUtils.executeInClassloader(ClassLoaderUtils.java:100)
+	at org.gradle.workers.internal.NoIsolationWorkerFactory$1.lambda$execute$0(NoIsolationWorkerFactory.java:62)
 	at org.gradle.workers.internal.AbstractWorker$1.call(AbstractWorker.java:44)
 	at org.gradle.workers.internal.AbstractWorker$1.call(AbstractWorker.java:41)
 	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:210)
@@ -1042,9 +1039,9 @@ Using fallback strategy: Compile without Kotlin daemon
 Try ./gradlew --stop if this issue persists
 If it does not look related to your configuration, please file an issue with logs to https://kotl.in/issue
 
-> Task :flutter_sms_inbox:compileReleaseJavaWithJavac
-> Task :image_picker_android:javaPreCompileRelease UP-TO-DATE
-> Task :flutter_sms_inbox:bundleLibCompileToJarRelease
+> Task :flutter_plugin_android_lifecycle:compileReleaseJavaWithJavac
+> Task :flutter_plugin_android_lifecycle:bundleLibCompileToJarRelease UP-TO-DATE
+> Task :flutter_sms_inbox:javaPreCompileRelease UP-TO-DATE
 
 > Task :flutter_contacts:compileReleaseKotlin
 w: file:///C:/Users/ham03_4mb3gaz/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_contacts-1.1.9+2/android/src/main/kotlin/co/quis/flutter_contacts/Contact.kt:41:40 Unchecked cast of 'Any?' to 'Map<String, Any>'.
@@ -1784,6 +1781,9 @@ Using fallback strategy: Compile without Kotlin daemon
 Try ./gradlew --stop if this issue persists
 If it does not look related to your configuration, please file an issue with logs to https://kotl.in/issue
 
+> Task :flutter_sms_inbox:compileReleaseJavaWithJavac
+> Task :image_picker_android:javaPreCompileRelease UP-TO-DATE
+> Task :flutter_sms_inbox:bundleLibCompileToJarRelease
 > Task :image_picker_android:compileReleaseJavaWithJavac
 > Task :path_provider_android:javaPreCompileRelease UP-TO-DATE
 > Task :image_picker_android:bundleLibCompileToJarRelease
@@ -1803,8 +1803,8 @@ If it does not look related to your configuration, please file an issue with log
 > Task :sqlite3_flutter_libs:javaPreCompileRelease UP-TO-DATE
 > Task :sqlite3_flutter_libs:compileReleaseJavaWithJavac
 > Task :url_launcher_android:generateReleaseBuildConfig UP-TO-DATE
-> Task :sqlite3_flutter_libs:bundleLibCompileToJarRelease
 > Task :url_launcher_android:javaPreCompileRelease UP-TO-DATE
+> Task :sqlite3_flutter_libs:bundleLibCompileToJarRelease
 
 > Task :quill_native_bridge_android:compileReleaseKotlin
 e: Daemon compilation failed: null
@@ -2156,6 +2156,7 @@ build\quill_native_bridge_android\kotlin\compileReleaseKotlin\cacheable\c
 aches-jvm\lookups\id-to-file.tab] registration stack trace
 				at org.jetbrains.kotlin.com.intellij.util.io.FilePageCache.registerPa
 gedFileStorage(FilePageCache.java:437)
+Failed to compile with Kotlin daemon: java.lang.Exception
 				... 44 more
 		Suppressed: java.lang.IllegalStateException: Storage for [E:\work2025\A
 pp\ConnectHeart\build\quill_native_bridge_android\kotlin\compileReleaseKo
@@ -2235,37 +2236,6 @@ dImplementation(PersistentMapBuilder.java:88)
 d(PersistentMapBuilder.java:71)
 			at org.jetbrains.kotlin.com.intellij.util.io.PersistentHashMap.<init>(
 PersistentHashMap.java:46)
-			at org.jetbrains.kotlin.com.intellij.util.io.PersistentHashMap.<init>(
-PersistentHashMap.java:72)
-			at org.jetbrains.kotlin.incremental.storage.LazyStorage.createMap(Lazy
-Storage.kt:62)
-			at org.jetbrains.kotlin.incremental.storage.LazyStorage.getStorageOrCr
-eateNew(LazyStorage.kt:59)
-			at org.jetbrains.kotlin.incremental.storage.LazyStorage.set(LazyStorag
-e.kt:80)
-			at org.jetbrains.kotlin.incremental.storage.InMemoryStorage.applyChang
-es(InMemoryStorage.kt:108)
-			at org.jetbrains.kotlin.incremental.storage.AppendableInMemoryStorage.
-applyChanges(InMemoryStorage.kt:179)
-			at org.jetbrains.kotlin.incremental.storage.InMemoryStorage.close(InMe
-moryStorage.kt:136)
-			at org.jetbrains.kotlin.incremental.storage.AppendableSetBasicMap.clos
-e(BasicMap.kt:157)
-			at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.inv
-oke(BasicMapsOwner.kt:53)
-			at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.inv
-oke(BasicMapsOwner.kt:53)
-			at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.forEachMapS
-afe(BasicMapsOwner.kt:87)
-			... 24 more
-			Suppressed: java.lang.Exception: Storage[E:\work2025\App\ConnectHeart\
-build\quill_native_bridge_android\kotlin\compileReleaseKotlin\cacheable\c
-aches-jvm\inputs\source-to-output.tab] registration stack trace
-				at org.jetbrains.kotlin.com.intellij.util.io.FilePageCache.registerPa
-gedFileStorage(FilePageCache.java:437)
-				... 44 more
-
-Failed to compile with Kotlin daemon: java.lang.Exception
 	at org.jetbrains.kotlin.daemon.common.CompileService$CallResult$Error.get(CompileService.kt:69)
 	at org.jetbrains.kotlin.daemon.common.CompileService$CallResult$Error.get(CompileService.kt:65)
 	at org.jetbrains.kotlin.compilerRunner.GradleKotlinCompilerWork.compileWithDaemon(GradleKotlinCompilerWork.kt:240)
@@ -2352,6 +2322,36 @@ Caused by: java.lang.Exception: Could not close incremental caches in E:\work202
 		at org.jetbrains.kotlin.incremental.storage.LazyStorage.set(LazyStorage.kt:80)
 		at org.jetbrains.kotlin.incremental.storage.InMemoryStorage.applyChanges(InMemoryStorage.kt:108)
 		at org.jetbrains.kotlin.incremental.storage.InMemoryStorage.close(InMemoryStorage.kt:136)
+			at org.jetbrains.kotlin.com.intellij.util.io.PersistentHashMap.<init>(
+PersistentHashMap.java:72)
+			at org.jetbrains.kotlin.incremental.storage.LazyStorage.createMap(Lazy
+Storage.kt:62)
+			at org.jetbrains.kotlin.incremental.storage.LazyStorage.getStorageOrCr
+eateNew(LazyStorage.kt:59)
+			at org.jetbrains.kotlin.incremental.storage.LazyStorage.set(LazyStorag
+e.kt:80)
+			at org.jetbrains.kotlin.incremental.storage.InMemoryStorage.applyChang
+es(InMemoryStorage.kt:108)
+			at org.jetbrains.kotlin.incremental.storage.AppendableInMemoryStorage.
+applyChanges(InMemoryStorage.kt:179)
+			at org.jetbrains.kotlin.incremental.storage.InMemoryStorage.close(InMe
+moryStorage.kt:136)
+			at org.jetbrains.kotlin.incremental.storage.AppendableSetBasicMap.clos
+e(BasicMap.kt:157)
+			at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.inv
+oke(BasicMapsOwner.kt:53)
+			at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.inv
+oke(BasicMapsOwner.kt:53)
+			at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.forEachMapS
+afe(BasicMapsOwner.kt:87)
+			... 24 more
+			Suppressed: java.lang.Exception: Storage[E:\work2025\App\ConnectHeart\
+build\quill_native_bridge_android\kotlin\compileReleaseKotlin\cacheable\c
+aches-jvm\inputs\source-to-output.tab] registration stack trace
+				at org.jetbrains.kotlin.com.intellij.util.io.FilePageCache.registerPa
+gedFileStorage(FilePageCache.java:437)
+				... 44 more
+
 		at org.jetbrains.kotlin.incremental.storage.PersistentStorageWrapper.close(PersistentStorage.kt:124)
 		at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.invoke(BasicMapsOwner.kt:53)
 		at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.invoke(BasicMapsOwner.kt:53)
@@ -2501,6 +2501,7 @@ If it does not look related to your configuration, please file an issue with log
 
 > Task :url_launcher_android:compileReleaseJavaWithJavac
 > Task :video_player_android:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :url_launcher_android:bundleLibCompileToJarRelease
 
 > Task :share_plus:compileReleaseKotlin
 e: Daemon compilation failed: null
@@ -2875,82 +2876,6 @@ PersistentHashMap.java:46)
 PersistentHashMap.java:72)
 			at org.jetbrains.kotlin.incremental.storage.LazyStorage.createMap(Lazy
 Storage.kt:62)
-Failed to compile with Kotlin daemon: java.lang.Exception
-	at org.jetbrains.kotlin.daemon.common.CompileService$CallResult$Error.get(CompileService.kt:69)
-	at org.jetbrains.kotlin.daemon.common.CompileService$CallResult$Error.get(CompileService.kt:65)
-	at org.jetbrains.kotlin.compilerRunner.GradleKotlinCompilerWork.compileWithDaemon(GradleKotlinCompilerWork.kt:240)
-	at org.jetbrains.kotlin.compilerRunner.GradleKotlinCompilerWork.compileWithDaemonOrFallbackImpl(GradleKotlinCompilerWork.kt:159)
-	at org.jetbrains.kotlin.compilerRunner.GradleKotlinCompilerWork.run(GradleKotlinCompilerWork.kt:111)
-	at org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction.execute(GradleCompilerRunnerWithWorkers.kt:74)
-	at org.gradle.workers.internal.DefaultWorkerServer.execute(DefaultWorkerServer.java:63)
-	at org.gradle.workers.internal.NoIsolationWorkerFactory$1$1.create(NoIsolationWorkerFactory.java:66)
-	at org.gradle.workers.internal.NoIsolationWorkerFactory$1$1.create(NoIsolationWorkerFactory.java:62)
-	at org.gradle.internal.classloader.ClassLoaderUtils.executeInClassloader(ClassLoaderUtils.java:100)
-	at org.gradle.workers.internal.NoIsolationWorkerFactory$1.lambda$execute$0(NoIsolationWorkerFactory.java:62)
-	at org.gradle.workers.internal.AbstractWorker$1.call(AbstractWorker.java:44)
-	at org.gradle.workers.internal.AbstractWorker$1.call(AbstractWorker.java:41)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:210)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:205)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:67)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:60)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:167)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:60)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:54)
-	at org.gradle.workers.internal.AbstractWorker.executeWrappedInBuildOperation(AbstractWorker.java:41)
-	at org.gradle.workers.internal.NoIsolationWorkerFactory$1.execute(NoIsolationWorkerFactory.java:59)
-	at org.gradle.workers.internal.DefaultWorkerExecutor.lambda$submitWork$0(DefaultWorkerExecutor.java:174)
-	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
-	at org.gradle.internal.work.DefaultConditionalExecutionQueue$ExecutionRunner.runExecution(DefaultConditionalExecutionQueue.java:194)
-	at org.gradle.internal.work.DefaultConditionalExecutionQueue$ExecutionRunner.access$700(DefaultConditionalExecutionQueue.java:127)
-	at org.gradle.internal.work.DefaultConditionalExecutionQueue$ExecutionRunner$1.run(DefaultConditionalExecutionQueue.java:169)
-	at org.gradle.internal.Factories$1.create(Factories.java:31)
-	at org.gradle.internal.work.DefaultWorkerLeaseService.withLocks(DefaultWorkerLeaseService.java:263)
-	at org.gradle.internal.work.DefaultWorkerLeaseService.runAsWorkerThread(DefaultWorkerLeaseService.java:127)
-	at org.gradle.internal.work.DefaultWorkerLeaseService.runAsWorkerThread(DefaultWorkerLeaseService.java:132)
-	at org.gradle.internal.work.DefaultConditionalExecutionQueue$ExecutionRunner.runBatch(DefaultConditionalExecutionQueue.java:164)
-	at org.gradle.internal.work.DefaultConditionalExecutionQueue$ExecutionRunner.run(DefaultConditionalExecutionQueue.java:133)
-	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539)
-	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
-	at org.gradle.internal.concurrent.ExecutorPolicy$CatchAndRecordFailures.onExecute(ExecutorPolicy.java:64)
-	at org.gradle.internal.concurrent.AbstractManagedExecutor$1.run(AbstractManagedExecutor.java:48)
-	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
-	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
-	at java.base/java.lang.Thread.run(Thread.java:840)
-Caused by: java.lang.AssertionError: java.lang.Exception: Could not close incremental caches in E:\work2025\App\ConnectHeart\build\share_plus\kotlin\compileReleaseKotlin\cacheable\caches-jvm\jvm\kotlin: class-fq-name-to-source.tab, source-to-classes.tab, internal-name-to-source.tab
-	at org.jetbrains.kotlin.com.google.common.io.Closer.close(Closer.java:218)
-	at org.jetbrains.kotlin.incremental.IncrementalCachesManager.close(IncrementalCachesManager.kt:55)
-	at kotlin.io.CloseableKt.closeFinally(Closeable.kt:46)
-	at org.jetbrains.kotlin.incremental.IncrementalCompilerRunner.compileNonIncrementally(IncrementalCompilerRunner.kt:293)
-	at org.jetbrains.kotlin.incremental.IncrementalCompilerRunner.compile(IncrementalCompilerRunner.kt:128)
-	at org.jetbrains.kotlin.daemon.CompileServiceImplBase.execIncrementalCompiler(CompileServiceImpl.kt:684)
-	at org.jetbrains.kotlin.daemon.CompileServiceImplBase.access$execIncrementalCompiler(CompileServiceImpl.kt:94)
-	at org.jetbrains.kotlin.daemon.CompileServiceImpl.compile(CompileServiceImpl.kt:1810)
-	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(Unknown Source)
-	at java.base/java.lang.reflect.Method.invoke(Unknown Source)
-	at java.rmi/sun.rmi.server.UnicastServerRef.dispatch(Unknown Source)
-	at java.rmi/sun.rmi.transport.Transport$1.run(Unknown Source)
-	at java.rmi/sun.rmi.transport.Transport$1.run(Unknown Source)
-	at java.base/java.security.AccessController.doPrivileged(Unknown Source)
-	at java.rmi/sun.rmi.transport.Transport.serviceCall(Unknown Source)
-	at java.rmi/sun.rmi.transport.tcp.TCPTransport.handleMessages(Unknown Source)
-	at java.rmi/sun.rmi.transport.tcp.TCPTransport$ConnectionHandler.run0(Unknown Source)
-	at java.rmi/sun.rmi.transport.tcp.TCPTransport$ConnectionHandler.lambda$run$0(Unknown Source)
-	at java.base/java.security.AccessController.doPrivileged(Unknown Source)
-	at java.rmi/sun.rmi.transport.tcp.TCPTransport$ConnectionHandler.run(Unknown Source)
-	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(Unknown Source)
-	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(Unknown Source)
-	at java.base/java.lang.Thread.run(Unknown Source)
-Caused by: java.lang.Exception: Could not close incremental caches in E:\work2025\App\ConnectHeart\build\share_plus\kotlin\compileReleaseKotlin\cacheable\caches-jvm\jvm\kotlin: class-fq-name-to-source.tab, source-to-classes.tab, internal-name-to-source.tab
-	at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.forEachMapSafe(BasicMapsOwner.kt:95)
-	at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.close(BasicMapsOwner.kt:53)
-	at org.jetbrains.kotlin.com.google.common.io.Closer.close(Closer.java:205)
-	... 22 more
-	Suppressed: java.lang.IllegalStateException: Storage for [E:\work2025\App\ConnectHeart\build\share_plus\kotlin\compileReleaseKotlin\cacheable\caches-jvm\jvm\kotlin\class-fq-name-to-source.tab] is already registered
-		at org.jetbrains.kotlin.com.intellij.util.io.FilePageCache.registerPagedFileStorage(FilePageCache.java:410)
-		at org.jetbrains.kotlin.com.intellij.util.io.PagedFileStorage.<init>(PagedFileStorage.java:72)
-		at org.jetbrains.kotlin.com.intellij.util.io.ResizeableMappedFile.<init>(ResizeableMappedFile.java:68)
-		at org.jetbrains.kotlin.com.intellij.util.io.PersistentBTreeEnumerator.<init>(PersistentBTreeEnumerator.java:128)
-		at org.jetbrains.kotlin.com.intellij.util.io.PersistentEnumerator.createDefaultEnumerator(PersistentEnumerator.java:52)
 			at org.jetbrains.kotlin.incremental.storage.LazyStorage.getStorageOrCr
 eateNew(LazyStorage.kt:59)
 			at org.jetbrains.kotlin.incremental.storage.LazyStorage.set(LazyStorag
@@ -3031,6 +2956,82 @@ source-to-output.tab] registration stack trace
 gedFileStorage(FilePageCache.java:437)
 				... 44 more
 
+Failed to compile with Kotlin daemon: java.lang.Exception
+	at org.jetbrains.kotlin.daemon.common.CompileService$CallResult$Error.get(CompileService.kt:69)
+	at org.jetbrains.kotlin.daemon.common.CompileService$CallResult$Error.get(CompileService.kt:65)
+	at org.jetbrains.kotlin.compilerRunner.GradleKotlinCompilerWork.compileWithDaemon(GradleKotlinCompilerWork.kt:240)
+	at org.jetbrains.kotlin.compilerRunner.GradleKotlinCompilerWork.compileWithDaemonOrFallbackImpl(GradleKotlinCompilerWork.kt:159)
+	at org.jetbrains.kotlin.compilerRunner.GradleKotlinCompilerWork.run(GradleKotlinCompilerWork.kt:111)
+	at org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction.execute(GradleCompilerRunnerWithWorkers.kt:74)
+	at org.gradle.workers.internal.DefaultWorkerServer.execute(DefaultWorkerServer.java:63)
+	at org.gradle.workers.internal.NoIsolationWorkerFactory$1$1.create(NoIsolationWorkerFactory.java:66)
+	at org.gradle.workers.internal.NoIsolationWorkerFactory$1$1.create(NoIsolationWorkerFactory.java:62)
+	at org.gradle.internal.classloader.ClassLoaderUtils.executeInClassloader(ClassLoaderUtils.java:100)
+	at org.gradle.workers.internal.NoIsolationWorkerFactory$1.lambda$execute$0(NoIsolationWorkerFactory.java:62)
+	at org.gradle.workers.internal.AbstractWorker$1.call(AbstractWorker.java:44)
+	at org.gradle.workers.internal.AbstractWorker$1.call(AbstractWorker.java:41)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:210)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:205)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:67)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:60)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:167)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:60)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:54)
+	at org.gradle.workers.internal.AbstractWorker.executeWrappedInBuildOperation(AbstractWorker.java:41)
+	at org.gradle.workers.internal.NoIsolationWorkerFactory$1.execute(NoIsolationWorkerFactory.java:59)
+	at org.gradle.workers.internal.DefaultWorkerExecutor.lambda$submitWork$0(DefaultWorkerExecutor.java:174)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+	at org.gradle.internal.work.DefaultConditionalExecutionQueue$ExecutionRunner.runExecution(DefaultConditionalExecutionQueue.java:194)
+	at org.gradle.internal.work.DefaultConditionalExecutionQueue$ExecutionRunner.access$700(DefaultConditionalExecutionQueue.java:127)
+	at org.gradle.internal.work.DefaultConditionalExecutionQueue$ExecutionRunner$1.run(DefaultConditionalExecutionQueue.java:169)
+	at org.gradle.internal.Factories$1.create(Factories.java:31)
+	at org.gradle.internal.work.DefaultWorkerLeaseService.withLocks(DefaultWorkerLeaseService.java:263)
+	at org.gradle.internal.work.DefaultWorkerLeaseService.runAsWorkerThread(DefaultWorkerLeaseService.java:127)
+	at org.gradle.internal.work.DefaultWorkerLeaseService.runAsWorkerThread(DefaultWorkerLeaseService.java:132)
+	at org.gradle.internal.work.DefaultConditionalExecutionQueue$ExecutionRunner.runBatch(DefaultConditionalExecutionQueue.java:164)
+	at org.gradle.internal.work.DefaultConditionalExecutionQueue$ExecutionRunner.run(DefaultConditionalExecutionQueue.java:133)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+	at org.gradle.internal.concurrent.ExecutorPolicy$CatchAndRecordFailures.onExecute(ExecutorPolicy.java:64)
+	at org.gradle.internal.concurrent.AbstractManagedExecutor$1.run(AbstractManagedExecutor.java:48)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+Caused by: java.lang.AssertionError: java.lang.Exception: Could not close incremental caches in E:\work2025\App\ConnectHeart\build\share_plus\kotlin\compileReleaseKotlin\cacheable\caches-jvm\jvm\kotlin: class-fq-name-to-source.tab, source-to-classes.tab, internal-name-to-source.tab
+	at org.jetbrains.kotlin.com.google.common.io.Closer.close(Closer.java:218)
+	at org.jetbrains.kotlin.incremental.IncrementalCachesManager.close(IncrementalCachesManager.kt:55)
+	at kotlin.io.CloseableKt.closeFinally(Closeable.kt:46)
+	at org.jetbrains.kotlin.incremental.IncrementalCompilerRunner.compileNonIncrementally(IncrementalCompilerRunner.kt:293)
+	at org.jetbrains.kotlin.incremental.IncrementalCompilerRunner.compile(IncrementalCompilerRunner.kt:128)
+	at org.jetbrains.kotlin.daemon.CompileServiceImplBase.execIncrementalCompiler(CompileServiceImpl.kt:684)
+	at org.jetbrains.kotlin.daemon.CompileServiceImplBase.access$execIncrementalCompiler(CompileServiceImpl.kt:94)
+	at org.jetbrains.kotlin.daemon.CompileServiceImpl.compile(CompileServiceImpl.kt:1810)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(Unknown Source)
+	at java.base/java.lang.reflect.Method.invoke(Unknown Source)
+	at java.rmi/sun.rmi.server.UnicastServerRef.dispatch(Unknown Source)
+	at java.rmi/sun.rmi.transport.Transport$1.run(Unknown Source)
+	at java.rmi/sun.rmi.transport.Transport$1.run(Unknown Source)
+	at java.base/java.security.AccessController.doPrivileged(Unknown Source)
+	at java.rmi/sun.rmi.transport.Transport.serviceCall(Unknown Source)
+	at java.rmi/sun.rmi.transport.tcp.TCPTransport.handleMessages(Unknown Source)
+	at java.rmi/sun.rmi.transport.tcp.TCPTransport$ConnectionHandler.run0(Unknown Source)
+	at java.rmi/sun.rmi.transport.tcp.TCPTransport$ConnectionHandler.lambda$run$0(Unknown Source)
+	at java.base/java.security.AccessController.doPrivileged(Unknown Source)
+	at java.rmi/sun.rmi.transport.tcp.TCPTransport$ConnectionHandler.run(Unknown Source)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(Unknown Source)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(Unknown Source)
+	at java.base/java.lang.Thread.run(Unknown Source)
+Caused by: java.lang.Exception: Could not close incremental caches in E:\work2025\App\ConnectHeart\build\share_plus\kotlin\compileReleaseKotlin\cacheable\caches-jvm\jvm\kotlin: class-fq-name-to-source.tab, source-to-classes.tab, internal-name-to-source.tab
+	at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.forEachMapSafe(BasicMapsOwner.kt:95)
+	at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.close(BasicMapsOwner.kt:53)
+	at org.jetbrains.kotlin.com.google.common.io.Closer.close(Closer.java:205)
+	... 22 more
+	Suppressed: java.lang.IllegalStateException: Storage for [E:\work2025\App\ConnectHeart\build\share_plus\kotlin\compileReleaseKotlin\cacheable\caches-jvm\jvm\kotlin\class-fq-name-to-source.tab] is already registered
+		at org.jetbrains.kotlin.com.intellij.util.io.FilePageCache.registerPagedFileStorage(FilePageCache.java:410)
+		at org.jetbrains.kotlin.com.intellij.util.io.PagedFileStorage.<init>(PagedFileStorage.java:72)
+		at org.jetbrains.kotlin.com.intellij.util.io.ResizeableMappedFile.<init>(ResizeableMappedFile.java:68)
+		at org.jetbrains.kotlin.com.intellij.util.io.PersistentBTreeEnumerator.<init>(PersistentBTreeEnumerator.java:128)
+		at org.jetbrains.kotlin.com.intellij.util.io.PersistentEnumerator.createDefaultEnumerator(PersistentEnumerator.java:52)
 		at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapImpl.<init>(PersistentMapImpl.java:165)
 		at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapImpl.<init>(PersistentMapImpl.java:140)
 		at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapBuilder.buildImplementation(PersistentMapBuilder.java:88)
@@ -3188,9 +3189,6 @@ gedFileStorage(FilePageCache.java:437)
 Using fallback strategy: Compile without Kotlin daemon
 Try ./gradlew --stop if this issue persists
 If it does not look related to your configuration, please file an issue with logs to https://kotl.in/issue
-
-> Task :url_launcher_android:bundleLibCompileToJarRelease
-
 e: Daemon compilation failed: null
 java.lang.Exception
 	at org.jetbrains.kotlin.daemon.common.CompileService$CallResult$Error.ge
@@ -3199,7 +3197,6 @@ t(CompileService.kt:69)
 t(CompileService.kt:65)
 	at org.jetbrains.kotlin.compilerRunner.GradleKotlinCompilerWork.compileW
 ithDaemon(GradleKotlinCompilerWork.kt:240)
-> Task :shared_preferences_android:compileReleaseKotlin
 	at org.jetbrains.kotlin.compilerRunner.GradleKotlinCompilerWork.compileW
 ithDaemonOrFallbackImpl(GradleKotlinCompilerWork.kt:159)
 	at org.jetbrains.kotlin.compilerRunner.GradleKotlinCompilerWork.run(Grad
@@ -3313,6 +3310,11 @@ ource)
 	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(Unknown 
 Source)
 	at java.base/java.lang.Thread.run(Unknown Source)
+
+> Task :video_player_android:javaPreCompileRelease UP-TO-DATE
+> Task :workmanager_android:checkKotlinGradlePluginConfigurationErrors SKIPPED
+
+> Task :shared_preferences_android:compileReleaseKotlin
 Caused by: java.lang.Exception: Could not close incremental caches in E:\
 work2025\App\ConnectHeart\build\shared_preferences_android\kotlin\compile
 ReleaseKotlin\cacheable\caches-jvm\jvm\kotlin: class-fq-name-to-source.ta
@@ -3884,736 +3886,9 @@ Using fallback strategy: Compile without Kotlin daemon
 Try ./gradlew --stop if this issue persists
 If it does not look related to your configuration, please file an issue with logs to https://kotl.in/issue
 
-> Task :video_player_android:javaPreCompileRelease UP-TO-DATE
-> Task :workmanager_android:checkKotlinGradlePluginConfigurationErrors SKIPPED
 > Task :workmanager_android:javaPreCompileRelease UP-TO-DATE
 
-> Task :video_player_android:compileReleaseKotlin
-e: Daemon compilation failed: null
-java.lang.Exception
-	at org.jetbrains.kotlin.daemon.common.CompileService$CallResult$Error.ge
-t(CompileService.kt:69)
-	at org.jetbrains.kotlin.daemon.common.CompileService$CallResult$Error.ge
-t(CompileService.kt:65)
-	at org.jetbrains.kotlin.compilerRunner.GradleKotlinCompilerWork.compileW
-ithDaemon(GradleKotlinCompilerWork.kt:240)
-	at org.jetbrains.kotlin.compilerRunner.GradleKotlinCompilerWork.compileW
-ithDaemonOrFallbackImpl(GradleKotlinCompilerWork.kt:159)
-	at org.jetbrains.kotlin.compilerRunner.GradleKotlinCompilerWork.run(Grad
-leKotlinCompilerWork.kt:111)
-	at org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$G
-radleKotlinCompilerWorkAction.execute(GradleCompilerRunnerWithWorkers.kt:
-74)
-	at org.gradle.workers.internal.DefaultWorkerServer.execute(DefaultWorker
-Server.java:63)
-	at org.gradle.workers.internal.NoIsolationWorkerFactory$1$1.create(NoIso
-lationWorkerFactory.java:66)
-	at org.gradle.workers.internal.NoIsolationWorkerFactory$1$1.create(NoIso
-lationWorkerFactory.java:62)
-	at org.gradle.internal.classloader.ClassLoaderUtils.executeInClassloader
-(ClassLoaderUtils.java:100)
-	at org.gradle.workers.internal.NoIsolationWorkerFactory$1.lambda$execute
-$0(NoIsolationWorkerFactory.java:62)
-	at org.gradle.workers.internal.AbstractWorker$1.call(AbstractWorker.java
-:44)
-	at org.gradle.workers.internal.AbstractWorker$1.call(AbstractWorker.java
-:41)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBu
-ildOperationWorker.execute(DefaultBuildOperationRunner.java:210)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBu
-ildOperationWorker.execute(DefaultBuildOperationRunner.java:205)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(
-DefaultBuildOperationRunner.java:67)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(
-DefaultBuildOperationRunner.java:60)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(De
-faultBuildOperationRunner.java:167)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(De
-faultBuildOperationRunner.java:60)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(Defau
-ltBuildOperationRunner.java:54)
-	at org.gradle.workers.internal.AbstractWorker.executeWrappedInBuildOpera
-tion(AbstractWorker.java:41)
-	at org.gradle.workers.internal.NoIsolationWorkerFactory$1.execute(NoIsol
-ationWorkerFactory.java:59)
-	at org.gradle.workers.internal.DefaultWorkerExecutor.lambda$submitWork$0
-(DefaultWorkerExecutor.java:174)
-	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
-	at org.gradle.internal.work.DefaultConditionalExecutionQueue$ExecutionRu
-nner.runExecution(DefaultConditionalExecutionQueue.java:194)
-	at org.gradle.internal.work.DefaultConditionalExecutionQueue$ExecutionRu
-nner.access$700(DefaultConditionalExecutionQueue.java:127)
-	at org.gradle.internal.work.DefaultConditionalExecutionQueue$ExecutionRu
-nner$1.run(DefaultConditionalExecutionQueue.java:169)
-	at org.gradle.internal.Factories$1.create(Factories.java:31)
-	at org.gradle.internal.work.DefaultWorkerLeaseService.withLocks(DefaultW
-orkerLeaseService.java:263)
-	at org.gradle.internal.work.DefaultWorkerLeaseService.runAsWorkerThread(
-DefaultWorkerLeaseService.java:127)
-	at org.gradle.internal.work.DefaultWorkerLeaseService.runAsWorkerThread(
-DefaultWorkerLeaseService.java:132)
-	at org.gradle.internal.work.DefaultConditionalExecutionQueue$ExecutionRu
-nner.runBatch(DefaultConditionalExecutionQueue.java:164)
-	at org.gradle.internal.work.DefaultConditionalExecutionQueue$ExecutionRu
-nner.run(DefaultConditionalExecutionQueue.java:133)
-	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executo
-rs.java:539)
-	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
-	at org.gradle.internal.concurrent.ExecutorPolicy$CatchAndRecordFailures.
-onExecute(ExecutorPolicy.java:64)
-	at org.gradle.internal.concurrent.AbstractManagedExecutor$1.run(Abstract
-ManagedExecutor.java:48)
-	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoo
-lExecutor.java:1136)
-	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPo
-olExecutor.java:635)
-	at java.base/java.lang.Thread.run(Thread.java:840)
-Caused by: java.lang.AssertionError: java.lang.Exception: Could not close
- incremental caches in E:\work2025\App\ConnectHeart\build\video_player_an
-droid\kotlin\compileReleaseKotlin\cacheable\caches-jvm\jvm\kotlin: class-
-fq-name-to-source.tab, source-to-classes.tab, internal-name-to-source.tab
-	at org.jetbrains.kotlin.com.google.common.io.Closer.close(Closer.java:21
-8)
-	at org.jetbrains.kotlin.incremental.IncrementalCachesManager.close(Incre
-mentalCachesManager.kt:55)
-	at kotlin.io.CloseableKt.closeFinally(Closeable.kt:46)
-	at org.jetbrains.kotlin.incremental.IncrementalCompilerRunner.compileNon
-Incrementally(IncrementalCompilerRunner.kt:293)
-	at org.jetbrains.kotlin.incremental.IncrementalCompilerRunner.compile(In
-crementalCompilerRunner.kt:128)
-	at org.jetbrains.kotlin.daemon.CompileServiceImplBase.execIncrementalCom
-piler(CompileServiceImpl.kt:684)
-	at org.jetbrains.kotlin.daemon.CompileServiceImplBase.access$execIncreme
-ntalCompiler(CompileServiceImpl.kt:94)
-	at org.jetbrains.kotlin.daemon.CompileServiceImpl.compile(CompileService
-Impl.kt:1810)
-	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(Unkn
-own Source)
-	at java.base/java.lang.reflect.Method.invoke(Unknown Source)
-	at java.rmi/sun.rmi.server.UnicastServerRef.dispatch(Unknown Source)
-	at java.rmi/sun.rmi.transport.Transport$1.run(Unknown Source)
-	at java.rmi/sun.rmi.transport.Transport$1.run(Unknown Source)
-	at java.base/java.security.AccessController.doPrivileged(Unknown Source)
-	at java.rmi/sun.rmi.transport.Transport.serviceCall(Unknown Source)
-	at java.rmi/sun.rmi.transport.tcp.TCPTransport.handleMessages(Unknown So
-urce)
-	at java.rmi/sun.rmi.transport.tcp.TCPTransport$ConnectionHandler.run0(Un
-known Source)
-	at java.rmi/sun.rmi.transport.tcp.TCPTransport$ConnectionHandler.lambda$
-run$0(Unknown Source)
-	at java.base/java.security.AccessController.doPrivileged(Unknown Source)
-	at java.rmi/sun.rmi.transport.tcp.TCPTransport$ConnectionHandler.run(Unk
-nown Source)
-	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(Unknown S
-ource)
-	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(Unknown 
-Source)
-	at java.base/java.lang.Thread.run(Unknown Source)
-Caused by: java.lang.Exception: Could not close incremental caches in E:\
-work2025\App\ConnectHeart\build\video_player_android\kotlin\compileReleas
-eKotlin\cacheable\caches-jvm\jvm\kotlin: class-fq-name-to-source.tab, sou
-rce-to-classes.tab, internal-name-to-source.tab
-	at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.forEachMapSaf
-e(BasicMapsOwner.kt:95)
-	at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.close(BasicMa
-psOwner.kt:53)
-	at org.jetbrains.kotlin.com.google.common.io.Closer.close(Closer.java:20
-5)
-	... 22 more
-	Suppressed: java.lang.IllegalStateException: Storage for [E:\work2025\Ap
-p\ConnectHeart\build\video_player_android\kotlin\compileReleaseKotlin\cac
-heable\caches-jvm\jvm\kotlin\class-fq-name-to-source.tab] is already regi
-stered
-		at org.jetbrains.kotlin.com.intellij.util.io.FilePageCache.registerPage
-dFileStorage(FilePageCache.java:410)
-		at org.jetbrains.kotlin.com.intellij.util.io.PagedFileStorage.<init>(Pa
-gedFileStorage.java:72)
-		at org.jetbrains.kotlin.com.intellij.util.io.ResizeableMappedFile.<init
->(ResizeableMappedFile.java:68)
-		at org.jetbrains.kotlin.com.intellij.util.io.PersistentBTreeEnumerator.
-<init>(PersistentBTreeEnumerator.java:128)
-		at org.jetbrains.kotlin.com.intellij.util.io.PersistentEnumerator.creat
-eDefaultEnumerator(PersistentEnumerator.java:52)
-		at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapImpl.<init>(P
-ersistentMapImpl.java:165)
-		at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapImpl.<init>(P
-ersistentMapImpl.java:140)
-		at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapBuilder.build
-Implementation(PersistentMapBuilder.java:88)
-		at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapBuilder.build
-(PersistentMapBuilder.java:71)
-		at org.jetbrains.kotlin.com.intellij.util.io.PersistentHashMap.<init>(P
-ersistentHashMap.java:46)
-		at org.jetbrains.kotlin.com.intellij.util.io.PersistentHashMap.<init>(P
-ersistentHashMap.java:72)
-		at org.jetbrains.kotlin.incremental.storage.LazyStorage.createMap(LazyS
-torage.kt:62)
-		at org.jetbrains.kotlin.incremental.storage.LazyStorage.getStorageOrCre
-ateNew(LazyStorage.kt:59)
-		at org.jetbrains.kotlin.incremental.storage.LazyStorage.set(LazyStorage
-.kt:80)
-		at org.jetbrains.kotlin.incremental.storage.InMemoryStorage.applyChange
-s(InMemoryStorage.kt:108)
-		at org.jetbrains.kotlin.incremental.storage.InMemoryStorage.close(InMem
-oryStorage.kt:136)
-		at org.jetbrains.kotlin.incremental.storage.PersistentStorageWrapper.cl
-ose(PersistentStorage.kt:124)
-		at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.invo
-ke(BasicMapsOwner.kt:53)
-		at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.invo
-ke(BasicMapsOwner.kt:53)
-		at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.forEachMapSa
-fe(BasicMapsOwner.kt:87)
-		... 24 more
-		Suppressed: java.lang.Exception: Storage[E:\work2025\App\ConnectHeart\b
-uild\video_player_android\kotlin\compileReleaseKotlin\cacheable\caches-jv
-m\jvm\kotlin\class-fq-name-to-source.tab] registration stack trace
-			at org.jetbrains.kotlin.com.intellij.util.io.FilePageCache.registerPag
-edFileStorage(FilePageCache.java:437)
-			... 43 more
-	Suppressed: java.lang.IllegalStateException: Storage for [E:\work2025\Ap
-p\ConnectHeart\build\video_player_android\kotlin\compileReleaseKotlin\cac
-heable\caches-jvm\jvm\kotlin\source-to-classes.tab] is already registered
-		at org.jetbrains.kotlin.com.intellij.util.io.FilePageCache.registerPage
-dFileStorage(FilePageCache.java:410)
-		at org.jetbrains.kotlin.com.intellij.util.io.PagedFileStorage.<init>(Pa
-gedFileStorage.java:72)
-		at org.jetbrains.kotlin.com.intellij.util.io.ResizeableMappedFile.<init
->(ResizeableMappedFile.java:68)
-		at org.jetbrains.kotlin.com.intellij.util.io.PersistentBTreeEnumerator.
-<init>(PersistentBTreeEnumerator.java:128)
-		at org.jetbrains.kotlin.com.intellij.util.io.PersistentEnumerator.creat
-eDefaultEnumerator(PersistentEnumerator.java:52)
-		at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapImpl.<init>(P
-ersistentMapImpl.java:165)
-		at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapImpl.<init>(P
-ersistentMapImpl.java:140)
-		at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapBuilder.build
-Implementation(PersistentMapBuilder.java:88)
-		at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapBuilder.build
-(PersistentMapBuilder.java:71)
-		at org.jetbrains.kotlin.com.intellij.util.io.PersistentHashMap.<init>(P
-ersistentHashMap.java:46)
-		at org.jetbrains.kotlin.com.intellij.util.io.PersistentHashMap.<init>(P
-ersistentHashMap.java:72)
-		at org.jetbrains.kotlin.incremental.storage.LazyStorage.createMap(LazyS
-torage.kt:62)
-		at org.jetbrains.kotlin.incremental.storage.LazyStorage.getStorageOrCre
-ateNew(LazyStorage.kt:59)
-		at org.jetbrains.kotlin.incremental.storage.LazyStorage.set(LazyStorage
-.kt:80)
-		at org.jetbrains.kotlin.incremental.storage.InMemoryStorage.applyChange
-s(InMemoryStorage.kt:108)
-		at org.jetbrains.kotlin.incremental.storage.AppendableInMemoryStorage.a
-pplyChanges(InMemoryStorage.kt:179)
-		at org.jetbrains.kotlin.incremental.storage.InMemoryStorage.close(InMem
-oryStorage.kt:136)
-		at org.jetbrains.kotlin.incremental.storage.AppendableSetBasicMap.close
-(BasicMap.kt:157)
-		at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.invo
-ke(BasicMapsOwner.kt:53)
-		at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.invo
-ke(BasicMapsOwner.kt:53)
-		at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.forEachMapSa
-fe(BasicMapsOwner.kt:87)
-		... 24 more
-		Suppressed: java.lang.Exception: Storage[E:\work2025\App\ConnectHeart\b
-uild\video_player_android\kotlin\compileReleaseKotlin\cacheable\caches-jv
-m\jvm\kotlin\source-to-classes.tab] registration stack trace
-			at org.jetbrains.kotlin.com.intellij.util.io.FilePageCache.registerPag
-edFileStorage(FilePageCache.java:437)
-			... 44 more
-	Suppressed: java.lang.IllegalStateException: Storage for [E:\work2025\Ap
-p\ConnectHeart\build\video_player_android\kotlin\compileReleaseKotlin\cac
-heable\caches-jvm\jvm\kotlin\internal-name-to-source.tab] is already regi
-stered
-		at org.jetbrains.kotlin.com.intellij.util.io.FilePageCache.registerPage
-dFileStorage(FilePageCache.java:410)
-		at org.jetbrains.kotlin.com.intellij.util.io.PagedFileStorage.<init>(Pa
-gedFileStorage.java:72)
-		at org.jetbrains.kotlin.com.intellij.util.io.ResizeableMappedFile.<init
->(ResizeableMappedFile.java:68)
-		at org.jetbrains.kotlin.com.intellij.util.io.PersistentBTreeEnumerator.
-<init>(PersistentBTreeEnumerator.java:128)
-		at org.jetbrains.kotlin.com.intellij.util.io.PersistentEnumerator.creat
-eDefaultEnumerator(PersistentEnumerator.java:52)
-		at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapImpl.<init>(P
-ersistentMapImpl.java:165)
-		at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapImpl.<init>(P
-ersistentMapImpl.java:140)
-		at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapBuilder.build
-Implementation(PersistentMapBuilder.java:88)
-		at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapBuilder.build
-(PersistentMapBuilder.java:71)
-		at org.jetbrains.kotlin.com.intellij.util.io.PersistentHashMap.<init>(P
-ersistentHashMap.java:46)
-		at org.jetbrains.kotlin.com.intellij.util.io.PersistentHashMap.<init>(P
-ersistentHashMap.java:72)
-		at org.jetbrains.kotlin.incremental.storage.LazyStorage.createMap(LazyS
-torage.kt:62)
-		at org.jetbrains.kotlin.incremental.storage.LazyStorage.getStorageOrCre
-ateNew(LazyStorage.kt:59)
-		at org.jetbrains.kotlin.incremental.storage.LazyStorage.set(LazyStorage
-.kt:80)
-		at org.jetbrains.kotlin.incremental.storage.InMemoryStorage.applyChange
-s(InMemoryStorage.kt:108)
-		at org.jetbrains.kotlin.incremental.storage.AppendableInMemoryStorage.a
-pplyChanges(InMemoryStorage.kt:179)
-		at org.jetbrains.kotlin.incremental.storage.InMemoryStorage.close(InMem
-oryStorage.kt:136)
-		at org.jetbrains.kotlin.incremental.storage.PersistentStorageWrapper.cl
-ose(PersistentStorage.kt:124)
-		at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.invo
-ke(BasicMapsOwner.kt:53)
-		at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.invo
-ke(BasicMapsOwner.kt:53)
-		at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.forEachMapSa
-fe(BasicMapsOwner.kt:87)
-		... 24 more
-		Suppressed: java.lang.Exception: Storage[E:\work2025\App\ConnectHeart\b
-uild\video_player_android\kotlin\compileReleaseKotlin\cacheable\caches-jv
-m\jvm\kotlin\internal-name-to-source.tab] registration stack trace
-			at org.jetbrains.kotlin.com.intellij.util.io.FilePageCache.registerPag
-edFileStorage(FilePageCache.java:437)
-			... 44 more
-	Suppressed: java.lang.Exception: Could not close incremental caches in E
-:\work2025\App\ConnectHeart\build\video_player_android\kotlin\compileRele
-aseKotlin\cacheable\caches-jvm\lookups: id-to-file.tab, file-to-id.tab
-		at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.forEachMapSa
-fe(BasicMapsOwner.kt:95)
-		at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.close(BasicM
-apsOwner.kt:53)
-		at org.jetbrains.kotlin.incremental.LookupStorage.close(LookupStorage.k
-t:155)
-		... 23 more
-		Suppressed: java.lang.IllegalStateException: Storage for [E:\work2025\A
-pp\ConnectHeart\build\video_player_android\kotlin\compileReleaseKotlin\ca
-cheable\caches-jvm\lookups\id-to-file.tab] is already registered
-			at org.jetbrains.kotlin.com.intellij.util.io.FilePageCache.registerPag
-edFileStorage(FilePageCache.java:410)
-			at org.jetbrains.kotlin.com.intellij.util.io.PagedFileStorage.<init>(P
-agedFileStorage.java:72)
-			at org.jetbrains.kotlin.com.intellij.util.io.ResizeableMappedFile.<ini
-t>(ResizeableMappedFile.java:68)
-			at org.jetbrains.kotlin.com.intellij.util.io.PersistentBTreeEnumerator
-.<init>(PersistentBTreeEnumerator.java:128)
-			at org.jetbrains.kotlin.com.intellij.util.io.PersistentEnumerator.crea
-teDefaultEnumerator(PersistentEnumerator.java:52)
-			at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapImpl.<init>(
-PersistentMapImpl.java:165)
-			at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapImpl.<init>(
-PersistentMapImpl.java:140)
-			at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapBuilder.buil
-dImplementation(PersistentMapBuilder.java:88)
-			at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapBuilder.buil
-d(PersistentMapBuilder.java:71)
-			at org.jetbrains.kotlin.com.intellij.util.io.PersistentHashMap.<init>(
-PersistentHashMap.java:46)
-			at org.jetbrains.kotlin.com.intellij.util.io.PersistentHashMap.<init>(
-PersistentHashMap.java:72)
-			at org.jetbrains.kotlin.incremental.storage.LazyStorage.createMap(Lazy
-Storage.kt:62)
-			at org.jetbrains.kotlin.incremental.storage.LazyStorage.getStorageOrCr
-eateNew(LazyStorage.kt:59)
-			at org.jetbrains.kotlin.incremental.storage.LazyStorage.set(LazyStorag
-e.kt:80)
-			at org.jetbrains.kotlin.incremental.storage.InMemoryStorage.applyChang
-es(InMemoryStorage.kt:108)
-			at org.jetbrains.kotlin.incremental.storage.InMemoryStorage.close(InMe
-moryStorage.kt:136)
-			at org.jetbrains.kotlin.incremental.storage.PersistentStorageWrapper.c
-lose(PersistentStorage.kt:124)
-			at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.inv
-oke(BasicMapsOwner.kt:53)
-			at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.inv
-oke(BasicMapsOwner.kt:53)
-			at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.forEachMapS
-afe(BasicMapsOwner.kt:87)
-			... 25 more
-			Suppressed: java.lang.Exception: Storage[E:\work2025\App\ConnectHeart\
-build\video_player_android\kotlin\compileReleaseKotlin\cacheable\caches-j
-vm\lookups\id-to-file.tab] registration stack trace
-				at org.jetbrains.kotlin.com.intellij.util.io.FilePageCache.registerPa
-gedFileStorage(FilePageCache.java:437)
-				... 44 more
-		Suppressed: java.lang.IllegalStateException: Storage for [E:\work2025\A
-pp\ConnectHeart\build\video_player_android\kotlin\compileReleaseKotlin\ca
-cheable\caches-jvm\lookups\file-to-id.tab] is already registered
-			at org.jetbrains.kotlin.com.intellij.util.io.FilePageCache.registerPag
-edFileStorage(FilePageCache.java:410)
-			at org.jetbrains.kotlin.com.intellij.util.io.PagedFileStorage.<init>(P
-agedFileStorage.java:72)
-			at org.jetbrains.kotlin.com.intellij.util.io.ResizeableMappedFile.<ini
-t>(ResizeableMappedFile.java:68)
-			at org.jetbrains.kotlin.com.intellij.util.io.PersistentBTreeEnumerator
-.<init>(PersistentBTreeEnumerator.java:128)
-			at org.jetbrains.kotlin.com.intellij.util.io.PersistentEnumerator.crea
-teDefaultEnumerator(PersistentEnumerator.java:52)
-			at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapImpl.<init>(
-PersistentMapImpl.java:165)
-			at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapImpl.<init>(
-PersistentMapImpl.java:140)
-			at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapBuilder.buil
-dImplementation(PersistentMapBuilder.java:88)
-			at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapBuilder.buil
-d(PersistentMapBuilder.java:71)
-			at org.jetbrains.kotlin.com.intellij.util.io.PersistentHashMap.<init>(
-PersistentHashMap.java:46)
-			at org.jetbrains.kotlin.com.intellij.util.io.PersistentHashMap.<init>(
-PersistentHashMap.java:72)
-			at org.jetbrains.kotlin.incremental.storage.LazyStorage.createMap(Lazy
-Storage.kt:62)
-			at org.jetbrains.kotlin.incremental.storage.LazyStorage.getStorageOrCr
-eateNew(LazyStorage.kt:59)
-			at org.jetbrains.kotlin.incremental.storage.LazyStorage.set(LazyStorag
-e.kt:80)
-			at org.jetbrains.kotlin.incremental.storage.InMemoryStorage.applyChang
-es(InMemoryStorage.kt:108)
-			at org.jetbrains.kotlin.incremental.storage.InMemoryStorage.close(InMe
-moryStorage.kt:136)
-			at org.jetbrains.kotlin.incremental.storage.PersistentStorageWrapper.c
-lose(PersistentStorage.kt:124)
-			at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.inv
-oke(BasicMapsOwner.kt:53)
-			at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.inv
-oke(BasicMapsOwner.kt:53)
-			at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.forEachMapS
-afe(BasicMapsOwner.kt:87)
-			... 25 more
-			Suppressed: java.lang.Exception: Storage[E:\work2025\App\ConnectHeart\
-build\video_player_android\kotlin\compileReleaseKotlin\cacheable\caches-j
-vm\lookups\file-to-id.tab] registration stack trace
-				at org.jetbrains.kotlin.com.intellij.util.io.FilePageCache.registerPa
-gedFileStorage(FilePageCache.java:437)
-				... 44 more
-	Suppressed: java.lang.Exception: Could not close incremental caches in E
-:\work2025\App\ConnectHeart\build\video_player_android\kotlin\compileRele
-aseKotlin\cacheable\caches-jvm\inputs: source-to-output.tab
-		... 25 more
-		Suppressed: java.lang.IllegalStateException: Storage for [E:\work2025\A
-pp\ConnectHeart\build\video_player_android\kotlin\compileReleaseKotlin\ca
-cheable\caches-jvm\inputs\source-to-output.tab] is already registered
-			at org.jetbrains.kotlin.com.intellij.util.io.FilePageCache.registerPag
-edFileStorage(FilePageCache.java:410)
-			at org.jetbrains.kotlin.com.intellij.util.io.PagedFileStorage.<init>(P
-agedFileStorage.java:72)
-			at org.jetbrains.kotlin.com.intellij.util.io.ResizeableMappedFile.<ini
-t>(ResizeableMappedFile.java:68)
-			at org.jetbrains.kotlin.com.intellij.util.io.PersistentBTreeEnumerator
-.<init>(PersistentBTreeEnumerator.java:128)
-			at org.jetbrains.kotlin.com.intellij.util.io.PersistentEnumerator.crea
-teDefaultEnumerator(PersistentEnumerator.java:52)
-			at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapImpl.<init>(
-PersistentMapImpl.java:165)
-			at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapImpl.<init>(
-PersistentMapImpl.java:140)
-			at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapBuilder.buil
-dImplementation(PersistentMapBuilder.java:88)
-			at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapBuilder.buil
-d(PersistentMapBuilder.java:71)
-			at org.jetbrains.kotlin.com.intellij.util.io.PersistentHashMap.<init>(
-PersistentHashMap.java:46)
-			at org.jetbrains.kotlin.com.intellij.util.io.PersistentHashMap.<init>(
-PersistentHashMap.java:72)
-			at org.jetbrains.kotlin.incremental.storage.LazyStorage.createMap(Lazy
-Storage.kt:62)
-			at org.jetbrains.kotlin.incremental.storage.LazyStorage.getStorageOrCr
-eateNew(LazyStorage.kt:59)
-			at org.jetbrains.kotlin.incremental.storage.LazyStorage.set(LazyStorag
-e.kt:80)
-			at org.jetbrains.kotlin.incremental.storage.InMemoryStorage.applyChang
-es(InMemoryStorage.kt:108)
-			at org.jetbrains.kotlin.incremental.storage.AppendableInMemoryStorage.
-applyChanges(InMemoryStorage.kt:179)
-			at org.jetbrains.kotlin.incremental.storage.InMemoryStorage.close(InMe
-moryStorage.kt:136)
-			at org.jetbrains.kotlin.incremental.storage.AppendableSetBasicMap.clos
-e(BasicMap.kt:157)
-			at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.inv
-oke(BasicMapsOwner.kt:53)
-			at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.inv
-oke(BasicMapsOwner.kt:53)
-			at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.forEachMapS
-afe(BasicMapsOwner.kt:87)
-			... 24 more
-			Suppressed: java.lang.Exception: Storage[E:\work2025\App\ConnectHeart\
-build\video_player_android\kotlin\compileReleaseKotlin\cacheable\caches-j
-vm\inputs\source-to-output.tab] registration stack trace
-				at org.jetbrains.kotlin.com.intellij.util.io.FilePageCache.registerPa
-gedFileStorage(FilePageCache.java:437)
-				... 44 more
-
-Failed to compile with Kotlin daemon: java.lang.Exception
-	at org.jetbrains.kotlin.daemon.common.CompileService$CallResult$Error.get(CompileService.kt:69)
-	at org.jetbrains.kotlin.daemon.common.CompileService$CallResult$Error.get(CompileService.kt:65)
-	at org.jetbrains.kotlin.compilerRunner.GradleKotlinCompilerWork.compileWithDaemon(GradleKotlinCompilerWork.kt:240)
-	at org.jetbrains.kotlin.compilerRunner.GradleKotlinCompilerWork.compileWithDaemonOrFallbackImpl(GradleKotlinCompilerWork.kt:159)
-	at org.jetbrains.kotlin.compilerRunner.GradleKotlinCompilerWork.run(GradleKotlinCompilerWork.kt:111)
-	at org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction.execute(GradleCompilerRunnerWithWorkers.kt:74)
-	at org.gradle.workers.internal.DefaultWorkerServer.execute(DefaultWorkerServer.java:63)
-	at org.gradle.workers.internal.NoIsolationWorkerFactory$1$1.create(NoIsolationWorkerFactory.java:66)
-	at org.gradle.workers.internal.NoIsolationWorkerFactory$1$1.create(NoIsolationWorkerFactory.java:62)
-	at org.gradle.internal.classloader.ClassLoaderUtils.executeInClassloader(ClassLoaderUtils.java:100)
-	at org.gradle.workers.internal.NoIsolationWorkerFactory$1.lambda$execute$0(NoIsolationWorkerFactory.java:62)
-	at org.gradle.workers.internal.AbstractWorker$1.call(AbstractWorker.java:44)
-	at org.gradle.workers.internal.AbstractWorker$1.call(AbstractWorker.java:41)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:210)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:205)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:67)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:60)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:167)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:60)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:54)
-	at org.gradle.workers.internal.AbstractWorker.executeWrappedInBuildOperation(AbstractWorker.java:41)
-	at org.gradle.workers.internal.NoIsolationWorkerFactory$1.execute(NoIsolationWorkerFactory.java:59)
-	at org.gradle.workers.internal.DefaultWorkerExecutor.lambda$submitWork$0(DefaultWorkerExecutor.java:174)
-	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
-	at org.gradle.internal.work.DefaultConditionalExecutionQueue$ExecutionRunner.runExecution(DefaultConditionalExecutionQueue.java:194)
-	at org.gradle.internal.work.DefaultConditionalExecutionQueue$ExecutionRunner.access$700(DefaultConditionalExecutionQueue.java:127)
-	at org.gradle.internal.work.DefaultConditionalExecutionQueue$ExecutionRunner$1.run(DefaultConditionalExecutionQueue.java:169)
-	at org.gradle.internal.Factories$1.create(Factories.java:31)
-	at org.gradle.internal.work.DefaultWorkerLeaseService.withLocks(DefaultWorkerLeaseService.java:263)
-	at org.gradle.internal.work.DefaultWorkerLeaseService.runAsWorkerThread(DefaultWorkerLeaseService.java:127)
-	at org.gradle.internal.work.DefaultWorkerLeaseService.runAsWorkerThread(DefaultWorkerLeaseService.java:132)
-	at org.gradle.internal.work.DefaultConditionalExecutionQueue$ExecutionRunner.runBatch(DefaultConditionalExecutionQueue.java:164)
-	at org.gradle.internal.work.DefaultConditionalExecutionQueue$ExecutionRunner.run(DefaultConditionalExecutionQueue.java:133)
-	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539)
-	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
-	at org.gradle.internal.concurrent.ExecutorPolicy$CatchAndRecordFailures.onExecute(ExecutorPolicy.java:64)
-	at org.gradle.internal.concurrent.AbstractManagedExecutor$1.run(AbstractManagedExecutor.java:48)
-	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
-	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
-	at java.base/java.lang.Thread.run(Thread.java:840)
-Caused by: java.lang.AssertionError: java.lang.Exception: Could not close incremental caches in E:\work2025\App\ConnectHeart\build\video_player_android\kotlin\compileReleaseKotlin\cacheable\caches-jvm\jvm\kotlin: class-fq-name-to-source.tab, source-to-classes.tab, internal-name-to-source.tab
-	at org.jetbrains.kotlin.com.google.common.io.Closer.close(Closer.java:218)
-	at org.jetbrains.kotlin.incremental.IncrementalCachesManager.close(IncrementalCachesManager.kt:55)
-	at kotlin.io.CloseableKt.closeFinally(Closeable.kt:46)
-	at org.jetbrains.kotlin.incremental.IncrementalCompilerRunner.compileNonIncrementally(IncrementalCompilerRunner.kt:293)
-	at org.jetbrains.kotlin.incremental.IncrementalCompilerRunner.compile(IncrementalCompilerRunner.kt:128)
-	at org.jetbrains.kotlin.daemon.CompileServiceImplBase.execIncrementalCompiler(CompileServiceImpl.kt:684)
-	at org.jetbrains.kotlin.daemon.CompileServiceImplBase.access$execIncrementalCompiler(CompileServiceImpl.kt:94)
-	at org.jetbrains.kotlin.daemon.CompileServiceImpl.compile(CompileServiceImpl.kt:1810)
-	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(Unknown Source)
-	at java.base/java.lang.reflect.Method.invoke(Unknown Source)
-	at java.rmi/sun.rmi.server.UnicastServerRef.dispatch(Unknown Source)
-	at java.rmi/sun.rmi.transport.Transport$1.run(Unknown Source)
-	at java.rmi/sun.rmi.transport.Transport$1.run(Unknown Source)
-	at java.base/java.security.AccessController.doPrivileged(Unknown Source)
-	at java.rmi/sun.rmi.transport.Transport.serviceCall(Unknown Source)
-	at java.rmi/sun.rmi.transport.tcp.TCPTransport.handleMessages(Unknown Source)
-	at java.rmi/sun.rmi.transport.tcp.TCPTransport$ConnectionHandler.run0(Unknown Source)
-	at java.rmi/sun.rmi.transport.tcp.TCPTransport$ConnectionHandler.lambda$run$0(Unknown Source)
-	at java.base/java.security.AccessController.doPrivileged(Unknown Source)
-	at java.rmi/sun.rmi.transport.tcp.TCPTransport$ConnectionHandler.run(Unknown Source)
-	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(Unknown Source)
-	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(Unknown Source)
-	at java.base/java.lang.Thread.run(Unknown Source)
-Caused by: java.lang.Exception: Could not close incremental caches in E:\work2025\App\ConnectHeart\build\video_player_android\kotlin\compileReleaseKotlin\cacheable\caches-jvm\jvm\kotlin: class-fq-name-to-source.tab, source-to-classes.tab, internal-name-to-source.tab
-	at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.forEachMapSafe(BasicMapsOwner.kt:95)
-	at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.close(BasicMapsOwner.kt:53)
-	at org.jetbrains.kotlin.com.google.common.io.Closer.close(Closer.java:205)
-	... 22 more
-	Suppressed: java.lang.IllegalStateException: Storage for [E:\work2025\App\ConnectHeart\build\video_player_android\kotlin\compileReleaseKotlin\cacheable\caches-jvm\jvm\kotlin\class-fq-name-to-source.tab] is already registered
-		at org.jetbrains.kotlin.com.intellij.util.io.FilePageCache.registerPagedFileStorage(FilePageCache.java:410)
-		at org.jetbrains.kotlin.com.intellij.util.io.PagedFileStorage.<init>(PagedFileStorage.java:72)
-		at org.jetbrains.kotlin.com.intellij.util.io.ResizeableMappedFile.<init>(ResizeableMappedFile.java:68)
-		at org.jetbrains.kotlin.com.intellij.util.io.PersistentBTreeEnumerator.<init>(PersistentBTreeEnumerator.java:128)
-		at org.jetbrains.kotlin.com.intellij.util.io.PersistentEnumerator.createDefaultEnumerator(PersistentEnumerator.java:52)
-		at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapImpl.<init>(PersistentMapImpl.java:165)
-		at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapImpl.<init>(PersistentMapImpl.java:140)
-		at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapBuilder.buildImplementation(PersistentMapBuilder.java:88)
-		at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapBuilder.build(PersistentMapBuilder.java:71)
-		at org.jetbrains.kotlin.com.intellij.util.io.PersistentHashMap.<init>(PersistentHashMap.java:46)
-		at org.jetbrains.kotlin.com.intellij.util.io.PersistentHashMap.<init>(PersistentHashMap.java:72)
-		at org.jetbrains.kotlin.incremental.storage.LazyStorage.createMap(LazyStorage.kt:62)
-		at org.jetbrains.kotlin.incremental.storage.LazyStorage.getStorageOrCreateNew(LazyStorage.kt:59)
-		at org.jetbrains.kotlin.incremental.storage.LazyStorage.set(LazyStorage.kt:80)
-		at org.jetbrains.kotlin.incremental.storage.InMemoryStorage.applyChanges(InMemoryStorage.kt:108)
-		at org.jetbrains.kotlin.incremental.storage.InMemoryStorage.close(InMemoryStorage.kt:136)
-		at org.jetbrains.kotlin.incremental.storage.PersistentStorageWrapper.close(PersistentStorage.kt:124)
-		at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.invoke(BasicMapsOwner.kt:53)
-		at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.invoke(BasicMapsOwner.kt:53)
-		at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.forEachMapSafe(BasicMapsOwner.kt:87)
-		... 24 more
-		Suppressed: java.lang.Exception: Storage[E:\work2025\App\ConnectHeart\build\video_player_android\kotlin\compileReleaseKotlin\cacheable\caches-jvm\jvm\kotlin\class-fq-name-to-source.tab] registration stack trace
-			at org.jetbrains.kotlin.com.intellij.util.io.FilePageCache.registerPagedFileStorage(FilePageCache.java:437)
-			... 43 more
-	Suppressed: java.lang.IllegalStateException: Storage for [E:\work2025\App\ConnectHeart\build\video_player_android\kotlin\compileReleaseKotlin\cacheable\caches-jvm\jvm\kotlin\source-to-classes.tab] is already registered
-		at org.jetbrains.kotlin.com.intellij.util.io.FilePageCache.registerPagedFileStorage(FilePageCache.java:410)
-		at org.jetbrains.kotlin.com.intellij.util.io.PagedFileStorage.<init>(PagedFileStorage.java:72)
-		at org.jetbrains.kotlin.com.intellij.util.io.ResizeableMappedFile.<init>(ResizeableMappedFile.java:68)
-		at org.jetbrains.kotlin.com.intellij.util.io.PersistentBTreeEnumerator.<init>(PersistentBTreeEnumerator.java:128)
-		at org.jetbrains.kotlin.com.intellij.util.io.PersistentEnumerator.createDefaultEnumerator(PersistentEnumerator.java:52)
-		at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapImpl.<init>(PersistentMapImpl.java:165)
-		at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapImpl.<init>(PersistentMapImpl.java:140)
-		at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapBuilder.buildImplementation(PersistentMapBuilder.java:88)
-		at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapBuilder.build(PersistentMapBuilder.java:71)
-		at org.jetbrains.kotlin.com.intellij.util.io.PersistentHashMap.<init>(PersistentHashMap.java:46)
-		at org.jetbrains.kotlin.com.intellij.util.io.PersistentHashMap.<init>(PersistentHashMap.java:72)
-		at org.jetbrains.kotlin.incremental.storage.LazyStorage.createMap(LazyStorage.kt:62)
-		at org.jetbrains.kotlin.incremental.storage.LazyStorage.getStorageOrCreateNew(LazyStorage.kt:59)
-		at org.jetbrains.kotlin.incremental.storage.LazyStorage.set(LazyStorage.kt:80)
-		at org.jetbrains.kotlin.incremental.storage.InMemoryStorage.applyChanges(InMemoryStorage.kt:108)
-		at org.jetbrains.kotlin.incremental.storage.AppendableInMemoryStorage.applyChanges(InMemoryStorage.kt:179)
-		at org.jetbrains.kotlin.incremental.storage.InMemoryStorage.close(InMemoryStorage.kt:136)
-		at org.jetbrains.kotlin.incremental.storage.AppendableSetBasicMap.close(BasicMap.kt:157)
-		at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.invoke(BasicMapsOwner.kt:53)
-		at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.invoke(BasicMapsOwner.kt:53)
-		at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.forEachMapSafe(BasicMapsOwner.kt:87)
-		... 24 more
-		Suppressed: java.lang.Exception: Storage[E:\work2025\App\ConnectHeart\build\video_player_android\kotlin\compileReleaseKotlin\cacheable\caches-jvm\jvm\kotlin\source-to-classes.tab] registration stack trace
-			at org.jetbrains.kotlin.com.intellij.util.io.FilePageCache.registerPagedFileStorage(FilePageCache.java:437)
-			... 44 more
-	Suppressed: java.lang.IllegalStateException: Storage for [E:\work2025\App\ConnectHeart\build\video_player_android\kotlin\compileReleaseKotlin\cacheable\caches-jvm\jvm\kotlin\internal-name-to-source.tab] is already registered
-		at org.jetbrains.kotlin.com.intellij.util.io.FilePageCache.registerPagedFileStorage(FilePageCache.java:410)
-		at org.jetbrains.kotlin.com.intellij.util.io.PagedFileStorage.<init>(PagedFileStorage.java:72)
-		at org.jetbrains.kotlin.com.intellij.util.io.ResizeableMappedFile.<init>(ResizeableMappedFile.java:68)
-		at org.jetbrains.kotlin.com.intellij.util.io.PersistentBTreeEnumerator.<init>(PersistentBTreeEnumerator.java:128)
-		at org.jetbrains.kotlin.com.intellij.util.io.PersistentEnumerator.createDefaultEnumerator(PersistentEnumerator.java:52)
-		at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapImpl.<init>(PersistentMapImpl.java:165)
-		at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapImpl.<init>(PersistentMapImpl.java:140)
-		at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapBuilder.buildImplementation(PersistentMapBuilder.java:88)
-		at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapBuilder.build(PersistentMapBuilder.java:71)
-		at org.jetbrains.kotlin.com.intellij.util.io.PersistentHashMap.<init>(PersistentHashMap.java:46)
-		at org.jetbrains.kotlin.com.intellij.util.io.PersistentHashMap.<init>(PersistentHashMap.java:72)
-		at org.jetbrains.kotlin.incremental.storage.LazyStorage.createMap(LazyStorage.kt:62)
-		at org.jetbrains.kotlin.incremental.storage.LazyStorage.getStorageOrCreateNew(LazyStorage.kt:59)
-		at org.jetbrains.kotlin.incremental.storage.LazyStorage.set(LazyStorage.kt:80)
-		at org.jetbrains.kotlin.incremental.storage.InMemoryStorage.applyChanges(InMemoryStorage.kt:108)
-		at org.jetbrains.kotlin.incremental.storage.AppendableInMemoryStorage.applyChanges(InMemoryStorage.kt:179)
-		at org.jetbrains.kotlin.incremental.storage.InMemoryStorage.close(InMemoryStorage.kt:136)
-		at org.jetbrains.kotlin.incremental.storage.PersistentStorageWrapper.close(PersistentStorage.kt:124)
-		at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.invoke(BasicMapsOwner.kt:53)
-		at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.invoke(BasicMapsOwner.kt:53)
-		at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.forEachMapSafe(BasicMapsOwner.kt:87)
-		... 24 more
-		Suppressed: java.lang.Exception: Storage[E:\work2025\App\ConnectHeart\build\video_player_android\kotlin\compileReleaseKotlin\cacheable\caches-jvm\jvm\kotlin\internal-name-to-source.tab] registration stack trace
-			at org.jetbrains.kotlin.com.intellij.util.io.FilePageCache.registerPagedFileStorage(FilePageCache.java:437)
-			... 44 more
-	Suppressed: java.lang.Exception: Could not close incremental caches in E:\work2025\App\ConnectHeart\build\video_player_android\kotlin\compileReleaseKotlin\cacheable\caches-jvm\lookups: id-to-file.tab, file-to-id.tab
-		at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.forEachMapSafe(BasicMapsOwner.kt:95)
-		at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.close(BasicMapsOwner.kt:53)
-		at org.jetbrains.kotlin.incremental.LookupStorage.close(LookupStorage.kt:155)
-		... 23 more
-		Suppressed: java.lang.IllegalStateException: Storage for [E:\work2025\App\ConnectHeart\build\video_player_android\kotlin\compileReleaseKotlin\cacheable\caches-jvm\lookups\id-to-file.tab] is already registered
-			at org.jetbrains.kotlin.com.intellij.util.io.FilePageCache.registerPagedFileStorage(FilePageCache.java:410)
-			at org.jetbrains.kotlin.com.intellij.util.io.PagedFileStorage.<init>(PagedFileStorage.java:72)
-			at org.jetbrains.kotlin.com.intellij.util.io.ResizeableMappedFile.<init>(ResizeableMappedFile.java:68)
-			at org.jetbrains.kotlin.com.intellij.util.io.PersistentBTreeEnumerator.<init>(PersistentBTreeEnumerator.java:128)
-			at org.jetbrains.kotlin.com.intellij.util.io.PersistentEnumerator.createDefaultEnumerator(PersistentEnumerator.java:52)
-			at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapImpl.<init>(PersistentMapImpl.java:165)
-			at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapImpl.<init>(PersistentMapImpl.java:140)
-			at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapBuilder.buildImplementation(PersistentMapBuilder.java:88)
-			at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapBuilder.build(PersistentMapBuilder.java:71)
-			at org.jetbrains.kotlin.com.intellij.util.io.PersistentHashMap.<init>(PersistentHashMap.java:46)
-			at org.jetbrains.kotlin.com.intellij.util.io.PersistentHashMap.<init>(PersistentHashMap.java:72)
-			at org.jetbrains.kotlin.incremental.storage.LazyStorage.createMap(LazyStorage.kt:62)
-			at org.jetbrains.kotlin.incremental.storage.LazyStorage.getStorageOrCreateNew(LazyStorage.kt:59)
-			at org.jetbrains.kotlin.incremental.storage.LazyStorage.set(LazyStorage.kt:80)
-			at org.jetbrains.kotlin.incremental.storage.InMemoryStorage.applyChanges(InMemoryStorage.kt:108)
-			at org.jetbrains.kotlin.incremental.storage.InMemoryStorage.close(InMemoryStorage.kt:136)
-			at org.jetbrains.kotlin.incremental.storage.PersistentStorageWrapper.close(PersistentStorage.kt:124)
-			at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.invoke(BasicMapsOwner.kt:53)
-			at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.invoke(BasicMapsOwner.kt:53)
-			at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.forEachMapSafe(BasicMapsOwner.kt:87)
-			... 25 more
-			Suppressed: java.lang.Exception: Storage[E:\work2025\App\ConnectHeart\build\video_player_android\kotlin\compileReleaseKotlin\cacheable\caches-jvm\lookups\id-to-file.tab] registration stack trace
-				at org.jetbrains.kotlin.com.intellij.util.io.FilePageCache.registerPagedFileStorage(FilePageCache.java:437)
-				... 44 more
-		Suppressed: java.lang.IllegalStateException: Storage for [E:\work2025\App\ConnectHeart\build\video_player_android\kotlin\compileReleaseKotlin\cacheable\caches-jvm\lookups\file-to-id.tab] is already registered
-			at org.jetbrains.kotlin.com.intellij.util.io.FilePageCache.registerPagedFileStorage(FilePageCache.java:410)
-			at org.jetbrains.kotlin.com.intellij.util.io.PagedFileStorage.<init>(PagedFileStorage.java:72)
-			at org.jetbrains.kotlin.com.intellij.util.io.ResizeableMappedFile.<init>(ResizeableMappedFile.java:68)
-			at org.jetbrains.kotlin.com.intellij.util.io.PersistentBTreeEnumerator.<init>(PersistentBTreeEnumerator.java:128)
-			at org.jetbrains.kotlin.com.intellij.util.io.PersistentEnumerator.createDefaultEnumerator(PersistentEnumerator.java:52)
-			at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapImpl.<init>(PersistentMapImpl.java:165)
-			at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapImpl.<init>(PersistentMapImpl.java:140)
-			at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapBuilder.buildImplementation(PersistentMapBuilder.java:88)
-			at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapBuilder.build(PersistentMapBuilder.java:71)
-			at org.jetbrains.kotlin.com.intellij.util.io.PersistentHashMap.<init>(PersistentHashMap.java:46)
-			at org.jetbrains.kotlin.com.intellij.util.io.PersistentHashMap.<init>(PersistentHashMap.java:72)
-			at org.jetbrains.kotlin.incremental.storage.LazyStorage.createMap(LazyStorage.kt:62)
-			at org.jetbrains.kotlin.incremental.storage.LazyStorage.getStorageOrCreateNew(LazyStorage.kt:59)
-			at org.jetbrains.kotlin.incremental.storage.LazyStorage.set(LazyStorage.kt:80)
-			at org.jetbrains.kotlin.incremental.storage.InMemoryStorage.applyChanges(InMemoryStorage.kt:108)
-			at org.jetbrains.kotlin.incremental.storage.InMemoryStorage.close(InMemoryStorage.kt:136)
-			at org.jetbrains.kotlin.incremental.storage.PersistentStorageWrapper.close(PersistentStorage.kt:124)
-			at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.invoke(BasicMapsOwner.kt:53)
-			at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.invoke(BasicMapsOwner.kt:53)
-			at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.forEachMapSafe(BasicMapsOwner.kt:87)
-			... 25 more
-			Suppressed: java.lang.Exception: Storage[E:\work2025\App\ConnectHeart\build\video_player_android\kotlin\compileReleaseKotlin\cacheable\caches-jvm\lookups\file-to-id.tab] registration stack trace
-				at org.jetbrains.kotlin.com.intellij.util.io.FilePageCache.registerPagedFileStorage(FilePageCache.java:437)
-				... 44 more
-	Suppressed: java.lang.Exception: Could not close incremental caches in E:\work2025\App\ConnectHeart\build\video_player_android\kotlin\compileReleaseKotlin\cacheable\caches-jvm\inputs: source-to-output.tab
-		... 25 more
-		Suppressed: java.lang.IllegalStateException: Storage for [E:\work2025\App\ConnectHeart\build\video_player_android\kotlin\compileReleaseKotlin\cacheable\caches-jvm\inputs\source-to-output.tab] is already registered
-			at org.jetbrains.kotlin.com.intellij.util.io.FilePageCache.registerPagedFileStorage(FilePageCache.java:410)
-			at org.jetbrains.kotlin.com.intellij.util.io.PagedFileStorage.<init>(PagedFileStorage.java:72)
-			at org.jetbrains.kotlin.com.intellij.util.io.ResizeableMappedFile.<init>(ResizeableMappedFile.java:68)
-			at org.jetbrains.kotlin.com.intellij.util.io.PersistentBTreeEnumerator.<init>(PersistentBTreeEnumerator.java:128)
-			at org.jetbrains.kotlin.com.intellij.util.io.PersistentEnumerator.createDefaultEnumerator(PersistentEnumerator.java:52)
-			at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapImpl.<init>(PersistentMapImpl.java:165)
-			at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapImpl.<init>(PersistentMapImpl.java:140)
-			at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapBuilder.buildImplementation(PersistentMapBuilder.java:88)
-			at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapBuilder.build(PersistentMapBuilder.java:71)
-			at org.jetbrains.kotlin.com.intellij.util.io.PersistentHashMap.<init>(PersistentHashMap.java:46)
-			at org.jetbrains.kotlin.com.intellij.util.io.PersistentHashMap.<init>(PersistentHashMap.java:72)
-			at org.jetbrains.kotlin.incremental.storage.LazyStorage.createMap(LazyStorage.kt:62)
-			at org.jetbrains.kotlin.incremental.storage.LazyStorage.getStorageOrCreateNew(LazyStorage.kt:59)
-			at org.jetbrains.kotlin.incremental.storage.LazyStorage.set(LazyStorage.kt:80)
-			at org.jetbrains.kotlin.incremental.storage.InMemoryStorage.applyChanges(InMemoryStorage.kt:108)
-			at org.jetbrains.kotlin.incremental.storage.AppendableInMemoryStorage.applyChanges(InMemoryStorage.kt:179)
-			at org.jetbrains.kotlin.incremental.storage.InMemoryStorage.close(InMemoryStorage.kt:136)
-			at org.jetbrains.kotlin.incremental.storage.AppendableSetBasicMap.close(BasicMap.kt:157)
-			at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.invoke(BasicMapsOwner.kt:53)
-			at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.invoke(BasicMapsOwner.kt:53)
-			at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.forEachMapSafe(BasicMapsOwner.kt:87)
-			... 24 more
-			Suppressed: java.lang.Exception: Storage[E:\work2025\App\ConnectHeart\build\video_player_android\kotlin\compileReleaseKotlin\cacheable\caches-jvm\inputs\source-to-output.tab] registration stack trace
-				at org.jetbrains.kotlin.com.intellij.util.io.FilePageCache.registerPagedFileStorage(FilePageCache.java:437)
-				... 44 more
-Using fallback strategy: Compile without Kotlin daemon
-Try ./gradlew --stop if this issue persists
-If it does not look related to your configuration, please file an issue with logs to https://kotl.in/issue
-
-> Task :device_calendar:compileReleaseKotlin
-exception: c:\Users\ham03_4mb3gaz\AppData\Local\Pub\Cache\hosted\pub.dev\
-device_calendar-4.3.3\android\src\main\kotlin\com\builttoroam\devicecalen
-dar\CalendarDelegate.kt:349:13: warning: this is a delicate API and its u
-se requires care. Make sure you fully read and understand documentation o
-f the declaration that is marked as a delicate API.
-exception:             GlobalScope.launch(Dispatchers.IO + exceptionHandl
-er) {
-exception:             ^^^^^^^^^^^
-
 > Task :photo_manager:compileReleaseKotlin
-exception: c:\Users\ham03_4mb3gaz\AppData\Local\Pub\Cache\hosted\pub.dev\
-device_calendar-4.3.3\android\src\main\kotlin\com\builttoroam\devicecalen
-dar\CalendarDelegate.kt:404:23: warning: this is a delicate API and its u
-se requires care. Make sure you fully read and understand documentation o
-f the declaration that is marked as a delicate API.
-exception:                 job = GlobalScope.launch(Dispatchers.IO + exce
-ptionHandler) {
-exception:                       ^^^^^^^^^^^
-exception: c:\Users\ham03_4mb3gaz\AppData\Local\Pub\Cache\hosted\pub.dev\
-device_calendar-4.3.3\android\src\main\kotlin\com\builttoroam\devicecalen
-dar\CalendarDelegate.kt:409:23: warning: this is a delicate API and its u
-se requires care. Make sure you fully read and understand documentation o
-f the declaration that is marked as a delicate API.
-exception:                 job = GlobalScope.launch(Dispatchers.IO + exce
-ptionHandler) {
-exception:                       ^^^^^^^^^^^
-exception: c:\Users\ham03_4mb3gaz\AppData\Local\Pub\Cache\hosted\pub.dev\
-device_calendar-4.3.3\android\src\main\kotlin\com\builttoroam\devicecalen
-dar\CalendarDelegate.kt:637:143: warning: 'static field YEAR_IN_MILLIS: L
-ong' is deprecated. Deprecated in Java.
-exception:                                 val cursor = CalendarContract.
-Instances.query(contentResolver, EVENT_INSTANCE_DELETION, startDate - Dat
-eUtils.YEAR_IN_MILLIS, startDate - 1)
-exception:                                                               
-                                                                         
-       ^^^^^^^^^^^^^^
 e: Daemon compilation failed: null
 java.lang.Exception
 	at org.jetbrains.kotlin.daemon.common.CompileService$CallResult$Error.ge
@@ -5300,8 +4575,736 @@ Using fallback strategy: Compile without Kotlin daemon
 Try ./gradlew --stop if this issue persists
 If it does not look related to your configuration, please file an issue with logs to https://kotl.in/issue
 
+> Task :device_calendar:compileReleaseKotlin
+exception: c:\Users\ham03_4mb3gaz\AppData\Local\Pub\Cache\hosted\pub.dev\
+device_calendar-4.3.3\android\src\main\kotlin\com\builttoroam\devicecalen
+dar\CalendarDelegate.kt:349:13: warning: this is a delicate API and its u
+se requires care. Make sure you fully read and understand documentation o
+f the declaration that is marked as a delicate API.
+exception:             GlobalScope.launch(Dispatchers.IO + exceptionHandl
+er) {
+exception:             ^^^^^^^^^^^
+exception: c:\Users\ham03_4mb3gaz\AppData\Local\Pub\Cache\hosted\pub.dev\
+device_calendar-4.3.3\android\src\main\kotlin\com\builttoroam\devicecalen
+dar\CalendarDelegate.kt:404:23: warning: this is a delicate API and its u
+se requires care. Make sure you fully read and understand documentation o
+f the declaration that is marked as a delicate API.
+exception:                 job = GlobalScope.launch(Dispatchers.IO + exce
+ptionHandler) {
+exception:                       ^^^^^^^^^^^
+exception: c:\Users\ham03_4mb3gaz\AppData\Local\Pub\Cache\hosted\pub.dev\
+device_calendar-4.3.3\android\src\main\kotlin\com\builttoroam\devicecalen
+dar\CalendarDelegate.kt:409:23: warning: this is a delicate API and its u
+se requires care. Make sure you fully read and understand documentation o
+f the declaration that is marked as a delicate API.
+exception:                 job = GlobalScope.launch(Dispatchers.IO + exce
+ptionHandler) {
+exception:                       ^^^^^^^^^^^
+exception: c:\Users\ham03_4mb3gaz\AppData\Local\Pub\Cache\hosted\pub.dev\
+device_calendar-4.3.3\android\src\main\kotlin\com\builttoroam\devicecalen
+dar\CalendarDelegate.kt:637:143: warning: 'static field YEAR_IN_MILLIS: L
+ong' is deprecated. Deprecated in Java.
+exception:                                 val cursor = CalendarContract.
+Instances.query(contentResolver, EVENT_INSTANCE_DELETION, startDate - Dat
+eUtils.YEAR_IN_MILLIS, startDate - 1)
+exception:                                                               
+                                                                         
+       ^^^^^^^^^^^^^^
+
 > Task :device_calendar:compileReleaseJavaWithJavac NO-SOURCE
 > Task :device_calendar:bundleLibCompileToJarRelease UP-TO-DATE
+
+> Task :video_player_android:compileReleaseKotlin
+e: Daemon compilation failed: null
+java.lang.Exception
+	at org.jetbrains.kotlin.daemon.common.CompileService$CallResult$Error.ge
+t(CompileService.kt:69)
+	at org.jetbrains.kotlin.daemon.common.CompileService$CallResult$Error.ge
+t(CompileService.kt:65)
+	at org.jetbrains.kotlin.compilerRunner.GradleKotlinCompilerWork.compileW
+ithDaemon(GradleKotlinCompilerWork.kt:240)
+	at org.jetbrains.kotlin.compilerRunner.GradleKotlinCompilerWork.compileW
+ithDaemonOrFallbackImpl(GradleKotlinCompilerWork.kt:159)
+	at org.jetbrains.kotlin.compilerRunner.GradleKotlinCompilerWork.run(Grad
+leKotlinCompilerWork.kt:111)
+	at org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$G
+radleKotlinCompilerWorkAction.execute(GradleCompilerRunnerWithWorkers.kt:
+74)
+	at org.gradle.workers.internal.DefaultWorkerServer.execute(DefaultWorker
+Server.java:63)
+	at org.gradle.workers.internal.NoIsolationWorkerFactory$1$1.create(NoIso
+lationWorkerFactory.java:66)
+	at org.gradle.workers.internal.NoIsolationWorkerFactory$1$1.create(NoIso
+lationWorkerFactory.java:62)
+	at org.gradle.internal.classloader.ClassLoaderUtils.executeInClassloader
+(ClassLoaderUtils.java:100)
+	at org.gradle.workers.internal.NoIsolationWorkerFactory$1.lambda$execute
+$0(NoIsolationWorkerFactory.java:62)
+	at org.gradle.workers.internal.AbstractWorker$1.call(AbstractWorker.java
+:44)
+	at org.gradle.workers.internal.AbstractWorker$1.call(AbstractWorker.java
+:41)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBu
+ildOperationWorker.execute(DefaultBuildOperationRunner.java:210)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBu
+ildOperationWorker.execute(DefaultBuildOperationRunner.java:205)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(
+DefaultBuildOperationRunner.java:67)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(
+DefaultBuildOperationRunner.java:60)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(De
+faultBuildOperationRunner.java:167)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(De
+faultBuildOperationRunner.java:60)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(Defau
+ltBuildOperationRunner.java:54)
+	at org.gradle.workers.internal.AbstractWorker.executeWrappedInBuildOpera
+tion(AbstractWorker.java:41)
+	at org.gradle.workers.internal.NoIsolationWorkerFactory$1.execute(NoIsol
+ationWorkerFactory.java:59)
+	at org.gradle.workers.internal.DefaultWorkerExecutor.lambda$submitWork$0
+(DefaultWorkerExecutor.java:174)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+	at org.gradle.internal.work.DefaultConditionalExecutionQueue$ExecutionRu
+nner.runExecution(DefaultConditionalExecutionQueue.java:194)
+	at org.gradle.internal.work.DefaultConditionalExecutionQueue$ExecutionRu
+nner.access$700(DefaultConditionalExecutionQueue.java:127)
+	at org.gradle.internal.work.DefaultConditionalExecutionQueue$ExecutionRu
+nner$1.run(DefaultConditionalExecutionQueue.java:169)
+	at org.gradle.internal.Factories$1.create(Factories.java:31)
+	at org.gradle.internal.work.DefaultWorkerLeaseService.withLocks(DefaultW
+orkerLeaseService.java:263)
+	at org.gradle.internal.work.DefaultWorkerLeaseService.runAsWorkerThread(
+DefaultWorkerLeaseService.java:127)
+	at org.gradle.internal.work.DefaultWorkerLeaseService.runAsWorkerThread(
+DefaultWorkerLeaseService.java:132)
+	at org.gradle.internal.work.DefaultConditionalExecutionQueue$ExecutionRu
+nner.runBatch(DefaultConditionalExecutionQueue.java:164)
+	at org.gradle.internal.work.DefaultConditionalExecutionQueue$ExecutionRu
+nner.run(DefaultConditionalExecutionQueue.java:133)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executo
+rs.java:539)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+	at org.gradle.internal.concurrent.ExecutorPolicy$CatchAndRecordFailures.
+onExecute(ExecutorPolicy.java:64)
+	at org.gradle.internal.concurrent.AbstractManagedExecutor$1.run(Abstract
+ManagedExecutor.java:48)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoo
+lExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPo
+olExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+Caused by: java.lang.AssertionError: java.lang.Exception: Could not close
+ incremental caches in E:\work2025\App\ConnectHeart\build\video_player_an
+droid\kotlin\compileReleaseKotlin\cacheable\caches-jvm\jvm\kotlin: class-
+fq-name-to-source.tab, source-to-classes.tab, internal-name-to-source.tab
+	at org.jetbrains.kotlin.com.google.common.io.Closer.close(Closer.java:21
+8)
+	at org.jetbrains.kotlin.incremental.IncrementalCachesManager.close(Incre
+mentalCachesManager.kt:55)
+	at kotlin.io.CloseableKt.closeFinally(Closeable.kt:46)
+	at org.jetbrains.kotlin.incremental.IncrementalCompilerRunner.compileNon
+Incrementally(IncrementalCompilerRunner.kt:293)
+	at org.jetbrains.kotlin.incremental.IncrementalCompilerRunner.compile(In
+crementalCompilerRunner.kt:128)
+	at org.jetbrains.kotlin.daemon.CompileServiceImplBase.execIncrementalCom
+piler(CompileServiceImpl.kt:684)
+	at org.jetbrains.kotlin.daemon.CompileServiceImplBase.access$execIncreme
+ntalCompiler(CompileServiceImpl.kt:94)
+	at org.jetbrains.kotlin.daemon.CompileServiceImpl.compile(CompileService
+Impl.kt:1810)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(Unkn
+own Source)
+	at java.base/java.lang.reflect.Method.invoke(Unknown Source)
+	at java.rmi/sun.rmi.server.UnicastServerRef.dispatch(Unknown Source)
+	at java.rmi/sun.rmi.transport.Transport$1.run(Unknown Source)
+	at java.rmi/sun.rmi.transport.Transport$1.run(Unknown Source)
+	at java.base/java.security.AccessController.doPrivileged(Unknown Source)
+	at java.rmi/sun.rmi.transport.Transport.serviceCall(Unknown Source)
+	at java.rmi/sun.rmi.transport.tcp.TCPTransport.handleMessages(Unknown So
+urce)
+	at java.rmi/sun.rmi.transport.tcp.TCPTransport$ConnectionHandler.run0(Un
+known Source)
+	at java.rmi/sun.rmi.transport.tcp.TCPTransport$ConnectionHandler.lambda$
+run$0(Unknown Source)
+	at java.base/java.security.AccessController.doPrivileged(Unknown Source)
+	at java.rmi/sun.rmi.transport.tcp.TCPTransport$ConnectionHandler.run(Unk
+nown Source)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(Unknown S
+ource)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(Unknown 
+Source)
+	at java.base/java.lang.Thread.run(Unknown Source)
+Caused by: java.lang.Exception: Could not close incremental caches in E:\
+work2025\App\ConnectHeart\build\video_player_android\kotlin\compileReleas
+eKotlin\cacheable\caches-jvm\jvm\kotlin: class-fq-name-to-source.tab, sou
+rce-to-classes.tab, internal-name-to-source.tab
+	at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.forEachMapSaf
+e(BasicMapsOwner.kt:95)
+	at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.close(BasicMa
+psOwner.kt:53)
+	at org.jetbrains.kotlin.com.google.common.io.Closer.close(Closer.java:20
+5)
+	... 22 more
+	Suppressed: java.lang.IllegalStateException: Storage for [E:\work2025\Ap
+p\ConnectHeart\build\video_player_android\kotlin\compileReleaseKotlin\cac
+heable\caches-jvm\jvm\kotlin\class-fq-name-to-source.tab] is already regi
+stered
+		at org.jetbrains.kotlin.com.intellij.util.io.FilePageCache.registerPage
+dFileStorage(FilePageCache.java:410)
+		at org.jetbrains.kotlin.com.intellij.util.io.PagedFileStorage.<init>(Pa
+gedFileStorage.java:72)
+		at org.jetbrains.kotlin.com.intellij.util.io.ResizeableMappedFile.<init
+>(ResizeableMappedFile.java:68)
+		at org.jetbrains.kotlin.com.intellij.util.io.PersistentBTreeEnumerator.
+<init>(PersistentBTreeEnumerator.java:128)
+		at org.jetbrains.kotlin.com.intellij.util.io.PersistentEnumerator.creat
+eDefaultEnumerator(PersistentEnumerator.java:52)
+		at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapImpl.<init>(P
+ersistentMapImpl.java:165)
+		at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapImpl.<init>(P
+ersistentMapImpl.java:140)
+		at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapBuilder.build
+Implementation(PersistentMapBuilder.java:88)
+		at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapBuilder.build
+(PersistentMapBuilder.java:71)
+		at org.jetbrains.kotlin.com.intellij.util.io.PersistentHashMap.<init>(P
+ersistentHashMap.java:46)
+		at org.jetbrains.kotlin.com.intellij.util.io.PersistentHashMap.<init>(P
+ersistentHashMap.java:72)
+		at org.jetbrains.kotlin.incremental.storage.LazyStorage.createMap(LazyS
+torage.kt:62)
+		at org.jetbrains.kotlin.incremental.storage.LazyStorage.getStorageOrCre
+ateNew(LazyStorage.kt:59)
+		at org.jetbrains.kotlin.incremental.storage.LazyStorage.set(LazyStorage
+.kt:80)
+		at org.jetbrains.kotlin.incremental.storage.InMemoryStorage.applyChange
+s(InMemoryStorage.kt:108)
+		at org.jetbrains.kotlin.incremental.storage.InMemoryStorage.close(InMem
+oryStorage.kt:136)
+		at org.jetbrains.kotlin.incremental.storage.PersistentStorageWrapper.cl
+ose(PersistentStorage.kt:124)
+		at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.invo
+ke(BasicMapsOwner.kt:53)
+		at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.invo
+ke(BasicMapsOwner.kt:53)
+		at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.forEachMapSa
+fe(BasicMapsOwner.kt:87)
+		... 24 more
+		Suppressed: java.lang.Exception: Storage[E:\work2025\App\ConnectHeart\b
+uild\video_player_android\kotlin\compileReleaseKotlin\cacheable\caches-jv
+m\jvm\kotlin\class-fq-name-to-source.tab] registration stack trace
+			at org.jetbrains.kotlin.com.intellij.util.io.FilePageCache.registerPag
+edFileStorage(FilePageCache.java:437)
+			... 43 more
+	Suppressed: java.lang.IllegalStateException: Storage for [E:\work2025\Ap
+p\ConnectHeart\build\video_player_android\kotlin\compileReleaseKotlin\cac
+heable\caches-jvm\jvm\kotlin\source-to-classes.tab] is already registered
+		at org.jetbrains.kotlin.com.intellij.util.io.FilePageCache.registerPage
+dFileStorage(FilePageCache.java:410)
+		at org.jetbrains.kotlin.com.intellij.util.io.PagedFileStorage.<init>(Pa
+gedFileStorage.java:72)
+		at org.jetbrains.kotlin.com.intellij.util.io.ResizeableMappedFile.<init
+>(ResizeableMappedFile.java:68)
+		at org.jetbrains.kotlin.com.intellij.util.io.PersistentBTreeEnumerator.
+<init>(PersistentBTreeEnumerator.java:128)
+		at org.jetbrains.kotlin.com.intellij.util.io.PersistentEnumerator.creat
+eDefaultEnumerator(PersistentEnumerator.java:52)
+		at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapImpl.<init>(P
+ersistentMapImpl.java:165)
+		at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapImpl.<init>(P
+ersistentMapImpl.java:140)
+		at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapBuilder.build
+Implementation(PersistentMapBuilder.java:88)
+		at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapBuilder.build
+(PersistentMapBuilder.java:71)
+		at org.jetbrains.kotlin.com.intellij.util.io.PersistentHashMap.<init>(P
+ersistentHashMap.java:46)
+		at org.jetbrains.kotlin.com.intellij.util.io.PersistentHashMap.<init>(P
+ersistentHashMap.java:72)
+		at org.jetbrains.kotlin.incremental.storage.LazyStorage.createMap(LazyS
+torage.kt:62)
+		at org.jetbrains.kotlin.incremental.storage.LazyStorage.getStorageOrCre
+ateNew(LazyStorage.kt:59)
+		at org.jetbrains.kotlin.incremental.storage.LazyStorage.set(LazyStorage
+.kt:80)
+		at org.jetbrains.kotlin.incremental.storage.InMemoryStorage.applyChange
+s(InMemoryStorage.kt:108)
+		at org.jetbrains.kotlin.incremental.storage.AppendableInMemoryStorage.a
+pplyChanges(InMemoryStorage.kt:179)
+		at org.jetbrains.kotlin.incremental.storage.InMemoryStorage.close(InMem
+oryStorage.kt:136)
+		at org.jetbrains.kotlin.incremental.storage.AppendableSetBasicMap.close
+(BasicMap.kt:157)
+		at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.invo
+ke(BasicMapsOwner.kt:53)
+		at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.invo
+ke(BasicMapsOwner.kt:53)
+		at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.forEachMapSa
+fe(BasicMapsOwner.kt:87)
+		... 24 more
+		Suppressed: java.lang.Exception: Storage[E:\work2025\App\ConnectHeart\b
+uild\video_player_android\kotlin\compileReleaseKotlin\cacheable\caches-jv
+m\jvm\kotlin\source-to-classes.tab] registration stack trace
+			at org.jetbrains.kotlin.com.intellij.util.io.FilePageCache.registerPag
+edFileStorage(FilePageCache.java:437)
+			... 44 more
+	Suppressed: java.lang.IllegalStateException: Storage for [E:\work2025\Ap
+p\ConnectHeart\build\video_player_android\kotlin\compileReleaseKotlin\cac
+heable\caches-jvm\jvm\kotlin\internal-name-to-source.tab] is already regi
+stered
+		at org.jetbrains.kotlin.com.intellij.util.io.FilePageCache.registerPage
+dFileStorage(FilePageCache.java:410)
+		at org.jetbrains.kotlin.com.intellij.util.io.PagedFileStorage.<init>(Pa
+gedFileStorage.java:72)
+		at org.jetbrains.kotlin.com.intellij.util.io.ResizeableMappedFile.<init
+>(ResizeableMappedFile.java:68)
+		at org.jetbrains.kotlin.com.intellij.util.io.PersistentBTreeEnumerator.
+<init>(PersistentBTreeEnumerator.java:128)
+		at org.jetbrains.kotlin.com.intellij.util.io.PersistentEnumerator.creat
+eDefaultEnumerator(PersistentEnumerator.java:52)
+		at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapImpl.<init>(P
+ersistentMapImpl.java:165)
+		at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapImpl.<init>(P
+ersistentMapImpl.java:140)
+		at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapBuilder.build
+Implementation(PersistentMapBuilder.java:88)
+		at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapBuilder.build
+(PersistentMapBuilder.java:71)
+		at org.jetbrains.kotlin.com.intellij.util.io.PersistentHashMap.<init>(P
+ersistentHashMap.java:46)
+		at org.jetbrains.kotlin.com.intellij.util.io.PersistentHashMap.<init>(P
+ersistentHashMap.java:72)
+		at org.jetbrains.kotlin.incremental.storage.LazyStorage.createMap(LazyS
+torage.kt:62)
+		at org.jetbrains.kotlin.incremental.storage.LazyStorage.getStorageOrCre
+ateNew(LazyStorage.kt:59)
+		at org.jetbrains.kotlin.incremental.storage.LazyStorage.set(LazyStorage
+.kt:80)
+		at org.jetbrains.kotlin.incremental.storage.InMemoryStorage.applyChange
+s(InMemoryStorage.kt:108)
+		at org.jetbrains.kotlin.incremental.storage.AppendableInMemoryStorage.a
+pplyChanges(InMemoryStorage.kt:179)
+		at org.jetbrains.kotlin.incremental.storage.InMemoryStorage.close(InMem
+oryStorage.kt:136)
+		at org.jetbrains.kotlin.incremental.storage.PersistentStorageWrapper.cl
+ose(PersistentStorage.kt:124)
+		at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.invo
+ke(BasicMapsOwner.kt:53)
+		at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.invo
+ke(BasicMapsOwner.kt:53)
+		at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.forEachMapSa
+fe(BasicMapsOwner.kt:87)
+		... 24 more
+		Suppressed: java.lang.Exception: Storage[E:\work2025\App\ConnectHeart\b
+uild\video_player_android\kotlin\compileReleaseKotlin\cacheable\caches-jv
+m\jvm\kotlin\internal-name-to-source.tab] registration stack trace
+			at org.jetbrains.kotlin.com.intellij.util.io.FilePageCache.registerPag
+edFileStorage(FilePageCache.java:437)
+			... 44 more
+	Suppressed: java.lang.Exception: Could not close incremental caches in E
+:\work2025\App\ConnectHeart\build\video_player_android\kotlin\compileRele
+aseKotlin\cacheable\caches-jvm\lookups: id-to-file.tab, file-to-id.tab
+		at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.forEachMapSa
+fe(BasicMapsOwner.kt:95)
+		at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.close(BasicM
+apsOwner.kt:53)
+		at org.jetbrains.kotlin.incremental.LookupStorage.close(LookupStorage.k
+t:155)
+		... 23 more
+		Suppressed: java.lang.IllegalStateException: Storage for [E:\work2025\A
+pp\ConnectHeart\build\video_player_android\kotlin\compileReleaseKotlin\ca
+cheable\caches-jvm\lookups\id-to-file.tab] is already registered
+			at org.jetbrains.kotlin.com.intellij.util.io.FilePageCache.registerPag
+edFileStorage(FilePageCache.java:410)
+			at org.jetbrains.kotlin.com.intellij.util.io.PagedFileStorage.<init>(P
+agedFileStorage.java:72)
+			at org.jetbrains.kotlin.com.intellij.util.io.ResizeableMappedFile.<ini
+t>(ResizeableMappedFile.java:68)
+			at org.jetbrains.kotlin.com.intellij.util.io.PersistentBTreeEnumerator
+.<init>(PersistentBTreeEnumerator.java:128)
+			at org.jetbrains.kotlin.com.intellij.util.io.PersistentEnumerator.crea
+teDefaultEnumerator(PersistentEnumerator.java:52)
+			at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapImpl.<init>(
+PersistentMapImpl.java:165)
+			at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapImpl.<init>(
+PersistentMapImpl.java:140)
+			at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapBuilder.buil
+dImplementation(PersistentMapBuilder.java:88)
+			at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapBuilder.buil
+d(PersistentMapBuilder.java:71)
+			at org.jetbrains.kotlin.com.intellij.util.io.PersistentHashMap.<init>(
+PersistentHashMap.java:46)
+			at org.jetbrains.kotlin.com.intellij.util.io.PersistentHashMap.<init>(
+PersistentHashMap.java:72)
+			at org.jetbrains.kotlin.incremental.storage.LazyStorage.createMap(Lazy
+Storage.kt:62)
+			at org.jetbrains.kotlin.incremental.storage.LazyStorage.getStorageOrCr
+eateNew(LazyStorage.kt:59)
+			at org.jetbrains.kotlin.incremental.storage.LazyStorage.set(LazyStorag
+e.kt:80)
+			at org.jetbrains.kotlin.incremental.storage.InMemoryStorage.applyChang
+es(InMemoryStorage.kt:108)
+			at org.jetbrains.kotlin.incremental.storage.InMemoryStorage.close(InMe
+moryStorage.kt:136)
+			at org.jetbrains.kotlin.incremental.storage.PersistentStorageWrapper.c
+lose(PersistentStorage.kt:124)
+			at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.inv
+oke(BasicMapsOwner.kt:53)
+			at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.inv
+oke(BasicMapsOwner.kt:53)
+			at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.forEachMapS
+afe(BasicMapsOwner.kt:87)
+			... 25 more
+			Suppressed: java.lang.Exception: Storage[E:\work2025\App\ConnectHeart\
+build\video_player_android\kotlin\compileReleaseKotlin\cacheable\caches-j
+vm\lookups\id-to-file.tab] registration stack trace
+				at org.jetbrains.kotlin.com.intellij.util.io.FilePageCache.registerPa
+gedFileStorage(FilePageCache.java:437)
+				... 44 more
+		Suppressed: java.lang.IllegalStateException: Storage for [E:\work2025\A
+pp\ConnectHeart\build\video_player_android\kotlin\compileReleaseKotlin\ca
+cheable\caches-jvm\lookups\file-to-id.tab] is already registered
+			at org.jetbrains.kotlin.com.intellij.util.io.FilePageCache.registerPag
+edFileStorage(FilePageCache.java:410)
+			at org.jetbrains.kotlin.com.intellij.util.io.PagedFileStorage.<init>(P
+agedFileStorage.java:72)
+			at org.jetbrains.kotlin.com.intellij.util.io.ResizeableMappedFile.<ini
+t>(ResizeableMappedFile.java:68)
+			at org.jetbrains.kotlin.com.intellij.util.io.PersistentBTreeEnumerator
+.<init>(PersistentBTreeEnumerator.java:128)
+			at org.jetbrains.kotlin.com.intellij.util.io.PersistentEnumerator.crea
+teDefaultEnumerator(PersistentEnumerator.java:52)
+			at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapImpl.<init>(
+PersistentMapImpl.java:165)
+			at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapImpl.<init>(
+PersistentMapImpl.java:140)
+			at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapBuilder.buil
+dImplementation(PersistentMapBuilder.java:88)
+Failed to compile with Kotlin daemon: java.lang.Exception
+	at org.jetbrains.kotlin.daemon.common.CompileService$CallResult$Error.get(CompileService.kt:69)
+	at org.jetbrains.kotlin.daemon.common.CompileService$CallResult$Error.get(CompileService.kt:65)
+	at org.jetbrains.kotlin.compilerRunner.GradleKotlinCompilerWork.compileWithDaemon(GradleKotlinCompilerWork.kt:240)
+	at org.jetbrains.kotlin.compilerRunner.GradleKotlinCompilerWork.compileWithDaemonOrFallbackImpl(GradleKotlinCompilerWork.kt:159)
+	at org.jetbrains.kotlin.compilerRunner.GradleKotlinCompilerWork.run(GradleKotlinCompilerWork.kt:111)
+	at org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction.execute(GradleCompilerRunnerWithWorkers.kt:74)
+	at org.gradle.workers.internal.DefaultWorkerServer.execute(DefaultWorkerServer.java:63)
+	at org.gradle.workers.internal.NoIsolationWorkerFactory$1$1.create(NoIsolationWorkerFactory.java:66)
+	at org.gradle.workers.internal.NoIsolationWorkerFactory$1$1.create(NoIsolationWorkerFactory.java:62)
+	at org.gradle.internal.classloader.ClassLoaderUtils.executeInClassloader(ClassLoaderUtils.java:100)
+	at org.gradle.workers.internal.NoIsolationWorkerFactory$1.lambda$execute$0(NoIsolationWorkerFactory.java:62)
+	at org.gradle.workers.internal.AbstractWorker$1.call(AbstractWorker.java:44)
+	at org.gradle.workers.internal.AbstractWorker$1.call(AbstractWorker.java:41)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:210)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:205)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:67)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:60)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:167)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:60)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:54)
+	at org.gradle.workers.internal.AbstractWorker.executeWrappedInBuildOperation(AbstractWorker.java:41)
+	at org.gradle.workers.internal.NoIsolationWorkerFactory$1.execute(NoIsolationWorkerFactory.java:59)
+	at org.gradle.workers.internal.DefaultWorkerExecutor.lambda$submitWork$0(DefaultWorkerExecutor.java:174)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+	at org.gradle.internal.work.DefaultConditionalExecutionQueue$ExecutionRunner.runExecution(DefaultConditionalExecutionQueue.java:194)
+	at org.gradle.internal.work.DefaultConditionalExecutionQueue$ExecutionRunner.access$700(DefaultConditionalExecutionQueue.java:127)
+	at org.gradle.internal.work.DefaultConditionalExecutionQueue$ExecutionRunner$1.run(DefaultConditionalExecutionQueue.java:169)
+	at org.gradle.internal.Factories$1.create(Factories.java:31)
+	at org.gradle.internal.work.DefaultWorkerLeaseService.withLocks(DefaultWorkerLeaseService.java:263)
+	at org.gradle.internal.work.DefaultWorkerLeaseService.runAsWorkerThread(DefaultWorkerLeaseService.java:127)
+	at org.gradle.internal.work.DefaultWorkerLeaseService.runAsWorkerThread(DefaultWorkerLeaseService.java:132)
+	at org.gradle.internal.work.DefaultConditionalExecutionQueue$ExecutionRunner.runBatch(DefaultConditionalExecutionQueue.java:164)
+	at org.gradle.internal.work.DefaultConditionalExecutionQueue$ExecutionRunner.run(DefaultConditionalExecutionQueue.java:133)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+	at org.gradle.internal.concurrent.ExecutorPolicy$CatchAndRecordFailures.onExecute(ExecutorPolicy.java:64)
+	at org.gradle.internal.concurrent.AbstractManagedExecutor$1.run(AbstractManagedExecutor.java:48)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+Caused by: java.lang.AssertionError: java.lang.Exception: Could not close incremental caches in E:\work2025\App\ConnectHeart\build\video_player_android\kotlin\compileReleaseKotlin\cacheable\caches-jvm\jvm\kotlin: class-fq-name-to-source.tab, source-to-classes.tab, internal-name-to-source.tab
+	at org.jetbrains.kotlin.com.google.common.io.Closer.close(Closer.java:218)
+	at org.jetbrains.kotlin.incremental.IncrementalCachesManager.close(IncrementalCachesManager.kt:55)
+	at kotlin.io.CloseableKt.closeFinally(Closeable.kt:46)
+	at org.jetbrains.kotlin.incremental.IncrementalCompilerRunner.compileNonIncrementally(IncrementalCompilerRunner.kt:293)
+	at org.jetbrains.kotlin.incremental.IncrementalCompilerRunner.compile(IncrementalCompilerRunner.kt:128)
+	at org.jetbrains.kotlin.daemon.CompileServiceImplBase.execIncrementalCompiler(CompileServiceImpl.kt:684)
+	at org.jetbrains.kotlin.daemon.CompileServiceImplBase.access$execIncrementalCompiler(CompileServiceImpl.kt:94)
+	at org.jetbrains.kotlin.daemon.CompileServiceImpl.compile(CompileServiceImpl.kt:1810)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(Unknown Source)
+	at java.base/java.lang.reflect.Method.invoke(Unknown Source)
+	at java.rmi/sun.rmi.server.UnicastServerRef.dispatch(Unknown Source)
+	at java.rmi/sun.rmi.transport.Transport$1.run(Unknown Source)
+	at java.rmi/sun.rmi.transport.Transport$1.run(Unknown Source)
+	at java.base/java.security.AccessController.doPrivileged(Unknown Source)
+	at java.rmi/sun.rmi.transport.Transport.serviceCall(Unknown Source)
+	at java.rmi/sun.rmi.transport.tcp.TCPTransport.handleMessages(Unknown Source)
+	at java.rmi/sun.rmi.transport.tcp.TCPTransport$ConnectionHandler.run0(Unknown Source)
+	at java.rmi/sun.rmi.transport.tcp.TCPTransport$ConnectionHandler.lambda$run$0(Unknown Source)
+	at java.base/java.security.AccessController.doPrivileged(Unknown Source)
+	at java.rmi/sun.rmi.transport.tcp.TCPTransport$ConnectionHandler.run(Unknown Source)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(Unknown Source)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(Unknown Source)
+	at java.base/java.lang.Thread.run(Unknown Source)
+Caused by: java.lang.Exception: Could not close incremental caches in E:\work2025\App\ConnectHeart\build\video_player_android\kotlin\compileReleaseKotlin\cacheable\caches-jvm\jvm\kotlin: class-fq-name-to-source.tab, source-to-classes.tab, internal-name-to-source.tab
+	at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.forEachMapSafe(BasicMapsOwner.kt:95)
+	at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.close(BasicMapsOwner.kt:53)
+	at org.jetbrains.kotlin.com.google.common.io.Closer.close(Closer.java:205)
+	... 22 more
+	Suppressed: java.lang.IllegalStateException: Storage for [E:\work2025\App\ConnectHeart\build\video_player_android\kotlin\compileReleaseKotlin\cacheable\caches-jvm\jvm\kotlin\class-fq-name-to-source.tab] is already registered
+		at org.jetbrains.kotlin.com.intellij.util.io.FilePageCache.registerPagedFileStorage(FilePageCache.java:410)
+		at org.jetbrains.kotlin.com.intellij.util.io.PagedFileStorage.<init>(PagedFileStorage.java:72)
+		at org.jetbrains.kotlin.com.intellij.util.io.ResizeableMappedFile.<init>(ResizeableMappedFile.java:68)
+		at org.jetbrains.kotlin.com.intellij.util.io.PersistentBTreeEnumerator.<init>(PersistentBTreeEnumerator.java:128)
+		at org.jetbrains.kotlin.com.intellij.util.io.PersistentEnumerator.createDefaultEnumerator(PersistentEnumerator.java:52)
+		at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapImpl.<init>(PersistentMapImpl.java:165)
+		at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapImpl.<init>(PersistentMapImpl.java:140)
+		at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapBuilder.buildImplementation(PersistentMapBuilder.java:88)
+		at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapBuilder.build(PersistentMapBuilder.java:71)
+		at org.jetbrains.kotlin.com.intellij.util.io.PersistentHashMap.<init>(PersistentHashMap.java:46)
+		at org.jetbrains.kotlin.com.intellij.util.io.PersistentHashMap.<init>(PersistentHashMap.java:72)
+		at org.jetbrains.kotlin.incremental.storage.LazyStorage.createMap(LazyStorage.kt:62)
+		at org.jetbrains.kotlin.incremental.storage.LazyStorage.getStorageOrCreateNew(LazyStorage.kt:59)
+		at org.jetbrains.kotlin.incremental.storage.LazyStorage.set(LazyStorage.kt:80)
+		at org.jetbrains.kotlin.incremental.storage.InMemoryStorage.applyChanges(InMemoryStorage.kt:108)
+		at org.jetbrains.kotlin.incremental.storage.InMemoryStorage.close(InMemoryStorage.kt:136)
+		at org.jetbrains.kotlin.incremental.storage.PersistentStorageWrapper.close(PersistentStorage.kt:124)
+		at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.invoke(BasicMapsOwner.kt:53)
+		at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.invoke(BasicMapsOwner.kt:53)
+		at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.forEachMapSafe(BasicMapsOwner.kt:87)
+		... 24 more
+		Suppressed: java.lang.Exception: Storage[E:\work2025\App\ConnectHeart\build\video_player_android\kotlin\compileReleaseKotlin\cacheable\caches-jvm\jvm\kotlin\class-fq-name-to-source.tab] registration stack trace
+			at org.jetbrains.kotlin.com.intellij.util.io.FilePageCache.registerPagedFileStorage(FilePageCache.java:437)
+			... 43 more
+	Suppressed: java.lang.IllegalStateException: Storage for [E:\work2025\App\ConnectHeart\build\video_player_android\kotlin\compileReleaseKotlin\cacheable\caches-jvm\jvm\kotlin\source-to-classes.tab] is already registered
+		at org.jetbrains.kotlin.com.intellij.util.io.FilePageCache.registerPagedFileStorage(FilePageCache.java:410)
+		at org.jetbrains.kotlin.com.intellij.util.io.PagedFileStorage.<init>(PagedFileStorage.java:72)
+		at org.jetbrains.kotlin.com.intellij.util.io.ResizeableMappedFile.<init>(ResizeableMappedFile.java:68)
+		at org.jetbrains.kotlin.com.intellij.util.io.PersistentBTreeEnumerator.<init>(PersistentBTreeEnumerator.java:128)
+		at org.jetbrains.kotlin.com.intellij.util.io.PersistentEnumerator.createDefaultEnumerator(PersistentEnumerator.java:52)
+		at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapImpl.<init>(PersistentMapImpl.java:165)
+		at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapImpl.<init>(PersistentMapImpl.java:140)
+		at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapBuilder.buildImplementation(PersistentMapBuilder.java:88)
+		at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapBuilder.build(PersistentMapBuilder.java:71)
+		at org.jetbrains.kotlin.com.intellij.util.io.PersistentHashMap.<init>(PersistentHashMap.java:46)
+		at org.jetbrains.kotlin.com.intellij.util.io.PersistentHashMap.<init>(PersistentHashMap.java:72)
+		at org.jetbrains.kotlin.incremental.storage.LazyStorage.createMap(LazyStorage.kt:62)
+		at org.jetbrains.kotlin.incremental.storage.LazyStorage.getStorageOrCreateNew(LazyStorage.kt:59)
+		at org.jetbrains.kotlin.incremental.storage.LazyStorage.set(LazyStorage.kt:80)
+		at org.jetbrains.kotlin.incremental.storage.InMemoryStorage.applyChanges(InMemoryStorage.kt:108)
+		at org.jetbrains.kotlin.incremental.storage.AppendableInMemoryStorage.applyChanges(InMemoryStorage.kt:179)
+		at org.jetbrains.kotlin.incremental.storage.InMemoryStorage.close(InMemoryStorage.kt:136)
+		at org.jetbrains.kotlin.incremental.storage.AppendableSetBasicMap.close(BasicMap.kt:157)
+		at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.invoke(BasicMapsOwner.kt:53)
+		at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.invoke(BasicMapsOwner.kt:53)
+		at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.forEachMapSafe(BasicMapsOwner.kt:87)
+		... 24 more
+		Suppressed: java.lang.Exception: Storage[E:\work2025\App\ConnectHeart\build\video_player_android\kotlin\compileReleaseKotlin\cacheable\caches-jvm\jvm\kotlin\source-to-classes.tab] registration stack trace
+			at org.jetbrains.kotlin.com.intellij.util.io.FilePageCache.registerPagedFileStorage(FilePageCache.java:437)
+			... 44 more
+	Suppressed: java.lang.IllegalStateException: Storage for [E:\work2025\App\ConnectHeart\build\video_player_android\kotlin\compileReleaseKotlin\cacheable\caches-jvm\jvm\kotlin\internal-name-to-source.tab] is already registered
+		at org.jetbrains.kotlin.com.intellij.util.io.FilePageCache.registerPagedFileStorage(FilePageCache.java:410)
+		at org.jetbrains.kotlin.com.intellij.util.io.PagedFileStorage.<init>(PagedFileStorage.java:72)
+		at org.jetbrains.kotlin.com.intellij.util.io.ResizeableMappedFile.<init>(ResizeableMappedFile.java:68)
+		at org.jetbrains.kotlin.com.intellij.util.io.PersistentBTreeEnumerator.<init>(PersistentBTreeEnumerator.java:128)
+		at org.jetbrains.kotlin.com.intellij.util.io.PersistentEnumerator.createDefaultEnumerator(PersistentEnumerator.java:52)
+		at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapImpl.<init>(PersistentMapImpl.java:165)
+		at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapImpl.<init>(PersistentMapImpl.java:140)
+		at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapBuilder.buildImplementation(PersistentMapBuilder.java:88)
+		at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapBuilder.build(PersistentMapBuilder.java:71)
+		at org.jetbrains.kotlin.com.intellij.util.io.PersistentHashMap.<init>(PersistentHashMap.java:46)
+		at org.jetbrains.kotlin.com.intellij.util.io.PersistentHashMap.<init>(PersistentHashMap.java:72)
+		at org.jetbrains.kotlin.incremental.storage.LazyStorage.createMap(LazyStorage.kt:62)
+		at org.jetbrains.kotlin.incremental.storage.LazyStorage.getStorageOrCreateNew(LazyStorage.kt:59)
+		at org.jetbrains.kotlin.incremental.storage.LazyStorage.set(LazyStorage.kt:80)
+		at org.jetbrains.kotlin.incremental.storage.InMemoryStorage.applyChanges(InMemoryStorage.kt:108)
+		at org.jetbrains.kotlin.incremental.storage.AppendableInMemoryStorage.applyChanges(InMemoryStorage.kt:179)
+		at org.jetbrains.kotlin.incremental.storage.InMemoryStorage.close(InMemoryStorage.kt:136)
+		at org.jetbrains.kotlin.incremental.storage.PersistentStorageWrapper.close(PersistentStorage.kt:124)
+		at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.invoke(BasicMapsOwner.kt:53)
+		at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.invoke(BasicMapsOwner.kt:53)
+		at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.forEachMapSafe(BasicMapsOwner.kt:87)
+		... 24 more
+		Suppressed: java.lang.Exception: Storage[E:\work2025\App\ConnectHeart\build\video_player_android\kotlin\compileReleaseKotlin\cacheable\caches-jvm\jvm\kotlin\internal-name-to-source.tab] registration stack trace
+			at org.jetbrains.kotlin.com.intellij.util.io.FilePageCache.registerPagedFileStorage(FilePageCache.java:437)
+			... 44 more
+	Suppressed: java.lang.Exception: Could not close incremental caches in E:\work2025\App\ConnectHeart\build\video_player_android\kotlin\compileReleaseKotlin\cacheable\caches-jvm\lookups: id-to-file.tab, file-to-id.tab
+		at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.forEachMapSafe(BasicMapsOwner.kt:95)
+		at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.close(BasicMapsOwner.kt:53)
+		at org.jetbrains.kotlin.incremental.LookupStorage.close(LookupStorage.kt:155)
+		... 23 more
+		Suppressed: java.lang.IllegalStateException: Storage for [E:\work2025\App\ConnectHeart\build\video_player_android\kotlin\compileReleaseKotlin\cacheable\caches-jvm\lookups\id-to-file.tab] is already registered
+			at org.jetbrains.kotlin.com.intellij.util.io.FilePageCache.registerPagedFileStorage(FilePageCache.java:410)
+			at org.jetbrains.kotlin.com.intellij.util.io.PagedFileStorage.<init>(PagedFileStorage.java:72)
+			at org.jetbrains.kotlin.com.intellij.util.io.ResizeableMappedFile.<init>(ResizeableMappedFile.java:68)
+			at org.jetbrains.kotlin.com.intellij.util.io.PersistentBTreeEnumerator.<init>(PersistentBTreeEnumerator.java:128)
+			at org.jetbrains.kotlin.com.intellij.util.io.PersistentEnumerator.createDefaultEnumerator(PersistentEnumerator.java:52)
+			at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapImpl.<init>(PersistentMapImpl.java:165)
+			at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapImpl.<init>(PersistentMapImpl.java:140)
+			at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapBuilder.buildImplementation(PersistentMapBuilder.java:88)
+			at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapBuilder.build(PersistentMapBuilder.java:71)
+			at org.jetbrains.kotlin.com.intellij.util.io.PersistentHashMap.<init>(PersistentHashMap.java:46)
+			at org.jetbrains.kotlin.com.intellij.util.io.PersistentHashMap.<init>(PersistentHashMap.java:72)
+			at org.jetbrains.kotlin.incremental.storage.LazyStorage.createMap(LazyStorage.kt:62)
+			at org.jetbrains.kotlin.incremental.storage.LazyStorage.getStorageOrCreateNew(LazyStorage.kt:59)
+			at org.jetbrains.kotlin.incremental.storage.LazyStorage.set(LazyStorage.kt:80)
+			at org.jetbrains.kotlin.incremental.storage.InMemoryStorage.applyChanges(InMemoryStorage.kt:108)
+			at org.jetbrains.kotlin.incremental.storage.InMemoryStorage.close(InMemoryStorage.kt:136)
+			at org.jetbrains.kotlin.incremental.storage.PersistentStorageWrapper.close(PersistentStorage.kt:124)
+			at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.invoke(BasicMapsOwner.kt:53)
+			at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.invoke(BasicMapsOwner.kt:53)
+			at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.forEachMapSafe(BasicMapsOwner.kt:87)
+			... 25 more
+			Suppressed: java.lang.Exception: Storage[E:\work2025\App\ConnectHeart\build\video_player_android\kotlin\compileReleaseKotlin\cacheable\caches-jvm\lookups\id-to-file.tab] registration stack trace
+				at org.jetbrains.kotlin.com.intellij.util.io.FilePageCache.registerPagedFileStorage(FilePageCache.java:437)
+				... 44 more
+		Suppressed: java.lang.IllegalStateException: Storage for [E:\work2025\App\ConnectHeart\build\video_player_android\kotlin\compileReleaseKotlin\cacheable\caches-jvm\lookups\file-to-id.tab] is already registered
+			at org.jetbrains.kotlin.com.intellij.util.io.FilePageCache.registerPagedFileStorage(FilePageCache.java:410)
+			at org.jetbrains.kotlin.com.intellij.util.io.PagedFileStorage.<init>(PagedFileStorage.java:72)
+			at org.jetbrains.kotlin.com.intellij.util.io.ResizeableMappedFile.<init>(ResizeableMappedFile.java:68)
+			at org.jetbrains.kotlin.com.intellij.util.io.PersistentBTreeEnumerator.<init>(PersistentBTreeEnumerator.java:128)
+			at org.jetbrains.kotlin.com.intellij.util.io.PersistentEnumerator.createDefaultEnumerator(PersistentEnumerator.java:52)
+			at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapImpl.<init>(PersistentMapImpl.java:165)
+			at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapImpl.<init>(PersistentMapImpl.java:140)
+			at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapBuilder.buildImplementation(PersistentMapBuilder.java:88)
+			at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapBuilder.build(PersistentMapBuilder.java:71)
+			at org.jetbrains.kotlin.com.intellij.util.io.PersistentHashMap.<init>(PersistentHashMap.java:46)
+			at org.jetbrains.kotlin.com.intellij.util.io.PersistentHashMap.<init>(PersistentHashMap.java:72)
+			at org.jetbrains.kotlin.incremental.storage.LazyStorage.createMap(LazyStorage.kt:62)
+			at org.jetbrains.kotlin.incremental.storage.LazyStorage.getStorageOrCreateNew(LazyStorage.kt:59)
+			at org.jetbrains.kotlin.incremental.storage.LazyStorage.set(LazyStorage.kt:80)
+			at org.jetbrains.kotlin.incremental.storage.InMemoryStorage.applyChanges(InMemoryStorage.kt:108)
+			at org.jetbrains.kotlin.incremental.storage.InMemoryStorage.close(InMemoryStorage.kt:136)
+			at org.jetbrains.kotlin.incremental.storage.PersistentStorageWrapper.close(PersistentStorage.kt:124)
+			at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.invoke(BasicMapsOwner.kt:53)
+			at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.invoke(BasicMapsOwner.kt:53)
+			at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.forEachMapSafe(BasicMapsOwner.kt:87)
+			... 25 more
+			Suppressed: java.lang.Exception: Storage[E:\work2025\App\ConnectHeart\build\video_player_android\kotlin\compileReleaseKotlin\cacheable\caches-jvm\lookups\file-to-id.tab] registration stack trace
+				at org.jetbrains.kotlin.com.intellij.util.io.FilePageCache.registerPagedFileStorage(FilePageCache.java:437)
+				... 44 more
+	Suppressed: java.lang.Exception: Could not close incremental caches in E:\work2025\App\ConnectHeart\build\video_player_android\kotlin\compileReleaseKotlin\cacheable\caches-jvm\inputs: source-to-output.tab
+		... 25 more
+		Suppressed: java.lang.IllegalStateException: Storage for [E:\work2025\App\ConnectHeart\build\video_player_android\kotlin\compileReleaseKotlin\cacheable\caches-jvm\inputs\source-to-output.tab] is already registered
+			at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapBuilder.buil
+d(PersistentMapBuilder.java:71)
+			at org.jetbrains.kotlin.com.intellij.util.io.PersistentHashMap.<init>(
+PersistentHashMap.java:46)
+			at org.jetbrains.kotlin.com.intellij.util.io.PersistentHashMap.<init>(
+PersistentHashMap.java:72)
+			at org.jetbrains.kotlin.incremental.storage.LazyStorage.createMap(Lazy
+Storage.kt:62)
+			at org.jetbrains.kotlin.incremental.storage.LazyStorage.getStorageOrCr
+eateNew(LazyStorage.kt:59)
+			at org.jetbrains.kotlin.incremental.storage.LazyStorage.set(LazyStorag
+e.kt:80)
+			at org.jetbrains.kotlin.incremental.storage.InMemoryStorage.applyChang
+es(InMemoryStorage.kt:108)
+			at org.jetbrains.kotlin.incremental.storage.InMemoryStorage.close(InMe
+moryStorage.kt:136)
+			at org.jetbrains.kotlin.incremental.storage.PersistentStorageWrapper.c
+lose(PersistentStorage.kt:124)
+			at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.inv
+oke(BasicMapsOwner.kt:53)
+			at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.inv
+oke(BasicMapsOwner.kt:53)
+			at org.jetbrains.kotlin.com.intellij.util.io.FilePageCache.registerPagedFileStorage(FilePageCache.java:410)
+			at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.forEachMapS
+afe(BasicMapsOwner.kt:87)
+			... 25 more
+			Suppressed: java.lang.Exception: Storage[E:\work2025\App\ConnectHeart\
+build\video_player_android\kotlin\compileReleaseKotlin\cacheable\caches-j
+vm\lookups\file-to-id.tab] registration stack trace
+				at org.jetbrains.kotlin.com.intellij.util.io.FilePageCache.registerPa
+gedFileStorage(FilePageCache.java:437)
+				... 44 more
+	Suppressed: java.lang.Exception: Could not close incremental caches in E
+:\work2025\App\ConnectHeart\build\video_player_android\kotlin\compileRele
+aseKotlin\cacheable\caches-jvm\inputs: source-to-output.tab
+		... 25 more
+		Suppressed: java.lang.IllegalStateException: Storage for [E:\work2025\A
+pp\ConnectHeart\build\video_player_android\kotlin\compileReleaseKotlin\ca
+cheable\caches-jvm\inputs\source-to-output.tab] is already registered
+			at org.jetbrains.kotlin.com.intellij.util.io.FilePageCache.registerPag
+edFileStorage(FilePageCache.java:410)
+			at org.jetbrains.kotlin.com.intellij.util.io.PagedFileStorage.<init>(P
+agedFileStorage.java:72)
+			at org.jetbrains.kotlin.com.intellij.util.io.ResizeableMappedFile.<ini
+t>(ResizeableMappedFile.java:68)
+			at org.jetbrains.kotlin.com.intellij.util.io.PersistentBTreeEnumerator
+.<init>(PersistentBTreeEnumerator.java:128)
+			at org.jetbrains.kotlin.com.intellij.util.io.PersistentEnumerator.crea
+teDefaultEnumerator(PersistentEnumerator.java:52)
+			at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapImpl.<init>(
+PersistentMapImpl.java:165)
+			at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapImpl.<init>(
+PersistentMapImpl.java:140)
+			at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapBuilder.buil
+dImplementation(PersistentMapBuilder.java:88)
+			at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapBuilder.buil
+d(PersistentMapBuilder.java:71)
+			at org.jetbrains.kotlin.com.intellij.util.io.PersistentHashMap.<init>(
+PersistentHashMap.java:46)
+			at org.jetbrains.kotlin.com.intellij.util.io.PersistentHashMap.<init>(
+PersistentHashMap.java:72)
+			at org.jetbrains.kotlin.incremental.storage.LazyStorage.createMap(Lazy
+Storage.kt:62)
+			at org.jetbrains.kotlin.incremental.storage.LazyStorage.getStorageOrCr
+eateNew(LazyStorage.kt:59)
+			at org.jetbrains.kotlin.incremental.storage.LazyStorage.set(LazyStorag
+e.kt:80)
+			at org.jetbrains.kotlin.incremental.storage.InMemoryStorage.applyChang
+es(InMemoryStorage.kt:108)
+			at org.jetbrains.kotlin.incremental.storage.AppendableInMemoryStorage.
+applyChanges(InMemoryStorage.kt:179)
+			at org.jetbrains.kotlin.incremental.storage.InMemoryStorage.close(InMe
+moryStorage.kt:136)
+			at org.jetbrains.kotlin.incremental.storage.AppendableSetBasicMap.clos
+e(BasicMap.kt:157)
+			at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.inv
+oke(BasicMapsOwner.kt:53)
+			at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.inv
+oke(BasicMapsOwner.kt:53)
+			at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.forEachMapS
+afe(BasicMapsOwner.kt:87)
+			... 24 more
+			Suppressed: java.lang.Exception: Storage[E:\work2025\App\ConnectHeart\
+build\video_player_android\kotlin\compileReleaseKotlin\cacheable\caches-j
+vm\inputs\source-to-output.tab] registration stack trace
+				at org.jetbrains.kotlin.com.intellij.util.io.FilePageCache.registerPa
+gedFileStorage(FilePageCache.java:437)
+				... 44 more
+
+			at org.jetbrains.kotlin.com.intellij.util.io.PagedFileStorage.<init>(PagedFileStorage.java:72)
+			at org.jetbrains.kotlin.com.intellij.util.io.ResizeableMappedFile.<init>(ResizeableMappedFile.java:68)
+			at org.jetbrains.kotlin.com.intellij.util.io.PersistentBTreeEnumerator.<init>(PersistentBTreeEnumerator.java:128)
+			at org.jetbrains.kotlin.com.intellij.util.io.PersistentEnumerator.createDefaultEnumerator(PersistentEnumerator.java:52)
+			at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapImpl.<init>(PersistentMapImpl.java:165)
+			at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapImpl.<init>(PersistentMapImpl.java:140)
+			at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapBuilder.buildImplementation(PersistentMapBuilder.java:88)
+			at org.jetbrains.kotlin.com.intellij.util.io.PersistentMapBuilder.build(PersistentMapBuilder.java:71)
+			at org.jetbrains.kotlin.com.intellij.util.io.PersistentHashMap.<init>(PersistentHashMap.java:46)
+			at org.jetbrains.kotlin.com.intellij.util.io.PersistentHashMap.<init>(PersistentHashMap.java:72)
+			at org.jetbrains.kotlin.incremental.storage.LazyStorage.createMap(LazyStorage.kt:62)
+			at org.jetbrains.kotlin.incremental.storage.LazyStorage.getStorageOrCreateNew(LazyStorage.kt:59)
+			at org.jetbrains.kotlin.incremental.storage.LazyStorage.set(LazyStorage.kt:80)
+			at org.jetbrains.kotlin.incremental.storage.InMemoryStorage.applyChanges(InMemoryStorage.kt:108)
+			at org.jetbrains.kotlin.incremental.storage.AppendableInMemoryStorage.applyChanges(InMemoryStorage.kt:179)
+			at org.jetbrains.kotlin.incremental.storage.InMemoryStorage.close(InMemoryStorage.kt:136)
+			at org.jetbrains.kotlin.incremental.storage.AppendableSetBasicMap.close(BasicMap.kt:157)
+			at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.invoke(BasicMapsOwner.kt:53)
+			at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.invoke(BasicMapsOwner.kt:53)
+			at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.forEachMapSafe(BasicMapsOwner.kt:87)
+			... 24 more
+			Suppressed: java.lang.Exception: Storage[E:\work2025\App\ConnectHeart\build\video_player_android\kotlin\compileReleaseKotlin\cacheable\caches-jvm\inputs\source-to-output.tab] registration stack trace
+				at org.jetbrains.kotlin.com.intellij.util.io.FilePageCache.registerPagedFileStorage(FilePageCache.java:437)
+				... 44 more
+Using fallback strategy: Compile without Kotlin daemon
+Try ./gradlew --stop if this issue persists
+If it does not look related to your configuration, please file an issue with logs to https://kotl.in/issue
+
+> Task :share_plus:compileReleaseJavaWithJavac NO-SOURCE
+> Task :share_plus:bundleLibCompileToJarRelease UP-TO-DATE
 
 > Task :workmanager_android:compileReleaseKotlin
 e: Daemon compilation failed: null
@@ -5692,19 +5695,6 @@ lose(PersistentStorage.kt:124)
 oke(BasicMapsOwner.kt:53)
 			at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.inv
 oke(BasicMapsOwner.kt:53)
-Failed to compile with Kotlin daemon: java.lang.Exception
-	at org.jetbrains.kotlin.daemon.common.CompileService$CallResult$Error.get(CompileService.kt:69)
-	at org.jetbrains.kotlin.daemon.common.CompileService$CallResult$Error.get(CompileService.kt:65)
-	at org.jetbrains.kotlin.compilerRunner.GradleKotlinCompilerWork.compileWithDaemon(GradleKotlinCompilerWork.kt:240)
-	at org.jetbrains.kotlin.compilerRunner.GradleKotlinCompilerWork.compileWithDaemonOrFallbackImpl(GradleKotlinCompilerWork.kt:159)
-	at org.jetbrains.kotlin.compilerRunner.GradleKotlinCompilerWork.run(GradleKotlinCompilerWork.kt:111)
-	at org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction.execute(GradleCompilerRunnerWithWorkers.kt:74)
-	at org.gradle.workers.internal.DefaultWorkerServer.execute(DefaultWorkerServer.java:63)
-	at org.gradle.workers.internal.NoIsolationWorkerFactory$1$1.create(NoIsolationWorkerFactory.java:66)
-	at org.gradle.workers.internal.NoIsolationWorkerFactory$1$1.create(NoIsolationWorkerFactory.java:62)
-	at org.gradle.internal.classloader.ClassLoaderUtils.executeInClassloader(ClassLoaderUtils.java:100)
-	at org.gradle.workers.internal.NoIsolationWorkerFactory$1.lambda$execute$0(NoIsolationWorkerFactory.java:62)
-	at org.gradle.workers.internal.AbstractWorker$1.call(AbstractWorker.java:44)
 			at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.forEachMapS
 afe(BasicMapsOwner.kt:87)
 			... 25 more
@@ -5771,6 +5761,19 @@ m\inputs\source-to-output.tab] registration stack trace
 gedFileStorage(FilePageCache.java:437)
 				... 44 more
 
+Failed to compile with Kotlin daemon: java.lang.Exception
+	at org.jetbrains.kotlin.daemon.common.CompileService$CallResult$Error.get(CompileService.kt:69)
+	at org.jetbrains.kotlin.daemon.common.CompileService$CallResult$Error.get(CompileService.kt:65)
+	at org.jetbrains.kotlin.compilerRunner.GradleKotlinCompilerWork.compileWithDaemon(GradleKotlinCompilerWork.kt:240)
+	at org.jetbrains.kotlin.compilerRunner.GradleKotlinCompilerWork.compileWithDaemonOrFallbackImpl(GradleKotlinCompilerWork.kt:159)
+	at org.jetbrains.kotlin.compilerRunner.GradleKotlinCompilerWork.run(GradleKotlinCompilerWork.kt:111)
+	at org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction.execute(GradleCompilerRunnerWithWorkers.kt:74)
+	at org.gradle.workers.internal.DefaultWorkerServer.execute(DefaultWorkerServer.java:63)
+	at org.gradle.workers.internal.NoIsolationWorkerFactory$1$1.create(NoIsolationWorkerFactory.java:66)
+	at org.gradle.workers.internal.NoIsolationWorkerFactory$1$1.create(NoIsolationWorkerFactory.java:62)
+	at org.gradle.internal.classloader.ClassLoaderUtils.executeInClassloader(ClassLoaderUtils.java:100)
+	at org.gradle.workers.internal.NoIsolationWorkerFactory$1.lambda$execute$0(NoIsolationWorkerFactory.java:62)
+	at org.gradle.workers.internal.AbstractWorker$1.call(AbstractWorker.java:44)
 	at org.gradle.workers.internal.AbstractWorker$1.call(AbstractWorker.java:41)
 	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:210)
 	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:205)
@@ -5991,9 +5994,6 @@ Caused by: java.lang.Exception: Could not close incremental caches in E:\work202
 Using fallback strategy: Compile without Kotlin daemon
 Try ./gradlew --stop if this issue persists
 If it does not look related to your configuration, please file an issue with logs to https://kotl.in/issue
-
-> Task :share_plus:compileReleaseJavaWithJavac NO-SOURCE
-> Task :share_plus:bundleLibCompileToJarRelease UP-TO-DATE
 
 > Task :flutter_contacts:compileReleaseKotlin
 exception: c:\Users\ham03_4mb3gaz\AppData\Local\Pub\Cache\hosted\pub.dev\
@@ -6327,13 +6327,13 @@ String>'.
 exception:             m["mimetypes"] as List<String>
 exception:                            ^^^^^^^^^^^^^^^
 
-> Task :quill_native_bridge_android:compileReleaseJavaWithJavac NO-SOURCE
-> Task :quill_native_bridge_android:bundleLibCompileToJarRelease UP-TO-DATE
 > Task :flutter_contacts:compileReleaseJavaWithJavac NO-SOURCE
 > Task :flutter_contacts:bundleLibCompileToJarRelease UP-TO-DATE
-> Task :video_player_android:compileReleaseJavaWithJavac
+> Task :quill_native_bridge_android:compileReleaseJavaWithJavac NO-SOURCE
+> Task :quill_native_bridge_android:bundleLibCompileToJarRelease UP-TO-DATE
 > Task :shared_preferences_android:compileReleaseJavaWithJavac
 > Task :shared_preferences_android:bundleLibCompileToJarRelease
+> Task :video_player_android:compileReleaseJavaWithJavac
 > Task :video_player_android:bundleLibCompileToJarRelease
 > Task :workmanager_android:compileReleaseJavaWithJavac NO-SOURCE
 > Task :workmanager_android:bundleLibCompileToJarRelease UP-TO-DATE
@@ -6342,16 +6342,76 @@ exception:                            ^^^^^^^^^^^^^^^
 
 > Task :app:compileReleaseKotlin FAILED
 e: file:///E:/work2025/App/ConnectHeart/android/app/src/main/kotlin/net/m
-pray/heart_connect/MainActivity.kt:29:37 Overload resolution ambiguity be
-tween candidates:
-fun getDeviceOwnerName(): String?
-fun getDeviceOwnerName(): String?
+pray/heart_connect/MainActivity.kt:29:37 Unresolved reference 'getDeviceO
+wnerName'.
 e: file:///E:/work2025/App/ConnectHeart/android/app/src/main/kotlin/net/m
-pray/heart_connect/MainActivity.kt:162:13 Conflicting overloads:
-fun getDeviceOwnerName(): String?
+pray/heart_connect/MainActivity.kt:42:39 Unresolved reference 'checkAiCor
+eAvailability'.
 e: file:///E:/work2025/App/ConnectHeart/android/app/src/main/kotlin/net/m
-pray/heart_connect/MainActivity.kt:424:13 Conflicting overloads:
-fun getDeviceOwnerName(): String?
+pray/heart_connect/MainActivity.kt:48:25 Unresolved reference 'refineWith
+GeminiNano'.
+e: file:///E:/work2025/App/ConnectHeart/android/app/src/main/kotlin/net/m
+pray/heart_connect/MainActivity.kt:48:57 Cannot infer type for value para
+meter 'refinedText'. Specify it explicitly.
+e: file:///E:/work2025/App/ConnectHeart/android/app/src/main/kotlin/net/m
+pray/heart_connect/MainActivity.kt:48:70 Cannot infer type for value para
+meter 'error'. Specify it explicitly.
+e: file:///E:/work2025/App/ConnectHeart/android/app/src/main/kotlin/net/m
+pray/heart_connect/MainActivity.kt:50:58 Argument type mismatch: actual t
+ype is 'Any', but 'String?' was expected.
+e: file:///E:/work2025/App/ConnectHeart/android/app/src/main/kotlin/net/m
+pray/heart_connect/MainActivity.kt:73:38 Unresolved reference 'getCalenda
+rEvents'.
+e: file:///E:/work2025/App/ConnectHeart/android/app/src/main/kotlin/net/m
+pray/heart_connect/MainActivity.kt:80:36 Unresolved reference 'isAppInsta
+lled'.
+e: file:///E:/work2025/App/ConnectHeart/android/app/src/main/kotlin/net/m
+pray/heart_connect/MainActivity.kt:98:36 Unresolved reference 'checkNaver
+CalendarInSystem'.
+e: file:///E:/work2025/App/ConnectHeart/android/app/src/main/kotlin/net/m
+pray/heart_connect/MainActivity.kt:116:29 Unresolved reference 'sendSmsNa
+tive'.
+e: file:///E:/work2025/App/ConnectHeart/android/app/src/main/kotlin/net/m
+pray/heart_connect/MainActivity.kt:142:43 Unresolved reference 'sendMmsIn
+tent'.
+e: file:///E:/work2025/App/ConnectHeart/android/app/src/main/kotlin/net/m
+pray/heart_connect/MainActivity.kt:161:5 Modifier 'private' is not applic
+able to 'local function'.
+e: file:///E:/work2025/App/ConnectHeart/android/app/src/main/kotlin/net/m
+pray/heart_connect/MainActivity.kt:178:52 Unresolved reference 'getDefaul
+tSmsPackage'.
+e: file:///E:/work2025/App/ConnectHeart/android/app/src/main/kotlin/net/m
+pray/heart_connect/MainActivity.kt:181:33 Unresolved reference 'getDefaul
+tSmsPackage'.
+e: file:///E:/work2025/App/ConnectHeart/android/app/src/main/kotlin/net/m
+pray/heart_connect/MainActivity.kt:199:32 Argument type mismatch: actual 
+type is 'Any', but 'String?' was expected.
+e: file:///E:/work2025/App/ConnectHeart/android/app/src/main/kotlin/net/m
+pray/heart_connect/MainActivity.kt:243:5 Modifier 'private' is not applic
+able to 'local function'.
+e: file:///E:/work2025/App/ConnectHeart/android/app/src/main/kotlin/net/m
+pray/heart_connect/MainActivity.kt:254:5 Modifier 'private' is not applic
+able to 'local function'.
+e: file:///E:/work2025/App/ConnectHeart/android/app/src/main/kotlin/net/m
+pray/heart_connect/MainActivity.kt:271:5 Modifier 'private' is not applic
+able to 'local function'.
+e: file:///E:/work2025/App/ConnectHeart/android/app/src/main/kotlin/net/m
+pray/heart_connect/MainActivity.kt:341:5 Modifier 'private' is not applic
+able to 'local function'.
+e: file:///E:/work2025/App/ConnectHeart/android/app/src/main/kotlin/net/m
+pray/heart_connect/MainActivity.kt:350:5 Modifier 'private' is not applic
+able to 'local function'.
+e: file:///E:/work2025/App/ConnectHeart/android/app/src/main/kotlin/net/m
+pray/heart_connect/MainActivity.kt:380:5 Modifier 'private' is not applic
+able to 'local function'.
+e: file:///E:/work2025/App/ConnectHeart/android/app/src/main/kotlin/net/m
+pray/heart_connect/MainActivity.kt:384:5 Modifier 'private' is not applic
+able to 'local function'.
+e: file:///E:/work2025/App/ConnectHeart/android/app/src/main/kotlin/net/m
+pray/heart_connect/MainActivity.kt:394:5 Modifier 'private' is not applic
+able to 'local function'.
+e: file:///E:/work2025/App/ConnectHeart/android/app/src/main/kotlin/net/m
+pray/heart_connect/MainActivity.kt:486:2 Syntax error: Missing '}.
 
 [Incubating] Problems report is available at: file:///E:/work2025/App/ConnectHeart/build/reports/problems/problems-report.html
 
@@ -6373,7 +6433,7 @@ Deprecated Gradle features were used in this build, making it incompatible with 
 
 You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
 
-For more on this, please refer to https://docs.gradle.org/8.14/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 
-BUILD FAILED in 1m 4s
+BUILD FAILED in 1m 6s
+For more on this, please refer to https://docs.gradle.org/8.14/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
 288 actionable tasks: 41 executed, 247 up-to-date

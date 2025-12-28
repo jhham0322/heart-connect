@@ -27,6 +27,10 @@
     <!-- Required for getting device owner name (Google account) -->
     <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
     
+    <!-- Required for getting owner name from Bluetooth device name -->
+    <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"/>
+    
     <application
         android:label="마음이음"
         android:name="${applicationName}"
@@ -37,6 +41,7 @@
             android:launchMode="singleTop"
             android:taskAffinity=""
             android:theme="@style/LaunchTheme"
+            android:screenOrientation="portrait"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true"
             android:windowSoftInputMode="adjustResize">
