@@ -19,6 +19,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:heart_connect/src/utils/app_version.dart';
 import 'package:heart_connect/src/l10n/app_strings.dart';
 import 'package:heart_connect/src/providers/locale_provider.dart';
+import 'package:heart_connect/src/providers/theme_provider.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -1061,6 +1062,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     onChanged: (v) {
                       setState(() => _brandingEnabled = v);
                       _saveSettings();
+                    },
+                  ),
+                ),
+                const SizedBox(height: 16),
+                // 다크 모드 토글
+                _buildSettingCard(
+                  iconBg: const Color(0xFF90CAF9),
+                  icon: Icons.dark_mode_outlined,
+                  title: strings.settingsDarkMode,
+                  desc: strings.settingsDarkModeDesc,
+                  descIcon: FontAwesomeIcons.moon,
+                  action: Switch(
+                    value: ref.watch(themeProvider) == ThemeMode.dark,
+                    activeThumbColor: const Color(0xFF5C6BC0),
+                    onChanged: (v) async {
+                      await ref.read(themeProvider.notifier).setTheme(
+                        v ? ThemeMode.dark : ThemeMode.light
+                      );
                     },
                   ),
                 ),

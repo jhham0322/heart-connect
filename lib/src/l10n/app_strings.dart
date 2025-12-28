@@ -309,6 +309,8 @@ class AppStrings {
   String get settingsTest => _fallback(_l10n?.settingsTest, '테스트');
   String get settingsGoogleCalendar => _fallback(_l10n?.settingsGoogleCalendar, 'Google 캘린더');
   String get settingsSamsungCalendar => _fallback(_l10n?.settingsSamsungCalendar, 'Samsung 캘린더');
+  String get settingsDarkMode => _fallback(_l10n?.settingsDarkMode, '다크 모드');
+  String get settingsDarkModeDesc => _fallback(_l10n?.settingsDarkModeDesc, '어두운 테마 사용');
   
   // ========== 스플래시/로딩 ==========
   String get splashPreparing => _fallback(_l10n?.splashPreparing, '준비 중...');

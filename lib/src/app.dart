@@ -8,6 +8,7 @@ import 'theme/app_theme.dart';
 import 'package:heart_connect/src/features/alarm/notification_service.dart';
 import 'package:heart_connect/src/features/splash/splash_screen.dart';
 import 'package:heart_connect/src/providers/locale_provider.dart';
+import 'package:heart_connect/src/providers/theme_provider.dart';
 
 import 'dart:ui';
 
@@ -43,12 +44,16 @@ class _MyAppState extends ConsumerState<MyApp> {
   Widget build(BuildContext context) {
     final goRouter = ref.watch(goRouterProvider);
     final locale = ref.watch(localeProvider);
+    final themeMode = ref.watch(themeProvider);
     
     return MaterialApp.router(
       routerConfig: goRouter,
       title: 'Heart Connect',
       debugShowCheckedModeBanner: false,
+      // 테마 모드에 따라 라이트/다크 테마 적용
       theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: themeMode,
       locale: locale,
       localizationsDelegates: const [
         AppLocalizations.delegate,
