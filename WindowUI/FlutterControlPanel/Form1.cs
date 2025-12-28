@@ -330,23 +330,37 @@ namespace FlutterControlPanel
             controlPanel.Controls.Add(btnCopyLog);
             toolTip.SetToolTip(btnCopyLog, "로그 클립보드 복사");
 
-            // Build Android Button
+            // Build Android APK Button
             btnBuildAndroid = new Button();
-            btnBuildAndroid.Text = "📱 Build";
-            btnBuildAndroid.Size = new Size(80, 40);
-            btnBuildAndroid.Location = new Point(this.ClientSize.Width - 250, 10);
+            btnBuildAndroid.Text = "📱 APK";
+            btnBuildAndroid.Size = new Size(70, 40);
+            btnBuildAndroid.Location = new Point(this.ClientSize.Width - 330, 10);
             btnBuildAndroid.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             btnBuildAndroid.BackColor = Color.FromArgb(129, 199, 132);
             btnBuildAndroid.FlatStyle = FlatStyle.Flat;
             btnBuildAndroid.Click += BtnBuildAndroid_Click;
             controlPanel.Controls.Add(btnBuildAndroid);
-            toolTip.SetToolTip(btnBuildAndroid, "Android APK 빌드 (Release)");
+            toolTip.SetToolTip(btnBuildAndroid, "Android APK 빌드 (Release) - 테스트용");
+
+            // Build AAB (App Bundle for Play Store) Button
+            Button btnBuildAAB = new Button();
+            btnBuildAAB.Text = "📦 AAB";
+            btnBuildAAB.Size = new Size(70, 40);
+            btnBuildAAB.Location = new Point(this.ClientSize.Width - 255, 10);
+            btnBuildAAB.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnBuildAAB.BackColor = Color.FromArgb(186, 104, 200); // Purple for Store
+            btnBuildAAB.ForeColor = Color.White;
+            btnBuildAAB.FlatStyle = FlatStyle.Flat;
+            btnBuildAAB.Font = new Font("Segoe UI", 9, FontStyle.Bold);
+            btnBuildAAB.Click += BtnBuildAAB_Click;
+            controlPanel.Controls.Add(btnBuildAAB);
+            toolTip.SetToolTip(btnBuildAAB, "Android App Bundle 빌드 (Google Play 스토어용)");
 
             // Build & Test Button (Build + Install + Run)
             Button btnBuildTest = new Button();
             btnBuildTest.Text = "🚀 Build && Test";
             btnBuildTest.Size = new Size(110, 40);
-            btnBuildTest.Location = new Point(this.ClientSize.Width - 190, 10);
+            btnBuildTest.Location = new Point(this.ClientSize.Width - 180, 10);
             btnBuildTest.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             btnBuildTest.BackColor = Color.FromArgb(79, 195, 247);
             btnBuildTest.ForeColor = Color.White;
@@ -586,6 +600,40 @@ namespace FlutterControlPanel
             StartProcess("cmd", "/c flutter clean && flutter build apk --release");
         }
 
+        private void BtnBuildAAB_Click(object sender, EventArgs e)
+        {
+            if (cmdProcess != null && !cmdProcess.HasExited)
+            {
+                MessageBox.Show("Please stop the running process first.");
+                return;
+            }
+
+            outputBox.Clear();
+            Log("=== AAB (App Bundle) 빌드 시작 ===");
+            Log("Google Play 스토어 업로드용 AAB 파일을 생성합니다...\n");
+
+            // AAB 빌드 명령 실행
+            string aabBuildCmd = "flutter build appbundle --release";
+            
+            // 빌드 완료 후 폴더 열기 위해 체인 명령 사용
+            string fullCmd = $"{aabBuildCmd} && echo. && echo ===================================== && echo AAB 빌드 완료! && echo 파일 위치: build\\app\\outputs\\bundle\\release\\app-release.aab && echo =====================================";
+            
+            StartProcess("cmd", "/c " + fullCmd);
+        }
+
+        private void BtnOpenAABFolder_Click(object sender, EventArgs e)
+        {
+            string aabFolder = Path.Combine(projectRoot, "build", "app", "outputs", "bundle", "release");
+            if (Directory.Exists(aabFolder))
+            {
+                Process.Start("explorer.exe", aabFolder);
+            }
+            else
+            {
+                MessageBox.Show("AAB 폴더가 없습니다. 먼저 AAB 빌드를 실행해주세요.", "폴더 없음", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
         private void StartProcess(string fileName, string arguments)
         {
             if (!Directory.Exists(projectRoot))
@@ -788,7 +836,8 @@ namespace FlutterControlPanel
 📋 Copy - 로그 클립보드 복사
 
 [Android 빌드 & 테스트]
-📱 Build - Android APK 빌드 (Release)
+📱 APK - Android APK 빌드 (테스트용)
+📦 AAB - Google Play 스토어용 App Bundle 빌드 ⭐NEW
 🚀 Build & Test - 빌드 → 설치 → 실행 (한번에!)
 ⚙ Settings - 패키지명, 앱이름, 버전, 아이콘 설정
 
@@ -804,6 +853,11 @@ namespace FlutterControlPanel
 2. 'Auto Build' 체크박스 활성화
 3. 코드 수정 후 저장하면 2초 후 자동 빌드 시작
 4. 빌드 완료 시 자동으로 설치 및 앱 실행!
+
+[Google Play 출시] ⭐NEW
+1. 📦 AAB 버튼 클릭하여 App Bundle 빌드
+2. build/app/outputs/bundle/release/app-release.aab 파일을
+   Google Play Console에 업로드
 ";
             MessageBox.Show(helpText, "❓ 사용법", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }

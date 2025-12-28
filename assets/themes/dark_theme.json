@@ -1,0 +1,247 @@
+{
+    "$schema": "https://design-tokens.github.io/community-group/format/",
+    "themeName": "Dark Theme",
+    "themeId": "dark",
+    "colors": {
+        "primary": {
+            "main": "#FFAB91",
+            "light": "#FFCCBC",
+            "dark": "#FF8A65",
+            "contrast": "#000000"
+        },
+        "secondary": {
+            "main": "#FFEE58",
+            "light": "#FFF59D",
+            "dark": "#FDD835",
+            "contrast": "#000000"
+        },
+        "background": {
+            "primary": "#121212",
+            "secondary": "#1E1E1E",
+            "card": "#2D2D2D",
+            "dialog": "#383838"
+        },
+        "text": {
+            "primary": "#FFFFFF",
+            "secondary": "#B0B0B0",
+            "hint": "#757575",
+            "disabled": "#505050",
+            "inverse": "#000000"
+        },
+        "border": {
+            "light": "#3D3D3D",
+            "medium": "#505050",
+            "dark": "#6D6D6D"
+        },
+        "status": {
+            "success": "#81C784",
+            "warning": "#FFB74D",
+            "error": "#EF5350",
+            "info": "#64B5F6"
+        },
+        "surface": {
+            "elevated": "#383838",
+            "overlay": "rgba(0, 0, 0, 0.7)"
+        }
+    },
+    "gradients": {
+        "primary": {
+            "type": "linear",
+            "angle": 135,
+            "colors": [
+                "#FFAB91",
+                "#FF8A65"
+            ]
+        },
+        "warm": {
+            "type": "linear",
+            "angle": 180,
+            "colors": [
+                "#2D2D2D",
+                "#1E1E1E"
+            ]
+        },
+        "sunset": {
+            "type": "linear",
+            "angle": 45,
+            "colors": [
+                "#FF8A65",
+                "#FFEE58"
+            ]
+        }
+    },
+    "typography": {
+        "fontFamily": {
+            "primary": "Nunito",
+            "secondary": "Noto Sans KR",
+            "display": "Great Vibes",
+            "mono": "Roboto Mono"
+        },
+        "fontSize": {
+            "xs": 10,
+            "sm": 12,
+            "md": 14,
+            "lg": 16,
+            "xl": 20,
+            "2xl": 24,
+            "3xl": 32,
+            "4xl": 40,
+            "5xl": 48
+        },
+        "fontWeight": {
+            "light": 300,
+            "regular": 400,
+            "medium": 500,
+            "semibold": 600,
+            "bold": 700
+        },
+        "lineHeight": {
+            "tight": 1.2,
+            "normal": 1.5,
+            "relaxed": 1.75
+        },
+        "letterSpacing": {
+            "tight": -0.5,
+            "normal": 0,
+            "wide": 0.5,
+            "wider": 1.0
+        }
+    },
+    "spacing": {
+        "none": 0,
+        "xs": 4,
+        "sm": 8,
+        "md": 16,
+        "lg": 24,
+        "xl": 32,
+        "2xl": 48,
+        "3xl": 64
+    },
+    "borderRadius": {
+        "none": 0,
+        "sm": 4,
+        "md": 8,
+        "lg": 12,
+        "xl": 16,
+        "2xl": 24,
+        "full": 9999
+    },
+    "shadows": {
+        "none": {
+            "offsetX": 0,
+            "offsetY": 0,
+            "blur": 0,
+            "spread": 0,
+            "color": "transparent"
+        },
+        "sm": {
+            "offsetX": 0,
+            "offsetY": 1,
+            "blur": 3,
+            "spread": 0,
+            "color": "rgba(0, 0, 0, 0.3)"
+        },
+        "md": {
+            "offsetX": 0,
+            "offsetY": 4,
+            "blur": 6,
+            "spread": -1,
+            "color": "rgba(0, 0, 0, 0.4)"
+        },
+        "lg": {
+            "offsetX": 0,
+            "offsetY": 10,
+            "blur": 15,
+            "spread": -3,
+            "color": "rgba(0, 0, 0, 0.5)"
+        },
+        "xl": {
+            "offsetX": 0,
+            "offsetY": 20,
+            "blur": 25,
+            "spread": -5,
+            "color": "rgba(0, 0, 0, 0.6)"
+        }
+    },
+    "animation": {
+        "duration": {
+            "instant": 0,
+            "fast": 150,
+            "normal": 300,
+            "slow": 500,
+            "slower": 1000
+        },
+        "easing": {
+            "linear": "linear",
+            "easeIn": "ease-in",
+            "easeOut": "ease-out",
+            "easeInOut": "ease-in-out",
+            "spring": "cubic-bezier(0.68, -0.55, 0.265, 1.55)"
+        }
+    },
+    "components": {
+        "button": {
+            "primary": {
+                "background": "$colors.primary.main",
+                "text": "$colors.primary.contrast",
+                "border": "none",
+                "borderRadius": "$borderRadius.lg",
+                "paddingX": "$spacing.lg",
+                "paddingY": "$spacing.md",
+                "shadow": "$shadows.md"
+            },
+            "secondary": {
+                "background": "transparent",
+                "text": "$colors.primary.main",
+                "border": "$colors.primary.main",
+                "borderRadius": "$borderRadius.lg",
+                "paddingX": "$spacing.lg",
+                "paddingY": "$spacing.md",
+                "shadow": "$shadows.none"
+            },
+            "ghost": {
+                "background": "transparent",
+                "text": "$colors.text.primary",
+                "border": "none",
+                "borderRadius": "$borderRadius.md",
+                "paddingX": "$spacing.md",
+                "paddingY": "$spacing.sm",
+                "shadow": "$shadows.none"
+            }
+        },
+        "card": {
+            "background": "$colors.background.card",
+            "borderRadius": "$borderRadius.xl",
+            "padding": "$spacing.lg",
+            "shadow": "$shadows.md"
+        },
+        "input": {
+            "background": "$colors.background.secondary",
+            "text": "$colors.text.primary",
+            "placeholder": "$colors.text.hint",
+            "border": "$colors.border.medium",
+            "borderRadius": "$borderRadius.md",
+            "paddingX": "$spacing.md",
+            "paddingY": "$spacing.sm"
+        },
+        "dialog": {
+            "background": "$colors.background.dialog",
+            "borderRadius": "$borderRadius.2xl",
+            "padding": "$spacing.xl",
+            "shadow": "$shadows.xl",
+            "overlay": "$colors.surface.overlay"
+        },
+        "appBar": {
+            "background": "transparent",
+            "elevation": 0,
+            "titleColor": "$colors.text.primary",
+            "iconColor": "$colors.text.primary"
+        },
+        "bottomNav": {
+            "background": "$colors.background.card",
+            "selectedColor": "$colors.primary.main",
+            "unselectedColor": "$colors.text.hint",
+            "shadow": "$shadows.lg"
+        }
+    }
+}
