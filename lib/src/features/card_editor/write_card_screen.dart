@@ -2751,6 +2751,11 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                               child: Transform.translate(
                                 offset: _dragOffset,
                                 child: GestureDetector(
+                                  behavior: HitTestBehavior.opaque, // 터치 이벤트 가로채기
+                                  onPanDown: _isZoomMode ? null : (details) {
+                                    // 터치 시작 즉시 드래그 모드 활성화 (스크롤 방지)
+                                    setState(() => _isDragMode = true);
+                                  },
                                   onPanUpdate: _isZoomMode ? null : (details) {
                                   // Calculate constraints
                                   final cardW = MediaQuery.of(context).size.width * 0.92;
@@ -2933,9 +2938,10 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                                             ),
                                             const SizedBox(width: 6),
                                             GestureDetector(
+                                              behavior: HitTestBehavior.opaque,
                                               onTap: _showAiToneSelector,
                                               child: Container(
-                                                padding: const EdgeInsets.all(4),
+                                                padding: const EdgeInsets.all(8), // 터치 영역 확대
                                                 decoration: BoxDecoration(
                                                   color: Colors.white.withOpacity(0.85),
                                                   borderRadius: BorderRadius.circular(6),
