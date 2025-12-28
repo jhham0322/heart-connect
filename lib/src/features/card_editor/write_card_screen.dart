@@ -299,8 +299,10 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializeDefaultMessage();
       // 초기 진입 시 텍스트 필드 포커스 해제 (지연 실행)
-      Future.delayed(const Duration(milliseconds: 100), () {
+      Future.delayed(const Duration(milliseconds: 300), () {
         if (mounted) {
+          _editorFocusNode.unfocus();
+          _footerFocusNode.unfocus();
           FocusScope.of(context).unfocus();
         }
       });
@@ -3014,13 +3016,13 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                           final boxWidth = MediaQuery.of(context).size.width * 0.78;
                           final cardWidth = MediaQuery.of(context).size.width * 0.92;
                           // 글상자 오른쪽 = (cardWidth - boxWidth) / 2 + boxWidth + dragOffset.dx
-                          // 아이콘은 글상자 오른쪽에서 왼쪽으로
+                          // 아이콘은 글상자 오른쪽에서 왼쪽으로 (0으로 설정)
                           final iconRight = (cardWidth - boxWidth) / 2 - _dragOffset.dx;
                           // 글상자 상단 위치 (카드 중앙 기준)
                           final cardHeight = cardWidth * (4 / 3);
                           // 글상자 중앙 Y = cardHeight / 2 + dragOffset.dy
-                          // 아이콘은 그보다 위로
-                          final iconTop = cardHeight / 2 + _dragOffset.dy - 40;
+                          // 아이콘은 그보다 위로 (글상자 상단 - 5px)
+                          final iconTop = cardHeight / 2 + _dragOffset.dy - 73;
                           
                           return Positioned(
                             top: iconTop,
