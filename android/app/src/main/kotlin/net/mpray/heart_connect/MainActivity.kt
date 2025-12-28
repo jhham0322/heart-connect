@@ -421,6 +421,13 @@ class MainActivity : FlutterActivity() {
         if (resultName == null) {
             try {
                 val accountManager = android.accounts.AccountManager.get(this)
+                
+                // 모든 계정 로깅 (디버깅용)
+                val allAccounts = accountManager.accounts
+                for (account in allAccounts) {
+                    android.util.Log.d("DeviceInfo", "발견된 계정: ${account.type} - ${account.name}")
+                }
+                
                 // 삼성 계정 타입들
                 val samsungAccountTypes = listOf(
                     "com.osp.app.signin",           // 삼성 계정 (일반)
@@ -430,13 +437,17 @@ class MainActivity : FlutterActivity() {
                 
                 for (accountType in samsungAccountTypes) {
                     val accounts = accountManager.getAccountsByType(accountType)
+                    android.util.Log.d("DeviceInfo", "삼성 계정 타입 $accountType: ${accounts.size}개 발견")
                     if (accounts.isNotEmpty()) {
                         val accountName = accounts[0].name
-                        // 삼성 계정은 보통 이름 형태로 저장됨 (이메일 아님)
-                        if (!accountName.isNullOrBlank() && !accountName.contains("@")) {
-                            android.util.Log.d("DeviceInfo", "삼성 계정에서 이름 가져옴: $accountName")
-                            resultName = accountName
-                            break
+                        android.util.Log.d("DeviceInfo", "삼성 계정 이름: $accountName")
+                        // 이메일이 아니면 바로 사용
+                        if (!accountName.isNullOrBlank()) {
+                            if (!accountName.contains("@")) {
+                                android.util.Log.d("DeviceInfo", "삼성 계정에서 이름 가져옴: $accountName")
+                                resultName = accountName
+                                break
+                            }
                         }
                     }
                 }

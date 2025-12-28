@@ -2033,8 +2033,8 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
             bottom: keyboardHeight > 0 ? keyboardHeight : sendButtonHeight,
             child: SingleChildScrollView(
               controller: _mainScrollController,
-              physics: _isZoomMode 
-                  ? const NeverScrollableScrollPhysics() // 줌 모드에서는 스크롤 비활성화
+              physics: (_isZoomMode || _isDragMode)
+                  ? const NeverScrollableScrollPhysics() // 줌 모드나 글상자 드래그 중에는 스크롤 비활성화
                   : const AlwaysScrollableScrollPhysics(),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
