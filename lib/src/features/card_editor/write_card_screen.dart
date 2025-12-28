@@ -2752,7 +2752,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                               child: Transform.translate(
                                 offset: _dragOffset,
                                 child: GestureDetector(
-                                  behavior: HitTestBehavior.opaque,
+                                  behavior: HitTestBehavior.deferToChild, // AI 아이콘 클릭 가능하게
                                   onPanDown: _isZoomMode ? null : (details) {
                                     setState(() => _isDragMode = true);
                                   },
@@ -2920,7 +2920,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                                     // 글자수 & AI 버튼 (글상자 오른쪽 위에 배치) - 캡쳐 시 숨김
                                     if (!_isCapturing)
                                       Positioned(
-                                        top: -30,
+                                        top: -35,
                                         right: 0,
                                         child: Row(
                                           mainAxisSize: MainAxisSize.min,
