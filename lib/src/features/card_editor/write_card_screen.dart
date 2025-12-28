@@ -2902,16 +2902,16 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                                             minHeight: _fontSize * 1.5 * 4, // 최소 4줄
                                             maxHeight: _fontSize * 1.5 * 7, // 최대 7줄
                                           ),
-                                          child: AbsorbPointer(
-                                            absorbing: !_isEditorActive, // 편집 모드가 아니면 터치 무시
+                                          child: IgnorePointer(
+                                            ignoring: !_isEditorActive, // 편집 모드가 아니면 터치 무시
                                             child: QuillEditor(
                                               controller: _quillController,
                                               focusNode: _editorFocusNode,
                                               scrollController: ScrollController(),
                                               config: QuillEditorConfig(
                                                 autoFocus: false,
-                                              expands: false,
-                                              scrollable: true,
+                                                expands: false,
+                                                scrollable: true,
                                               padding: EdgeInsets.zero,
                                               showCursor: true,
                                               placeholder: '여기를 탭하여 메시지 입력...',
@@ -2971,8 +2971,8 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                                                       ? Border.all(color: const Color(0xFFF29D86), width: 2.0)
                                                       : Border.all(color: Colors.transparent, width: 2.0),
                                                 ),
-                                                child: AbsorbPointer(
-                                                  absorbing: !_isFooterActive, // Footer 편집 모드가 아니면 터치 무시
+                                                child: IgnorePointer(
+                                                  ignoring: !_isFooterActive, // Footer 편집 모드가 아니면 터치 무시
                                                   child: QuillEditor(
                                                     controller: _footerQuillController,
                                                     focusNode: _footerFocusNode,
