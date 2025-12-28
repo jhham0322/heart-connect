@@ -1434,9 +1434,29 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
         return;
     }
     
-    // 모달 대신 직접 친근하게 톤으로 변환
-    setState(() => _isAiLoading = true);
-    _refineMessageWithAi(tone: "friendly, warm, and casual");
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (ctx) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 16),
+                child: Text("AI 감성 변환 (Gemini)", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              ),
+              _buildToneOption("정중하게 (Polite)", "polite, formal, and respectful", FontAwesomeIcons.userTie),
+              _buildToneOption("위트있게 (Witty)", "witty, humorous, and fun", FontAwesomeIcons.faceLaughBeam),
+              _buildToneOption("친근하게 (Friendly)", "friendly, warm, and casual", FontAwesomeIcons.handshakeSimple),
+              _buildToneOption("감동적인 시처럼 (Poetic)", "poetic, emotional, and touching", FontAwesomeIcons.featherPointed),
+              const SizedBox(height: 20),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   Widget _buildToneOption(String label, String toneParam, IconData icon) {
@@ -2989,55 +3009,46 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                   ),
                 ),
                 
-                // 글자수 & AI 버튼 (글상자 바로 위에 배치)
+                // 글자수 & AI 버튼 (글상자 오른쪽 위에 배치)
                 if (!_isCapturing)
                   Positioned.fill(
                     child: IgnorePointer(
                       ignoring: _isZoomMode,
                       child: Center(
                         child: Transform.translate(
-                          offset: _dragOffset,
+                          offset: Offset(_dragOffset.dx, _dragOffset.dy - 30), // 글상자보다 위로
                           child: Container(
                             width: MediaQuery.of(context).size.width * 0.78,
-                            child: Column(
+                            alignment: Alignment.topRight,
+                            child: Row(
                               mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
-                                // AI 아이콘 (글상자 위에)
-                                Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white.withOpacity(0.85),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Text(
-                                        "${_message.length} / 75",
-                                        style: TextStyle(fontSize: 10, color: _message.length >= 75 ? Colors.red : Colors.grey[700]),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 6),
-                                    GestureDetector(
-                                      behavior: HitTestBehavior.opaque,
-                                      onTap: _showAiToneSelector,
-                                      child: Container(
-                                        padding: const EdgeInsets.all(8),
-                                        decoration: BoxDecoration(
-                                          color: Colors.white.withOpacity(0.85),
-                                          borderRadius: BorderRadius.circular(6),
-                                        ),
-                                        child: _isAiLoading 
-                                          ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFFF29D86)))
-                                          : const Icon(FontAwesomeIcons.wandMagicSparkles, size: 12, color: Color(0xFFF29D86)),
-                                      ),
-                                    ),
-                                  ],
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.85),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text(
+                                    "${_message.length} / 75",
+                                    style: TextStyle(fontSize: 10, color: _message.length >= 75 ? Colors.red : Colors.grey[700]),
+                                  ),
                                 ),
-                                const SizedBox(height: 4), // 글상자와의 간격
-                                // 글상자 높이만큼의 공간 (글상자는 별도 위젯)
+                                const SizedBox(width: 6),
+                                GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: _showAiToneSelector,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.85),
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: _isAiLoading 
+                                      ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFFF29D86)))
+                                      : const Icon(FontAwesomeIcons.wandMagicSparkles, size: 12, color: Color(0xFFF29D86)),
+                                  ),
+                                ),
                               ],
                             ),
                           ),
