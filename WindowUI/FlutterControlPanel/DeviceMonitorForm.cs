@@ -14,6 +14,7 @@ namespace FlutterControlPanel
         private PictureBox screenBox;
         private RichTextBox logBox;
         private Button btnCopyScreen;
+        private Button btnSaveScreen;
         private Button btnCopyLog;
         private Button btnRefresh;
         private Button btnStartLog;
@@ -92,6 +93,15 @@ namespace FlutterControlPanel
             btnCopyScreen.FlatStyle = FlatStyle.Flat;
             btnCopyScreen.Click += BtnCopyScreen_Click;
             leftBottom.Controls.Add(btnCopyScreen);
+
+            btnSaveScreen = new Button();
+            btnSaveScreen.Text = "💾 Save";
+            btnSaveScreen.Size = new Size(100, 35);
+            btnSaveScreen.Location = new Point(250, 8);
+            btnSaveScreen.BackColor = Color.FromArgb(255, 183, 77);
+            btnSaveScreen.FlatStyle = FlatStyle.Flat;
+            btnSaveScreen.Click += BtnSaveScreen_Click;
+            leftBottom.Controls.Add(btnSaveScreen);
 
             // Right Panel - Log
             Panel rightPanel = new Panel();
@@ -387,6 +397,34 @@ namespace FlutterControlPanel
             {
                 Clipboard.SetImage(screenBox.Image);
                 MessageBox.Show("Screen copied to clipboard!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else
+            {
+                MessageBox.Show("No screen captured yet.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
+        private void BtnSaveScreen_Click(object sender, EventArgs e)
+        {
+            if (screenBox.Image != null)
+            {
+                try
+                {
+                    string downloadsPath = Path.Combine(
+                        Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                        "Downloads"
+                    );
+                    string timestamp = DateTime.Now.ToString("yyyyMMdd_HH_mm_ss");
+                    string fileName = $"ConnectHeart_{timestamp}.png";
+                    string fullPath = Path.Combine(downloadsPath, fileName);
+
+                    screenBox.Image.Save(fullPath, System.Drawing.Imaging.ImageFormat.Png);
+                    MessageBox.Show($"Screen saved to:\n{fullPath}", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Failed to save: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
             else
             {
