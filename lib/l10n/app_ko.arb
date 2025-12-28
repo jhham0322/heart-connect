@@ -136,6 +136,7 @@
   "cardEditorSave": "저장",
   "cardEditorShare": "공유",
   "cardEditorEnterMessage": "메시지를 입력하세요",
+  "editorMessagePlaceholder": "보내실 내용을 입력하세요.",
   "cardEditorGenerateAI": "AI 메시지 생성",
   "cardEditorTextBox": "글상자",
   "cardEditorZoomHint": "더블탭하시면 줌 모드로 전환됩니다",

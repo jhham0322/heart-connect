@@ -133,7 +133,7 @@ class WriteCardScreen extends ConsumerStatefulWidget {
 
 class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   // State for Editing
-  String _message = "Happy Birthday,\ndear Emma!\nWith love, Anna.";
+  String _message = ""; // Will be set to localized placeholder if empty
   late final TextEditingController _messageController;
   late final TextEditingController _footerController;
   String _footerText = "HEART-CONNECT";
@@ -294,6 +294,11 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
       document: Document()..insert(0, _footerText),
       selection: const TextSelection.collapsed(offset: 0),
     );
+    
+    // Set default message as localized placeholder (will be done after first build)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializeDefaultMessage();
+    });
     
     _quillController.addListener(_onEditorChanged);
     _footerQuillController.addListener(_onFooterEditorChanged);
@@ -525,6 +530,23 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     }
   }
 
+  /// 메시지가 비어있으면 기본 플레이스홀더 텍스트 설정
+  void _initializeDefaultMessage() {
+    if (!mounted) return;
+    
+    // 이미 드래프트에서 메시지가 로드되었으면 스킵
+    final plainText = _quillController.document.toPlainText().trim();
+    if (plainText.isNotEmpty) return;
+    
+    final strings = ref.read(appStringsProvider);
+    final placeholder = strings.editorMessagePlaceholder;
+    
+    setState(() {
+      _message = placeholder;
+      _quillController.document = Document()..insert(0, placeholder);
+    });
+  }
+
   Future<void> _fetchAllSavedCards() async {
     final db = ref.read(appDatabaseProvider);
     final cards = await db.getAllSavedCards(); // Assuming this method returns all cards sorted by date DESC
@@ -586,9 +608,10 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   void _resetToNewCard() {
     if (_currentCardId == null) return; // Already new
 
+    final strings = ref.read(appStringsProvider);
     setState(() {
       _currentCardId = null;
-      _message = "Happy Birthday,\ndear Emma!\nWith love, Anna.";
+      _message = strings.editorMessagePlaceholder;
       _quillController.document = Document()..insert(0, _message);
       _selectedFrame = null;
       _boxColor = Colors.white.withOpacity(0.4);
@@ -2675,7 +2698,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                               maxScale: 5.0,
                               constrained: true, // 이미지가 경계를 벗어나지 않음
                               clipBehavior: Clip.hardEdge, // 경계를 벗어난 부분 클립
-                              panEnabled: _isZoomMode, // 줌 모드일 때만 이동 가능
+                              panEnabled: true, // 항상 이미지 이동 가능
                               scaleEnabled: _isZoomMode, // 줌 모드일 때만 줌 가능
                               interactionEndFrictionCoefficient: 0.0001, // 부드러운 제스처
                               onInteractionStart: (details) {

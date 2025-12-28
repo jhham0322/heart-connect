@@ -213,6 +213,7 @@ class AppStrings {
   String get cardEditorZoomHint => _fallback(_l10n?.cardEditorZoomHint, '더블탭하시면 줌 모드로 전환됩니다');
   String get cardEditorRecipient => _fallback(_l10n?.cardEditorRecipient, '발송대상');
   String get cardEditorAddRecipient => _fallback(_l10n?.cardEditorAddRecipient, '대상 추가');
+  String get editorMessagePlaceholder => _fallback(_l10n?.editorMessagePlaceholder, '보내실 내용을 입력하세요.');
   
   // ========== 발송 대상 선택 다이얼로그 ==========
   String get recipientSelectTitle => _fallback(_l10n?.recipientSelectTitle, '발송 대상 선택');

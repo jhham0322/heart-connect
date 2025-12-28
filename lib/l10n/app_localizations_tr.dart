@@ -400,6 +400,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get cardEditorEnterMessage => 'Mesajınız...';
 
   @override
+  String get editorMessagePlaceholder => '보내실 내용을 입력하세요.';
+
+  @override
   String get cardEditorGenerateAI => 'AI Mesaj';
 
   @override

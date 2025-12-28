@@ -398,6 +398,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get cardEditorEnterMessage => 'رسالتك...';
 
   @override
+  String get editorMessagePlaceholder => '보내실 내용을 입력하세요.';
+
+  @override
   String get cardEditorGenerateAI => 'رسالة AI';
 
   @override

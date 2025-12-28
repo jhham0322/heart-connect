@@ -396,6 +396,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get cardEditorEnterMessage => '메시지를 입력하세요';
 
   @override
+  String get editorMessagePlaceholder => '보내실 내용을 입력하세요.';
+
+  @override
   String get cardEditorGenerateAI => 'AI 메시지 생성';
 
   @override

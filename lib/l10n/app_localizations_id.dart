@@ -399,6 +399,9 @@ class AppLocalizationsId extends AppLocalizations {
   String get cardEditorEnterMessage => 'Pesan Anda...';
 
   @override
+  String get editorMessagePlaceholder => '보내실 내용을 입력하세요.';
+
+  @override
   String get cardEditorGenerateAI => 'Pesan AI';
 
   @override

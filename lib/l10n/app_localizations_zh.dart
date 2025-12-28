@@ -393,6 +393,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cardEditorEnterMessage => '请输入您的留言';
 
   @override
+  String get editorMessagePlaceholder => '보내실 내용을 입력하세요.';
+
+  @override
   String get cardEditorGenerateAI => 'AI生成留言';
 
   @override

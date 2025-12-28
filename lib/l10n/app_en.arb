@@ -136,6 +136,7 @@
   "cardEditorSave": "Save",
   "cardEditorShare": "Share",
   "cardEditorEnterMessage": "Enter your message",
+  "editorMessagePlaceholder": "Enter your message here.",
   "cardEditorGenerateAI": "Generate AI Message",
   "cardEditorTextBox": "Text Box",
   "cardEditorZoomHint": "Tap to enter zoom mode",

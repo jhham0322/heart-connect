@@ -24,6 +24,9 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" 
         android:maxSdkVersion="32"/>
     
+    <!-- Required for getting device owner name (Google account) -->
+    <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
+    
     <application
         android:label="마음이음"
         android:name="${applicationName}"

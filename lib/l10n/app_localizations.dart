@@ -884,6 +884,12 @@ abstract class AppLocalizations {
   /// **'메시지를 입력하세요'**
   String get cardEditorEnterMessage;
 
+  /// No description provided for @editorMessagePlaceholder.
+  ///
+  /// In ko, this message translates to:
+  /// **'보내실 내용을 입력하세요.'**
+  String get editorMessagePlaceholder;
+
   /// No description provided for @cardEditorGenerateAI.
   ///
   /// In ko, this message translates to:

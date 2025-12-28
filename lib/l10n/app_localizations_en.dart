@@ -400,6 +400,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cardEditorEnterMessage => 'Enter your message';
 
   @override
+  String get editorMessagePlaceholder => 'Enter your message here.';
+
+  @override
   String get cardEditorGenerateAI => 'Generate AI Message';
 
   @override
