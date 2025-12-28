@@ -2052,6 +2052,44 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
             ),
           ),
 
+          // 글자수 & AI 버튼 (SingleChildScrollView 밖에서 항상 클릭 가능)
+          if (!_isCapturing && !_isZoomMode)
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 70 + _dragOffset.dy,
+              right: MediaQuery.of(context).size.width * 0.11 - _dragOffset.dx,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.85),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      "${_message.length} / 75",
+                      style: TextStyle(fontSize: 10, color: _message.length >= 75 ? Colors.red : Colors.grey[700]),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: _showAiToneSelector,
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.85),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: _isAiLoading 
+                        ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFFF29D86)))
+                        : const Icon(FontAwesomeIcons.wandMagicSparkles, size: 12, color: Color(0xFFF29D86)),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
           // 상단 페이드 그라데이션 오버레이 (이미지 잘림 부드럽게 처리)
           Positioned(
             top: 0,
@@ -2751,9 +2789,8 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                               child: Transform.translate(
                                 offset: _dragOffset,
                                 child: GestureDetector(
-                                  behavior: HitTestBehavior.opaque, // 터치 이벤트 가로채기
+                                  behavior: HitTestBehavior.opaque,
                                   onPanDown: _isZoomMode ? null : (details) {
-                                    // 터치 시작 즉시 드래그 모드 활성화 (스크롤 방지)
                                     setState(() => _isDragMode = true);
                                   },
                                   onPanUpdate: _isZoomMode ? null : (details) {
@@ -2917,43 +2954,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                                       ],
                                     ),
                                     
-                                    // 1. 글자수 & AI 버튼 (글상자 바로 위쪽에 고정) - 캡쳐 시 숨김
-                                    if (!_isCapturing)
-                                      Positioned(
-                                        top: -28,
-                                        right: 0,
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Container(
-                                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                              decoration: BoxDecoration(
-                                                color: Colors.white.withOpacity(0.85),
-                                                borderRadius: BorderRadius.circular(8),
-                                              ),
-                                              child: Text(
-                                                "${_message.length} / 75",
-                                                style: TextStyle(fontSize: 10, color: _message.length >= 75 ? Colors.red : Colors.grey[700]),
-                                              ),
-                                            ),
-                                            const SizedBox(width: 6),
-                                            GestureDetector(
-                                              behavior: HitTestBehavior.opaque,
-                                              onTap: _showAiToneSelector,
-                                              child: Container(
-                                                padding: const EdgeInsets.all(8), // 터치 영역 확대
-                                                decoration: BoxDecoration(
-                                                  color: Colors.white.withOpacity(0.85),
-                                                  borderRadius: BorderRadius.circular(6),
-                                                ),
-                                                child: _isAiLoading 
-                                                  ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFFF29D86)))
-                                                  : const Icon(FontAwesomeIcons.wandMagicSparkles, size: 12, color: Color(0xFFF29D86)),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
+                                    // AI 아이콘은 글상자 밖으로 이동됨
                                     
                                     // 3. Footer (Floating & Draggable)
                                     Positioned.fill(
@@ -3045,6 +3046,55 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                   ),
                 ),
                 
+                // 글자수 & AI 버튼 (글상자 GestureDetector 밖에서 클릭 가능)
+                if (!_isCapturing)
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    child: Center(
+                      child: Transform.translate(
+                        offset: Offset(_dragOffset.dx, _dragOffset.dy - 45), // 글상자 위치 따라가기
+                        child: Container(
+                          width: MediaQuery.of(context).size.width * 0.78,
+                          alignment: Alignment.topRight,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.85),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  "${_message.length} / 75",
+                                  style: TextStyle(fontSize: 10, color: _message.length >= 75 ? Colors.red : Colors.grey[700]),
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              GestureDetector(
+                                behavior: HitTestBehavior.opaque,
+                                onTap: _showAiToneSelector,
+                                child: Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.85),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: _isAiLoading 
+                                    ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFFF29D86)))
+                                    : const Icon(FontAwesomeIcons.wandMagicSparkles, size: 12, color: Color(0xFFF29D86)),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+
                 // 3. Change BG / Frame Toggle (Top Right) - 캡처에서 제외
                 // 상단 고정으로 이동됨
               ],
