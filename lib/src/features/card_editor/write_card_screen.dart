@@ -2026,21 +2026,29 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
       resizeToAvoidBottomInset: false, // 키보드가 올라와도 화면 리사이즈 안함 (직접 스크롤로 처리)
       body: Stack(
         children: [
-          // 전체 콘텐츠를 하단에 고정 (배경 이미지 + 툴바 + 썸네일)
           Positioned(
             left: 0,
             right: 0,
+            top: MediaQuery.of(context).padding.top + 60, // 상단 버튼 영역 아래
             bottom: keyboardHeight > 0 ? keyboardHeight : sendButtonHeight,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Card Preview (캡쳐 가능 영역)
-                _buildCardPreview(),
-                // Toolbar
-                _buildToolbar(),
-                // Template Selector (썸네일)
-                _buildTemplateSelector(),
-              ],
+            child: SingleChildScrollView(
+              controller: _mainScrollController,
+              physics: _isZoomMode 
+                  ? const NeverScrollableScrollPhysics() // 줌 모드에서는 스크롤 비활성화
+                  : const AlwaysScrollableScrollPhysics(),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Card Preview (캡쳐 가능 영역)
+                  _buildCardPreview(),
+                  // Toolbar
+                  _buildToolbar(),
+                  // Template Selector (썸네일)
+                  _buildTemplateSelector(),
+                  // 하단 여백 (발송 버튼 공간)
+                  const SizedBox(height: 20),
+                ],
+              ),
             ),
           ),
 
@@ -2698,7 +2706,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                               maxScale: 5.0,
                               constrained: true, // 이미지가 경계를 벗어나지 않음
                               clipBehavior: Clip.hardEdge, // 경계를 벗어난 부분 클립
-                              panEnabled: true, // 항상 이미지 이동 가능
+                              panEnabled: _isZoomMode, // 줌 모드일 때만 이동 가능
                               scaleEnabled: _isZoomMode, // 줌 모드일 때만 줌 가능
                               interactionEndFrictionCoefficient: 0.0001, // 부드러운 제스처
                               onInteractionStart: (details) {

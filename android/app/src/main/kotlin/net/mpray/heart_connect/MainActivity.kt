@@ -417,13 +417,41 @@ class MainActivity : FlutterActivity() {
                 android.util.Log.e("DeviceInfo", "프로필 조회 실패: ${e.message}")
             }
         }
+        // 2. 삼성 계정에서 이름 가져오기
+        if (resultName == null) {
+            try {
+                val accountManager = android.accounts.AccountManager.get(this)
+                // 삼성 계정 타입들
+                val samsungAccountTypes = listOf(
+                    "com.osp.app.signin",           // 삼성 계정 (일반)
+                    "com.samsung.account",          // 삼성 계정 (다른 타입)
+                    "com.sec.android.app.samsungapps" // 삼성 앱스토어
+                )
+                
+                for (accountType in samsungAccountTypes) {
+                    val accounts = accountManager.getAccountsByType(accountType)
+                    if (accounts.isNotEmpty()) {
+                        val accountName = accounts[0].name
+                        // 삼성 계정은 보통 이름 형태로 저장됨 (이메일 아님)
+                        if (!accountName.isNullOrBlank() && !accountName.contains("@")) {
+                            android.util.Log.d("DeviceInfo", "삼성 계정에서 이름 가져옴: $accountName")
+                            resultName = accountName
+                            break
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("DeviceInfo", "삼성 계정 조회 실패: ${e.message}")
+            }
+        }
 
-        // 2. 블루투스 기기 이름에서 가져오기 (보통 "XXX의 Galaxy" 형태)
+        // 3. 블루투스 기기 이름에서 가져오기 (보통 "XXX의 Galaxy" 형태)
         if (resultName == null) {
             try {
                 val bluetoothAdapter = android.bluetooth.BluetoothAdapter.getDefaultAdapter()
                 val deviceName = bluetoothAdapter?.name
                 if (!deviceName.isNullOrBlank()) {
+                    android.util.Log.d("DeviceInfo", "블루투스 기기 이름: $deviceName")
                     // "함정훈의 Galaxy S24" 형태에서 이름 추출
                     val patterns = listOf(
                         "(.+?)의\\s*.+".toRegex(),  // "이름의 Galaxy..."
@@ -447,7 +475,7 @@ class MainActivity : FlutterActivity() {
             }
         }
 
-        // 3. Google 계정 표시 이름 또는 이메일 앞부분
+        // 4. Google 계정 표시 이름 또는 이메일 앞부분
         if (resultName == null) {
             try {
                 val accountManager = android.accounts.AccountManager.get(this)
