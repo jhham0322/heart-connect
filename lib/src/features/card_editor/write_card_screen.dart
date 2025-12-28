@@ -679,10 +679,12 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
          // Focus change tracking
          if (_footerFocusNode.hasFocus) {
            _isFooterActive = true;
+           _isEditorActive = false; // 메인 글상자 편집 모드 해제
            // Clear selection in main editor
            _quillController.updateSelection(const TextSelection.collapsed(offset: 0), ChangeSource.local);
          } else if (_editorFocusNode.hasFocus) {
            _isFooterActive = false;
+           _isEditorActive = true; // 메인 글상자 편집 모드 활성화
            // Clear selection in footer editor
            _footerQuillController.updateSelection(const TextSelection.collapsed(offset: 0), ChangeSource.local);
            
@@ -699,6 +701,10 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                }
              });
            }
+         } else {
+           // 둘 다 포커스 없으면 모두 비활성화
+           _isFooterActive = false;
+           _isEditorActive = false;
          }
          _updateToolbarState();
       });
