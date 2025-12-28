@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -26,6 +27,29 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   bool _sendSmsGranted = false;
   String _userName = '';
 
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDeviceOwnerName();
+  }
+
+  /// 기기에 등록된 사용자 이름 가져오기
+  Future<void> _loadDeviceOwnerName() async {
+    if (Platform.isAndroid) {
+      try {
+        const channel = MethodChannel('com.hamm.heart_connect/device_info');
+        final String? ownerName = await channel.invokeMethod('getOwnerName');
+        if (ownerName != null && ownerName.isNotEmpty && mounted) {
+          setState(() {
+            _nameController.text = ownerName;
+          });
+        }
+      } catch (e) {
+        debugPrint('[Onboarding] Failed to get device owner name: $e');
+      }
+    }
+  }
 
   @override
   void dispose() {

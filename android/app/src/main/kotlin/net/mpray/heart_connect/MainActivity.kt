@@ -17,9 +17,23 @@ class MainActivity : FlutterActivity() {
     private val CALENDAR_CHANNEL = "com.heartconnect/calendar"
     private val SMS_CHANNEL = "com.heartconnect/sms"
     private val MMS_CHANNEL = "com.heartconnect/mms"
+    private val DEVICE_INFO_CHANNEL = "com.hamm.heart_connect/device_info"
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        
+        // Device Info Channel - 기기 사용자 이름 가져오기
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, DEVICE_INFO_CHANNEL).setMethodCallHandler { call, result ->
+            when (call.method) {
+                "getOwnerName" -> {
+                    val ownerName = getDeviceOwnerName()
+                    result.success(ownerName)
+                }
+                else -> {
+                    result.notImplemented()
+                }
+            }
+        }
         
         // AI Channel
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
@@ -139,6 +153,35 @@ class MainActivity : FlutterActivity() {
                     result.notImplemented()
                 }
             }
+        }
+    }
+    
+    /**
+     * 기기에 등록된 사용자 이름 가져오기 (Google 계정 이름)
+     */
+    private fun getDeviceOwnerName(): String? {
+        return try {
+            val accountManager = android.accounts.AccountManager.get(this)
+            val accounts = accountManager.getAccountsByType("com.google")
+            
+            if (accounts.isNotEmpty()) {
+                // Google 계정 이메일에서 이름 부분만 추출 (@ 앞부분)
+                val email = accounts[0].name
+                val namePart = email.substringBefore("@")
+                
+                // 숫자나 특수문자가 많으면 이름으로 부적합하므로 null 반환
+                if (namePart.any { it.isLetter() }) {
+                    // 첫 글자 대문자로
+                    namePart.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+                } else {
+                    null
+                }
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("DeviceInfo", "사용자 이름 가져오기 실패: ${e.message}")
+            null
         }
     }
     
