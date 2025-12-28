@@ -298,6 +298,8 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     // Set default message as localized placeholder (will be done after first build)
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializeDefaultMessage();
+      // 초기 진입 시 텍스트 필드 포커스 해제
+      FocusManager.instance.primaryFocus?.unfocus();
     });
     
     _quillController.addListener(_onEditorChanged);
@@ -3000,52 +3002,58 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                       ),
                     ),
                     
-                    // 글자수 & AI 버튼 (글상자 위에 배치, 스크롤 따라감)
+                    // 글자수 & AI 버튼 (글상자 오른쪽 위에 배치)
                     if (!_isCapturing && !_isZoomMode)
-                      Positioned.fill(
-                        child: IgnorePointer(
-                          ignoring: false,
-                          child: Center(
-                            child: Transform.translate(
-                              offset: Offset(_dragOffset.dx, _dragOffset.dy - 80),
-                              child: Container(
-                                width: MediaQuery.of(context).size.width * 0.78,
-                                alignment: Alignment.topRight,
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white.withOpacity(0.85),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Text(
-                                        "${_message.length} / 75",
-                                        style: TextStyle(fontSize: 10, color: _message.length >= 75 ? Colors.red : Colors.grey[700]),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 6),
-                                    GestureDetector(
-                                      behavior: HitTestBehavior.opaque,
-                                      onTap: _showAiToneSelector,
-                                      child: Container(
-                                        padding: const EdgeInsets.all(8),
-                                        decoration: BoxDecoration(
-                                          color: Colors.white.withOpacity(0.85),
-                                          borderRadius: BorderRadius.circular(6),
-                                        ),
-                                        child: _isAiLoading 
-                                          ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFFF29D86)))
-                                          : const Icon(FontAwesomeIcons.wandMagicSparkles, size: 12, color: Color(0xFFF29D86)),
-                                      ),
-                                    ),
-                                  ],
+                      Builder(
+                        builder: (context) {
+                          // 글상자와 동일한 위치 계산
+                          final boxWidth = MediaQuery.of(context).size.width * 0.78;
+                          final cardWidth = MediaQuery.of(context).size.width * 0.92;
+                          // 글상자 오른쪽 = (cardWidth - boxWidth) / 2 + boxWidth + dragOffset.dx
+                          // 아이콘은 글상자 오른쪽에서 왼쪽으로
+                          final iconRight = (cardWidth - boxWidth) / 2 - _dragOffset.dx;
+                          // 글상자 상단 위치 (카드 중앙 기준)
+                          final cardHeight = cardWidth * (4 / 3);
+                          // 글상자 중앙 Y = cardHeight / 2 + dragOffset.dy
+                          // 아이콘은 그보다 위로
+                          final iconTop = cardHeight / 2 + _dragOffset.dy - 80;
+                          
+                          return Positioned(
+                            top: iconTop,
+                            right: iconRight,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.85),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text(
+                                    "${_message.length} / 75",
+                                    style: TextStyle(fontSize: 10, color: _message.length >= 75 ? Colors.red : Colors.grey[700]),
+                                  ),
                                 ),
-                              ),
+                                const SizedBox(width: 6),
+                                GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: _showAiToneSelector,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.85),
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: _isAiLoading 
+                                      ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFFF29D86)))
+                                      : const Icon(FontAwesomeIcons.wandMagicSparkles, size: 12, color: Color(0xFFF29D86)),
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                        ),
+                          );
+                        },
                       ),
                     ],
                   ),
