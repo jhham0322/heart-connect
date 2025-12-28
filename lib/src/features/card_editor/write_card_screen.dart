@@ -268,9 +268,9 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   Color _defaultColor = const Color(0xFF1A1A1A);
   TextAlign _defaultTextAlign = TextAlign.center;
 
-  // Focus Node for Quill Editor
-  final FocusNode _editorFocusNode = FocusNode();
-  final FocusNode _footerFocusNode = FocusNode(); // 푸터 포커스 노드 추가
+  // Focus Node for Quill Editor (초기에는 포커스 불가)
+  final FocusNode _editorFocusNode = FocusNode(skipTraversal: true);
+  final FocusNode _footerFocusNode = FocusNode(skipTraversal: true); // 푸터 포커스 노드 추가
   
   // GlobalKey for RepaintBoundary (이미지 캡처용)
   final GlobalKey _captureKey = GlobalKey();
