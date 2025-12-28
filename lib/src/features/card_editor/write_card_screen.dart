@@ -2956,7 +2956,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                                       child: Align(
                                         alignment: Alignment.bottomRight,
                                         child: Padding(
-                                          padding: const EdgeInsets.only(right: 15, bottom: 5),
+                                          padding: const EdgeInsets.only(right: 15, bottom: -25),
                                           child: GestureDetector(
                                             onTap: () {
                                               _footerFocusNode.requestFocus();
