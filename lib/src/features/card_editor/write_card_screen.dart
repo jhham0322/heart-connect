@@ -195,6 +195,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   bool _isFooterUnderline = false;
   
   // Track active input for styling
+  bool _isEditorActive = false; // 메인 글상자 편집 모드
   bool _isFooterActive = false;
   
   // Footer Box Style
@@ -2692,14 +2693,25 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
               )
             ],
           ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: GestureDetector(
-              // 줌 모드일 때는 스와이프 비활성화 (InteractiveViewer가 터치 처리)
-              onHorizontalDragEnd: _isZoomMode ? null : _handleSwipeNavigation,
-              onDoubleTapDown: (details) => _doubleTapDetails = details,
-              onDoubleTap: _handleDoubleTap,
-              child: Stack(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: GestureDetector(
+                // 줌 모드일 때는 스와이프 비활성화 (InteractiveViewer가 터치 처리)
+                onHorizontalDragEnd: _isZoomMode ? null : _handleSwipeNavigation,
+                onDoubleTapDown: (details) => _doubleTapDetails = details,
+                onDoubleTap: _handleDoubleTap,
+                onTap: () {
+                  // 이미지 영역 탭 시 편집 모드 해제
+                  if (_isEditorActive || _isFooterActive) {
+                    setState(() {
+                      _isEditorActive = false;
+                      _isFooterActive = false;
+                    });
+                    _editorFocusNode.unfocus();
+                    _footerFocusNode.unfocus();
+                  }
+                },
+                child: Stack(
                 children: [
                   // RepaintBoundary로 캡처 영역 감싸기 (버튼 제외)
                   RepaintBoundary(
@@ -2812,6 +2824,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                                 onTap: () {
                                   _editorFocusNode.requestFocus();
                                   setState(() {
+                                    _isEditorActive = true; // 메인 글상자 편집 모드 활성화
                                     _isFooterActive = false;
                                   });
                                   _updateToolbarState();
@@ -2889,12 +2902,14 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                                             minHeight: _fontSize * 1.5 * 4, // 최소 4줄
                                             maxHeight: _fontSize * 1.5 * 7, // 최대 7줄
                                           ),
-                                          child: QuillEditor(
-                                            controller: _quillController,
-                                            focusNode: _editorFocusNode,
-                                            scrollController: ScrollController(),
-                                            config: QuillEditorConfig(
-                                              autoFocus: false,
+                                          child: AbsorbPointer(
+                                            absorbing: !_isEditorActive, // 편집 모드가 아니면 터치 무시
+                                            child: QuillEditor(
+                                              controller: _quillController,
+                                              focusNode: _editorFocusNode,
+                                              scrollController: ScrollController(),
+                                              config: QuillEditorConfig(
+                                                autoFocus: false,
                                               expands: false,
                                               scrollable: true,
                                               padding: EdgeInsets.zero,
@@ -2920,6 +2935,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                                                 ),
                                               ),
                                             ), 
+                                          ),
                                           ),
                                         ),
                                         // Footer space placeholder if needed? No, it floats.
@@ -3009,7 +3025,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                     ),
                     
                     // 글자수 & AI 버튼 (글상자 오른쪽 위에 배치)
-                    if (!_isCapturing && !_isZoomMode)
+                    if (!_isCapturing)
                       Builder(
                         builder: (context) {
                           // 글상자와 동일한 위치 계산
@@ -3022,7 +3038,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                           final cardHeight = cardWidth * (4 / 3);
                           // 글상자 중앙 Y = cardHeight / 2 + dragOffset.dy
                           // 아이콘은 그보다 위로 (글상자 상단 - 5px)
-                          final iconTop = cardHeight / 2 + _dragOffset.dy - 73;
+                          final iconTop = cardHeight / 2 + _dragOffset.dy - 55;
                           
                           return Positioned(
                             top: iconTop,
