@@ -2969,21 +2969,13 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                                     
                                     // AI 아이콘은 Scaffold Stack으로 이동됨
                                     
-                                    // 3. Footer (Floating & Draggable)
+                                    // 3. Footer (글상자 오른쪽 하단 고정)
                                     Positioned.fill(
                                       child: Align(
                                         alignment: Alignment.bottomRight,
-                                        child: Transform.translate(
-                                          offset: _footerOffset,
+                                        child: Padding(
+                                          padding: const EdgeInsets.only(right: 15, bottom: 15),
                                           child: GestureDetector(
-                                            onPanUpdate: (details) {
-                                              setState(() {
-                                                _footerOffset += details.delta;
-                                              });
-                                            },
-                                            onPanEnd: (details) {
-                                              _saveDraft();
-                                            },
                                             onTap: () {
                                               _footerFocusNode.requestFocus();
                                               setState(() {
