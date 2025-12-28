@@ -298,8 +298,12 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     // Set default message as localized placeholder (will be done after first build)
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializeDefaultMessage();
-      // 초기 진입 시 텍스트 필드 포커스 해제
-      FocusManager.instance.primaryFocus?.unfocus();
+      // 초기 진입 시 텍스트 필드 포커스 해제 (지연 실행)
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (mounted) {
+          FocusScope.of(context).unfocus();
+        }
+      });
     });
     
     _quillController.addListener(_onEditorChanged);
@@ -3016,7 +3020,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                           final cardHeight = cardWidth * (4 / 3);
                           // 글상자 중앙 Y = cardHeight / 2 + dragOffset.dy
                           // 아이콘은 그보다 위로
-                          final iconTop = cardHeight / 2 + _dragOffset.dy - 80;
+                          final iconTop = cardHeight / 2 + _dragOffset.dy - 40;
                           
                           return Positioned(
                             top: iconTop,
