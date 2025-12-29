@@ -552,6 +552,18 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
         
         // Ensure UI reflects state
         _updateToolbarState();
+        
+        // 드래프트가 있지만 메시지가 비어있으면 주제 선택 팝업 표시
+        final messageContent = _quillController.document.toPlainText().trim();
+        if (messageContent.isEmpty) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              Future.delayed(const Duration(milliseconds: 500), () {
+                if (mounted) _showAiToneSelector();
+              });
+            }
+          });
+        }
       }
     } catch (e) {
       print("[Draft] Error loading draft: $e");
@@ -3647,12 +3659,28 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   Future<void> _handleSend() async {
     if (_isSending) return;
     
-    // 수신자가 없으면 초기화 (테스트용) - 삭제
-    // if (_recipients.isEmpty) {
-    //    for (int i = 1; i <= 20; i++) {
-    //     _recipients.add("수신자 $i (010-0000-${i.toString().padLeft(4, '0')})");
-    //   }
-    // }
+    final strings = ref.read(appStringsProvider);
+    
+    // 메시지 내용 검증
+    final messageContent = _quillController.document.toPlainText().trim();
+    if (messageContent.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("발송할 내용이 없습니다. 메시지를 입력해주세요.")),
+        );
+      }
+      return;
+    }
+    
+    // 수신자 검증
+    if (_recipients.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("수신자가 없습니다. 수신자를 추가해주세요.")),
+        );
+      }
+      return;
+    }
 
     // 1. 발송 전 이미지 생성 및 확인
     final savedPath = await _saveCardImage();
