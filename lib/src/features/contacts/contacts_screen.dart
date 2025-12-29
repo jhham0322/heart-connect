@@ -23,6 +23,51 @@ class ContactsScreen extends ConsumerStatefulWidget {
   ConsumerState<ContactsScreen> createState() => _ContactsScreenState();
 }
 
+// 가족 판별용 키워드 정의 (전역)
+const _familySpouseKeywords = ['아내', '남편', '부인', '배우자', '와이프', '신랑', '신부', 'wife', 'husband'];
+const _familyChildKeywords = ['아들', '딸', '자녀', '막내', '첫째', '둘째', '셋째', '애기', '아기', '손자', '손녀', 'son', 'daughter'];
+const _familyParentKeywords = ['어머니', '아버지', '엄마', '아빠', '모친', '부친', '어무이', '아부지', 'mother', 'father', 'mom', 'dad'];
+const _familySiblingKeywords = ['형', '누나', '오빠', '언니', '동생', '형제', '자매', '남동생', '여동생', 'brother', 'sister'];
+const _familyMaternalKeywords = ['이모', '외삼촌', '외할머니', '외할아버지', '외숙모', '이모부', '외가'];
+const _familyRelativeKeywords = [
+  '삼촌', '고모', '숙부', '숙모', '고모부', '조카', '사촌', '친척', 
+  '할머니', '할아버지', '장인', '장모', '시아버지', '시어머니',
+  '며느리', '사위', '처형', '처제', '매형', '매제', '올케', '형수', '제수',
+  '6촌', '8촌', 'uncle', 'aunt', 'grandma', 'grandpa', 'cousin'
+];
+const _familyPrefixes = ['큰', '작은', '친', '외', '새', '의붓', '계'];
+
+// 가족 연락처인지 판별하는 함수
+bool isFamilyContact(Contact c, {String myFamilyName = '함'}) {
+  // 1. groupTag에 가족 포함
+  if (c.groupTag?.toLowerCase().contains('family') == true ||
+      c.groupTag?.contains('가족') == true) {
+    return true;
+  }
+  
+  // 2. 이름에 가족 관련 단어가 포함
+  final nameLower = c.name.toLowerCase();
+  final allKeywords = [
+    ..._familySpouseKeywords, ..._familyChildKeywords, ..._familyParentKeywords,
+    ..._familySiblingKeywords, ..._familyMaternalKeywords, ..._familyRelativeKeywords
+  ];
+  
+  for (var keyword in allKeywords) {
+    if (nameLower.contains(keyword.toLowerCase())) return true;
+    // 접두사 조합 체크
+    for (var prefix in _familyPrefixes) {
+      if (nameLower.contains('$prefix$keyword'.toLowerCase())) return true;
+    }
+  }
+  
+  // 3. 성씨가 같으면 가족
+  if (c.name.isNotEmpty && c.name[0] == myFamilyName) {
+    return true;
+  }
+  
+  return false;
+}
+
 class _ContactsScreenState extends ConsumerState<ContactsScreen> {
   int _selectedTabIndex = 0; // 0: My People, 1: Groups, 2: Memory Record
   String _searchQuery = '';
@@ -489,8 +534,13 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
     final strings = ref.watch(appStringsProvider);
     final isSelected = _selectedGroupTag == groupTag;
     
+    // 가족 그룹일 때는 isFamilyContact 함수로 카운트
+    final countFuture = isFamily 
+        ? database.getAllContacts().then((contacts) => contacts.where((c) => isFamilyContact(c)).length)
+        : database.getContactCountByGroupTag(groupTag);
+    
     return FutureBuilder<int>(
-      future: database.getContactCountByGroupTag(groupTag),
+      future: countFuture,
       builder: (context, countSnapshot) {
         final memberCount = countSnapshot.data ?? 0;
         
@@ -853,7 +903,9 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
               ),
               Expanded(
                 child: FutureBuilder<List<Contact>>(
-                  future: database.getContactsByGroupTag(groupTag),
+                  future: isFamily 
+                      ? database.getAllContacts().then((contacts) => contacts.where((c) => isFamilyContact(c)).toList())
+                      : database.getContactsByGroupTag(groupTag),
                   builder: (context, snapshot) {
                     final contacts = snapshot.data ?? [];
                     if (contacts.isEmpty) {
