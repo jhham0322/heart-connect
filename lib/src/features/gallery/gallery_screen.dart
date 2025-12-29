@@ -607,8 +607,16 @@ class _GalleryDetailScreenState extends ConsumerState<GalleryDetailScreen> {
                 final isFilePath = imagePath.startsWith('/') || imagePath.contains(':\\');
                 final isFavorite = ref.watch(favoritesProvider).contains(imagePath);
                 
-                // 프리미엄 이미지 확인
-                final isPremium = widget.category.isPremium(index);
+                // 프리미엄 이미지 확인 (파일명 기반)
+                // newyear 카테고리: New1_만 무료, New2_~New6_는 유료
+                final bool isPremium;
+                if (widget.category.id == 'newyear') {
+                  final fileName = imagePath.split('/').last;
+                  // New1_로 시작하면 무료, 그 외(New2_~New6_)는 유료
+                  isPremium = !fileName.startsWith('New1_');
+                } else {
+                  isPremium = widget.category.isPremium(index);
+                }
                 final isUnlocked = isPremium 
                     ? ref.watch(unlockProvider).isUnlocked(widget.category.id, index)
                     : true;

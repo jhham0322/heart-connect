@@ -245,37 +245,15 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         children: [
           const SizedBox(height: 20),
           
-          // 앱 아이콘 (큰 사이즈)
-          Container(
+          // 앱 아이콘 (큰 사이즈) - 투명 배경 그대로 표시
+          Image.asset(
+            'assets/icons/onboarding_heart.png',
             width: 160,
             height: 160,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(24),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFFF29D86).withAlpha(60),
-                  blurRadius: 20,
-                  offset: const Offset(0, 10),
-                ),
-              ],
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(24),
-              child: Image.asset(
-                'assets/icons/onboarding_heart.png',
-                width: 160,
-                height: 160,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    color: Colors.white,
-                    child: const Center(
-                      child: Text('💝', style: TextStyle(fontSize: 80)),
-                    ),
-                  );
-                },
-              ),
-            ),
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) {
+              return const Text('💝', style: TextStyle(fontSize: 80));
+            },
           ),
           
           const SizedBox(height: 32),
