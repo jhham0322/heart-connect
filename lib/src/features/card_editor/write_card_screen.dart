@@ -149,13 +149,13 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   bool _isLoadingFrames = false;
 
   // Style State
-  TextStyle _currentStyle = GoogleFonts.greatVibes(fontSize: 24, color: const Color(0xFF1A1A1A), height: 1.2);
+  TextStyle _currentStyle = GoogleFonts.gowunDodum(fontSize: 30, color: const Color(0xFF1A1A1A), height: 1.2);
   TextAlign _textAlign = TextAlign.center;
   bool _isBold = false;
   bool _isItalic = false;
   bool _isUnderline = false;
-  double _fontSize = 24.0;
-  String _fontName = 'Great Vibes';
+  double _fontSize = 30.0;
+  String _fontName = 'Gowun Dodum';
   
   // Templates (Loaded Dynamically)
   List<String> _templates = [];
@@ -264,8 +264,8 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   late QuillController _footerQuillController;
   
   // Document Default Styles (for HTML wrapper and "Apply All" logic)
-  String _defaultFontName = 'Great Vibes';
-  double _defaultFontSize = 24.0;
+  String _defaultFontName = 'Gowun Dodum';
+  double _defaultFontSize = 30.0;
   Color _defaultColor = const Color(0xFF1A1A1A);
   TextAlign _defaultTextAlign = TextAlign.center;
 
@@ -835,26 +835,37 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   }
 
   void _onFocusChanged() {
-    // Prevent setState during build/layout by deferring to post frame
+    // Prevent unnecessary rebuilds by checking if state actually changed
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
+      
+      final footerHasFocus = _footerFocusNode.hasFocus;
+      final editorHasFocus = _editorFocusNode.hasFocus;
+      
+      // 상태가 실제로 변경된 경우에만 setState 호출
+      bool needsUpdate = false;
+      
+      if (footerHasFocus && !_isFooterActive) {
+        needsUpdate = true;
+      } else if (editorHasFocus && !_isEditorActive) {
+        needsUpdate = true;
+      } else if (!footerHasFocus && !editorHasFocus && (_isFooterActive || _isEditorActive)) {
+        needsUpdate = true;
+      }
+      
+      if (!needsUpdate) return;
+      
       setState(() {
-         // Focus change tracking
-         if (_footerFocusNode.hasFocus) {
+         if (footerHasFocus) {
            _isFooterActive = true;
-           _isEditorActive = false; // 메인 글상자 편집 모드 해제
-           // Clear selection in main editor
-           _quillController.updateSelection(const TextSelection.collapsed(offset: 0), ChangeSource.local);
-         } else if (_editorFocusNode.hasFocus) {
+           _isEditorActive = false;
+         } else if (editorHasFocus) {
            _isFooterActive = false;
-           _isEditorActive = true; // 메인 글상자 편집 모드 활성화
-           // Clear selection in footer editor
-           _footerQuillController.updateSelection(const TextSelection.collapsed(offset: 0), ChangeSource.local);
+           _isEditorActive = true;
            
            // 처음 텍스트 영역 포커스 시 AI 문구 교정 안내
            if (!_hasShownAiHint) {
              _hasShownAiHint = true;
-             // 상단 힌트 영역에 표시
              _currentHintMessage = '💡 오른쪽 상단 AI 버튼으로 문구를 자동 교정할 수 있어요!';
              Future.delayed(const Duration(seconds: 4), () {
                if (mounted && _currentHintMessage.contains('AI')) {
@@ -865,7 +876,6 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
              });
            }
          } else {
-           // 둘 다 포커스 없으면 모두 비활성화
            _isFooterActive = false;
            _isEditorActive = false;
          }
