@@ -785,6 +785,10 @@ class _FullScreenViewerState extends ConsumerState<_FullScreenViewer> {
             icon: const Icon(FontAwesomeIcons.penNib, color: Colors.white, size: 22),
             onPressed: () {
               final selectedImage = widget.images[_currentIndex];
+              print("[GalleryViewer] Write button pressed");
+              print("[GalleryViewer] selectedImage: $selectedImage");
+              print("[GalleryViewer] categoryId: ${widget.categoryId}");
+              print("[GalleryViewer] categoryImages count: ${widget.images.length}");
               Navigator.pop(context); // 뷰어 닫기
               context.push('/write', extra: {
                 'image': selectedImage,

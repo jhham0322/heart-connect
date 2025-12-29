@@ -1,0 +1,17 @@
+12-29 19:23:16.976 30994 30994 I flutter : [GalleryViewer] Write button pressed
+12-29 19:23:16.977 30994 30994 I flutter : [GalleryViewer] selectedImage: assets/images/cards/christmas/c7844f97-e07b-4f10-ac8d-0d335a0016ec.png
+12-29 19:23:16.977 30994 30994 I flutter : [GalleryViewer] categoryId: christmas
+12-29 19:23:16.977 30994 30994 I flutter : [GalleryViewer] categoryImages count: 19
+12-29 19:23:16.982 30994 30994 I flutter : [AppRouter] /write route - extra type: _Map<String, Object>
+12-29 19:23:16.984 30994 30994 I flutter : [AppRouter] /write route - extra: {image: assets/images/cards/christmas/c7844f97-e07b-4f10-ac8d-0d335a0016ec.png, categoryId: christmas, categoryImages: [assets/images/cards/christmas/04e92cf7-eb93-45a8-a892-ac29f576fb66.png, assets/images/cards/christmas/096e9919-04d1-4dc7-a218-61ee2c4bbeb7.png, assets/images/cards/christmas/159c855e-b7f2-465d-b3c1-1358f2ec682c.png, assets/images/cards/christmas/24cd2f8e-7406-4afa-9473-c06215bc46dc.png, assets/images/cards/christmas/3d04780a-eda4-487b-a622-f52dc5f825ad.png, assets/images/cards/christmas/4dc1f4ec-e15f-41ae-bdab-9c7f81995001.png, assets/images/cards/christmas/7c8f415c-ec0d-4090-802f-f490ded073a2.png, assets/images/cards/christmas/8063e740-f3b6-4b55-ba5d-0db4fe92f929.png, assets/images/cards/christmas/8591d31a-8088-4919-8403-9043d370ab99.png, assets/images/cards/christmas/86b9a456-bb3b-4b6c-8361-68099045da74.png, assets/images/cards/christmas/9220be3c-2fba-4d9e-bb32-ee829642c573.png, assets/images/cards/christmas/96c87a39-82d4-4129-ad8e-1cdad2c9893d.png, asset
+12-29 19:23:16.984 30994 30994 I flutter : [AppRouter] /write route - initialImage: assets/images/cards/christmas/c7844f97-e07b-4f10-ac8d-0d335a0016ec.png
+12-29 19:23:16.984 30994 30994 I flutter : [AppRouter] /write route - categoryId: christmas
+12-29 19:23:16.984 30994 30994 I flutter : [AppRouter] /write route - categoryImages count: 19
+12-29 19:23:16.992 30994 30994 I flutter : [WriteCardScreen] initState at 2025-12-29 19:23:16.992732
+12-29 19:23:16.992 30994 30994 I flutter : [WriteCardScreen] Received InitialImage: assets/images/cards/christmas/c7844f97-e07b-4f10-ac8d-0d335a0016ec.png
+12-29 19:23:16.992 30994 30994 I flutter : [WriteCardScreen] Set _selectedImage: assets/images/cards/christmas/c7844f97-e07b-4f10-ac8d-0d335a0016ec.png
+12-29 19:23:16.992 30994 30994 I flutter : [WriteCardScreen] initialContact is NULL
+12-29 19:23:16.992 30994 30994 I flutter : [WriteCardScreen] initialCategoryId: christmas
+12-29 19:23:16.992 30994 30994 I flutter : [WriteCardScreen] initialCategoryImages: 19 images
+12-29 19:23:16.992 30994 30994 I flutter : [WriteCardScreen] initialCategoryImages isNotEmpty: true
+12-29 19:23:16.992 30994 30994 I flutter : [WriteCardScreen] SUCCESS - Using 19 images from gallery category: christmas

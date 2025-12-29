@@ -353,12 +353,18 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
       print("[WriteCardScreen] initialContact is NULL");
     }
 
+    // 갤러리에서 전달받은 카테고리 이미지 목록 확인
+    print("[WriteCardScreen] initialCategoryId: ${widget.initialCategoryId}");
+    print("[WriteCardScreen] initialCategoryImages: ${widget.initialCategoryImages?.length ?? 0} images");
+    print("[WriteCardScreen] initialCategoryImages isNotEmpty: ${widget.initialCategoryImages?.isNotEmpty ?? false}");
+    
     // 갤러리에서 전달받은 카테고리 이미지 목록이 있으면 바로 템플릿으로 사용
     if (widget.initialCategoryImages != null && widget.initialCategoryImages!.isNotEmpty) {
       _templates = widget.initialCategoryImages!;
       _isLoading = false;
-      print("[WriteCardScreen] Using ${_templates.length} images from gallery category: ${widget.initialCategoryId}");
+      print("[WriteCardScreen] SUCCESS - Using ${_templates.length} images from gallery category: ${widget.initialCategoryId}");
     } else {
+      print("[WriteCardScreen] FALLBACK - Loading default templates");
       _loadTemplateAssets(); // 갤러리에서 오지 않은 경우에만 기본 템플릿 로드
     }
     
@@ -458,7 +464,10 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
       if (mounted) {
         setState(() {
           // Restore simple values
-          if (data['image'] != null) _selectedImage = data['image'];
+          // 갤러리에서 이미지가 전달된 경우에는 드래프트 이미지를 덮어쓰지 않음
+          if (data['image'] != null && widget.initialImage == null) {
+            _selectedImage = data['image'];
+          }
           _selectedFrame = data['frame'];
           _isFrameMode = data['isFrameMode'] ?? false;
           _isFooterActive = data['isFooterActive'] ?? false;
