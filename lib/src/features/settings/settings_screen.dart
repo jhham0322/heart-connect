@@ -1066,23 +1066,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                // 다크 모드 토글
-                _buildSettingCard(
-                  iconBg: const Color(0xFF90CAF9),
-                  icon: Icons.dark_mode_outlined,
-                  title: strings.settingsDarkMode,
-                  desc: strings.settingsDarkModeDesc,
-                  descIcon: FontAwesomeIcons.moon,
-                  action: Switch(
-                    value: ref.watch(themeProvider) == ThemeMode.dark,
-                    activeThumbColor: const Color(0xFF5C6BC0),
-                    onChanged: (v) async {
-                      await ref.read(themeProvider.notifier).setTheme(
-                        v ? ThemeMode.dark : ThemeMode.light
-                      );
-                    },
-                  ),
-                ),
+                // 다크 모드 토글 (임시 비활성화)
+                // _buildSettingCard(
+                //   iconBg: const Color(0xFF90CAF9),
+                //   icon: Icons.dark_mode_outlined,
+                //   title: strings.settingsDarkMode,
+                //   desc: strings.settingsDarkModeDesc,
+                //   descIcon: FontAwesomeIcons.moon,
+                //   action: Switch(
+                //     value: ref.watch(themeProvider) == ThemeMode.dark,
+                //     activeThumbColor: const Color(0xFF5C6BC0),
+                //     onChanged: (v) async {
+                //       await ref.read(themeProvider.notifier).setTheme(
+                //         v ? ThemeMode.dark : ThemeMode.light
+                //       );
+                //     },
+                //   ),
+                // ),
                 const SizedBox(height: 16),
                 _buildSettingCard(
                   iconBg: const Color(0xFFFFF59D),

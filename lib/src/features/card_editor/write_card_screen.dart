@@ -4407,11 +4407,11 @@ class _RecipientManagerDialogState extends ConsumerState<RecipientManagerDialog>
       if (phoneNumber != null) {
         debugPrint('[MMS발송] 수신자: $item, 전화번호: $phoneNumber');
         
-        // MMS Intent로 문자 앱 열기
+        // MMS Intent로 이미지만 발송 (텍스트 제외)
         final success = await MmsIntentService.sendMmsIntent(
           phoneNumber: phoneNumber,
           imagePath: widget.savedPath,
-          message: widget.messageContent,
+          message: '', // 이미지만 발송
         );
         
         if (success) {
@@ -4782,7 +4782,7 @@ class _RecipientManagerDialogState extends ConsumerState<RecipientManagerDialog>
                           await SocialShareService.shareImage(
                             imagePath: widget.savedPath,
                             platformId: platformId,
-                            text: widget.messageContent.isNotEmpty ? widget.messageContent : '마음을 전합니다 💝',
+                            // 이미지만 발송 (텍스트 제외)
                           );
                         }
                       },
