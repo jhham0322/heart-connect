@@ -1,7 +1,7 @@
 name: heart_connect
 description: "A Flutter-based emotional relationship management and semi-automatic card sending solution."
 publish_to: 'none'
-version: 1.0.0+2
+version: 1.0.1+3
 
 environment:
   sdk: '>=3.2.0 <4.0.0'

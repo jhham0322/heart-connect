@@ -1,20 +1,20 @@
-﻿// ???뚯씪? 鍮뚮뱶 ?ㅽ겕由쏀듃???섑빐 ?먮룞 ?앹꽦?⑸땲??
-// ?섎룞?쇰줈 ?섏젙?섏? 留덉꽭??
-// ?앹꽦: 2025-12-27
+﻿// 앱 버전 정보 - 빌드 스크립트에 의해 자동 생성됩니다.
+// 수동으로 수정하지 마세요.
+// 생성: 2025-12-30
 
 class AppVersion {
-  static const String version = '1.0.0';
-  static const String buildNumber = '1';
+  static const String version = '1.0.1';
+  static const String buildNumber = '3';
   
-  // Git/SVN 由щ퉬???뺣낫 (鍮뚮뱶 ???먮룞 ?낅뜲?댄듃)
-  static const String revision = '36a8b85';
+  // Git/SVN 리비전 정보 (빌드 시 자동 업데이트)
+  static const String revision = '61c6a63';
   
-  // 鍮뚮뱶 ?좎쭨
-  static const String buildDate = '2025-12-27';
+  // 빌드 날짜
+  static const String buildDate = '2025-12-30';
   
-  // ?꾩껜 踰꾩쟾 臾몄옄??
+  // 전체 버전 문자열
   static String get fullVersion => '$version+$buildNumber ($revision)';
   
-  // 吏㏃? 踰꾩쟾 臾몄옄??
+  // 짧은 버전 문자열
   static String get shortVersion => 'v$version ($revision)';
 }
