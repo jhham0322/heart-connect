@@ -483,6 +483,14 @@ class AppStrings {
   String get photoPermissionStep4 => _fallback(_l10n?.photoPermissionStep4, '4. "허용" 또는 "모든 사진 허용"을 선택하세요');
   String get photoPermissionNote => _fallback(_l10n?.photoPermissionNote, '⚡ 권한을 허용한 후 이 화면으로 돌아오면\n자동으로 사진이 표시됩니다.');
   String get openSettings => _fallback(_l10n?.openSettings, '설정 열기');
+  
+  // ========== 프리미엄 콘텐츠 ==========
+  String get premiumImage => _fallback(_l10n?.premiumImage, '프리미엄 이미지');
+  String get watchAdToUnlock => _fallback(_l10n?.watchAdToUnlock, '광고를 시청하고 잠금 해제');
+  String get unlockSuccess => _fallback(_l10n?.unlockSuccess, '잠금이 해제되었습니다!');
+  String get adNotReady => _fallback(_l10n?.adNotReady, '광고가 준비되지 않았습니다. 잠시 후 다시 시도해주세요.');
+  String get watchAd => _fallback(_l10n?.watchAd, '광고 보기');
+  String get premiumLocked => _fallback(_l10n?.premiumLocked, '잠금');
 }
 
 /// AppStrings Provider - languageCode에 맞는 인스턴스 자동 생성

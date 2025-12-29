@@ -6,13 +6,26 @@ class CategoryItem {
   final String title;
   final IconData icon;
   final Color color;
+  /// 이 인덱스 이후의 이미지는 프리미엄 (null이면 프리미엄 없음)
+  final int? premiumStartIndex;
 
-  CategoryItem({required this.id, required this.title, required this.icon, required this.color});
+  CategoryItem({
+    required this.id, 
+    required this.title, 
+    required this.icon, 
+    required this.color,
+    this.premiumStartIndex,
+  });
+  
+  /// 해당 인덱스의 이미지가 프리미엄인지 확인
+  bool isPremium(int index) {
+    return premiumStartIndex != null && index >= premiumStartIndex!;
+  }
 }
 
 final List<CategoryItem> galleryCategories = [
   CategoryItem(id: 'christmas', title: 'Christmas', icon: FontAwesomeIcons.tree, color: const Color(0xFFEF9A9A)), 
-  CategoryItem(id: 'newyear', title: 'New Year', icon: FontAwesomeIcons.champagneGlasses, color: const Color(0xFF90CAF9)), 
+  CategoryItem(id: 'newyear', title: 'New Year', icon: FontAwesomeIcons.champagneGlasses, color: const Color(0xFF90CAF9), premiumStartIndex: 5), 
   CategoryItem(id: 'birthday', title: 'Birthday', icon: FontAwesomeIcons.cakeCandles, color: const Color(0xFFF48FB1)), 
   CategoryItem(id: 'thanks', title: 'Thanks', icon: FontAwesomeIcons.heart, color: const Color(0xFFFFF59D)), 
   CategoryItem(id: 'motherDay', title: 'Parents Day', icon: FontAwesomeIcons.personBreastfeeding, color: const Color(0xFFCE93D8)), 

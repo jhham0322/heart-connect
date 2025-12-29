@@ -2221,6 +2221,42 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'설정 열기'**
   String get openSettings;
+
+  /// No description provided for @premiumImage.
+  ///
+  /// In ko, this message translates to:
+  /// **'프리미엄 이미지'**
+  String get premiumImage;
+
+  /// No description provided for @watchAdToUnlock.
+  ///
+  /// In ko, this message translates to:
+  /// **'광고를 시청하고 잠금 해제'**
+  String get watchAdToUnlock;
+
+  /// No description provided for @unlockSuccess.
+  ///
+  /// In ko, this message translates to:
+  /// **'잠금이 해제되었습니다!'**
+  String get unlockSuccess;
+
+  /// No description provided for @adNotReady.
+  ///
+  /// In ko, this message translates to:
+  /// **'광고가 준비되지 않았습니다. 잠시 후 다시 시도해주세요.'**
+  String get adNotReady;
+
+  /// No description provided for @watchAd.
+  ///
+  /// In ko, this message translates to:
+  /// **'광고 보기'**
+  String get watchAd;
+
+  /// No description provided for @premiumLocked.
+  ///
+  /// In ko, this message translates to:
+  /// **'잠금'**
+  String get premiumLocked;
 }
 
 class _AppLocalizationsDelegate

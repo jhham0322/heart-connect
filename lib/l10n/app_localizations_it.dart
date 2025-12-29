@@ -1095,4 +1095,22 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get openSettings => 'Apri impostazioni';
+
+  @override
+  String get premiumImage => '프리미엄 이미지';
+
+  @override
+  String get watchAdToUnlock => '광고를 시청하고 잠금 해제';
+
+  @override
+  String get unlockSuccess => '잠금이 해제되었습니다!';
+
+  @override
+  String get adNotReady => '광고가 준비되지 않았습니다. 잠시 후 다시 시도해주세요.';
+
+  @override
+  String get watchAd => '광고 보기';
+
+  @override
+  String get premiumLocked => '잠금';
 }

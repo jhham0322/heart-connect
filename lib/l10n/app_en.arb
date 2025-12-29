@@ -430,5 +430,12 @@
   "photoPermissionStep3": "3. Tap \"Photos and videos\"",
   "photoPermissionStep4": "4. Select \"Allow\" or \"Allow all photos\"",
   "photoPermissionNote": "⚡ After allowing permission, return here\nand photos will load automatically.",
-  "openSettings": "Open Settings"
+  "openSettings": "Open Settings",
+  
+  "premiumImage": "Premium Image",
+  "watchAdToUnlock": "Watch ad to unlock",
+  "unlockSuccess": "Unlocked!",
+  "adNotReady": "Ad is not ready. Please try again later.",
+  "watchAd": "Watch Ad",
+  "premiumLocked": "Locked"
 }

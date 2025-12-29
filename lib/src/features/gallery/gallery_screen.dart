@@ -13,11 +13,15 @@ import 'package:photo_manager/photo_manager.dart';
 import '../../theme/app_theme.dart';
 import '../../l10n/app_strings.dart';
 import '../../providers/locale_provider.dart';
+import '../../providers/unlock_provider.dart';
 import 'favorites_provider.dart';
 import 'gallery_selection_provider.dart';
 import '../../utils/ad_helper.dart'; // AdMob
 
 import 'gallery_data.dart';
+
+// UnlockProvider 전역 Provider
+final unlockProvider = ChangeNotifierProvider((ref) => UnlockProvider());
 
 class GalleryScreen extends ConsumerStatefulWidget {
   const GalleryScreen({super.key});
@@ -603,8 +607,21 @@ class _GalleryDetailScreenState extends ConsumerState<GalleryDetailScreen> {
                 final isFilePath = imagePath.startsWith('/') || imagePath.contains(':\\');
                 final isFavorite = ref.watch(favoritesProvider).contains(imagePath);
                 
+                // 프리미엄 이미지 확인
+                final isPremium = widget.category.isPremium(index);
+                final isUnlocked = isPremium 
+                    ? ref.watch(unlockProvider).isUnlocked(widget.category.id, index)
+                    : true;
+                final isLocked = isPremium && !isUnlocked;
+                
                 return GestureDetector(
-                  onTap: () => _openImageViewer(index),
+                  onTap: () {
+                    if (isLocked) {
+                      _showUnlockDialog(index, strings);
+                    } else {
+                      _openImageViewer(index);
+                    }
+                  },
                   child: Hero(
                     tag: imagePath,
                     child: Stack(
@@ -617,10 +634,54 @@ class _GalleryDetailScreenState extends ConsumerState<GalleryDetailScreen> {
                                   ? FileImage(File(imagePath)) as ImageProvider
                                   : AssetImage(imagePath),
                               fit: BoxFit.cover,
+                              colorFilter: isLocked 
+                                  ? ColorFilter.mode(Colors.black.withOpacity(0.5), BlendMode.darken)
+                                  : null,
                             ),
                           ),
                         ),
-                        if (isFavorite)
+                        // 프리미엄 잠금 오버레이
+                        if (isLocked)
+                          Positioned.fill(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [
+                                    Colors.black.withOpacity(0.3),
+                                    Colors.black.withOpacity(0.6),
+                                  ],
+                                ),
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: Colors.amber.withOpacity(0.9),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(FontAwesomeIcons.lock, color: Colors.white, size: 16),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: Colors.black.withOpacity(0.6),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Text(
+                                      strings.premiumLocked,
+                                      style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        if (isFavorite && !isLocked)
                           const Positioned(
                             top: 8,
                             left: 8,
@@ -636,7 +697,139 @@ class _GalleryDetailScreenState extends ConsumerState<GalleryDetailScreen> {
                   ),
                 );
               },
-           ),
+   );
+  }
+  
+  // 프리미엄 이미지 잠금 해제 다이얼로그
+  void _showUnlockDialog(int index, AppStrings strings) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.amber.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(FontAwesomeIcons.lock, color: Colors.amber, size: 20),
+            ),
+            const SizedBox(width: 12),
+            Expanded(child: Text(strings.premiumImage, style: const TextStyle(fontSize: 17))),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // 미리보기 이미지
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Stack(
+                children: [
+                  Image.asset(
+                    _images[index],
+                    height: 150,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  ),
+                  Positioned.fill(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.transparent,
+                            Colors.black.withOpacity(0.5),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const Positioned.fill(
+                    child: Center(
+                      child: Icon(FontAwesomeIcons.lock, color: Colors.white, size: 40),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              strings.watchAdToUnlock,
+              style: const TextStyle(fontSize: 15),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(strings.cancel),
+          ),
+          ElevatedButton.icon(
+            onPressed: () async {
+              Navigator.pop(context);
+              
+              final adHelper = AdHelper();
+              if (!adHelper.isRewardedAdReady) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(strings.adNotReady),
+                    backgroundColor: Colors.orange,
+                  ),
+                );
+                return;
+              }
+              
+              // 광고 표시 및 보상 처리
+              final shown = await adHelper.showRewardedAd(
+                onRewarded: () {
+                  // 이미지 잠금 해제
+                  ref.read(unlockProvider).unlock(widget.category.id, index);
+                  
+                  // 성공 메시지
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Row(
+                          children: [
+                            const Icon(FontAwesomeIcons.lockOpen, color: Colors.white, size: 16),
+                            const SizedBox(width: 8),
+                            Text(strings.unlockSuccess),
+                          ],
+                        ),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                    
+                    // 잠금 해제 후 바로 이미지 뷰어 열기
+                    _openImageViewer(index);
+                  }
+                },
+              );
+              
+              if (!shown && mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(strings.adNotReady),
+                    backgroundColor: Colors.orange,
+                  ),
+                );
+              }
+            },
+            icon: const Icon(FontAwesomeIcons.play, size: 16),
+            label: Text(strings.watchAd),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.amber,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            ),
+          ),
+        ],
+      ),
     );
   }
   

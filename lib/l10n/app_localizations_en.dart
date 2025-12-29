@@ -1094,4 +1094,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get openSettings => 'Open Settings';
+
+  @override
+  String get premiumImage => 'Premium Image';
+
+  @override
+  String get watchAdToUnlock => 'Watch ad to unlock';
+
+  @override
+  String get unlockSuccess => 'Unlocked!';
+
+  @override
+  String get adNotReady => 'Ad is not ready. Please try again later.';
+
+  @override
+  String get watchAd => 'Watch Ad';
+
+  @override
+  String get premiumLocked => 'Locked';
 }
