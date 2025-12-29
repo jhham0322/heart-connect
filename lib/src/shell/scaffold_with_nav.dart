@@ -5,6 +5,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../theme/app_theme.dart';
 import '../features/gallery/gallery_selection_provider.dart';
 import '../features/contacts/current_contact_provider.dart';
+import '../features/contacts/selected_group_provider.dart';
+import '../features/database/database_provider.dart';
 import '../l10n/app_strings.dart';
 
 class ScaffoldWithNav extends ConsumerWidget {
@@ -103,9 +105,23 @@ class ScaffoldWithNav extends ConsumerWidget {
         ),
         child: FloatingActionButton(
           heroTag: 'write-fab',
-          onPressed: () {
+          onPressed: () async {
             final selectedImage = ref.read(currentSelectionProvider);
             final currentContact = ref.read(currentContactProvider);
+            final selectedGroupTag = ref.read(selectedGroupTagProvider);
+            
+            // 그룹이 선택된 경우 - 그룹 멤버를 수신자로 설정
+            if (selectedGroupTag != null) {
+              final database = ref.read(appDatabaseProvider);
+              final groupContacts = await database.getContactsByGroupTag(selectedGroupTag);
+              
+              if (groupContacts.isNotEmpty) {
+                final recipients = groupContacts.map((c) => {'name': c.name, 'phone': c.phone}).toList();
+                print("[ScaffoldWithNav] Navigating to Write with group: $selectedGroupTag, ${recipients.length} recipients");
+                context.push('/write', extra: {'recipients': recipients});
+                return;
+              }
+            }
             
             if (currentContact != null) {
               // 연락처 상세화면에서 FAB를 누른 경우 - 해당 연락처를 수신자로 설정

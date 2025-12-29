@@ -12,6 +12,7 @@ import '../../theme/app_theme.dart';
 import 'contact_detail_screen.dart';
 import '../../utils/phone_formatter.dart';
 import 'current_contact_provider.dart';
+import 'selected_group_provider.dart';
 import 'contact_service.dart';
 import '../../l10n/app_strings.dart';
 import '../../providers/locale_provider.dart';
@@ -75,6 +76,7 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
   String _selectedFilter = '전체'; // 기본은 전체
   bool _isSyncing = false; // 동기화 중 상태
   String? _selectedGroupTag; // 선택된 그룹 태그 (null: 없음)
+  List<String>? _cachedGroupTags; // 드래그 순서 유지를 위한 그룹 태그 캐시
 
   @override
   Widget build(BuildContext context) {
@@ -493,11 +495,16 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
     return FutureBuilder<List<String>>(
       future: _getFilteredGroupTags(database),
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
+        if (snapshot.connectionState == ConnectionState.waiting && _cachedGroupTags == null) {
           return const Center(child: CircularProgressIndicator());
         }
         
-        final filteredGroupTags = snapshot.data ?? [];
+        // 캐시가 없거나 검색 중이면 새 데이터 사용
+        if (snapshot.hasData && (_cachedGroupTags == null || _searchQuery.isNotEmpty)) {
+          _cachedGroupTags = snapshot.data;
+        }
+        
+        final filteredGroupTags = _cachedGroupTags ?? [];
         
         // 가족을 별도로 분리
         final hasFamily = filteredGroupTags.contains('가족');
@@ -523,14 +530,20 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
                         : ReorderableListView.builder(
                             padding: const EdgeInsets.fromLTRB(20, 10, 20, 100),
                             itemCount: otherGroupTags.length,
-                            onReorder: (oldIndex, newIndex) async {
+                            onReorder: (oldIndex, newIndex) {
                               if (newIndex > oldIndex) newIndex--;
-                              // 순서 변경 시 ContactGroups 테이블의 sortOrder 업데이트
-                              final movedTag = otherGroupTags[oldIndex];
-                              final groups = await database.select(database.contactGroups).get();
-                              final movedGroup = groups.firstWhere((g) => g.name == movedTag, orElse: () => groups.first);
-                              await database.updateContactGroup(movedGroup.copyWith(sortOrder: newIndex));
-                              setState(() {});
+                              // 캐시된 리스트에서 순서 변경
+                              setState(() {
+                                if (_cachedGroupTags != null) {
+                                  // 가족을 제외한 인덱스 계산 (가족은 맨 앞)
+                                  final familyOffset = _cachedGroupTags!.contains('가족') ? 1 : 0;
+                                  final actualOldIndex = oldIndex + familyOffset;
+                                  final actualNewIndex = newIndex + familyOffset;
+                                  
+                                  final item = _cachedGroupTags!.removeAt(actualOldIndex);
+                                  _cachedGroupTags!.insert(actualNewIndex, item);
+                                }
+                              });
                             },
                             itemBuilder: (context, index) {
                               return Container(
@@ -592,9 +605,12 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
         
         return GestureDetector(
           onTap: () {
+            final newSelection = isSelected ? null : groupTag;
             setState(() {
-              _selectedGroupTag = isSelected ? null : groupTag;
+              _selectedGroupTag = newSelection;
             });
+            // ScaffoldWithNav의 FAB에서 사용할 수 있도록 provider 업데이트
+            ref.read(selectedGroupTagProvider.notifier).state = newSelection;
           },
           onDoubleTap: () => _showGroupTagDetailDialog(groupTag, database, isFamily: isFamily),
           child: Container(
