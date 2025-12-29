@@ -446,53 +446,94 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
     );
   }
 
+  // 검색 쿼리를 적용하여 그룹 목록 필터링
+  Future<List<String>> _getFilteredGroupTags(AppDatabase database) async {
+    final allGroupTags = await database.getDistinctGroupTags();
+    
+    if (_searchQuery.isEmpty) {
+      return allGroupTags;
+    }
+    
+    final searchLower = _searchQuery.toLowerCase();
+    List<String> filteredGroupTags = [];
+    
+    for (var tag in allGroupTags) {
+      // 1. 그룹명 검색
+      if (tag.toLowerCase().contains(searchLower)) {
+        filteredGroupTags.add(tag);
+        continue;
+      }
+      
+      // 2. 멤버 이름으로 검색 (가족 그룹은 isFamilyContact 사용)
+      List<Contact> tagContacts;
+      if (tag == '가족') {
+        final allContacts = await database.getAllContacts();
+        tagContacts = allContacts.where((c) => isFamilyContact(c)).toList();
+      } else {
+        tagContacts = await database.getContactsByGroupTag(tag);
+      }
+      
+      if (tagContacts.any((c) => c.name.toLowerCase().contains(searchLower))) {
+        filteredGroupTags.add(tag);
+      }
+    }
+    
+    return filteredGroupTags;
+  }
+
   Widget _buildGroupsList(AppDatabase database) {
     final strings = ref.watch(appStringsProvider);
     
+    // 검색 쿼리를 적용한 그룹 목록 가져오기
     return FutureBuilder<List<String>>(
-      future: database.getDistinctGroupTags(),
+      future: _getFilteredGroupTags(database),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         }
         
-        // 모든 고유 그룹 태그 (가족 포함)
-        var allGroupTags = snapshot.data ?? [];
-        
-        // 검색 필터 적용
-        if (_searchQuery.isNotEmpty) {
-          allGroupTags = allGroupTags.where((tag) => 
-            tag.toLowerCase().contains(_searchQuery.toLowerCase())
-          ).toList();
-        }
+        final filteredGroupTags = snapshot.data ?? [];
         
         // 가족을 별도로 분리
-        final hasFamily = allGroupTags.contains('가족');
-        final otherGroupTags = allGroupTags.where((tag) => tag != '가족').toList();
+        final hasFamily = filteredGroupTags.contains('가족');
+        final showFamily = hasFamily || _searchQuery.isEmpty;
+        final otherGroupTags = filteredGroupTags.where((tag) => tag != '가족').toList();
         
         return Stack(
           children: [
             Column(
               children: [
                 // 가족 그룹 (맨 위 고정)
-                if (hasFamily || _searchQuery.isEmpty)
+                if (showFamily)
                   Padding(
                     padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
                     child: _buildGroupTagCard('가족', database, isFamily: true),
                   ),
-                // 사용자 정의 그룹 목록
+                // 사용자 정의 그룹 목록 (ReorderableListView로 드래그 순서 변경 지원)
                 Expanded(
-                  child: otherGroupTags.isEmpty
-                    ? (_searchQuery.isNotEmpty 
-                        ? Center(child: Text(strings.contactsNoSearchResult))
-                        : const SizedBox())
-                    : ListView.builder(
-                        padding: const EdgeInsets.fromLTRB(20, 10, 20, 100),
-                        itemCount: otherGroupTags.length,
-                        itemBuilder: (context, index) {
-                          return _buildGroupTagCard(otherGroupTags[index], database);
-                        },
-                      ),
+                  child: (otherGroupTags.isEmpty && !showFamily)
+                    ? Center(child: Text(strings.contactsNoSearchResult))
+                    : otherGroupTags.isEmpty
+                        ? const SizedBox()
+                        : ReorderableListView.builder(
+                            padding: const EdgeInsets.fromLTRB(20, 10, 20, 100),
+                            itemCount: otherGroupTags.length,
+                            onReorder: (oldIndex, newIndex) async {
+                              if (newIndex > oldIndex) newIndex--;
+                              // 순서 변경 시 ContactGroups 테이블의 sortOrder 업데이트
+                              final movedTag = otherGroupTags[oldIndex];
+                              final groups = await database.select(database.contactGroups).get();
+                              final movedGroup = groups.firstWhere((g) => g.name == movedTag, orElse: () => groups.first);
+                              await database.updateContactGroup(movedGroup.copyWith(sortOrder: newIndex));
+                              setState(() {});
+                            },
+                            itemBuilder: (context, index) {
+                              return Container(
+                                key: ValueKey(otherGroupTags[index]),
+                                child: _buildGroupTagCard(otherGroupTags[index], database),
+                              );
+                            },
+                          ),
                 ),
               ],
             ),
