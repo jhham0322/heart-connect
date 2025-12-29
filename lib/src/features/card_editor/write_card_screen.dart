@@ -161,12 +161,12 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   bool _isLoadingFrames = false;
 
   // Style State
-  TextStyle _currentStyle = GoogleFonts.gowunDodum(fontSize: 30, color: const Color(0xFF1A1A1A), height: 1.2);
+  TextStyle _currentStyle = GoogleFonts.gowunDodum(fontSize: 18, color: const Color(0xFF1A1A1A), height: 1.2);
   TextAlign _textAlign = TextAlign.center;
   bool _isBold = false;
   bool _isItalic = false;
   bool _isUnderline = false;
-  double _fontSize = 30.0;
+  double _fontSize = 18.0;
   String _fontName = 'Gowun Dodum';
   
   // Templates (Loaded Dynamically)
@@ -201,7 +201,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
 
   // Footer Style State
   Color _footerColor = Colors.white;
-  double _footerFontSize = 20.0; // 기본 푸터 폰트 크기
+  double _footerFontSize = 18.0; // 기본 푸터 폰트 크기
   String _footerFont = 'Roboto'; // 푸터 폰트 (기본값)
   bool _isFooterBold = true;
   bool _isFooterItalic = false;
