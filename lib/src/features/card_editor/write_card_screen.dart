@@ -18,7 +18,7 @@ import '../gallery/favorites_provider.dart'; // Import favorites provider
 import 'package:drift/drift.dart' hide Column;
 import '../database/app_database.dart';
 import '../database/database_provider.dart';
-import '../database/greeting_data_loader.dart';
+import '../database/greeting_generator.dart';
 import '../../widgets/contact_picker_dialog.dart'; // Common contact picker
 import 'package:flutter_quill/flutter_quill.dart'; // Rich Text Editor
 import 'package:flutter_quill_extensions/flutter_quill_extensions.dart';
@@ -581,38 +581,17 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
 
   // 플레이스홀더는 QuillEditor의 placeholder 속성으로 처리됨 (코드 제거됨)
 
-  /// DB에서 사용 가능한 주제 목록 로드
+  /// Generator에서 사용 가능한 주제 목록 로드 (DB 불필요)
   Future<void> _loadAvailableTopics() async {
-    try {
-      final db = ref.read(appDatabaseProvider);
-      
-      // 주제 테이블에서 조회 (비어있으면 샘플 데이터 로드)
-      var topics = await db.getGreetingTopicNames();
-      
-      if (topics.isEmpty) {
-        // 샘플 데이터 로드
-        try {
-          final loader = GreetingDataLoader(db);
-          await loader.loadGreetingSamplesFromAsset('assets/data/greeting_samples.txt');
-          topics = await db.getGreetingTopicNames();
-          print('[WriteCardScreen] Loaded ${topics.length} greeting topics from asset');
-        } catch (e) {
-          print('[WriteCardScreen] Error loading greeting samples: $e');
-        }
-      }
-      
-      if (mounted) {
-        setState(() {
-          _availableTopics = topics;
-        });
-      }
-    } catch (e) {
-      print('[WriteCardScreen] Error loading topics: $e');
+    if (mounted) {
+      setState(() {
+        _availableTopics = GreetingGenerator.topics;
+      });
     }
   }
 
-  /// DB에서 특정 주제+감성의 랜덤 인사말 가져오기
-  Future<void> _getRandomGreetingFromDb(String sentiment) async {
+  /// Generator에서 특정 주제+감성의 랜덤 인사말 생성 (DB 불필요)
+  void _getRandomGreetingFromGenerator(String sentiment) {
     if (_selectedTopic == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("먼저 주제를 선택해주세요.")),
@@ -620,29 +599,21 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
       return;
     }
     
-    try {
-      final db = ref.read(appDatabaseProvider);
-      final greeting = await db.getRandomGreeting(_selectedTopic!, sentiment);
-      
-      if (greeting != null && mounted) {
-        setState(() {
-          _message = greeting;
-          _quillController.document = Document()..insert(0, greeting);
-        });
-        _saveDraft();
-        Navigator.pop(context); // 팝업 닫기
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("'$_selectedTopic' 주제의 문구를 가져왔습니다.")),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("'$_selectedTopic' 주제에 해당하는 문구가 없습니다.")),
-        );
-      }
-    } catch (e) {
-      print('[WriteCardScreen] Error getting random greeting: $e');
+    final greeting = GreetingGenerator.generateGreeting(_selectedTopic!, sentiment);
+    
+    if (greeting != null && mounted) {
+      setState(() {
+        _message = greeting;
+        _quillController.document = Document()..insert(0, greeting);
+      });
+      _saveDraft();
+      Navigator.pop(context); // 팝업 닫기
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("오류가 발생했습니다.")),
+        SnackBar(content: Text("'$_selectedTopic' 주제의 문구를 생성했습니다.")),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("'$_selectedTopic' 주제에 해당하는 문구를 생성할 수 없습니다.")),
       );
     }
   }
@@ -1705,7 +1676,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
             child: IconButton(
               icon: const Icon(FontAwesomeIcons.dice, color: Color(0xFF4CAF50), size: 18),
               tooltip: '랜덤 문구 가져오기',
-              onPressed: () => _getRandomGreetingFromDb(sentiment),
+              onPressed: () => _getRandomGreetingFromGenerator(sentiment),
             ),
           )
         : null,

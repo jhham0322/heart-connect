@@ -70,7 +70,8 @@ class AdHelper {
     if (Platform.isAndroid) {
       if (kReleaseMode) {
         // TODO: 실제 Rewarded Ad ID로 교체 필요
-        return 'ca-app-pub-0898435964439351/1234567890'; // 임시 ID
+        // TODO: 아래 문자열을 생성하신 실제 리워드 광고 ID로 변경해주세요.
+        return 'ca-app-pub-0898435964439351/1234567890'; // 구글 AdMob에서 발급받은 ID를 여기에 입력
       } else {
         return 'ca-app-pub-3940256099942544/5224354917'; // 테스트 ID
       }
