@@ -15,6 +15,7 @@ import '../../l10n/app_strings.dart';
 import '../../providers/locale_provider.dart';
 import 'favorites_provider.dart';
 import 'gallery_selection_provider.dart';
+import '../../utils/ad_helper.dart'; // AdMob
 
 import 'gallery_data.dart';
 
@@ -271,6 +272,13 @@ class _GalleryDetailScreenState extends ConsumerState<GalleryDetailScreen> {
   void initState() {
     super.initState();
     _loadImages();
+    
+    // 'my_photos' 카테고리 진입 시 전면 광고 표시
+    if (widget.category.id == 'my_photos') {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        AdHelper().showInterstitialAd();
+      });
+    }
   }
 
   // 기기 갤러리에서 사진 로드

@@ -411,31 +411,13 @@ namespace FlutterControlPanel
             {
                 try
                 {
-                    using (SaveFileDialog saveDialog = new SaveFileDialog())
-                    {
-                        saveDialog.Filter = "PNG Image|*.png|All Files|*.*";
-                        saveDialog.Title = "Save Screen Capture";
-                        saveDialog.FileName = $"ConnectHeart_{DateTime.Now:yyyyMMdd_HH_mm_ss}.png";
-                        
-                        // Try to suggest Downloads, fallback to Desktop
-                        string defaultPath = GetDownloadsFolderPath();
-                        if (Directory.Exists(defaultPath))
-                        {
-                            saveDialog.InitialDirectory = defaultPath;
-                        }
-                        else
-                        {
-                            saveDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-                        }
+                    string downloadsPath = GetDownloadsFolderPath();
+                    string timestamp = DateTime.Now.ToString("yyyyMMdd_HH_mm_ss");
+                    string fileName = $"ConnectHeart_{timestamp}.png";
+                    string fullPath = Path.Combine(downloadsPath, fileName);
 
-                        if (saveDialog.ShowDialog() == DialogResult.OK)
-                        {
-                            screenBox.Image.Save(saveDialog.FileName, System.Drawing.Imaging.ImageFormat.Png);
-                            // Optional: Ask to open folder?
-                            // Process.Start("explorer.exe", "/select,\"" + saveDialog.FileName + "\"");
-                            MessageBox.Show($"Saved to: {saveDialog.FileName}", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        }
-                    }
+                    screenBox.Image.Save(fullPath, System.Drawing.Imaging.ImageFormat.Png);
+                    MessageBox.Show($"Screen saved to:\n{fullPath}", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 catch (Exception ex)
                 {
