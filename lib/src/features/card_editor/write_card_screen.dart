@@ -188,7 +188,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
 
   // Footer Style State
   Color _footerColor = Colors.white;
-  double _footerFontSize = 14.0; // 기본 푸터 폰트 크기
+  double _footerFontSize = 20.0; // 기본 푸터 폰트 크기
   String _footerFont = 'Roboto'; // 푸터 폰트 (기본값)
   bool _isFooterBold = true;
   bool _isFooterItalic = false;
@@ -629,6 +629,22 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
 
 
   void _onQuillChanged() {
+    final text = _quillController.document.toPlainText();
+    final lines = text.split('\n');
+    
+    // 8줄 제한
+    if (lines.length > 8) {
+      // 8줄까지만 유지
+      final truncatedText = lines.take(8).join('\n');
+      final doc = Document()..insert(0, truncatedText);
+      _quillController.document = doc;
+      // 커서를 끝으로 이동
+      _quillController.updateSelection(
+        TextSelection.collapsed(offset: truncatedText.length),
+        ChangeSource.local,
+      );
+    }
+    
     setState(() {
       _message = _quillController.document.toPlainText().trim();
     });
@@ -3011,9 +3027,9 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                           final cardWidth = MediaQuery.of(context).size.width * 0.92;
                           final cardHeight = cardWidth * (4 / 3);
                           
-                          // Footer: 글상자 오른쪽 하단 (글상자 아래 10px, 왼쪽으로 30px)
+                          // Footer: 글상자 오른쪽 하단 (글상자 아래, 왼쪽으로 30px)
                           final footerRight = (cardWidth - boxWidth) / 2 - _dragOffset.dx + 45; // 15 + 30 = 45
-                          final footerTop = cardHeight / 2 + _dragOffset.dy + 80; // 90 - 10 = 80
+                          final footerTop = cardHeight / 2 + _dragOffset.dy + 100; // 아래로 더 이동
                           
                           return Positioned(
                             top: footerTop,
