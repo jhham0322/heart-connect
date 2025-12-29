@@ -134,7 +134,12 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
               text: ref.watch(appStringsProvider).contactsGroups,
               icon: FontAwesomeIcons.userGroup,
               isActive: _selectedTabIndex == 1,
-              onTap: () => setState(() => _selectedTabIndex = 1),
+              onTap: () {
+                // 그룹 탭으로 전환 시 currentContactProvider 클리어
+                // (FAB가 이전에 선택한 연락처를 사용하지 않도록)
+                ref.read(currentContactProvider.notifier).state = null;
+                setState(() => _selectedTabIndex = 1);
+              },
             ),
           ),
           const SizedBox(width: 8),
