@@ -780,6 +780,19 @@ class _FullScreenViewerState extends ConsumerState<_FullScreenViewer> {
               );
             },
           ),
+          // 글쓰기 버튼 - 현재 이미지로 카드 작성
+          IconButton(
+            icon: const Icon(FontAwesomeIcons.penNib, color: Colors.white, size: 22),
+            onPressed: () {
+              final selectedImage = widget.images[_currentIndex];
+              Navigator.pop(context); // 뷰어 닫기
+              context.push('/write', extra: {
+                'image': selectedImage,
+                'categoryId': widget.categoryId,
+                'categoryImages': widget.images,
+              });
+            },
+          ),
           // Close/Back Button moved to right
           IconButton(
             icon: const Icon(Icons.close, color: Colors.white, size: 28),
@@ -944,6 +957,20 @@ class _DevicePhotoViewerState extends ConsumerState<_DevicePhotoViewer> {
                 if (_currentFile != null) {
                   ref.read(favoritesProvider.notifier).toggleFavorite(_currentFile!.path);
                 }
+              },
+            ),
+          // 글쓰기 버튼 - 현재 이미지로 카드 작성
+          if (_currentFile != null)
+            IconButton(
+              icon: const Icon(FontAwesomeIcons.penNib, color: Colors.white, size: 22),
+              onPressed: () {
+                final selectedImage = _currentFile!.path;
+                Navigator.pop(context); // 뷰어 닫기
+                context.push('/write', extra: {
+                  'image': selectedImage,
+                  'categoryId': 'my_photos',
+                  'categoryImages': <String>[], // 기기 사진은 목록 전달이 복잡하므로 비워둠
+                });
               },
             ),
           IconButton(
