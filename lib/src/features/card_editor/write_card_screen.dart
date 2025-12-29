@@ -2780,7 +2780,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                               child: Transform.translate(
                                 offset: _dragOffset,
                                 child: GestureDetector(
-                                  behavior: HitTestBehavior.translucent, // Footer도 탭 가능하게
+                                  behavior: HitTestBehavior.deferToChild, // 자식(QuillEditor)이 탭 받도록
                                   onPanDown: _isZoomMode ? null : (details) {
                                     setState(() => _isDragMode = true);
                                   },
