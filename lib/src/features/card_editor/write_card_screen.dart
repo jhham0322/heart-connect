@@ -2940,78 +2940,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                                     
                                     // AI 아이콘은 Scaffold Stack으로 이동됨
                                     
-                                    // 3. Footer (글상자 오른쪽 하단 고정)
-                                    Positioned.fill(
-                                      child: Align(
-                                        alignment: Alignment.bottomRight,
-                                        child: Padding(
-                                          padding: const EdgeInsets.only(right: 15, bottom: -25),
-                                          child: GestureDetector(
-                                            behavior: HitTestBehavior.opaque, // 전체 영역 탭 가능
-                                            onTap: () {
-                                              _footerFocusNode.requestFocus();
-                                              setState(() {
-                                                _isEditorActive = false; // 메인 글상자 편집 모드 해제
-                                                _isFooterActive = true;
-                                              });
-                                              _updateToolbarState();
-                                              _saveDraft();
-                                            },
-                                            child: IntrinsicWidth(
-                                              child: Container(
-                                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                                decoration: BoxDecoration(
-                                                  color: _footerBgColor.withOpacity(_footerBgOpacity),
-                                                  borderRadius: BorderRadius.circular(_footerRadius),
-                                                  border: (_isFooterActive && !_isCapturing)
-                                                      ? Border.all(color: const Color(0xFFF29D86), width: 2.0)
-                                                      : Border.all(color: Colors.transparent, width: 2.0),
-                                                ),
-                                                child: QuillEditor(
-                                                  controller: _footerQuillController,
-                                                  focusNode: _footerFocusNode,
-                                                  scrollController: ScrollController(),
-                                                  config: QuillEditorConfig(
-                                                    autoFocus: false,
-                                                    expands: false,
-                                                    scrollable: false, // Auto-size height
-                                                    padding: EdgeInsets.zero,
-                                                    showCursor: true,
-                                                    placeholder: '보낸 사람',
-                                                    customStyleBuilder: (attribute) {
-                                                      if (attribute.key == 'font') {
-                                                        try {
-                                                          return GoogleFonts.getFont(attribute.value);
-                                                        } catch (e) {
-                                                          return const TextStyle();
-                                                        }
-                                                      }
-                                                      return const TextStyle();
-                                                    },
-                                                    customStyles: DefaultStyles(
-                                                      paragraph: DefaultTextBlockStyle(
-                                                        GoogleFonts.getFont(
-                                                          _footerFont,
-                                                          color: _footerColor,
-                                                          fontSize: _footerFontSize,
-                                                          fontWeight: FontWeight.normal, // Controlled by Quill attributes now
-                                                          fontStyle: FontStyle.normal,
-                                                          decoration: TextDecoration.none,
-                                                        ),
-                                                        HorizontalSpacing.zero,
-                                                        VerticalSpacing.zero,
-                                                        VerticalSpacing.zero,
-                                                        null,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
+                                    // Footer는 CardPreview Stack으로 이동됨
                                   ],
                                 ),
                               ),
@@ -3070,6 +2999,88 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                                   ),
                                 ),
                               ],
+                            ),
+                          );
+                        },
+                      ),
+                    
+                    // Footer (CardPreview Stack - 글상자와 독립적으로 탭 가능)
+                    if (!_isCapturing)
+                      Builder(
+                        builder: (context) {
+                          // 글상자와 동일한 위치 계산
+                          final boxWidth = MediaQuery.of(context).size.width * 0.78;
+                          final cardWidth = MediaQuery.of(context).size.width * 0.92;
+                          final cardHeight = cardWidth * (4 / 3);
+                          // Footer 위치: 글상자 오른쪽 하단
+                          final footerRight = (cardWidth - boxWidth) / 2 - _dragOffset.dx + 15;
+                          final footerTop = cardHeight / 2 + _dragOffset.dy + 60;
+                          
+                          return Positioned(
+                            top: footerTop,
+                            right: footerRight,
+                            child: GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onTap: () {
+                                _footerFocusNode.requestFocus();
+                                setState(() {
+                                  _isEditorActive = false;
+                                  _isFooterActive = true;
+                                });
+                                _updateToolbarState();
+                                _saveDraft();
+                              },
+                              child: IntrinsicWidth(
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: _footerBgColor.withOpacity(_footerBgOpacity),
+                                    borderRadius: BorderRadius.circular(_footerRadius),
+                                    border: (_isFooterActive && !_isCapturing)
+                                        ? Border.all(color: const Color(0xFFF29D86), width: 2.0)
+                                        : Border.all(color: Colors.transparent, width: 2.0),
+                                  ),
+                                  child: QuillEditor(
+                                    controller: _footerQuillController,
+                                    focusNode: _footerFocusNode,
+                                    scrollController: ScrollController(),
+                                    config: QuillEditorConfig(
+                                      autoFocus: false,
+                                      expands: false,
+                                      scrollable: false,
+                                      padding: EdgeInsets.zero,
+                                      showCursor: true,
+                                      placeholder: '보낸 사람',
+                                      customStyleBuilder: (attribute) {
+                                        if (attribute.key == 'font') {
+                                          try {
+                                            return GoogleFonts.getFont(attribute.value);
+                                          } catch (e) {
+                                            return const TextStyle();
+                                          }
+                                        }
+                                        return const TextStyle();
+                                      },
+                                      customStyles: DefaultStyles(
+                                        paragraph: DefaultTextBlockStyle(
+                                          GoogleFonts.getFont(
+                                            _footerFont,
+                                            color: _footerColor,
+                                            fontSize: _footerFontSize,
+                                            fontWeight: FontWeight.normal,
+                                            fontStyle: FontStyle.normal,
+                                            decoration: TextDecoration.none,
+                                          ),
+                                          HorizontalSpacing.zero,
+                                          VerticalSpacing.zero,
+                                          VerticalSpacing.zero,
+                                          null,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
                             ),
                           );
                         },
