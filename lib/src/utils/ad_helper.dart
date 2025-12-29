@@ -28,23 +28,30 @@ class AdHelper {
     loadInterstitialAd();
   }
 
-  /// 배너 광고 ID (테스트 ID)
+  /// 배너 광고 ID
   String get bannerAdUnitId {
     if (Platform.isAndroid) {
-      // Android Test Banner ID
-      return 'ca-app-pub-3940256099942544/6300978111';
+      // kReleaseMode: 앱이 릴리즈(배포) 모드로 빌드되었는지 확인
+      if (kReleaseMode) {
+        return 'ca-app-pub-0898435964439351/2052163203'; // 실제 배너 ID
+      } else {
+        return 'ca-app-pub-3940256099942544/6300978111'; // 테스트 ID
+      }
     } else if (Platform.isIOS) {
-      // iOS Test Banner ID
+      // iOS Test Banner ID (실제 ID가 없으므로 테스트 ID 유지)
       return 'ca-app-pub-3940256099942544/2934735716';
     }
     throw UnsupportedError('Unsupported platform');
   }
 
-  /// 전면 광고 ID (테스트 ID)
+  /// 전면 광고 ID
   String get interstitialAdUnitId {
     if (Platform.isAndroid) {
-      // Android Test Interstitial ID
-      return 'ca-app-pub-3940256099942544/1033173712';
+      if (kReleaseMode) {
+        return 'ca-app-pub-0898435964439351/7684420372'; // 실제 전면 ID
+      } else {
+        return 'ca-app-pub-3940256099942544/1033173712'; // 테스트 ID
+      }
     } else if (Platform.isIOS) {
       // iOS Test Interstitial ID
       return 'ca-app-pub-3940256099942544/4411468910';

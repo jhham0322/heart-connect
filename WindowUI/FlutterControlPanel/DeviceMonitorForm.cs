@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Microsoft.Win32;
 
 namespace FlutterControlPanel
 {
@@ -410,16 +411,31 @@ namespace FlutterControlPanel
             {
                 try
                 {
-                    string downloadsPath = Path.Combine(
-                        Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-                        "Downloads"
-                    );
-                    string timestamp = DateTime.Now.ToString("yyyyMMdd_HH_mm_ss");
-                    string fileName = $"ConnectHeart_{timestamp}.png";
-                    string fullPath = Path.Combine(downloadsPath, fileName);
+                    using (SaveFileDialog saveDialog = new SaveFileDialog())
+                    {
+                        saveDialog.Filter = "PNG Image|*.png|All Files|*.*";
+                        saveDialog.Title = "Save Screen Capture";
+                        saveDialog.FileName = $"ConnectHeart_{DateTime.Now:yyyyMMdd_HH_mm_ss}.png";
+                        
+                        // Try to suggest Downloads, fallback to Desktop
+                        string defaultPath = GetDownloadsFolderPath();
+                        if (Directory.Exists(defaultPath))
+                        {
+                            saveDialog.InitialDirectory = defaultPath;
+                        }
+                        else
+                        {
+                            saveDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                        }
 
-                    screenBox.Image.Save(fullPath, System.Drawing.Imaging.ImageFormat.Png);
-                    MessageBox.Show($"Screen saved to:\n{fullPath}", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        if (saveDialog.ShowDialog() == DialogResult.OK)
+                        {
+                            screenBox.Image.Save(saveDialog.FileName, System.Drawing.Imaging.ImageFormat.Png);
+                            // Optional: Ask to open folder?
+                            // Process.Start("explorer.exe", "/select,\"" + saveDialog.FileName + "\"");
+                            MessageBox.Show($"Saved to: {saveDialog.FileName}", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -453,6 +469,33 @@ namespace FlutterControlPanel
                 logcatProcess.Kill();
             }
             base.OnFormClosing(e);
+        }
+
+        private string GetDownloadsFolderPath()
+        {
+            try
+            {
+                // Check registry for user's download folder
+                string keyName = @"Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders";
+                using (RegistryKey key = Registry.CurrentUser.OpenSubKey(keyName))
+                {
+                    if (key != null)
+                    {
+                        // Look for the Downloads GUID
+                        object val = key.GetValue("{374DE290-123F-4565-9164-39C4925E467B}");
+                        if (val != null)
+                        {
+                            string path = val.ToString();
+                            // Expand checks for %USERPROFILE% etc.
+                            return Environment.ExpandEnvironmentVariables(path);
+                        }
+                    }
+                }
+            }
+            catch { }
+
+            // Fallback to default
+            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
         }
     }
 }
