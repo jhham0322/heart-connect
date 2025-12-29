@@ -166,7 +166,25 @@ class AppStrings {
   String get contactsMessageSent => _fallback(_l10n?.contactsMessageSent, '보냄');
   String get contactsMessageReceived => _fallback(_l10n?.contactsMessageReceived, '받음');
   
-  // ========== 공유하기 ==========
+  // ========== 연락 그룹 ==========
+  String get contactsGroups => _fallback(_l10n?.contactsGroups, '연락 그룹');
+  String get groupManage => _fallback(_l10n?.groupManage, '그룹 관리');
+  String get groupAdd => _fallback(_l10n?.groupAdd, '그룹 추가');
+  String get groupEdit => _fallback(_l10n?.groupEdit, '그룹 편집');
+  String get groupDelete => _fallback(_l10n?.groupDelete, '그룹 삭제');
+  String get groupName => _fallback(_l10n?.groupName, '그룹 이름');
+  String get groupNameHint => _fallback(_l10n?.groupNameHint, '그룹 이름을 입력하세요');
+  String get groupNameRequired => _fallback(_l10n?.groupNameRequired, '그룹 이름을 입력해주세요');
+  String groupDeleteConfirm(String name) => _l10n?.groupDeleteConfirm(name) ?? '"$name" 그룹을 삭제하시겠습니까?';
+  String get groupDeleteDesc => _fallback(_l10n?.groupDeleteDesc, '그룹만 삭제되며, 연락처는 유지됩니다.');
+  String get groupEmpty => _fallback(_l10n?.groupEmpty, '그룹에 연락처가 없습니다');
+  String get groupAddContact => _fallback(_l10n?.groupAddContact, '연락처 추가');
+  String get groupRemoveContact => _fallback(_l10n?.groupRemoveContact, '그룹에서 제거');
+  String get groupSelectGroups => _fallback(_l10n?.groupSelectGroups, '그룹 선택');
+  String get groupNoGroups => _fallback(_l10n?.groupNoGroups, '등록된 그룹이 없습니다');
+  String get groupCreateFirst => _fallback(_l10n?.groupCreateFirst, '첫 번째 그룹을 만들어보세요!');
+  String groupMemberCount(int count) => _l10n?.groupMemberCount(count) ?? '$count명';
+  
   String get shareTitle => _fallback(_l10n?.shareTitle, '공유하기');
   String get shareOtherApps => _fallback(_l10n?.shareOtherApps, '기타 앱으로 공유');
   String get shareKakaoTalk => _fallback(_l10n?.shareKakaoTalk, '카카오톡');
