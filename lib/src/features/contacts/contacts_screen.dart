@@ -870,12 +870,16 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
     
     if (groupContacts.isEmpty) return;
     
-    // recipients JSON 형식으로 변환
+    // recipients 형식으로 변환
     final recipients = groupContacts.map((c) => {'name': c.name, 'phone': c.phone}).toList();
-    final recipientsJson = Uri.encodeComponent(jsonEncode(recipients));
     
     if (mounted) {
-      context.go('/write?recipients=$recipientsJson');
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => WriteCardScreen(initialRecipients: recipients),
+        ),
+      );
     }
   }
 
