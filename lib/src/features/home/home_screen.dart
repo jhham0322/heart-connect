@@ -18,6 +18,7 @@ import '../database/database_provider.dart'; // Added for appDatabaseProvider
 import '../../utils/phone_formatter.dart'; // Added phone formatter utility
 import '../../widgets/contact_picker_dialog.dart'; // Common contact picker dialog
 import '../../l10n/app_strings.dart';
+import '../../widgets/ad_banner_widget.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -356,6 +357,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
         // D. 다가오는 일정
         Expanded(child: _buildUpcomingEvents(homeState.upcomingEvents)),
+        
+        // E. 하단 배너 광고
+        const Padding(
+          padding: EdgeInsets.only(bottom: 90), // BottomNav 높이만큼 패딩
+          child: AdBannerWidget(),
+        ),
       ],
     );
   }

@@ -31,6 +31,7 @@ import 'package:heart_connect/src/services/social_share_service.dart'; // 소셜
 import 'package:heart_connect/src/services/mms_intent_service.dart'; // MMS Intent 발송
 import 'package:heart_connect/src/l10n/app_strings.dart';
 import 'package:heart_connect/src/providers/locale_provider.dart';
+import 'package:heart_connect/src/utils/ad_helper.dart'; // AdMob
 
 class AutoScrollingText extends StatefulWidget {
   final String text;
@@ -4230,8 +4231,12 @@ class _RecipientManagerDialogState extends ConsumerState<RecipientManagerDialog>
         content: Text("${strings.sendResultSuccess(_successCount)}\n${strings.sendResultFailed(_failureCount)}"),
         actions: [
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context); // 팝업 닫기
+              
+              // 전면 광고 표시 (AdMob)
+              await AdHelper().showInterstitialAd();
+              
               if (mounted) Navigator.pop(context); // 발송 관리 화면 닫기
             },
             child: Text(strings.ok),

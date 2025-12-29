@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:window_manager/window_manager.dart';
 import 'src/app.dart';
+import 'src/utils/ad_helper.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,6 +32,11 @@ void main() async {
         debugPrint("Failed to set icon: $e");
       }
     });
+  }
+  
+  // Initialize AdMob (Mobile only)
+  if (Platform.isAndroid || Platform.isIOS) {
+    await AdHelper().initialize();
   }
   
   runApp(const ProviderScope(child: MyApp()));
