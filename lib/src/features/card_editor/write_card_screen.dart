@@ -321,11 +321,13 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
 
     // Add initial contact if provided
     if (widget.initialContact != null) {
-      _recipients.insert(0, "${widget.initialContact!.name} (${widget.initialContact!.phone})");
+      _recipients.clear(); // 기존 수신자 클리어
+      _recipients.add("${widget.initialContact!.name} (${widget.initialContact!.phone})");
       print("[WriteCardScreen] Added initialContact: ${widget.initialContact!.name} to _recipients");
       print("[WriteCardScreen] _recipients now: $_recipients");
     } else if (widget.initialRecipients != null && widget.initialRecipients!.isNotEmpty) {
-      // 일정에서 전달받은 수신자 목록 처리
+      // 그룹에서 전달받은 수신자 목록 처리 - 기존 수신자 클리어
+      _recipients.clear();
       for (var r in widget.initialRecipients!) {
         final name = r['name'] ?? '';
         final phone = r['phone'] ?? '';
