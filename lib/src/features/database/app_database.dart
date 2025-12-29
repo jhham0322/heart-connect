@@ -262,12 +262,22 @@ class AppDatabase extends _$AppDatabase {
 
   // ========== groupTag 기반 그룹 관리 ==========
   
-  // 모든 고유 그룹 태그 조회 (즐겨찾기 제외)
+  // 모든 고유 그룹 태그 조회 (ContactGroups 테이블 + contacts.groupTag 합집합)
   Future<List<String>> getDistinctGroupTags() async {
-    final result = await customSelect(
+    // 1. contacts 테이블에서 실제 사용 중인 groupTag
+    final contactGroupTags = await customSelect(
       'SELECT DISTINCT group_tag FROM contacts WHERE group_tag IS NOT NULL AND group_tag != \'\' ORDER BY group_tag',
     ).get();
-    return result.map((row) => row.read<String>('group_tag')).toList();
+    final fromContacts = contactGroupTags.map((row) => row.read<String>('group_tag')).toSet();
+    
+    // 2. ContactGroups 테이블에서 등록된 그룹 이름
+    final allGroups = await select(contactGroups).get();
+    final fromGroups = allGroups.map((g) => g.name).toSet();
+    
+    // 3. 두 집합 합치기 (중복 제거)
+    final combined = {...fromContacts, ...fromGroups}.toList();
+    combined.sort();
+    return combined;
   }
 
   // 특정 그룹 태그를 가진 연락처 조회
