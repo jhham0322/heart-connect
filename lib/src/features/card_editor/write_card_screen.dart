@@ -353,9 +353,21 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     // }
     _pendingRecipients = List.from(_recipients);
     
-    // 화면 진입 시 텍스트 에디터 자동 포커스 방지
+    // 화면 진입 시 텍스트 에디터 자동 포커스 방지 (여러 프레임에 걸쳐 실행)
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _editorFocusNode.unfocus();
+      _footerFocusNode.unfocus();
       FocusManager.instance.primaryFocus?.unfocus();
+      
+      // 추가적인 지연 포커스 해제
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (mounted) {
+          _editorFocusNode.unfocus();
+          _footerFocusNode.unfocus();
+          FocusManager.instance.primaryFocus?.unfocus();
+        }
+      });
     });
   }
   
