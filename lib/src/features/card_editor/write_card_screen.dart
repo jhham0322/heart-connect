@@ -3015,9 +3015,9 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                           final cardWidth = MediaQuery.of(context).size.width * 0.92;
                           final cardHeight = cardWidth * (4 / 3);
                           
-                          // Footer: 글상자 오른쪽 하단
+                          // Footer: 글상자 오른쪽 하단 (글상자 중앙 + 글상자 높이의 절반 50)
                           final footerRight = (cardWidth - boxWidth) / 2 - _dragOffset.dx + 45;
-                          final footerTop = cardHeight / 2 + _dragOffset.dy; // 글상자 중앙
+                          final footerTop = cardHeight / 2 + _dragOffset.dy + 50; // 글상자 중앙 + 50 (높이 100의 절반)
                           
                           return Positioned(
                             top: footerTop,
@@ -3128,31 +3128,39 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // 글자 크기 콤보박스 (6~32)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6),
-              decoration: BoxDecoration(
-                border: Border.all(color: const Color(0xFFDDDDDD)),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: DropdownButtonHideUnderline(
-                child: DropdownButton<double>(
-                  value: _fontSizeOptions.contains(_fontSize) ? _fontSize : 24,
-                  isDense: true,
-                  style: const TextStyle(fontSize: 12, color: Color(0xFF555555)),
-                  icon: const Icon(Icons.arrow_drop_down, size: 16),
-                  items: _fontSizeOptions.map((size) {
-                    return DropdownMenuItem<double>(
-                      value: size,
-                      child: Text('${size.toInt()}', style: const TextStyle(fontSize: 12)),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    if (value != null) {
-                      _applyFontSize(value, isFooterOverride: isFooterForToolbar);
-                    }
-                  },
-                ),
-              ),
+            Builder(
+              builder: (context) {
+                // Footer 활성화 시 _footerFontSize 사용
+                final currentSize = isFooterForToolbar ? _footerFontSize : _fontSize;
+                final displaySize = _fontSizeOptions.contains(currentSize) ? currentSize : 20.0;
+                
+                return Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: const Color(0xFFDDDDDD)),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<double>(
+                      value: displaySize,
+                      isDense: true,
+                      style: const TextStyle(fontSize: 12, color: Color(0xFF555555)),
+                      icon: const Icon(Icons.arrow_drop_down, size: 16),
+                      items: _fontSizeOptions.map((size) {
+                        return DropdownMenuItem<double>(
+                          value: size,
+                          child: Text('${size.toInt()}', style: const TextStyle(fontSize: 12)),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        if (value != null) {
+                          _applyFontSize(value, isFooterOverride: isFooterForToolbar);
+                        }
+                      },
+                    ),
+                  ),
+                );
+              },
             ),
             const SizedBox(width: 6),
 
