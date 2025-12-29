@@ -2963,8 +2963,8 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                           // 글상자 상단 위치 (카드 중앙 기준)
                           final cardHeight = cardWidth * (4 / 3);
                           // 글상자 중앙 Y = cardHeight / 2 + dragOffset.dy
-                          // 아이콘은 그보다 위로 (글상자 상단 - 5px)
-                          final iconTop = cardHeight / 2 + _dragOffset.dy - 55;
+                          // AI 아이콘: 글상자 상단 위 (고정 높이 100 기준 -50 - 35 = -85)
+                          final iconTop = cardHeight / 2 + _dragOffset.dy - 85;
                           
                           return Positioned(
                             top: iconTop,
@@ -3012,9 +3012,9 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                           final boxWidth = MediaQuery.of(context).size.width * 0.78;
                           final cardWidth = MediaQuery.of(context).size.width * 0.92;
                           final cardHeight = cardWidth * (4 / 3);
-                          // Footer 위치: 글상자 오른쪽 하단
+                          // Footer 위치: 글상자 하단 아래 (고정 높이 100 기준 +50 + 20 = +70)
                           final footerRight = (cardWidth - boxWidth) / 2 - _dragOffset.dx + 15;
-                          final footerTop = cardHeight / 2 + _dragOffset.dy + 60;
+                          final footerTop = cardHeight / 2 + _dragOffset.dy + 70;
                           
                           return Positioned(
                             top: footerTop,
