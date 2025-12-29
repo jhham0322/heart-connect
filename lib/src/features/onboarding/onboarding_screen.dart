@@ -380,7 +380,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   color: const Color(0xFFF29D86),
                   iconSize: 28,
                   splashRadius: 20,
-                  tooltip: '이전 언어',
                 ),
                 
                 // 언어 텍스트 (스와이프 감지)
@@ -427,7 +426,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   color: const Color(0xFFF29D86),
                   iconSize: 28,
                   splashRadius: 20,
-                  tooltip: '다음 언어',
                 ),
               ],
             ),
