@@ -508,6 +508,7 @@ class _GalleryDetailScreenState extends ConsumerState<GalleryDetailScreen> {
          images: _images, 
          initialIndex: index, 
          categoryName: widget.category.title,
+         categoryId: widget.category.id,
        )
      ));
   }
@@ -695,11 +696,13 @@ class _FullScreenViewer extends ConsumerStatefulWidget {
   final List<String> images;
   final int initialIndex;
   final String categoryName;
+  final String categoryId;
 
   const _FullScreenViewer({
     required this.images, 
     required this.initialIndex, 
     required this.categoryName,
+    required this.categoryId,
   });
 
   @override
@@ -716,9 +719,11 @@ class _FullScreenViewerState extends ConsumerState<_FullScreenViewer> {
     _currentIndex = widget.initialIndex;
     _pageController = PageController(initialPage: widget.initialIndex);
     
-    // Sync initial selection
+    // Sync initial selection and category info
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(currentSelectionProvider.notifier).state = widget.images[_currentIndex];
+      ref.read(currentCategoryProvider.notifier).state = widget.categoryId;
+      ref.read(currentCategoryImagesProvider.notifier).state = widget.images;
     });
   }
 

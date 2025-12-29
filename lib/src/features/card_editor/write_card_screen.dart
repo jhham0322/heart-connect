@@ -126,7 +126,18 @@ class WriteCardScreen extends ConsumerStatefulWidget {
   final Contact? initialContact; // Added initialContact parameter
   final String? originalMessage; // Added originalMessage parameter
   final List<Map<String, String>>? initialRecipients; // 일정에서 전달받은 수신자 목록
-  const WriteCardScreen({super.key, this.initialImage, this.initialContact, this.originalMessage, this.initialRecipients});
+  final String? initialCategoryId; // 갤러리에서 전달받은 카테고리 ID
+  final List<String>? initialCategoryImages; // 갤러리에서 전달받은 카테고리 이미지 목록
+  
+  const WriteCardScreen({
+    super.key, 
+    this.initialImage, 
+    this.initialContact, 
+    this.originalMessage, 
+    this.initialRecipients,
+    this.initialCategoryId,
+    this.initialCategoryImages,
+  });
 
   @override
   ConsumerState<WriteCardScreen> createState() => _WriteCardScreenState();
@@ -346,7 +357,19 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     _loadFrameAssets();
     _loadDraft(); // Load full draft including footer
     _loadAvailableTopics(); // DB에서 주제 목록 로드
-
+    
+    // 갤러리에서 전달받은 카테고리 이미지 목록이 있으면 템플릿으로 사용
+    if (widget.initialCategoryImages != null && widget.initialCategoryImages!.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {
+            _templates = widget.initialCategoryImages!;
+            _isLoading = false;
+          });
+          print("[WriteCardScreen] Loaded ${_templates.length} images from gallery category: ${widget.initialCategoryId}");
+        }
+      });
+    }
     // 더미 수신자 데이터 생성 삭제 (사용자 요청: 1명만 있어야 함)
     // for (int i = 1; i <= 20; i++) {
     //   _recipients.add("수신자 $i 010-0000-${i.toString().padLeft(4, '0')}");

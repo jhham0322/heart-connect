@@ -29,11 +29,13 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: '/write',
         parentNavigatorKey: _rootNavigatorKey,
         pageBuilder: (context, state) {
-          final initialImage = state.uri.queryParameters['image'];
+          String? initialImage = state.uri.queryParameters['image'];
           final extra = state.extra;
           Contact? initialContact;
           String? originalMessage;
           List<Map<String, String>>? initialRecipients;
+          String? categoryId;
+          List<String>? categoryImages;
 
           if (extra is Contact) {
             initialContact = extra;
@@ -50,9 +52,19 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                   .map((e) => Map<String, String>.from(e as Map))
                   .toList();
             }
+            // 갤러리에서 전달된 이미지 및 카테고리 정보
+            if (extra['image'] is String) {
+              initialImage = extra['image'] as String;
+            }
+            if (extra['categoryId'] is String) {
+              categoryId = extra['categoryId'] as String;
+            }
+            if (extra['categoryImages'] is List) {
+              categoryImages = List<String>.from(extra['categoryImages'] as List);
+            }
           }
           
-          print("[AppRouter] /write route. contact: ${initialContact?.name}, recipients: ${initialRecipients?.length ?? 0}");
+          print("[AppRouter] /write route. contact: ${initialContact?.name}, recipients: ${initialRecipients?.length ?? 0}, image: $initialImage, category: $categoryId");
           return MaterialPage(
             fullscreenDialog: true,
             child: WriteCardScreen(
@@ -61,6 +73,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               initialContact: initialContact,
               originalMessage: originalMessage,
               initialRecipients: initialRecipients,
+              initialCategoryId: categoryId,
+              initialCategoryImages: categoryImages,
             ),
           );
         },

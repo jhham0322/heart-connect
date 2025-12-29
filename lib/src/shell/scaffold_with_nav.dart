@@ -128,9 +128,15 @@ class ScaffoldWithNav extends ConsumerWidget {
               print("[ScaffoldWithNav] Navigating to Write with contact: ${currentContact.name}");
               context.push('/write', extra: currentContact);
             } else if (selectedImage != null) {
-               print("[ScaffoldWithNav] Navigating to Write with image: $selectedImage");
-               final uri = Uri(path: '/write', queryParameters: {'image': selectedImage});
-               context.push(uri.toString());
+               // 갤러리에서 선택한 이미지가 있는 경우
+               final categoryId = ref.read(currentCategoryProvider);
+               final categoryImages = ref.read(currentCategoryImagesProvider);
+               print("[ScaffoldWithNav] Navigating to Write with image: $selectedImage, category: $categoryId");
+               context.push('/write', extra: {
+                 'image': selectedImage,
+                 'categoryId': categoryId,
+                 'categoryImages': categoryImages,
+               });
             } else {
                context.push('/write');
             }
