@@ -1037,19 +1037,20 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     if (controller.selection.isCollapsed) {
        final len = controller.document.length;
        controller.formatText(0, len, Attribute.fromKeyValue('size', size.toString()));
-       
-       setState(() {
-          if (isFooter) {
-             _footerFontSize = size;
-          } else {
-             _defaultFontSize = size;
-             _fontSize = size;
-             _currentStyle = _currentStyle.copyWith(fontSize: size);
-          }
-       });
     } else {
        controller.formatSelection(Attribute.fromKeyValue('size', size.toString()));
     }
+    
+    // 항상 폰트 사이즈 상태 업데이트
+    setState(() {
+       if (isFooter) {
+          _footerFontSize = size;
+       } else {
+          _defaultFontSize = size;
+          _fontSize = size;
+          _currentStyle = _currentStyle.copyWith(fontSize: size);
+       }
+    });
     _saveDraft();
   }
   
@@ -2954,24 +2955,14 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                     if (!_isCapturing)
                       Builder(
                         builder: (context) {
-                          // 글상자 RenderBox에서 실제 크기와 위치 가져오기
-                          final textBoxRenderBox = _textBoxKey.currentContext?.findRenderObject() as RenderBox?;
-                          if (textBoxRenderBox == null) {
-                            return const SizedBox.shrink();
-                          }
+                          // 글상자와 동일한 위치 계산 (단순 오프셋 방식)
+                          final boxWidth = MediaQuery.of(context).size.width * 0.78;
+                          final cardWidth = MediaQuery.of(context).size.width * 0.92;
+                          final cardHeight = cardWidth * (4 / 3);
                           
-                          // Stack 내의 위치 계산을 위해 상위 RenderBox 필요
-                          final stackRenderBox = context.findRenderObject() as RenderBox?;
-                          if (stackRenderBox == null) {
-                            return const SizedBox.shrink();
-                          }
-                          
-                          final textBoxPosition = textBoxRenderBox.localToGlobal(Offset.zero, ancestor: stackRenderBox);
-                          final textBoxSize = textBoxRenderBox.size;
-                          
-                          // AI 아이콘: 글상자 상단 위, 오른쪽 정렬 (왼쪽으로 20픽셀)
-                          final iconTop = textBoxPosition.dy - 35; // 글상자 상단에서 35px 위
-                          final iconRight = MediaQuery.of(context).size.width * 0.92 - textBoxPosition.dx - textBoxSize.width + 20; // 왼쪽으로 20px
+                          // AI 아이콘: 글상자 오른쪽 상단 (글상자 위 35px)
+                          final iconRight = (cardWidth - boxWidth) / 2 - _dragOffset.dx;
+                          final iconTop = cardHeight / 2 + _dragOffset.dy - 85; // 글상자 중앙에서 위로
                           
                           return Positioned(
                             top: iconTop,
@@ -3015,23 +3006,14 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                     if (!_isCapturing)
                       Builder(
                         builder: (context) {
-                          // 글상자 RenderBox에서 실제 크기와 위치 가져오기
-                          final textBoxRenderBox = _textBoxKey.currentContext?.findRenderObject() as RenderBox?;
-                          if (textBoxRenderBox == null) {
-                            return const SizedBox.shrink();
-                          }
+                          // 글상자와 동일한 위치 계산 (단순 오프셋 방식)
+                          final boxWidth = MediaQuery.of(context).size.width * 0.78;
+                          final cardWidth = MediaQuery.of(context).size.width * 0.92;
+                          final cardHeight = cardWidth * (4 / 3);
                           
-                          final stackRenderBox = context.findRenderObject() as RenderBox?;
-                          if (stackRenderBox == null) {
-                            return const SizedBox.shrink();
-                          }
-                          
-                          final textBoxPosition = textBoxRenderBox.localToGlobal(Offset.zero, ancestor: stackRenderBox);
-                          final textBoxSize = textBoxRenderBox.size;
-                          
-                          // Footer: 글상자 하단 + 50px, 왼쪽으로 20px
-                          final footerTop = textBoxPosition.dy + textBoxSize.height + 50;
-                          final footerRight = MediaQuery.of(context).size.width * 0.92 - textBoxPosition.dx - textBoxSize.width + 20;
+                          // Footer: 글상자 오른쪽 하단 (글상자 아래 15px)
+                          final footerRight = (cardWidth - boxWidth) / 2 - _dragOffset.dx + 15;
+                          final footerTop = cardHeight / 2 + _dragOffset.dy + 90; // 글상자 중앙에서 아래로
                           
                           return Positioned(
                             top: footerTop,
@@ -3047,52 +3029,58 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                                 _updateToolbarState();
                                 _saveDraft();
                               },
-                              child: IntrinsicWidth(
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: _footerBgColor.withOpacity(_footerBgOpacity),
-                                    borderRadius: BorderRadius.circular(_footerRadius),
-                                    border: (_isFooterActive && !_isCapturing)
-                                        ? Border.all(color: const Color(0xFFF29D86), width: 2.0)
-                                        : Border.all(color: Colors.transparent, width: 2.0),
-                                  ),
-                                  child: QuillEditor(
-                                    controller: _footerQuillController,
-                                    focusNode: _footerFocusNode,
-                                    scrollController: ScrollController(),
-                                    config: QuillEditorConfig(
-                                      autoFocus: false,
-                                      expands: false,
-                                      scrollable: false,
-                                      padding: EdgeInsets.zero,
-                                      showCursor: true,
-                                      placeholder: '보낸 사람',
-                                      customStyleBuilder: (attribute) {
-                                        if (attribute.key == 'font') {
-                                          try {
-                                            return GoogleFonts.getFont(attribute.value);
-                                          } catch (e) {
-                                            return const TextStyle();
-                                          }
+                              child: Container(
+                                constraints: const BoxConstraints(maxWidth: 200), // 최대 너비 제한
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: _footerBgColor.withOpacity(_footerBgOpacity),
+                                  borderRadius: BorderRadius.circular(_footerRadius),
+                                  border: (_isFooterActive && !_isCapturing)
+                                      ? Border.all(color: const Color(0xFFF29D86), width: 2.0)
+                                      : Border.all(color: Colors.transparent, width: 2.0),
+                                ),
+                                child: QuillEditor(
+                                  controller: _footerQuillController,
+                                  focusNode: _footerFocusNode,
+                                  scrollController: ScrollController(),
+                                  config: QuillEditorConfig(
+                                    autoFocus: false,
+                                    expands: false,
+                                    scrollable: false,
+                                    padding: EdgeInsets.zero,
+                                    showCursor: true,
+                                    placeholder: '보낸 사람',
+                                    customStyleBuilder: (attribute) {
+                                      if (attribute.key == 'font') {
+                                        try {
+                                          return GoogleFonts.getFont(attribute.value);
+                                        } catch (e) {
+                                          return const TextStyle();
                                         }
-                                        return const TextStyle();
-                                      },
-                                      customStyles: DefaultStyles(
-                                        paragraph: DefaultTextBlockStyle(
-                                          GoogleFonts.getFont(
-                                            _footerFont,
-                                            color: _footerColor,
-                                            fontSize: _footerFontSize,
-                                            fontWeight: FontWeight.normal,
-                                            fontStyle: FontStyle.normal,
-                                            decoration: TextDecoration.none,
-                                          ),
-                                          HorizontalSpacing.zero,
-                                          VerticalSpacing.zero,
-                                          VerticalSpacing.zero,
-                                          null,
+                                      }
+                                      // 폰트 사이즈 attribute 처리
+                                      if (attribute.key == 'size') {
+                                        final size = double.tryParse(attribute.value.toString());
+                                        if (size != null) {
+                                          return TextStyle(fontSize: size);
+                                        }
+                                      }
+                                      return const TextStyle();
+                                    },
+                                    customStyles: DefaultStyles(
+                                      paragraph: DefaultTextBlockStyle(
+                                        GoogleFonts.getFont(
+                                          _footerFont,
+                                          color: _footerColor,
+                                          fontSize: _footerFontSize,
+                                          fontWeight: FontWeight.normal,
+                                          fontStyle: FontStyle.normal,
+                                          decoration: TextDecoration.none,
                                         ),
+                                        HorizontalSpacing.zero,
+                                        VerticalSpacing.zero,
+                                        VerticalSpacing.zero,
+                                        null,
                                       ),
                                     ),
                                   ),
