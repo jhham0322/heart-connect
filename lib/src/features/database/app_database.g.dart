@@ -556,6 +556,11 @@ class $SavedCardsTable extends SavedCards
       defaultConstraints: GeneratedColumn.constraintIsAlways(
           'CHECK ("is_footer_active" IN (0, 1))'),
       defaultValue: const Constant(false));
+  static const VerificationMeta _topicMeta = const VerificationMeta('topic');
+  @override
+  late final GeneratedColumn<String> topic = GeneratedColumn<String>(
+      'topic', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
@@ -576,6 +581,7 @@ class $SavedCardsTable extends SavedCards
         footerStyle,
         mainStyle,
         isFooterActive,
+        topic,
         createdAt
       ];
   @override
@@ -637,6 +643,10 @@ class $SavedCardsTable extends SavedCards
           isFooterActive.isAcceptableOrUnknown(
               data['is_footer_active']!, _isFooterActiveMeta));
     }
+    if (data.containsKey('topic')) {
+      context.handle(
+          _topicMeta, topic.isAcceptableOrUnknown(data['topic']!, _topicMeta));
+    }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
@@ -670,6 +680,8 @@ class $SavedCardsTable extends SavedCards
           .read(DriftSqlType.string, data['${effectivePrefix}main_style']),
       isFooterActive: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}is_footer_active'])!,
+      topic: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}topic']),
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
     );
@@ -692,6 +704,7 @@ class SavedCard extends DataClass implements Insertable<SavedCard> {
   final String? footerStyle;
   final String? mainStyle;
   final bool isFooterActive;
+  final String? topic;
   final DateTime createdAt;
   const SavedCard(
       {required this.id,
@@ -704,6 +717,7 @@ class SavedCard extends DataClass implements Insertable<SavedCard> {
       this.footerStyle,
       this.mainStyle,
       required this.isFooterActive,
+      this.topic,
       required this.createdAt});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -730,6 +744,9 @@ class SavedCard extends DataClass implements Insertable<SavedCard> {
       map['main_style'] = Variable<String>(mainStyle);
     }
     map['is_footer_active'] = Variable<bool>(isFooterActive);
+    if (!nullToAbsent || topic != null) {
+      map['topic'] = Variable<String>(topic);
+    }
     map['created_at'] = Variable<DateTime>(createdAt);
     return map;
   }
@@ -757,6 +774,8 @@ class SavedCard extends DataClass implements Insertable<SavedCard> {
           ? const Value.absent()
           : Value(mainStyle),
       isFooterActive: Value(isFooterActive),
+      topic:
+          topic == null && nullToAbsent ? const Value.absent() : Value(topic),
       createdAt: Value(createdAt),
     );
   }
@@ -775,6 +794,7 @@ class SavedCard extends DataClass implements Insertable<SavedCard> {
       footerStyle: serializer.fromJson<String?>(json['footerStyle']),
       mainStyle: serializer.fromJson<String?>(json['mainStyle']),
       isFooterActive: serializer.fromJson<bool>(json['isFooterActive']),
+      topic: serializer.fromJson<String?>(json['topic']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
     );
   }
@@ -792,6 +812,7 @@ class SavedCard extends DataClass implements Insertable<SavedCard> {
       'footerStyle': serializer.toJson<String?>(footerStyle),
       'mainStyle': serializer.toJson<String?>(mainStyle),
       'isFooterActive': serializer.toJson<bool>(isFooterActive),
+      'topic': serializer.toJson<String?>(topic),
       'createdAt': serializer.toJson<DateTime>(createdAt),
     };
   }
@@ -807,6 +828,7 @@ class SavedCard extends DataClass implements Insertable<SavedCard> {
           Value<String?> footerStyle = const Value.absent(),
           Value<String?> mainStyle = const Value.absent(),
           bool? isFooterActive,
+          Value<String?> topic = const Value.absent(),
           DateTime? createdAt}) =>
       SavedCard(
         id: id ?? this.id,
@@ -819,6 +841,7 @@ class SavedCard extends DataClass implements Insertable<SavedCard> {
         footerStyle: footerStyle.present ? footerStyle.value : this.footerStyle,
         mainStyle: mainStyle.present ? mainStyle.value : this.mainStyle,
         isFooterActive: isFooterActive ?? this.isFooterActive,
+        topic: topic.present ? topic.value : this.topic,
         createdAt: createdAt ?? this.createdAt,
       );
   SavedCard copyWithCompanion(SavedCardsCompanion data) {
@@ -838,6 +861,7 @@ class SavedCard extends DataClass implements Insertable<SavedCard> {
       isFooterActive: data.isFooterActive.present
           ? data.isFooterActive.value
           : this.isFooterActive,
+      topic: data.topic.present ? data.topic.value : this.topic,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
   }
@@ -855,14 +879,26 @@ class SavedCard extends DataClass implements Insertable<SavedCard> {
           ..write('footerStyle: $footerStyle, ')
           ..write('mainStyle: $mainStyle, ')
           ..write('isFooterActive: $isFooterActive, ')
+          ..write('topic: $topic, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, htmlContent, footerText, imagePath,
-      frame, boxStyle, footerStyle, mainStyle, isFooterActive, createdAt);
+  int get hashCode => Object.hash(
+      id,
+      name,
+      htmlContent,
+      footerText,
+      imagePath,
+      frame,
+      boxStyle,
+      footerStyle,
+      mainStyle,
+      isFooterActive,
+      topic,
+      createdAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -877,6 +913,7 @@ class SavedCard extends DataClass implements Insertable<SavedCard> {
           other.footerStyle == this.footerStyle &&
           other.mainStyle == this.mainStyle &&
           other.isFooterActive == this.isFooterActive &&
+          other.topic == this.topic &&
           other.createdAt == this.createdAt);
 }
 
@@ -891,6 +928,7 @@ class SavedCardsCompanion extends UpdateCompanion<SavedCard> {
   final Value<String?> footerStyle;
   final Value<String?> mainStyle;
   final Value<bool> isFooterActive;
+  final Value<String?> topic;
   final Value<DateTime> createdAt;
   const SavedCardsCompanion({
     this.id = const Value.absent(),
@@ -903,6 +941,7 @@ class SavedCardsCompanion extends UpdateCompanion<SavedCard> {
     this.footerStyle = const Value.absent(),
     this.mainStyle = const Value.absent(),
     this.isFooterActive = const Value.absent(),
+    this.topic = const Value.absent(),
     this.createdAt = const Value.absent(),
   });
   SavedCardsCompanion.insert({
@@ -916,6 +955,7 @@ class SavedCardsCompanion extends UpdateCompanion<SavedCard> {
     this.footerStyle = const Value.absent(),
     this.mainStyle = const Value.absent(),
     this.isFooterActive = const Value.absent(),
+    this.topic = const Value.absent(),
     this.createdAt = const Value.absent(),
   }) : htmlContent = Value(htmlContent);
   static Insertable<SavedCard> custom({
@@ -929,6 +969,7 @@ class SavedCardsCompanion extends UpdateCompanion<SavedCard> {
     Expression<String>? footerStyle,
     Expression<String>? mainStyle,
     Expression<bool>? isFooterActive,
+    Expression<String>? topic,
     Expression<DateTime>? createdAt,
   }) {
     return RawValuesInsertable({
@@ -942,6 +983,7 @@ class SavedCardsCompanion extends UpdateCompanion<SavedCard> {
       if (footerStyle != null) 'footer_style': footerStyle,
       if (mainStyle != null) 'main_style': mainStyle,
       if (isFooterActive != null) 'is_footer_active': isFooterActive,
+      if (topic != null) 'topic': topic,
       if (createdAt != null) 'created_at': createdAt,
     });
   }
@@ -957,6 +999,7 @@ class SavedCardsCompanion extends UpdateCompanion<SavedCard> {
       Value<String?>? footerStyle,
       Value<String?>? mainStyle,
       Value<bool>? isFooterActive,
+      Value<String?>? topic,
       Value<DateTime>? createdAt}) {
     return SavedCardsCompanion(
       id: id ?? this.id,
@@ -969,6 +1012,7 @@ class SavedCardsCompanion extends UpdateCompanion<SavedCard> {
       footerStyle: footerStyle ?? this.footerStyle,
       mainStyle: mainStyle ?? this.mainStyle,
       isFooterActive: isFooterActive ?? this.isFooterActive,
+      topic: topic ?? this.topic,
       createdAt: createdAt ?? this.createdAt,
     );
   }
@@ -1006,6 +1050,9 @@ class SavedCardsCompanion extends UpdateCompanion<SavedCard> {
     if (isFooterActive.present) {
       map['is_footer_active'] = Variable<bool>(isFooterActive.value);
     }
+    if (topic.present) {
+      map['topic'] = Variable<String>(topic.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -1025,6 +1072,7 @@ class SavedCardsCompanion extends UpdateCompanion<SavedCard> {
           ..write('footerStyle: $footerStyle, ')
           ..write('mainStyle: $mainStyle, ')
           ..write('isFooterActive: $isFooterActive, ')
+          ..write('topic: $topic, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
@@ -3131,6 +3179,264 @@ class ContactGroupMembershipsCompanion
   }
 }
 
+class $GreetingTemplatesTable extends GreetingTemplates
+    with TableInfo<$GreetingTemplatesTable, GreetingTemplate> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $GreetingTemplatesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  static const VerificationMeta _topicMeta = const VerificationMeta('topic');
+  @override
+  late final GeneratedColumn<String> topic = GeneratedColumn<String>(
+      'topic', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _sentimentMeta =
+      const VerificationMeta('sentiment');
+  @override
+  late final GeneratedColumn<String> sentiment = GeneratedColumn<String>(
+      'sentiment', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _messageMeta =
+      const VerificationMeta('message');
+  @override
+  late final GeneratedColumn<String> message = GeneratedColumn<String>(
+      'message', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [id, topic, sentiment, message];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'greeting_templates';
+  @override
+  VerificationContext validateIntegrity(Insertable<GreetingTemplate> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('topic')) {
+      context.handle(
+          _topicMeta, topic.isAcceptableOrUnknown(data['topic']!, _topicMeta));
+    } else if (isInserting) {
+      context.missing(_topicMeta);
+    }
+    if (data.containsKey('sentiment')) {
+      context.handle(_sentimentMeta,
+          sentiment.isAcceptableOrUnknown(data['sentiment']!, _sentimentMeta));
+    } else if (isInserting) {
+      context.missing(_sentimentMeta);
+    }
+    if (data.containsKey('message')) {
+      context.handle(_messageMeta,
+          message.isAcceptableOrUnknown(data['message']!, _messageMeta));
+    } else if (isInserting) {
+      context.missing(_messageMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  GreetingTemplate map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return GreetingTemplate(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      topic: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}topic'])!,
+      sentiment: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}sentiment'])!,
+      message: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}message'])!,
+    );
+  }
+
+  @override
+  $GreetingTemplatesTable createAlias(String alias) {
+    return $GreetingTemplatesTable(attachedDatabase, alias);
+  }
+}
+
+class GreetingTemplate extends DataClass
+    implements Insertable<GreetingTemplate> {
+  final int id;
+  final String topic;
+  final String sentiment;
+  final String message;
+  const GreetingTemplate(
+      {required this.id,
+      required this.topic,
+      required this.sentiment,
+      required this.message});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['topic'] = Variable<String>(topic);
+    map['sentiment'] = Variable<String>(sentiment);
+    map['message'] = Variable<String>(message);
+    return map;
+  }
+
+  GreetingTemplatesCompanion toCompanion(bool nullToAbsent) {
+    return GreetingTemplatesCompanion(
+      id: Value(id),
+      topic: Value(topic),
+      sentiment: Value(sentiment),
+      message: Value(message),
+    );
+  }
+
+  factory GreetingTemplate.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return GreetingTemplate(
+      id: serializer.fromJson<int>(json['id']),
+      topic: serializer.fromJson<String>(json['topic']),
+      sentiment: serializer.fromJson<String>(json['sentiment']),
+      message: serializer.fromJson<String>(json['message']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'topic': serializer.toJson<String>(topic),
+      'sentiment': serializer.toJson<String>(sentiment),
+      'message': serializer.toJson<String>(message),
+    };
+  }
+
+  GreetingTemplate copyWith(
+          {int? id, String? topic, String? sentiment, String? message}) =>
+      GreetingTemplate(
+        id: id ?? this.id,
+        topic: topic ?? this.topic,
+        sentiment: sentiment ?? this.sentiment,
+        message: message ?? this.message,
+      );
+  GreetingTemplate copyWithCompanion(GreetingTemplatesCompanion data) {
+    return GreetingTemplate(
+      id: data.id.present ? data.id.value : this.id,
+      topic: data.topic.present ? data.topic.value : this.topic,
+      sentiment: data.sentiment.present ? data.sentiment.value : this.sentiment,
+      message: data.message.present ? data.message.value : this.message,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('GreetingTemplate(')
+          ..write('id: $id, ')
+          ..write('topic: $topic, ')
+          ..write('sentiment: $sentiment, ')
+          ..write('message: $message')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, topic, sentiment, message);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is GreetingTemplate &&
+          other.id == this.id &&
+          other.topic == this.topic &&
+          other.sentiment == this.sentiment &&
+          other.message == this.message);
+}
+
+class GreetingTemplatesCompanion extends UpdateCompanion<GreetingTemplate> {
+  final Value<int> id;
+  final Value<String> topic;
+  final Value<String> sentiment;
+  final Value<String> message;
+  const GreetingTemplatesCompanion({
+    this.id = const Value.absent(),
+    this.topic = const Value.absent(),
+    this.sentiment = const Value.absent(),
+    this.message = const Value.absent(),
+  });
+  GreetingTemplatesCompanion.insert({
+    this.id = const Value.absent(),
+    required String topic,
+    required String sentiment,
+    required String message,
+  })  : topic = Value(topic),
+        sentiment = Value(sentiment),
+        message = Value(message);
+  static Insertable<GreetingTemplate> custom({
+    Expression<int>? id,
+    Expression<String>? topic,
+    Expression<String>? sentiment,
+    Expression<String>? message,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (topic != null) 'topic': topic,
+      if (sentiment != null) 'sentiment': sentiment,
+      if (message != null) 'message': message,
+    });
+  }
+
+  GreetingTemplatesCompanion copyWith(
+      {Value<int>? id,
+      Value<String>? topic,
+      Value<String>? sentiment,
+      Value<String>? message}) {
+    return GreetingTemplatesCompanion(
+      id: id ?? this.id,
+      topic: topic ?? this.topic,
+      sentiment: sentiment ?? this.sentiment,
+      message: message ?? this.message,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (topic.present) {
+      map['topic'] = Variable<String>(topic.value);
+    }
+    if (sentiment.present) {
+      map['sentiment'] = Variable<String>(sentiment.value);
+    }
+    if (message.present) {
+      map['message'] = Variable<String>(message.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('GreetingTemplatesCompanion(')
+          ..write('id: $id, ')
+          ..write('topic: $topic, ')
+          ..write('sentiment: $sentiment, ')
+          ..write('message: $message')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -3145,6 +3451,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $ContactGroupsTable contactGroups = $ContactGroupsTable(this);
   late final $ContactGroupMembershipsTable contactGroupMemberships =
       $ContactGroupMembershipsTable(this);
+  late final $GreetingTemplatesTable greetingTemplates =
+      $GreetingTemplatesTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -3158,7 +3466,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         holidays,
         dailyPlans,
         contactGroups,
-        contactGroupMemberships
+        contactGroupMemberships,
+        greetingTemplates
       ];
 }
 
@@ -3565,6 +3874,7 @@ typedef $$SavedCardsTableCreateCompanionBuilder = SavedCardsCompanion Function({
   Value<String?> footerStyle,
   Value<String?> mainStyle,
   Value<bool> isFooterActive,
+  Value<String?> topic,
   Value<DateTime> createdAt,
 });
 typedef $$SavedCardsTableUpdateCompanionBuilder = SavedCardsCompanion Function({
@@ -3578,6 +3888,7 @@ typedef $$SavedCardsTableUpdateCompanionBuilder = SavedCardsCompanion Function({
   Value<String?> footerStyle,
   Value<String?> mainStyle,
   Value<bool> isFooterActive,
+  Value<String?> topic,
   Value<DateTime> createdAt,
 });
 
@@ -3640,6 +3951,9 @@ class $$SavedCardsTableFilterComposer
   ColumnFilters<bool> get isFooterActive => $composableBuilder(
       column: $table.isFooterActive,
       builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get topic => $composableBuilder(
+      column: $table.topic, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnFilters(column));
@@ -3706,6 +4020,9 @@ class $$SavedCardsTableOrderingComposer
       column: $table.isFooterActive,
       builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get topic => $composableBuilder(
+      column: $table.topic, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
 }
@@ -3748,6 +4065,9 @@ class $$SavedCardsTableAnnotationComposer
 
   GeneratedColumn<bool> get isFooterActive => $composableBuilder(
       column: $table.isFooterActive, builder: (column) => column);
+
+  GeneratedColumn<String> get topic =>
+      $composableBuilder(column: $table.topic, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -3807,6 +4127,7 @@ class $$SavedCardsTableTableManager extends RootTableManager<
             Value<String?> footerStyle = const Value.absent(),
             Value<String?> mainStyle = const Value.absent(),
             Value<bool> isFooterActive = const Value.absent(),
+            Value<String?> topic = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
           }) =>
               SavedCardsCompanion(
@@ -3820,6 +4141,7 @@ class $$SavedCardsTableTableManager extends RootTableManager<
             footerStyle: footerStyle,
             mainStyle: mainStyle,
             isFooterActive: isFooterActive,
+            topic: topic,
             createdAt: createdAt,
           ),
           createCompanionCallback: ({
@@ -3833,6 +4155,7 @@ class $$SavedCardsTableTableManager extends RootTableManager<
             Value<String?> footerStyle = const Value.absent(),
             Value<String?> mainStyle = const Value.absent(),
             Value<bool> isFooterActive = const Value.absent(),
+            Value<String?> topic = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
           }) =>
               SavedCardsCompanion.insert(
@@ -3846,6 +4169,7 @@ class $$SavedCardsTableTableManager extends RootTableManager<
             footerStyle: footerStyle,
             mainStyle: mainStyle,
             isFooterActive: isFooterActive,
+            topic: topic,
             createdAt: createdAt,
           ),
           withReferenceMapper: (p0) => p0
@@ -5488,6 +5812,160 @@ typedef $$ContactGroupMembershipsTableProcessedTableManager
         (ContactGroupMembership, $$ContactGroupMembershipsTableReferences),
         ContactGroupMembership,
         PrefetchHooks Function({bool contactId, bool groupId})>;
+typedef $$GreetingTemplatesTableCreateCompanionBuilder
+    = GreetingTemplatesCompanion Function({
+  Value<int> id,
+  required String topic,
+  required String sentiment,
+  required String message,
+});
+typedef $$GreetingTemplatesTableUpdateCompanionBuilder
+    = GreetingTemplatesCompanion Function({
+  Value<int> id,
+  Value<String> topic,
+  Value<String> sentiment,
+  Value<String> message,
+});
+
+class $$GreetingTemplatesTableFilterComposer
+    extends Composer<_$AppDatabase, $GreetingTemplatesTable> {
+  $$GreetingTemplatesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get topic => $composableBuilder(
+      column: $table.topic, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get sentiment => $composableBuilder(
+      column: $table.sentiment, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get message => $composableBuilder(
+      column: $table.message, builder: (column) => ColumnFilters(column));
+}
+
+class $$GreetingTemplatesTableOrderingComposer
+    extends Composer<_$AppDatabase, $GreetingTemplatesTable> {
+  $$GreetingTemplatesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get topic => $composableBuilder(
+      column: $table.topic, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get sentiment => $composableBuilder(
+      column: $table.sentiment, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get message => $composableBuilder(
+      column: $table.message, builder: (column) => ColumnOrderings(column));
+}
+
+class $$GreetingTemplatesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $GreetingTemplatesTable> {
+  $$GreetingTemplatesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get topic =>
+      $composableBuilder(column: $table.topic, builder: (column) => column);
+
+  GeneratedColumn<String> get sentiment =>
+      $composableBuilder(column: $table.sentiment, builder: (column) => column);
+
+  GeneratedColumn<String> get message =>
+      $composableBuilder(column: $table.message, builder: (column) => column);
+}
+
+class $$GreetingTemplatesTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $GreetingTemplatesTable,
+    GreetingTemplate,
+    $$GreetingTemplatesTableFilterComposer,
+    $$GreetingTemplatesTableOrderingComposer,
+    $$GreetingTemplatesTableAnnotationComposer,
+    $$GreetingTemplatesTableCreateCompanionBuilder,
+    $$GreetingTemplatesTableUpdateCompanionBuilder,
+    (
+      GreetingTemplate,
+      BaseReferences<_$AppDatabase, $GreetingTemplatesTable, GreetingTemplate>
+    ),
+    GreetingTemplate,
+    PrefetchHooks Function()> {
+  $$GreetingTemplatesTableTableManager(
+      _$AppDatabase db, $GreetingTemplatesTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$GreetingTemplatesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$GreetingTemplatesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$GreetingTemplatesTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<String> topic = const Value.absent(),
+            Value<String> sentiment = const Value.absent(),
+            Value<String> message = const Value.absent(),
+          }) =>
+              GreetingTemplatesCompanion(
+            id: id,
+            topic: topic,
+            sentiment: sentiment,
+            message: message,
+          ),
+          createCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            required String topic,
+            required String sentiment,
+            required String message,
+          }) =>
+              GreetingTemplatesCompanion.insert(
+            id: id,
+            topic: topic,
+            sentiment: sentiment,
+            message: message,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$GreetingTemplatesTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $GreetingTemplatesTable,
+    GreetingTemplate,
+    $$GreetingTemplatesTableFilterComposer,
+    $$GreetingTemplatesTableOrderingComposer,
+    $$GreetingTemplatesTableAnnotationComposer,
+    $$GreetingTemplatesTableCreateCompanionBuilder,
+    $$GreetingTemplatesTableUpdateCompanionBuilder,
+    (
+      GreetingTemplate,
+      BaseReferences<_$AppDatabase, $GreetingTemplatesTable, GreetingTemplate>
+    ),
+    GreetingTemplate,
+    PrefetchHooks Function()>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -5511,4 +5989,6 @@ class $AppDatabaseManager {
   $$ContactGroupMembershipsTableTableManager get contactGroupMemberships =>
       $$ContactGroupMembershipsTableTableManager(
           _db, _db.contactGroupMemberships);
+  $$GreetingTemplatesTableTableManager get greetingTemplates =>
+      $$GreetingTemplatesTableTableManager(_db, _db.greetingTemplates);
 }

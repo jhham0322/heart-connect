@@ -59,6 +59,7 @@ class SavedCards extends Table {
   TextColumn get footerStyle => text().nullable()();
   TextColumn get mainStyle => text().nullable()();
   BoolColumn get isFooterActive => boolean().withDefault(const Constant(false))();
+  TextColumn get topic => text().nullable()(); // 선택된 주제 (새해, 감사, 크리스마스 등)
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 }
 
@@ -89,6 +90,14 @@ class ContactGroupMemberships extends Table {
   Set<Column> get primaryKey => {contactId, groupId};
 }
 
+// 9. Greeting Templates Table
+class GreetingTemplates extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get topic => text()();      // 주제: 새해, 감사, 크리스마스 등
+  TextColumn get sentiment => text()();  // 감성종류: polite, witty, friendly, poetic
+  TextColumn get message => text()();    // 문구 내용
+}
+
 class DailyPlans extends Table {
   IntColumn get id => integer().autoIncrement()();
   DateTimeColumn get date => dateTime()();
@@ -101,7 +110,7 @@ class DailyPlans extends Table {
   TextColumn get recipients => text().nullable()(); // JSON list of recipients: [{"name":"Kim","phone":"010..."}]
 }
 
-@DriftDatabase(tables: [Contacts, History, Templates, GalleryFavorites, SavedCards, Holidays, DailyPlans, ContactGroups, ContactGroupMemberships])
+@DriftDatabase(tables: [Contacts, History, Templates, GalleryFavorites, SavedCards, Holidays, DailyPlans, ContactGroups, ContactGroupMemberships, GreetingTemplates])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
   
@@ -109,7 +118,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(QueryExecutor e) : super(e);
 
   @override
-  int get schemaVersion => 11; // Version 11: Contact Groups
+  int get schemaVersion => 12; // Version 12: Greeting Templates & SavedCards topic
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -158,6 +167,11 @@ class AppDatabase extends _$AppDatabase {
         // Version 11: Contact Groups feature
         await m.createTable(contactGroups);
         await m.createTable(contactGroupMemberships);
+      }
+      if (from < 12) {
+        // Version 12: Greeting Templates & SavedCards topic
+        await m.createTable(greetingTemplates);
+        await m.addColumn(savedCards, savedCards.topic);
       }
     },
     beforeOpen: (details) async {
@@ -726,6 +740,47 @@ class AppDatabase extends _$AppDatabase {
     }
   }
 
+  // --- Greeting Templates Methods ---
+  
+  /// 인사말 삽입
+  Future<int> insertGreeting(GreetingTemplatesCompanion entry) => 
+    into(greetingTemplates).insert(entry);
+  
+  /// 여러 인사말 일괄 삽입
+  Future<void> insertGreetings(List<GreetingTemplatesCompanion> entries) async {
+    await batch((batch) {
+      batch.insertAll(greetingTemplates, entries);
+    });
+  }
+  
+  /// 사용 가능한 주제 목록 조회
+  Future<List<String>> getDistinctTopics() async {
+    final result = await customSelect(
+      'SELECT DISTINCT topic FROM greeting_templates ORDER BY topic',
+    ).get();
+    return result.map((row) => row.read<String>('topic')).toList();
+  }
+  
+  /// 특정 주제+감성에서 랜덤 문구 조회
+  Future<String?> getRandomGreeting(String topic, String sentiment) async {
+    final result = await customSelect(
+      'SELECT message FROM greeting_templates WHERE topic = ? AND sentiment = ? ORDER BY RANDOM() LIMIT 1',
+      variables: [Variable.withString(topic), Variable.withString(sentiment)],
+    ).getSingleOrNull();
+    return result?.read<String>('message');
+  }
+  
+  /// 특정 주제의 모든 문구 조회 (감성 무관)
+  Future<List<GreetingTemplate>> getGreetingsByTopic(String topic) {
+    return (select(greetingTemplates)..where((t) => t.topic.equals(topic))).get();
+  }
+  
+  /// 모든 인사말 템플릿 조회
+  Future<List<GreetingTemplate>> getAllGreetingTemplates() => select(greetingTemplates).get();
+  
+  /// 인사말 템플릿 삭제 (주제별)
+  Future<int> deleteGreetingsByTopic(String topic) =>
+    (delete(greetingTemplates)..where((t) => t.topic.equals(topic))).go();
 
 }
 

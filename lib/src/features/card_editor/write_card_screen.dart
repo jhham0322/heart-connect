@@ -282,6 +282,10 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   List<SavedCard> _savedCards = [];
   int? _currentCardId;
 
+  // Greeting Templates State (주제별 인사말)
+  String? _selectedTopic;  // 현재 선택된 주제
+  List<String> _availableTopics = [];  // DB에서 가져온 주제 목록
+
   @override
   void initState() {
     super.initState();
@@ -344,6 +348,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     _loadTemplateAssets();
     _loadFrameAssets();
     _loadDraft(); // Load full draft including footer
+    _loadAvailableTopics(); // DB에서 주제 목록 로드
 
     // 더미 수신자 데이터 생성 삭제 (사용자 요청: 1명만 있어야 함)
     // for (int i = 1; i <= 20; i++) {
@@ -400,6 +405,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
           'transformMatrix': _transformationController.value.storage.toList(), // Save Zoom/Pan State
         },
         'isFooterActive': _isFooterActive,
+        'topic': _selectedTopic, // 선택된 주제 저장
         'timestamp': DateTime.now().toIso8601String(),
       };
       
@@ -494,6 +500,9 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
               _currentStyle = GoogleFonts.greatVibes(fontSize: _fontSize, color: _defaultColor);
             }
           }
+
+          // Restore Topic (인사말 주제)
+          _selectedTopic = data['topic'];
         });
         
         // Ensure UI reflects state
@@ -548,6 +557,57 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
       _message = placeholder;
       _quillController.document = Document()..insert(0, placeholder);
     });
+  }
+
+  /// DB에서 사용 가능한 주제 목록 로드
+  Future<void> _loadAvailableTopics() async {
+    try {
+      final db = ref.read(appDatabaseProvider);
+      final topics = await db.getDistinctTopics();
+      if (mounted) {
+        setState(() {
+          _availableTopics = topics;
+        });
+      }
+    } catch (e) {
+      print('[WriteCardScreen] Error loading topics: $e');
+    }
+  }
+
+  /// DB에서 특정 주제+감성의 랜덤 인사말 가져오기
+  Future<void> _getRandomGreetingFromDb(String sentiment) async {
+    if (_selectedTopic == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("먼저 주제를 선택해주세요.")),
+      );
+      return;
+    }
+    
+    try {
+      final db = ref.read(appDatabaseProvider);
+      final greeting = await db.getRandomGreeting(_selectedTopic!, sentiment);
+      
+      if (greeting != null && mounted) {
+        setState(() {
+          _message = greeting;
+          _quillController.document = Document()..insert(0, greeting);
+        });
+        _saveDraft();
+        Navigator.pop(context); // 팝업 닫기
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("'$_selectedTopic' 주제의 문구를 가져왔습니다.")),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("'$_selectedTopic' 주제에 해당하는 문구가 없습니다.")),
+        );
+      }
+    } catch (e) {
+      print('[WriteCardScreen] Error getting random greeting: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("오류가 발생했습니다.")),
+      );
+    }
   }
 
   Future<void> _fetchAllSavedCards() async {
@@ -1477,6 +1537,9 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   }
 
   Widget _buildToneOption(String label, String toneParam, IconData icon) {
+    // toneParam에서 sentiment 추출 (예: "polite, formal..." -> "polite")
+    final sentiment = toneParam.split(',').first.trim();
+    
     return ListTile(
       leading: Container(
         padding: const EdgeInsets.all(8),
@@ -1484,6 +1547,20 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
         child: Icon(icon, color: const Color(0xFFF29D86), size: 20),
       ),
       title: Text(label),
+      // 주사위 아이콘: 주제가 선택된 경우에만 표시
+      trailing: _selectedTopic != null
+        ? Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFFE8F5E9),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: IconButton(
+              icon: const Icon(FontAwesomeIcons.dice, color: Color(0xFF4CAF50), size: 18),
+              tooltip: '랜덤 문구 가져오기',
+              onPressed: () => _getRandomGreetingFromDb(sentiment),
+            ),
+          )
+        : null,
       onTap: () {
         if (_isAiLoading) return;
         // Set loading state immediately to prevent multiple clicks
