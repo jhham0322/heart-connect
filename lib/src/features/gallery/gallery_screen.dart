@@ -607,14 +607,12 @@ class _GalleryDetailScreenState extends ConsumerState<GalleryDetailScreen> {
                 final isFilePath = imagePath.startsWith('/') || imagePath.contains(':\\');
                 final isFavorite = ref.watch(favoritesProvider).contains(imagePath);
                 
-                // 프리미엄 이미지 확인 (파일명 기반)
-                // newyear 카테고리: New1_만 무료, New2_~New6_는 유료
+                // 프리미엄 이미지 확인 (인덱스 기반)
+                // newyear 카테고리: 인덱스 200까지 무료
                 final bool isPremium;
                 if (widget.category.id == 'newyear') {
-                  // 파일명 추출 (Windows/Unix 경로 모두 처리)
-                  final fileName = imagePath.split(RegExp(r'[/\\]')).last.toLowerCase();
-                  // new1_로 시작하면 무료, 그 외(new2_~new6_)는 유료
-                  isPremium = !fileName.startsWith('new1_');
+                  // 인덱스 200 미만은 무료, 200 이상은 유료
+                  isPremium = index >= 200;
                 } else {
                   isPremium = widget.category.isPremium(index);
                 }

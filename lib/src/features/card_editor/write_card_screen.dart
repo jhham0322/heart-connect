@@ -457,6 +457,14 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
       
       if (draftJson == null || draftJson.isEmpty) {
         _loadSavedFooter(); // Fallback to old footer save if no full draft
+        // 이전 드래프트가 없으면 주제 선택 팝업 자동 표시
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            Future.delayed(const Duration(milliseconds: 500), () {
+              if (mounted) _showAiToneSelector();
+            });
+          }
+        });
         return;
       }
 
@@ -2156,6 +2164,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   }
   
   // PNG를 JPEG로 변환하여 저장 (MMS 전송용 파일 크기 최적화)
+  // 하단에 "마음을 전합니다(마음이음)" 워터마크 추가
   Future<Uint8List?> _convertPngToJpeg(Uint8List pngBytes) async {
     try {
       // PNG 디코딩
@@ -2165,8 +2174,32 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
         return null;
       }
       
+      // 워터마크 추가를 위한 새 이미지 생성 (원본 + 하단 여백)
+      const watermarkHeight = 40;
+      final newImage = img.Image(
+        width: image.width,
+        height: image.height + watermarkHeight,
+        numChannels: 3,
+      );
+      
+      // 배경을 흰색으로 채우기
+      img.fill(newImage, color: img.ColorFloat32.rgb(255, 255, 255));
+      
+      // 원본 이미지 복사
+      img.compositeImage(newImage, image, dstX: 0, dstY: 0);
+      
+      // 워터마크 텍스트 추가
+      img.drawString(
+        newImage,
+        '마음을 전합니다 (마음이음)',
+        font: img.arial24,
+        x: (image.width ~/ 2) - 130, // 중앙 정렬 (대략)
+        y: image.height + 8,
+        color: img.ColorFloat32.rgb(128, 128, 128), // 회색
+      );
+      
       // JPEG로 인코딩 (품질 85% - 파일 크기와 화질 균형)
-      final jpegBytes = img.encodeJpg(image, quality: 85);
+      final jpegBytes = img.encodeJpg(newImage, quality: 85);
       return Uint8List.fromList(jpegBytes);
     } catch (e) {
       print("JPEG 변환 오류: $e");
