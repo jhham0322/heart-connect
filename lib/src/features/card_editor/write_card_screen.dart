@@ -753,10 +753,13 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
         final sizeStr = style.attributes['size']?.value;
         if (sizeStr != null) {
              final parsed = double.tryParse(sizeStr.toString());
-             if (parsed != null) _fontSize = parsed;
+             if (parsed != null) {
+               // 유효한 옵션에 없으면 가장 가까운 값 사용
+               _fontSize = _fontSizeOptions.contains(parsed) ? parsed : 20.0;
+             }
         }
       } else {
-        _fontSize = _isFooterActive ? _footerFontSize : 24.0;
+        _fontSize = _isFooterActive ? (_fontSizeOptions.contains(_footerFontSize) ? _footerFontSize : 20.0) : 24.0;
       }
       
       // 폰트 패밀리 확인
@@ -2859,8 +2862,8 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                                   key: _textBoxKey,
                                   width: MediaQuery.of(context).size.width * 0.78,
                                  constraints: const BoxConstraints(
-                                   minHeight: 180, // 고정 높이
-                                   maxHeight: 180, // 고정 높이
+                                   minHeight: 240, // 고정 높이 (180 + 60)
+                                   maxHeight: 240, // 고정 높이
                                  ),
                                  padding: const EdgeInsets.fromLTRB(20, 20, 30, 20), // 위아래 20씩
                                 decoration: ShapeDecoration(
@@ -2903,8 +2906,8 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                                         // 2. 편집 가능한 QuillEditor (고정 높이 140 = 180 - 40)
                                         ConstrainedBox(
                                           constraints: const BoxConstraints(
-                                            minHeight: 140,
-                                            maxHeight: 140,
+                                            minHeight: 200, // 240 - 40 (padding)
+                                            maxHeight: 200,
                                           ),
                                           child: QuillEditor(
                                             controller: _quillController,
