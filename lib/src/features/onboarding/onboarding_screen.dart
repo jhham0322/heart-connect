@@ -262,7 +262,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(24),
               child: Image.asset(
-                'assets/icons/icon-512.png',
+                'assets/icons/onboarding_heart.png',
                 width: 160,
                 height: 160,
                 fit: BoxFit.cover,
