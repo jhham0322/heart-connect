@@ -207,6 +207,8 @@ class AppStrings {
   String get galleryTravel => _fallback(_l10n?.galleryTravel, '여행');
   String get galleryHobby => _fallback(_l10n?.galleryHobby, '취미');
   String get gallerySports => _fallback(_l10n?.gallerySports, '스포츠');
+  String get galleryQute => _fallback(_l10n?.galleryQute, '귀여움');
+  String get galleryHeaven => _fallback(_l10n?.galleryHeaven, '천국');
   String get galleryMyPhotos => _fallback(_l10n?.galleryMyPhotos, '내 사진');
   String get gallerySelectImage => _fallback(_l10n?.gallerySelectImage, '이미지 선택');
   String get galleryNoImages => _fallback(_l10n?.galleryNoImages, '이미지가 없습니다');

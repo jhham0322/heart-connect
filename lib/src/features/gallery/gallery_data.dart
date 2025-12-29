@@ -20,6 +20,8 @@ final List<CategoryItem> galleryCategories = [
   CategoryItem(id: 'tour', title: 'Travel', icon: FontAwesomeIcons.plane, color: const Color(0xFFA5D6A7)), 
   CategoryItem(id: 'hobby', title: 'Hobby', icon: FontAwesomeIcons.puzzlePiece, color: const Color(0xFFB39DDB)), 
   CategoryItem(id: 'sports', title: 'Sports', icon: FontAwesomeIcons.futbol, color: const Color(0xFF81C784)), 
+  CategoryItem(id: 'qute', title: 'Qute', icon: FontAwesomeIcons.faceSmileBeam, color: const Color(0xFFFFCC80)), 
+  CategoryItem(id: 'heaven', title: 'Heaven', icon: FontAwesomeIcons.dove, color: const Color(0xFF81D4FA)), 
   CategoryItem(id: 'my_photos', title: 'My Photos', icon: FontAwesomeIcons.images, color: const Color(0xFF90A4AE)), 
   CategoryItem(id: 'favorites', title: 'Favorites', icon: FontAwesomeIcons.solidHeart, color: const Color(0xFFE57373)), 
 ];

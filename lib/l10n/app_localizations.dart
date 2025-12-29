@@ -884,6 +884,18 @@ abstract class AppLocalizations {
   /// **'스포츠'**
   String get gallerySports;
 
+  /// No description provided for @galleryQute.
+  ///
+  /// In ko, this message translates to:
+  /// **'귀여움'**
+  String get galleryQute;
+
+  /// No description provided for @galleryHeaven.
+  ///
+  /// In ko, this message translates to:
+  /// **'천국'**
+  String get galleryHeaven;
+
   /// No description provided for @galleryMyPhotos.
   ///
   /// In ko, this message translates to:

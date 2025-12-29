@@ -402,6 +402,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get gallerySports => 'رياضة';
 
   @override
+  String get galleryQute => 'لطيف';
+
+  @override
+  String get galleryHeaven => 'الجنة';
+
+  @override
   String get galleryMyPhotos => 'صوري';
 
   @override

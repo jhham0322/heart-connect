@@ -404,6 +404,12 @@ class AppLocalizationsHi extends AppLocalizations {
   String get gallerySports => 'खेल';
 
   @override
+  String get galleryQute => 'प्यारा';
+
+  @override
+  String get galleryHeaven => 'स्वर्ग';
+
+  @override
   String get galleryMyPhotos => 'मेरी तस्वीरें';
 
   @override

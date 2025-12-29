@@ -397,6 +397,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get gallerySports => '运动';
 
   @override
+  String get galleryQute => '可爱';
+
+  @override
+  String get galleryHeaven => '天堂';
+
+  @override
   String get galleryMyPhotos => '我的相册';
 
   @override

@@ -404,6 +404,12 @@ class AppLocalizationsId extends AppLocalizations {
   String get gallerySports => 'Olahraga';
 
   @override
+  String get galleryQute => 'Lucu';
+
+  @override
+  String get galleryHeaven => 'Surga';
+
+  @override
   String get galleryMyPhotos => 'Foto Saya';
 
   @override

@@ -51,6 +51,8 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
       case 'tour': return strings.galleryTravel;
       case 'hobby': return strings.galleryHobby;
       case 'sports': return strings.gallerySports;
+      case 'qute': return strings.galleryQute;
+      case 'heaven': return strings.galleryHeaven;
       case 'my_photos': return strings.galleryMyPhotos;
       case 'favorites': return strings.contactsFavorites;
       default: return id;
@@ -543,6 +545,8 @@ class _GalleryDetailScreenState extends ConsumerState<GalleryDetailScreen> {
       case 'tour': localizedTitle = strings.galleryTravel; break;
       case 'hobby': localizedTitle = strings.galleryHobby; break;
       case 'sports': localizedTitle = strings.gallerySports; break;
+      case 'qute': localizedTitle = strings.galleryQute; break;
+      case 'heaven': localizedTitle = strings.galleryHeaven; break;
       case 'my_photos': localizedTitle = strings.galleryMyPhotos; break;
       case 'favorites': localizedTitle = strings.contactsFavorites; break;
       default: localizedTitle = widget.category.title;

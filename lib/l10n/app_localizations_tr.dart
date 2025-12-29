@@ -404,6 +404,12 @@ class AppLocalizationsTr extends AppLocalizations {
   String get gallerySports => 'Spor';
 
   @override
+  String get galleryQute => 'Sevimli';
+
+  @override
+  String get galleryHeaven => 'Cennet';
+
+  @override
   String get galleryMyPhotos => 'Fotoğraflarım';
 
   @override

@@ -405,6 +405,12 @@ class AppLocalizationsPt extends AppLocalizations {
   String get gallerySports => 'Esporte';
 
   @override
+  String get galleryQute => 'Fofo';
+
+  @override
+  String get galleryHeaven => 'Céu';
+
+  @override
   String get galleryMyPhotos => 'Minhas fotos';
 
   @override

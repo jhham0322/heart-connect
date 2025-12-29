@@ -400,6 +400,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get gallerySports => '스포츠';
 
   @override
+  String get galleryQute => '귀여움';
+
+  @override
+  String get galleryHeaven => '천국';
+
+  @override
   String get galleryMyPhotos => '내 사진';
 
   @override

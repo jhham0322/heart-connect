@@ -405,6 +405,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get gallerySports => 'Спорт';
 
   @override
+  String get galleryQute => 'Милый';
+
+  @override
+  String get galleryHeaven => 'Рай';
+
+  @override
   String get galleryMyPhotos => 'Мои фото';
 
   @override

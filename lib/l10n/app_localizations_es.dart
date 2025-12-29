@@ -405,6 +405,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get gallerySports => 'Deportes';
 
   @override
+  String get galleryQute => 'Lindo';
+
+  @override
+  String get galleryHeaven => 'Cielo';
+
+  @override
   String get galleryMyPhotos => 'Mis fotos';
 
   @override

@@ -399,6 +399,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get gallerySports => 'スポーツ';
 
   @override
+  String get galleryQute => 'キュート';
+
+  @override
+  String get galleryHeaven => '天国';
+
+  @override
   String get galleryMyPhotos => 'マイフォト';
 
   @override
