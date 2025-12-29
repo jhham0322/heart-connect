@@ -188,7 +188,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
 
   // Footer Style State
   Color _footerColor = Colors.white;
-  double _footerFontSize = 10.0;
+  double _footerFontSize = 14.0; // 기본 푸터 폰트 크기
   String _footerFont = 'Roboto'; // 푸터 폰트 (기본값)
   bool _isFooterBold = true;
   bool _isFooterItalic = false;
@@ -2960,8 +2960,8 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                           final cardWidth = MediaQuery.of(context).size.width * 0.92;
                           final cardHeight = cardWidth * (4 / 3);
                           
-                          // AI 아이콘: 글상자 오른쪽 상단 (글상자 위 35px)
-                          final iconRight = (cardWidth - boxWidth) / 2 - _dragOffset.dx;
+                          // AI 아이콘: 글상자 오른쪽 상단 (글상자 위 35px, 왼쪽으로 30px)
+                          final iconRight = (cardWidth - boxWidth) / 2 - _dragOffset.dx + 30;
                           final iconTop = cardHeight / 2 + _dragOffset.dy - 85; // 글상자 중앙에서 위로
                           
                           return Positioned(
@@ -3011,9 +3011,9 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                           final cardWidth = MediaQuery.of(context).size.width * 0.92;
                           final cardHeight = cardWidth * (4 / 3);
                           
-                          // Footer: 글상자 오른쪽 하단 (글상자 아래 15px)
-                          final footerRight = (cardWidth - boxWidth) / 2 - _dragOffset.dx + 15;
-                          final footerTop = cardHeight / 2 + _dragOffset.dy + 90; // 글상자 중앙에서 아래로
+                          // Footer: 글상자 오른쪽 하단 (글상자 아래 10px, 왼쪽으로 30px)
+                          final footerRight = (cardWidth - boxWidth) / 2 - _dragOffset.dx + 45; // 15 + 30 = 45
+                          final footerTop = cardHeight / 2 + _dragOffset.dy + 80; // 90 - 10 = 80
                           
                           return Positioned(
                             top: footerTop,
