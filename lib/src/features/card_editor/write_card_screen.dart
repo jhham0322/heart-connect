@@ -149,7 +149,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   String _message = ""; // Will be set to localized placeholder if empty
   late final TextEditingController _messageController;
   late final TextEditingController _footerController;
-  String _footerText = "HEART-CONNECT";
+  String _footerText = ""; // 기본값 빈 문자열 (처음에 안 보임)
   
   // Default placeholder matching the Nativity scene
   String _selectedImage = "assets/images/cards/christmas/baecb8cc-2d6e-40a3-9754-95eae4022ab7.png"; 
