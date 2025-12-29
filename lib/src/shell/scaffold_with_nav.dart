@@ -84,7 +84,7 @@ class ScaffoldWithNav extends ConsumerWidget {
         ),
       ),
       body: navigationShell,
-      extendBody: true,
+      extendBody: false,
       floatingActionButton: Container(
         height: 70,
         width: 70,

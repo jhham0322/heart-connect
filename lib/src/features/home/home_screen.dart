@@ -360,7 +360,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         
         // E. 하단 배너 광고
         const Padding(
-          padding: EdgeInsets.only(bottom: 90), // BottomNav 높이만큼 패딩
+          padding: EdgeInsets.only(bottom: 8),
           child: AdBannerWidget(),
         ),
       ],
