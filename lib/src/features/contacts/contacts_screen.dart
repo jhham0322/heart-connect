@@ -842,7 +842,14 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
   Future<void> _navigateToWriteCardWithGroup(AppDatabase database) async {
     if (_selectedGroupTag == null) return;
     
-    final groupContacts = await database.getContactsByGroupTag(_selectedGroupTag!);
+    // 가족 그룹일 때는 isFamilyContact 함수로 필터링
+    List<Contact> groupContacts;
+    if (_selectedGroupTag == '가족') {
+      final allContacts = await database.getAllContacts();
+      groupContacts = allContacts.where((c) => isFamilyContact(c)).toList();
+    } else {
+      groupContacts = await database.getContactsByGroupTag(_selectedGroupTag!);
+    }
     
     if (groupContacts.isEmpty) return;
     
@@ -983,7 +990,8 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
     final groupContacts = await database.getContactsByGroupTag(groupTag);
     final groupContactIds = groupContacts.map((c) => c.id).toSet();
     
-    final availableContacts = allContacts.where((c) => !groupContactIds.contains(c.id) && (c.groupTag == null || c.groupTag!.isEmpty)).toList();
+    // 해당 그룹에 이미 추가된 연락처만 제외 (다른 그룹 멤버는 포함)
+    final availableContacts = allContacts.where((c) => !groupContactIds.contains(c.id)).toList();
     
     if (!mounted) return;
     
