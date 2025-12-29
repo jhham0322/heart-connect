@@ -273,10 +273,13 @@ class _GalleryDetailScreenState extends ConsumerState<GalleryDetailScreen> {
     super.initState();
     _loadImages();
     
-    // 'my_photos' 카테고리 진입 시 전면 광고 표시
+    // 'my_photos' 카테고리 진입 시 20% 확률로 전면 광고 표시
     if (widget.category.id == 'my_photos') {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        AdHelper().showInterstitialAd();
+        final random = DateTime.now().millisecondsSinceEpoch % 5;
+        if (random == 0) {
+          AdHelper().showInterstitialAd();
+        }
       });
     }
   }
@@ -920,8 +923,10 @@ class _DevicePhotoViewerState extends ConsumerState<_DevicePhotoViewer> {
     final file = await widget.assets[_currentIndex].file;
     if (mounted && file != null) {
       setState(() => _currentFile = file);
-      // selection provider에 파일 경로 설정
+      // selection provider에 파일 경로 설정 (FAB에서 사용)
       ref.read(currentSelectionProvider.notifier).state = file.path;
+      // 카테고리 정보도 설정 (FAB에서 my_photos 카테고리로 인식)
+      ref.read(currentCategoryProvider.notifier).state = 'my_photos';
     }
   }
 
@@ -971,17 +976,25 @@ class _DevicePhotoViewerState extends ConsumerState<_DevicePhotoViewer> {
                 }
               },
             ),
-          // 글쓰기 버튼 - 현재 이미지로 카드 작성
+          // 글쓰기 버튼 - 현재 이미지로 카드 작성 (40% 확률로 광고 표시)
           if (_currentFile != null)
             IconButton(
               icon: const Icon(FontAwesomeIcons.penNib, color: Colors.white, size: 22),
-              onPressed: () {
+              onPressed: () async {
                 final selectedImage = _currentFile!.path;
-                Navigator.pop(context); // 뷰어 닫기
+                
+                // 40% 확률로 광고 표시
+                final random = DateTime.now().millisecondsSinceEpoch % 5;
+                if (random < 2) {
+                  await AdHelper().showInterstitialAd();
+                }
+                
+                if (!mounted) return;
+                Navigator.pop(context);
                 context.push('/write', extra: {
                   'image': selectedImage,
                   'categoryId': 'my_photos',
-                  'categoryImages': <String>[], // 기기 사진은 목록 전달이 복잡하므로 비워둠
+                  'categoryImages': <String>[],
                 });
               },
             ),
@@ -1048,6 +1061,7 @@ class _DevicePhotoViewerState extends ConsumerState<_DevicePhotoViewer> {
           )
         ],
       ),
+      // FAB 제거 - ScaffoldWithNav의 FAB이 이미 보이므로 중복 제거
     );
   }
 }
