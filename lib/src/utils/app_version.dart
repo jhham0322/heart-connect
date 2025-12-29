@@ -4,7 +4,7 @@
 
 class AppVersion {
   static const String version = '1.0.1';
-  static const String buildNumber = '4';
+  static const String buildNumber = '5';
   
   // Git/SVN 리비전 정보 (빌드 시 자동 업데이트)
   static const String revision = '61c6a63';
