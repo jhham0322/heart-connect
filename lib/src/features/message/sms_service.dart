@@ -1,8 +1,6 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
-import 'package:permission_handler/permission_handler.dart';
 import '../database/database_provider.dart';
 
 /// Custom wrapper for SMS Message to allow mocking and platform independence
@@ -36,119 +34,16 @@ class SmsService {
     // Normalize contact numbers for comparison
     final contactNumbers = contacts.map((c) => _normalizeNumber(c.phone)).toSet();
 
-    if (kIsWeb || Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
-      // Return mock data for non-mobile platforms
-      return _getMockMessages(contactNumbers);
-    }
-
-    // Mobile: Request permissions and fetch SMS
-    final permission = await Permission.sms.status;
-    if (!permission.isGranted) {
-      final result = await Permission.sms.request();
-      if (!result.isGranted) {
-        throw Exception('SMS permission denied');
-      }
-    }
-
-    final SmsQuery query = SmsQuery();
-    final List<SmsMessage> messages = await query.querySms(
-      kinds: [SmsQueryKind.inbox],
-      sort: true, // Sorts by date desc by default
-    );
-
-    // Filter by contact numbers AND mobile phone only
-    final filtered = messages.where((msg) {
-      if (msg.address == null) return false;
-      final normalizedSender = _normalizeNumber(msg.address!);
-      
-      // 1. 핸드폰 번호만 필터링 (010, 011 등)
-      if (!_isMobilePhone(msg.address!)) return false;
-      
-      // 2. 내 연락처에 있는 사람만
-      return contactNumbers.any((cNum) => _isMatch(normalizedSender, cNum));
-    }).map((m) => AppSmsMessage(
-      id: m.id,
-      address: m.address,
-      body: m.body,
-      date: m.date,
-      read: m.isRead,
-      kind: m.kind == SmsMessageKind.sent ? 'sent' : 'inbox',
-    )).toList();
-
-    return filtered;
+    // SMS 권한이 제거되었으므로 항상 mock 데이터 반환
+    return _getMockMessages(contactNumbers);
   }
   
   /// 특정 전화번호와 주고받은 SMS 메시지 가져오기
   Future<List<AppSmsMessage>> getMessagesForPhone(String phone) async {
     final normalizedPhone = _normalizeNumber(phone);
     
-    if (kIsWeb || Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
-      // Mock data for desktop
-      return _getMockMessagesForPhone(normalizedPhone);
-    }
-    
-    // Mobile: Request permissions and fetch SMS
-    final permission = await Permission.sms.status;
-    if (!permission.isGranted) {
-      final result = await Permission.sms.request();
-      if (!result.isGranted) {
-        return [];
-      }
-    }
-    
-    final SmsQuery query = SmsQuery();
-    
-    // 받은 메시지
-    final List<SmsMessage> inboxMessages = await query.querySms(
-      kinds: [SmsQueryKind.inbox],
-      sort: true,
-    );
-    
-    // 보낸 메시지
-    final List<SmsMessage> sentMessages = await query.querySms(
-      kinds: [SmsQueryKind.sent],
-      sort: true,
-    );
-    
-    // 모든 메시지 합치기
-    final allMessages = <AppSmsMessage>[];
-    
-    // 받은 메시지 필터링
-    for (final msg in inboxMessages) {
-      if (msg.address == null) continue;
-      final normalizedSender = _normalizeNumber(msg.address!);
-      if (_isMatch(normalizedSender, normalizedPhone)) {
-        allMessages.add(AppSmsMessage(
-          id: msg.id,
-          address: msg.address,
-          body: msg.body,
-          date: msg.date,
-          read: msg.isRead,
-          kind: 'received',
-        ));
-      }
-    }
-    
-    // 보낸 메시지 필터링
-    for (final msg in sentMessages) {
-      if (msg.address == null) continue;
-      final normalizedRecipient = _normalizeNumber(msg.address!);
-      if (_isMatch(normalizedRecipient, normalizedPhone)) {
-        allMessages.add(AppSmsMessage(
-          id: msg.id,
-          address: msg.address,
-          body: msg.body,
-          date: msg.date,
-          read: true,
-          kind: 'sent',
-        ));
-      }
-    }
-    
-    // 날짜순 정렬 (최신순)
-    allMessages.sort((a, b) => (b.date ?? DateTime.now()).compareTo(a.date ?? DateTime.now()));
-    
-    return allMessages;
+    // SMS 권한이 제거되었으므로 항상 mock 데이터 반환
+    return _getMockMessagesForPhone(normalizedPhone);
   }
   
   List<AppSmsMessage> _getMockMessagesForPhone(String phone) {
