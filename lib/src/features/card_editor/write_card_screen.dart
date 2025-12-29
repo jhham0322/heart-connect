@@ -628,33 +628,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   // _saveFooter removed in favor of _saveDraft
 
 
-  bool _isTruncating = false; // 무한 루프 방지 플래그
-  
   void _onQuillChanged() {
-    // 무한 루프 방지
-    if (_isTruncating) return;
-    
-    final text = _quillController.document.toPlainText();
-    final lines = text.split('\n');
-    
-    // 8줄 제한
-    if (lines.length > 8) {
-      _isTruncating = true;
-      try {
-        // 8줄까지만 유지
-        final truncatedText = lines.take(8).join('\n');
-        final doc = Document()..insert(0, truncatedText);
-        _quillController.document = doc;
-        // 커서를 끝으로 이동
-        _quillController.updateSelection(
-          TextSelection.collapsed(offset: truncatedText.length),
-          ChangeSource.local,
-        );
-      } finally {
-        _isTruncating = false;
-      }
-    }
-    
     setState(() {
       _message = _quillController.document.toPlainText().trim();
     });
