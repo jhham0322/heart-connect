@@ -3011,9 +3011,9 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                           final cardWidth = MediaQuery.of(context).size.width * 0.92;
                           final cardHeight = cardWidth * (4 / 3);
                           
-                          // Footer: 글상자 오른쪽 하단 (글상자 아래, 왼쪽으로 30px)
-                          final footerRight = (cardWidth - boxWidth) / 2 - _dragOffset.dx + 45; // 15 + 30 = 45
-                          final footerTop = cardHeight / 2 + _dragOffset.dy + 100; // 아래로 더 이동
+                          // Footer: 글상자 오른쪽 하단
+                          final footerRight = (cardWidth - boxWidth) / 2 - _dragOffset.dx + 45;
+                          final footerTop = cardHeight / 2 + _dragOffset.dy + 60; // 글상자 중앙에서 아래로
                           
                           return Positioned(
                             top: footerTop,
