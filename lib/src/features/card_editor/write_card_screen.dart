@@ -18,6 +18,7 @@ import '../gallery/favorites_provider.dart'; // Import favorites provider
 import 'package:drift/drift.dart' hide Column;
 import '../database/app_database.dart';
 import '../database/database_provider.dart';
+import '../database/greeting_data_loader.dart';
 import '../../widgets/contact_picker_dialog.dart'; // Common contact picker
 import 'package:flutter_quill/flutter_quill.dart'; // Rich Text Editor
 import 'package:flutter_quill_extensions/flutter_quill_extensions.dart';
@@ -563,7 +564,22 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   Future<void> _loadAvailableTopics() async {
     try {
       final db = ref.read(appDatabaseProvider);
-      final topics = await db.getDistinctTopics();
+      
+      // 주제 테이블에서 조회 (비어있으면 샘플 데이터 로드)
+      var topics = await db.getGreetingTopicNames();
+      
+      if (topics.isEmpty) {
+        // 샘플 데이터 로드
+        try {
+          final loader = GreetingDataLoader(db);
+          await loader.loadGreetingSamplesFromAsset('assets/data/greeting_samples.txt');
+          topics = await db.getGreetingTopicNames();
+          print('[WriteCardScreen] Loaded ${topics.length} greeting topics from asset');
+        } catch (e) {
+          print('[WriteCardScreen] Error loading greeting samples: $e');
+        }
+      }
+      
       if (mounted) {
         setState(() {
           _availableTopics = topics;

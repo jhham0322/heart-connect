@@ -3437,6 +3437,221 @@ class GreetingTemplatesCompanion extends UpdateCompanion<GreetingTemplate> {
   }
 }
 
+class $GreetingTopicsTable extends GreetingTopics
+    with TableInfo<$GreetingTopicsTable, GreetingTopic> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $GreetingTopicsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _sortOrderMeta =
+      const VerificationMeta('sortOrder');
+  @override
+  late final GeneratedColumn<int> sortOrder = GeneratedColumn<int>(
+      'sort_order', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  @override
+  List<GeneratedColumn> get $columns => [id, name, sortOrder];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'greeting_topics';
+  @override
+  VerificationContext validateIntegrity(Insertable<GreetingTopic> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('sort_order')) {
+      context.handle(_sortOrderMeta,
+          sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  GreetingTopic map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return GreetingTopic(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      sortOrder: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}sort_order'])!,
+    );
+  }
+
+  @override
+  $GreetingTopicsTable createAlias(String alias) {
+    return $GreetingTopicsTable(attachedDatabase, alias);
+  }
+}
+
+class GreetingTopic extends DataClass implements Insertable<GreetingTopic> {
+  final int id;
+  final String name;
+  final int sortOrder;
+  const GreetingTopic(
+      {required this.id, required this.name, required this.sortOrder});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['name'] = Variable<String>(name);
+    map['sort_order'] = Variable<int>(sortOrder);
+    return map;
+  }
+
+  GreetingTopicsCompanion toCompanion(bool nullToAbsent) {
+    return GreetingTopicsCompanion(
+      id: Value(id),
+      name: Value(name),
+      sortOrder: Value(sortOrder),
+    );
+  }
+
+  factory GreetingTopic.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return GreetingTopic(
+      id: serializer.fromJson<int>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      sortOrder: serializer.fromJson<int>(json['sortOrder']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'name': serializer.toJson<String>(name),
+      'sortOrder': serializer.toJson<int>(sortOrder),
+    };
+  }
+
+  GreetingTopic copyWith({int? id, String? name, int? sortOrder}) =>
+      GreetingTopic(
+        id: id ?? this.id,
+        name: name ?? this.name,
+        sortOrder: sortOrder ?? this.sortOrder,
+      );
+  GreetingTopic copyWithCompanion(GreetingTopicsCompanion data) {
+    return GreetingTopic(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('GreetingTopic(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('sortOrder: $sortOrder')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name, sortOrder);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is GreetingTopic &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.sortOrder == this.sortOrder);
+}
+
+class GreetingTopicsCompanion extends UpdateCompanion<GreetingTopic> {
+  final Value<int> id;
+  final Value<String> name;
+  final Value<int> sortOrder;
+  const GreetingTopicsCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+  });
+  GreetingTopicsCompanion.insert({
+    this.id = const Value.absent(),
+    required String name,
+    this.sortOrder = const Value.absent(),
+  }) : name = Value(name);
+  static Insertable<GreetingTopic> custom({
+    Expression<int>? id,
+    Expression<String>? name,
+    Expression<int>? sortOrder,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (sortOrder != null) 'sort_order': sortOrder,
+    });
+  }
+
+  GreetingTopicsCompanion copyWith(
+      {Value<int>? id, Value<String>? name, Value<int>? sortOrder}) {
+    return GreetingTopicsCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      sortOrder: sortOrder ?? this.sortOrder,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (sortOrder.present) {
+      map['sort_order'] = Variable<int>(sortOrder.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('GreetingTopicsCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('sortOrder: $sortOrder')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -3453,6 +3668,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $ContactGroupMembershipsTable(this);
   late final $GreetingTemplatesTable greetingTemplates =
       $GreetingTemplatesTable(this);
+  late final $GreetingTopicsTable greetingTopics = $GreetingTopicsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -3467,7 +3683,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         dailyPlans,
         contactGroups,
         contactGroupMemberships,
-        greetingTemplates
+        greetingTemplates,
+        greetingTopics
       ];
 }
 
@@ -5966,6 +6183,144 @@ typedef $$GreetingTemplatesTableProcessedTableManager = ProcessedTableManager<
     ),
     GreetingTemplate,
     PrefetchHooks Function()>;
+typedef $$GreetingTopicsTableCreateCompanionBuilder = GreetingTopicsCompanion
+    Function({
+  Value<int> id,
+  required String name,
+  Value<int> sortOrder,
+});
+typedef $$GreetingTopicsTableUpdateCompanionBuilder = GreetingTopicsCompanion
+    Function({
+  Value<int> id,
+  Value<String> name,
+  Value<int> sortOrder,
+});
+
+class $$GreetingTopicsTableFilterComposer
+    extends Composer<_$AppDatabase, $GreetingTopicsTable> {
+  $$GreetingTopicsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get sortOrder => $composableBuilder(
+      column: $table.sortOrder, builder: (column) => ColumnFilters(column));
+}
+
+class $$GreetingTopicsTableOrderingComposer
+    extends Composer<_$AppDatabase, $GreetingTopicsTable> {
+  $$GreetingTopicsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get sortOrder => $composableBuilder(
+      column: $table.sortOrder, builder: (column) => ColumnOrderings(column));
+}
+
+class $$GreetingTopicsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $GreetingTopicsTable> {
+  $$GreetingTopicsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<int> get sortOrder =>
+      $composableBuilder(column: $table.sortOrder, builder: (column) => column);
+}
+
+class $$GreetingTopicsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $GreetingTopicsTable,
+    GreetingTopic,
+    $$GreetingTopicsTableFilterComposer,
+    $$GreetingTopicsTableOrderingComposer,
+    $$GreetingTopicsTableAnnotationComposer,
+    $$GreetingTopicsTableCreateCompanionBuilder,
+    $$GreetingTopicsTableUpdateCompanionBuilder,
+    (
+      GreetingTopic,
+      BaseReferences<_$AppDatabase, $GreetingTopicsTable, GreetingTopic>
+    ),
+    GreetingTopic,
+    PrefetchHooks Function()> {
+  $$GreetingTopicsTableTableManager(
+      _$AppDatabase db, $GreetingTopicsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$GreetingTopicsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$GreetingTopicsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$GreetingTopicsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<String> name = const Value.absent(),
+            Value<int> sortOrder = const Value.absent(),
+          }) =>
+              GreetingTopicsCompanion(
+            id: id,
+            name: name,
+            sortOrder: sortOrder,
+          ),
+          createCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            required String name,
+            Value<int> sortOrder = const Value.absent(),
+          }) =>
+              GreetingTopicsCompanion.insert(
+            id: id,
+            name: name,
+            sortOrder: sortOrder,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$GreetingTopicsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $GreetingTopicsTable,
+    GreetingTopic,
+    $$GreetingTopicsTableFilterComposer,
+    $$GreetingTopicsTableOrderingComposer,
+    $$GreetingTopicsTableAnnotationComposer,
+    $$GreetingTopicsTableCreateCompanionBuilder,
+    $$GreetingTopicsTableUpdateCompanionBuilder,
+    (
+      GreetingTopic,
+      BaseReferences<_$AppDatabase, $GreetingTopicsTable, GreetingTopic>
+    ),
+    GreetingTopic,
+    PrefetchHooks Function()>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -5991,4 +6346,6 @@ class $AppDatabaseManager {
           _db, _db.contactGroupMemberships);
   $$GreetingTemplatesTableTableManager get greetingTemplates =>
       $$GreetingTemplatesTableTableManager(_db, _db.greetingTemplates);
+  $$GreetingTopicsTableTableManager get greetingTopics =>
+      $$GreetingTopicsTableTableManager(_db, _db.greetingTopics);
 }

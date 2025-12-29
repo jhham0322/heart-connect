@@ -98,6 +98,13 @@ class GreetingTemplates extends Table {
   TextColumn get message => text()();    // 문구 내용
 }
 
+// 10. Greeting Topics Table (콤보박스 표시용)
+class GreetingTopics extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get name => text()();       // 주제 이름: 새해, 생일, 감사 등
+  IntColumn get sortOrder => integer().withDefault(const Constant(0))();  // 정렬 순서
+}
+
 class DailyPlans extends Table {
   IntColumn get id => integer().autoIncrement()();
   DateTimeColumn get date => dateTime()();
@@ -110,7 +117,7 @@ class DailyPlans extends Table {
   TextColumn get recipients => text().nullable()(); // JSON list of recipients: [{"name":"Kim","phone":"010..."}]
 }
 
-@DriftDatabase(tables: [Contacts, History, Templates, GalleryFavorites, SavedCards, Holidays, DailyPlans, ContactGroups, ContactGroupMemberships, GreetingTemplates])
+@DriftDatabase(tables: [Contacts, History, Templates, GalleryFavorites, SavedCards, Holidays, DailyPlans, ContactGroups, ContactGroupMemberships, GreetingTemplates, GreetingTopics])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
   
@@ -118,7 +125,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(QueryExecutor e) : super(e);
 
   @override
-  int get schemaVersion => 12; // Version 12: Greeting Templates & SavedCards topic
+  int get schemaVersion => 13; // Version 13: GreetingTopics table
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -172,6 +179,10 @@ class AppDatabase extends _$AppDatabase {
         // Version 12: Greeting Templates & SavedCards topic
         await m.createTable(greetingTemplates);
         await m.addColumn(savedCards, savedCards.topic);
+      }
+      if (from < 13) {
+        // Version 13: Greeting Topics table for combo box
+        await m.createTable(greetingTopics);
       }
     },
     beforeOpen: (details) async {
@@ -781,6 +792,47 @@ class AppDatabase extends _$AppDatabase {
   /// 인사말 템플릿 삭제 (주제별)
   Future<int> deleteGreetingsByTopic(String topic) =>
     (delete(greetingTemplates)..where((t) => t.topic.equals(topic))).go();
+
+  // --- Greeting Topics Methods ---
+  
+  /// 모든 주제 목록 조회 (정렬순)
+  Future<List<GreetingTopic>> getAllGreetingTopics() =>
+    (select(greetingTopics)..orderBy([(t) => OrderingTerm(expression: t.sortOrder)])).get();
+  
+  /// 주제 이름 목록만 조회 (콤보박스용)
+  Future<List<String>> getGreetingTopicNames() async {
+    final topics = await getAllGreetingTopics();
+    return topics.map((t) => t.name).toList();
+  }
+  
+  /// 주제 삽입
+  Future<int> insertGreetingTopic(GreetingTopicsCompanion entry) =>
+    into(greetingTopics).insert(entry);
+  
+  /// 여러 주제 일괄 삽입
+  Future<void> insertGreetingTopicsIfEmpty(List<String> topicNames) async {
+    final existing = await getAllGreetingTopics();
+    if (existing.isEmpty) {
+      await batch((batch) {
+        for (int i = 0; i < topicNames.length; i++) {
+          batch.insert(greetingTopics, GreetingTopicsCompanion.insert(
+            name: topicNames[i],
+            sortOrder: Value(i),
+          ));
+        }
+      });
+    }
+  }
+  
+  /// 주제 삭제
+  Future<int> deleteGreetingTopic(int id) =>
+    (delete(greetingTopics)..where((t) => t.id.equals(id))).go();
+  
+  /// 모든 주제와 인사말 데이터 초기화
+  Future<void> resetAllGreetingData() async {
+    await delete(greetingTemplates).go();
+    await delete(greetingTopics).go();
+  }
 
 }
 
