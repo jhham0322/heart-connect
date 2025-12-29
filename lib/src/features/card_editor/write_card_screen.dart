@@ -4202,12 +4202,8 @@ class _RecipientManagerDialogState extends ConsumerState<RecipientManagerDialog>
         content: Text("${strings.sendResultSuccess(_successCount)}\n${strings.sendResultFailed(_failureCount)}"),
         actions: [
           TextButton(
-            onPressed: () async {
+            onPressed: () {
               Navigator.pop(context); // 팝업 닫기
-              
-              // 전면 광고 표시 (AdMob)
-              await AdHelper().showInterstitialAd();
-              
               if (mounted) Navigator.pop(context); // 발송 관리 화면 닫기
             },
             child: Text(strings.ok),

@@ -697,7 +697,8 @@ class _GalleryDetailScreenState extends ConsumerState<GalleryDetailScreen> {
                   ),
                 );
               },
-   );
+            ),
+    );
   }
   
   // 프리미엄 이미지 잠금 해제 다이얼로그
