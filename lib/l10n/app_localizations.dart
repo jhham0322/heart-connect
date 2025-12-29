@@ -662,6 +662,108 @@ abstract class AppLocalizations {
   /// **'받음'**
   String get contactsMessageReceived;
 
+  /// No description provided for @contactsGroups.
+  ///
+  /// In ko, this message translates to:
+  /// **'연락 그룹'**
+  String get contactsGroups;
+
+  /// No description provided for @groupManage.
+  ///
+  /// In ko, this message translates to:
+  /// **'그룹 관리'**
+  String get groupManage;
+
+  /// No description provided for @groupAdd.
+  ///
+  /// In ko, this message translates to:
+  /// **'그룹 추가'**
+  String get groupAdd;
+
+  /// No description provided for @groupEdit.
+  ///
+  /// In ko, this message translates to:
+  /// **'그룹 편집'**
+  String get groupEdit;
+
+  /// No description provided for @groupDelete.
+  ///
+  /// In ko, this message translates to:
+  /// **'그룹 삭제'**
+  String get groupDelete;
+
+  /// No description provided for @groupName.
+  ///
+  /// In ko, this message translates to:
+  /// **'그룹 이름'**
+  String get groupName;
+
+  /// No description provided for @groupNameHint.
+  ///
+  /// In ko, this message translates to:
+  /// **'그룹 이름을 입력하세요'**
+  String get groupNameHint;
+
+  /// No description provided for @groupNameRequired.
+  ///
+  /// In ko, this message translates to:
+  /// **'그룹 이름을 입력해주세요'**
+  String get groupNameRequired;
+
+  /// No description provided for @groupDeleteConfirm.
+  ///
+  /// In ko, this message translates to:
+  /// **'\"{name}\" 그룹을 삭제하시겠습니까?'**
+  String groupDeleteConfirm(String name);
+
+  /// No description provided for @groupDeleteDesc.
+  ///
+  /// In ko, this message translates to:
+  /// **'그룹만 삭제되며, 연락처는 유지됩니다.'**
+  String get groupDeleteDesc;
+
+  /// No description provided for @groupEmpty.
+  ///
+  /// In ko, this message translates to:
+  /// **'그룹에 연락처가 없습니다'**
+  String get groupEmpty;
+
+  /// No description provided for @groupAddContact.
+  ///
+  /// In ko, this message translates to:
+  /// **'연락처 추가'**
+  String get groupAddContact;
+
+  /// No description provided for @groupRemoveContact.
+  ///
+  /// In ko, this message translates to:
+  /// **'그룹에서 제거'**
+  String get groupRemoveContact;
+
+  /// No description provided for @groupSelectGroups.
+  ///
+  /// In ko, this message translates to:
+  /// **'그룹 선택'**
+  String get groupSelectGroups;
+
+  /// No description provided for @groupNoGroups.
+  ///
+  /// In ko, this message translates to:
+  /// **'등록된 그룹이 없습니다'**
+  String get groupNoGroups;
+
+  /// No description provided for @groupCreateFirst.
+  ///
+  /// In ko, this message translates to:
+  /// **'첫 번째 그룹을 만들어보세요!'**
+  String get groupCreateFirst;
+
+  /// No description provided for @groupMemberCount.
+  ///
+  /// In ko, this message translates to:
+  /// **'{count}명'**
+  String groupMemberCount(int count);
+
   /// No description provided for @shareTitle.
   ///
   /// In ko, this message translates to:

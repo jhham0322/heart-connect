@@ -289,6 +289,62 @@ class AppLocalizationsEs extends AppLocalizations {
   String get contactsMessageReceived => 'Recibido';
 
   @override
+  String get contactsGroups => 'Grupos';
+
+  @override
+  String get groupManage => 'Gestionar grupos';
+
+  @override
+  String get groupAdd => 'Añadir grupo';
+
+  @override
+  String get groupEdit => 'Editar grupo';
+
+  @override
+  String get groupDelete => 'Eliminar grupo';
+
+  @override
+  String get groupName => 'Nombre del grupo';
+
+  @override
+  String get groupNameHint => 'Ingrese nombre del grupo';
+
+  @override
+  String get groupNameRequired => 'Ingrese el nombre del grupo';
+
+  @override
+  String groupDeleteConfirm(String name) {
+    return '¿Eliminar grupo \"$name\"?';
+  }
+
+  @override
+  String get groupDeleteDesc =>
+      'Solo se eliminará el grupo, los contactos se conservarán.';
+
+  @override
+  String get groupEmpty => 'No hay contactos en este grupo';
+
+  @override
+  String get groupAddContact => 'Añadir contacto';
+
+  @override
+  String get groupRemoveContact => 'Eliminar del grupo';
+
+  @override
+  String get groupSelectGroups => 'Seleccionar grupos';
+
+  @override
+  String get groupNoGroups => 'No hay grupos registrados';
+
+  @override
+  String get groupCreateFirst => '¡Cree su primer grupo!';
+
+  @override
+  String groupMemberCount(int count) {
+    return '$count';
+  }
+
+  @override
   String get shareTitle => 'Compartir';
 
   @override

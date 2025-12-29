@@ -287,6 +287,61 @@ class AppLocalizationsAr extends AppLocalizations {
   String get contactsMessageReceived => 'تم الاستلام';
 
   @override
+  String get contactsGroups => 'المجموعات';
+
+  @override
+  String get groupManage => 'إدارة المجموعات';
+
+  @override
+  String get groupAdd => 'إضافة مجموعة';
+
+  @override
+  String get groupEdit => 'تعديل المجموعة';
+
+  @override
+  String get groupDelete => 'حذف المجموعة';
+
+  @override
+  String get groupName => 'اسم المجموعة';
+
+  @override
+  String get groupNameHint => 'أدخل اسم المجموعة';
+
+  @override
+  String get groupNameRequired => 'يرجى إدخال اسم المجموعة';
+
+  @override
+  String groupDeleteConfirm(String name) {
+    return 'حذف مجموعة \"$name\"؟';
+  }
+
+  @override
+  String get groupDeleteDesc => 'سيتم حذف المجموعة فقط، وستبقى جهات الاتصال.';
+
+  @override
+  String get groupEmpty => 'لا توجد جهات اتصال في هذه المجموعة';
+
+  @override
+  String get groupAddContact => 'إضافة جهة اتصال';
+
+  @override
+  String get groupRemoveContact => 'إزالة من المجموعة';
+
+  @override
+  String get groupSelectGroups => 'اختر المجموعات';
+
+  @override
+  String get groupNoGroups => 'لا توجد مجموعات مسجلة';
+
+  @override
+  String get groupCreateFirst => 'أنشئ مجموعتك الأولى!';
+
+  @override
+  String groupMemberCount(int count) {
+    return '$count';
+  }
+
+  @override
   String get shareTitle => 'مشاركة';
 
   @override

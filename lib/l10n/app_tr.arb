@@ -97,6 +97,34 @@
   "contactsMessageSent": "Gönderildi",
   "contactsMessageReceived": "Alındı",
   
+  "contactsGroups": "Gruplar",
+  "groupManage": "Grupları Yönet",
+  "groupAdd": "Grup Ekle",
+  "groupEdit": "Grubu Düzenle",
+  "groupDelete": "Grubu Sil",
+  "groupName": "Grup Adı",
+  "groupNameHint": "Grup adını girin",
+  "groupNameRequired": "Grup adını girin",
+  "groupDeleteConfirm": "\"{name}\" grubu silinsin mi?",
+  "@groupDeleteConfirm": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "groupDeleteDesc": "Yalnızca grup silinir, kişiler korunur.",
+  "groupEmpty": "Bu grupta kişi yok",
+  "groupAddContact": "Kişi Ekle",
+  "groupRemoveContact": "Gruptan Çıkar",
+  "groupSelectGroups": "Grupları Seç",
+  "groupNoGroups": "Kayıtlı grup yok",
+  "groupCreateFirst": "İlk grubunuzu oluşturun!",
+  "groupMemberCount": "{count}",
+  "@groupMemberCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  
   "shareTitle": "Paylaş",
   "shareOtherApps": "Diğer uygulamalar",
   "shareKakaoTalk": "KakaoTalk",

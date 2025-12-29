@@ -2631,6 +2631,506 @@ class DailyPlansCompanion extends UpdateCompanion<DailyPlan> {
   }
 }
 
+class $ContactGroupsTable extends ContactGroups
+    with TableInfo<$ContactGroupsTable, ContactGroup> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ContactGroupsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
+      additionalChecks:
+          GeneratedColumn.checkTextLength(minTextLength: 1, maxTextLength: 50),
+      type: DriftSqlType.string,
+      requiredDuringInsert: true);
+  static const VerificationMeta _iconMeta = const VerificationMeta('icon');
+  @override
+  late final GeneratedColumn<String> icon = GeneratedColumn<String>(
+      'icon', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant('group'));
+  static const VerificationMeta _sortOrderMeta =
+      const VerificationMeta('sortOrder');
+  @override
+  late final GeneratedColumn<int> sortOrder = GeneratedColumn<int>(
+      'sort_order', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
+  @override
+  List<GeneratedColumn> get $columns => [id, name, icon, sortOrder, createdAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'contact_groups';
+  @override
+  VerificationContext validateIntegrity(Insertable<ContactGroup> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('icon')) {
+      context.handle(
+          _iconMeta, icon.isAcceptableOrUnknown(data['icon']!, _iconMeta));
+    }
+    if (data.containsKey('sort_order')) {
+      context.handle(_sortOrderMeta,
+          sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ContactGroup map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ContactGroup(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      icon: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}icon'])!,
+      sortOrder: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}sort_order'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+    );
+  }
+
+  @override
+  $ContactGroupsTable createAlias(String alias) {
+    return $ContactGroupsTable(attachedDatabase, alias);
+  }
+}
+
+class ContactGroup extends DataClass implements Insertable<ContactGroup> {
+  final int id;
+  final String name;
+  final String icon;
+  final int sortOrder;
+  final DateTime createdAt;
+  const ContactGroup(
+      {required this.id,
+      required this.name,
+      required this.icon,
+      required this.sortOrder,
+      required this.createdAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['name'] = Variable<String>(name);
+    map['icon'] = Variable<String>(icon);
+    map['sort_order'] = Variable<int>(sortOrder);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  ContactGroupsCompanion toCompanion(bool nullToAbsent) {
+    return ContactGroupsCompanion(
+      id: Value(id),
+      name: Value(name),
+      icon: Value(icon),
+      sortOrder: Value(sortOrder),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory ContactGroup.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ContactGroup(
+      id: serializer.fromJson<int>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      icon: serializer.fromJson<String>(json['icon']),
+      sortOrder: serializer.fromJson<int>(json['sortOrder']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'name': serializer.toJson<String>(name),
+      'icon': serializer.toJson<String>(icon),
+      'sortOrder': serializer.toJson<int>(sortOrder),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  ContactGroup copyWith(
+          {int? id,
+          String? name,
+          String? icon,
+          int? sortOrder,
+          DateTime? createdAt}) =>
+      ContactGroup(
+        id: id ?? this.id,
+        name: name ?? this.name,
+        icon: icon ?? this.icon,
+        sortOrder: sortOrder ?? this.sortOrder,
+        createdAt: createdAt ?? this.createdAt,
+      );
+  ContactGroup copyWithCompanion(ContactGroupsCompanion data) {
+    return ContactGroup(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      icon: data.icon.present ? data.icon.value : this.icon,
+      sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ContactGroup(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('icon: $icon, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name, icon, sortOrder, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ContactGroup &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.icon == this.icon &&
+          other.sortOrder == this.sortOrder &&
+          other.createdAt == this.createdAt);
+}
+
+class ContactGroupsCompanion extends UpdateCompanion<ContactGroup> {
+  final Value<int> id;
+  final Value<String> name;
+  final Value<String> icon;
+  final Value<int> sortOrder;
+  final Value<DateTime> createdAt;
+  const ContactGroupsCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.icon = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  ContactGroupsCompanion.insert({
+    this.id = const Value.absent(),
+    required String name,
+    this.icon = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  }) : name = Value(name);
+  static Insertable<ContactGroup> custom({
+    Expression<int>? id,
+    Expression<String>? name,
+    Expression<String>? icon,
+    Expression<int>? sortOrder,
+    Expression<DateTime>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (icon != null) 'icon': icon,
+      if (sortOrder != null) 'sort_order': sortOrder,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  ContactGroupsCompanion copyWith(
+      {Value<int>? id,
+      Value<String>? name,
+      Value<String>? icon,
+      Value<int>? sortOrder,
+      Value<DateTime>? createdAt}) {
+    return ContactGroupsCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      icon: icon ?? this.icon,
+      sortOrder: sortOrder ?? this.sortOrder,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (icon.present) {
+      map['icon'] = Variable<String>(icon.value);
+    }
+    if (sortOrder.present) {
+      map['sort_order'] = Variable<int>(sortOrder.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ContactGroupsCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('icon: $icon, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ContactGroupMembershipsTable extends ContactGroupMemberships
+    with TableInfo<$ContactGroupMembershipsTable, ContactGroupMembership> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ContactGroupMembershipsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _contactIdMeta =
+      const VerificationMeta('contactId');
+  @override
+  late final GeneratedColumn<int> contactId = GeneratedColumn<int>(
+      'contact_id', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: true,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('REFERENCES contacts (id)'));
+  static const VerificationMeta _groupIdMeta =
+      const VerificationMeta('groupId');
+  @override
+  late final GeneratedColumn<int> groupId = GeneratedColumn<int>(
+      'group_id', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: true,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('REFERENCES contact_groups (id)'));
+  @override
+  List<GeneratedColumn> get $columns => [contactId, groupId];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'contact_group_memberships';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<ContactGroupMembership> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('contact_id')) {
+      context.handle(_contactIdMeta,
+          contactId.isAcceptableOrUnknown(data['contact_id']!, _contactIdMeta));
+    } else if (isInserting) {
+      context.missing(_contactIdMeta);
+    }
+    if (data.containsKey('group_id')) {
+      context.handle(_groupIdMeta,
+          groupId.isAcceptableOrUnknown(data['group_id']!, _groupIdMeta));
+    } else if (isInserting) {
+      context.missing(_groupIdMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {contactId, groupId};
+  @override
+  ContactGroupMembership map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ContactGroupMembership(
+      contactId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}contact_id'])!,
+      groupId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}group_id'])!,
+    );
+  }
+
+  @override
+  $ContactGroupMembershipsTable createAlias(String alias) {
+    return $ContactGroupMembershipsTable(attachedDatabase, alias);
+  }
+}
+
+class ContactGroupMembership extends DataClass
+    implements Insertable<ContactGroupMembership> {
+  final int contactId;
+  final int groupId;
+  const ContactGroupMembership(
+      {required this.contactId, required this.groupId});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['contact_id'] = Variable<int>(contactId);
+    map['group_id'] = Variable<int>(groupId);
+    return map;
+  }
+
+  ContactGroupMembershipsCompanion toCompanion(bool nullToAbsent) {
+    return ContactGroupMembershipsCompanion(
+      contactId: Value(contactId),
+      groupId: Value(groupId),
+    );
+  }
+
+  factory ContactGroupMembership.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ContactGroupMembership(
+      contactId: serializer.fromJson<int>(json['contactId']),
+      groupId: serializer.fromJson<int>(json['groupId']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'contactId': serializer.toJson<int>(contactId),
+      'groupId': serializer.toJson<int>(groupId),
+    };
+  }
+
+  ContactGroupMembership copyWith({int? contactId, int? groupId}) =>
+      ContactGroupMembership(
+        contactId: contactId ?? this.contactId,
+        groupId: groupId ?? this.groupId,
+      );
+  ContactGroupMembership copyWithCompanion(
+      ContactGroupMembershipsCompanion data) {
+    return ContactGroupMembership(
+      contactId: data.contactId.present ? data.contactId.value : this.contactId,
+      groupId: data.groupId.present ? data.groupId.value : this.groupId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ContactGroupMembership(')
+          ..write('contactId: $contactId, ')
+          ..write('groupId: $groupId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(contactId, groupId);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ContactGroupMembership &&
+          other.contactId == this.contactId &&
+          other.groupId == this.groupId);
+}
+
+class ContactGroupMembershipsCompanion
+    extends UpdateCompanion<ContactGroupMembership> {
+  final Value<int> contactId;
+  final Value<int> groupId;
+  final Value<int> rowid;
+  const ContactGroupMembershipsCompanion({
+    this.contactId = const Value.absent(),
+    this.groupId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ContactGroupMembershipsCompanion.insert({
+    required int contactId,
+    required int groupId,
+    this.rowid = const Value.absent(),
+  })  : contactId = Value(contactId),
+        groupId = Value(groupId);
+  static Insertable<ContactGroupMembership> custom({
+    Expression<int>? contactId,
+    Expression<int>? groupId,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (contactId != null) 'contact_id': contactId,
+      if (groupId != null) 'group_id': groupId,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ContactGroupMembershipsCompanion copyWith(
+      {Value<int>? contactId, Value<int>? groupId, Value<int>? rowid}) {
+    return ContactGroupMembershipsCompanion(
+      contactId: contactId ?? this.contactId,
+      groupId: groupId ?? this.groupId,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (contactId.present) {
+      map['contact_id'] = Variable<int>(contactId.value);
+    }
+    if (groupId.present) {
+      map['group_id'] = Variable<int>(groupId.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ContactGroupMembershipsCompanion(')
+          ..write('contactId: $contactId, ')
+          ..write('groupId: $groupId, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -2642,6 +3142,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $GalleryFavoritesTable(this);
   late final $HolidaysTable holidays = $HolidaysTable(this);
   late final $DailyPlansTable dailyPlans = $DailyPlansTable(this);
+  late final $ContactGroupsTable contactGroups = $ContactGroupsTable(this);
+  late final $ContactGroupMembershipsTable contactGroupMemberships =
+      $ContactGroupMembershipsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2653,7 +3156,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         templates,
         galleryFavorites,
         holidays,
-        dailyPlans
+        dailyPlans,
+        contactGroups,
+        contactGroupMemberships
       ];
 }
 
@@ -2695,6 +3200,25 @@ final class $$ContactsTableReferences
         .filter((f) => f.contactId.id.sqlEquals($_itemColumn<int>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_historyRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+
+  static MultiTypedResultKey<$ContactGroupMembershipsTable,
+      List<ContactGroupMembership>> _contactGroupMembershipsRefsTable(
+          _$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(db.contactGroupMemberships,
+          aliasName: $_aliasNameGenerator(
+              db.contacts.id, db.contactGroupMemberships.contactId));
+
+  $$ContactGroupMembershipsTableProcessedTableManager
+      get contactGroupMembershipsRefs {
+    final manager = $$ContactGroupMembershipsTableTableManager(
+            $_db, $_db.contactGroupMemberships)
+        .filter((f) => f.contactId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache =
+        $_typedResult.readTableOrNull(_contactGroupMembershipsRefsTable($_db));
     return ProcessedTableManager(
         manager.$state.copyWith(prefetchedData: cache));
   }
@@ -2755,6 +3279,29 @@ class $$ContactsTableFilterComposer
               $removeJoinBuilderFromRootComposer:
                   $removeJoinBuilderFromRootComposer,
             ));
+    return f(composer);
+  }
+
+  Expression<bool> contactGroupMembershipsRefs(
+      Expression<bool> Function($$ContactGroupMembershipsTableFilterComposer f)
+          f) {
+    final $$ContactGroupMembershipsTableFilterComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.id,
+            referencedTable: $db.contactGroupMemberships,
+            getReferencedColumn: (t) => t.contactId,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$ContactGroupMembershipsTableFilterComposer(
+                  $db: $db,
+                  $table: $db.contactGroupMemberships,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
     return f(composer);
   }
 }
@@ -2854,6 +3401,29 @@ class $$ContactsTableAnnotationComposer
             ));
     return f(composer);
   }
+
+  Expression<T> contactGroupMembershipsRefs<T extends Object>(
+      Expression<T> Function($$ContactGroupMembershipsTableAnnotationComposer a)
+          f) {
+    final $$ContactGroupMembershipsTableAnnotationComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.id,
+            referencedTable: $db.contactGroupMemberships,
+            getReferencedColumn: (t) => t.contactId,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$ContactGroupMembershipsTableAnnotationComposer(
+                  $db: $db,
+                  $table: $db.contactGroupMemberships,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return f(composer);
+  }
 }
 
 class $$ContactsTableTableManager extends RootTableManager<
@@ -2867,7 +3437,8 @@ class $$ContactsTableTableManager extends RootTableManager<
     $$ContactsTableUpdateCompanionBuilder,
     (Contact, $$ContactsTableReferences),
     Contact,
-    PrefetchHooks Function({bool historyRefs})> {
+    PrefetchHooks Function(
+        {bool historyRefs, bool contactGroupMembershipsRefs})> {
   $$ContactsTableTableManager(_$AppDatabase db, $ContactsTable table)
       : super(TableManagerState(
           db: db,
@@ -2926,10 +3497,14 @@ class $$ContactsTableTableManager extends RootTableManager<
               .map((e) =>
                   (e.readTable(table), $$ContactsTableReferences(db, table, e)))
               .toList(),
-          prefetchHooksCallback: ({historyRefs = false}) {
+          prefetchHooksCallback: (
+              {historyRefs = false, contactGroupMembershipsRefs = false}) {
             return PrefetchHooks(
               db: db,
-              explicitlyWatchedTables: [if (historyRefs) db.history],
+              explicitlyWatchedTables: [
+                if (historyRefs) db.history,
+                if (contactGroupMembershipsRefs) db.contactGroupMemberships
+              ],
               addJoins: null,
               getPrefetchedDataCallback: (items) async {
                 return [
@@ -2942,6 +3517,19 @@ class $$ContactsTableTableManager extends RootTableManager<
                         managerFromTypedResult: (p0) =>
                             $$ContactsTableReferences(db, table, p0)
                                 .historyRefs,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.contactId == item.id),
+                        typedResults: items),
+                  if (contactGroupMembershipsRefs)
+                    await $_getPrefetchedData<Contact, $ContactsTable,
+                            ContactGroupMembership>(
+                        currentTable: table,
+                        referencedTable: $$ContactsTableReferences
+                            ._contactGroupMembershipsRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$ContactsTableReferences(db, table, p0)
+                                .contactGroupMembershipsRefs,
                         referencedItemsForCurrentItem:
                             (item, referencedItems) => referencedItems
                                 .where((e) => e.contactId == item.id),
@@ -2964,7 +3552,8 @@ typedef $$ContactsTableProcessedTableManager = ProcessedTableManager<
     $$ContactsTableUpdateCompanionBuilder,
     (Contact, $$ContactsTableReferences),
     Contact,
-    PrefetchHooks Function({bool historyRefs})>;
+    PrefetchHooks Function(
+        {bool historyRefs, bool contactGroupMembershipsRefs})>;
 typedef $$SavedCardsTableCreateCompanionBuilder = SavedCardsCompanion Function({
   Value<int> id,
   Value<String> name,
@@ -4325,6 +4914,580 @@ typedef $$DailyPlansTableProcessedTableManager = ProcessedTableManager<
     (DailyPlan, BaseReferences<_$AppDatabase, $DailyPlansTable, DailyPlan>),
     DailyPlan,
     PrefetchHooks Function()>;
+typedef $$ContactGroupsTableCreateCompanionBuilder = ContactGroupsCompanion
+    Function({
+  Value<int> id,
+  required String name,
+  Value<String> icon,
+  Value<int> sortOrder,
+  Value<DateTime> createdAt,
+});
+typedef $$ContactGroupsTableUpdateCompanionBuilder = ContactGroupsCompanion
+    Function({
+  Value<int> id,
+  Value<String> name,
+  Value<String> icon,
+  Value<int> sortOrder,
+  Value<DateTime> createdAt,
+});
+
+final class $$ContactGroupsTableReferences
+    extends BaseReferences<_$AppDatabase, $ContactGroupsTable, ContactGroup> {
+  $$ContactGroupsTableReferences(
+      super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$ContactGroupMembershipsTable,
+      List<ContactGroupMembership>> _contactGroupMembershipsRefsTable(
+          _$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(db.contactGroupMemberships,
+          aliasName: $_aliasNameGenerator(
+              db.contactGroups.id, db.contactGroupMemberships.groupId));
+
+  $$ContactGroupMembershipsTableProcessedTableManager
+      get contactGroupMembershipsRefs {
+    final manager = $$ContactGroupMembershipsTableTableManager(
+            $_db, $_db.contactGroupMemberships)
+        .filter((f) => f.groupId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache =
+        $_typedResult.readTableOrNull(_contactGroupMembershipsRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+}
+
+class $$ContactGroupsTableFilterComposer
+    extends Composer<_$AppDatabase, $ContactGroupsTable> {
+  $$ContactGroupsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get icon => $composableBuilder(
+      column: $table.icon, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get sortOrder => $composableBuilder(
+      column: $table.sortOrder, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  Expression<bool> contactGroupMembershipsRefs(
+      Expression<bool> Function($$ContactGroupMembershipsTableFilterComposer f)
+          f) {
+    final $$ContactGroupMembershipsTableFilterComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.id,
+            referencedTable: $db.contactGroupMemberships,
+            getReferencedColumn: (t) => t.groupId,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$ContactGroupMembershipsTableFilterComposer(
+                  $db: $db,
+                  $table: $db.contactGroupMemberships,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return f(composer);
+  }
+}
+
+class $$ContactGroupsTableOrderingComposer
+    extends Composer<_$AppDatabase, $ContactGroupsTable> {
+  $$ContactGroupsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get icon => $composableBuilder(
+      column: $table.icon, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get sortOrder => $composableBuilder(
+      column: $table.sortOrder, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+}
+
+class $$ContactGroupsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ContactGroupsTable> {
+  $$ContactGroupsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get icon =>
+      $composableBuilder(column: $table.icon, builder: (column) => column);
+
+  GeneratedColumn<int> get sortOrder =>
+      $composableBuilder(column: $table.sortOrder, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  Expression<T> contactGroupMembershipsRefs<T extends Object>(
+      Expression<T> Function($$ContactGroupMembershipsTableAnnotationComposer a)
+          f) {
+    final $$ContactGroupMembershipsTableAnnotationComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.id,
+            referencedTable: $db.contactGroupMemberships,
+            getReferencedColumn: (t) => t.groupId,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$ContactGroupMembershipsTableAnnotationComposer(
+                  $db: $db,
+                  $table: $db.contactGroupMemberships,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return f(composer);
+  }
+}
+
+class $$ContactGroupsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $ContactGroupsTable,
+    ContactGroup,
+    $$ContactGroupsTableFilterComposer,
+    $$ContactGroupsTableOrderingComposer,
+    $$ContactGroupsTableAnnotationComposer,
+    $$ContactGroupsTableCreateCompanionBuilder,
+    $$ContactGroupsTableUpdateCompanionBuilder,
+    (ContactGroup, $$ContactGroupsTableReferences),
+    ContactGroup,
+    PrefetchHooks Function({bool contactGroupMembershipsRefs})> {
+  $$ContactGroupsTableTableManager(_$AppDatabase db, $ContactGroupsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ContactGroupsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ContactGroupsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ContactGroupsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<String> name = const Value.absent(),
+            Value<String> icon = const Value.absent(),
+            Value<int> sortOrder = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+          }) =>
+              ContactGroupsCompanion(
+            id: id,
+            name: name,
+            icon: icon,
+            sortOrder: sortOrder,
+            createdAt: createdAt,
+          ),
+          createCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            required String name,
+            Value<String> icon = const Value.absent(),
+            Value<int> sortOrder = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+          }) =>
+              ContactGroupsCompanion.insert(
+            id: id,
+            name: name,
+            icon: icon,
+            sortOrder: sortOrder,
+            createdAt: createdAt,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$ContactGroupsTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: ({contactGroupMembershipsRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (contactGroupMembershipsRefs) db.contactGroupMemberships
+              ],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (contactGroupMembershipsRefs)
+                    await $_getPrefetchedData<ContactGroup, $ContactGroupsTable,
+                            ContactGroupMembership>(
+                        currentTable: table,
+                        referencedTable: $$ContactGroupsTableReferences
+                            ._contactGroupMembershipsRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$ContactGroupsTableReferences(db, table, p0)
+                                .contactGroupMembershipsRefs,
+                        referencedItemsForCurrentItem: (item,
+                                referencedItems) =>
+                            referencedItems.where((e) => e.groupId == item.id),
+                        typedResults: items)
+                ];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$ContactGroupsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $ContactGroupsTable,
+    ContactGroup,
+    $$ContactGroupsTableFilterComposer,
+    $$ContactGroupsTableOrderingComposer,
+    $$ContactGroupsTableAnnotationComposer,
+    $$ContactGroupsTableCreateCompanionBuilder,
+    $$ContactGroupsTableUpdateCompanionBuilder,
+    (ContactGroup, $$ContactGroupsTableReferences),
+    ContactGroup,
+    PrefetchHooks Function({bool contactGroupMembershipsRefs})>;
+typedef $$ContactGroupMembershipsTableCreateCompanionBuilder
+    = ContactGroupMembershipsCompanion Function({
+  required int contactId,
+  required int groupId,
+  Value<int> rowid,
+});
+typedef $$ContactGroupMembershipsTableUpdateCompanionBuilder
+    = ContactGroupMembershipsCompanion Function({
+  Value<int> contactId,
+  Value<int> groupId,
+  Value<int> rowid,
+});
+
+final class $$ContactGroupMembershipsTableReferences extends BaseReferences<
+    _$AppDatabase, $ContactGroupMembershipsTable, ContactGroupMembership> {
+  $$ContactGroupMembershipsTableReferences(
+      super.$_db, super.$_table, super.$_typedResult);
+
+  static $ContactsTable _contactIdTable(_$AppDatabase db) =>
+      db.contacts.createAlias($_aliasNameGenerator(
+          db.contactGroupMemberships.contactId, db.contacts.id));
+
+  $$ContactsTableProcessedTableManager get contactId {
+    final $_column = $_itemColumn<int>('contact_id')!;
+
+    final manager = $$ContactsTableTableManager($_db, $_db.contacts)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_contactIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static $ContactGroupsTable _groupIdTable(_$AppDatabase db) =>
+      db.contactGroups.createAlias($_aliasNameGenerator(
+          db.contactGroupMemberships.groupId, db.contactGroups.id));
+
+  $$ContactGroupsTableProcessedTableManager get groupId {
+    final $_column = $_itemColumn<int>('group_id')!;
+
+    final manager = $$ContactGroupsTableTableManager($_db, $_db.contactGroups)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_groupIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+}
+
+class $$ContactGroupMembershipsTableFilterComposer
+    extends Composer<_$AppDatabase, $ContactGroupMembershipsTable> {
+  $$ContactGroupMembershipsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  $$ContactsTableFilterComposer get contactId {
+    final $$ContactsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.contactId,
+        referencedTable: $db.contacts,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$ContactsTableFilterComposer(
+              $db: $db,
+              $table: $db.contacts,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$ContactGroupsTableFilterComposer get groupId {
+    final $$ContactGroupsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.groupId,
+        referencedTable: $db.contactGroups,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$ContactGroupsTableFilterComposer(
+              $db: $db,
+              $table: $db.contactGroups,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$ContactGroupMembershipsTableOrderingComposer
+    extends Composer<_$AppDatabase, $ContactGroupMembershipsTable> {
+  $$ContactGroupMembershipsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  $$ContactsTableOrderingComposer get contactId {
+    final $$ContactsTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.contactId,
+        referencedTable: $db.contacts,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$ContactsTableOrderingComposer(
+              $db: $db,
+              $table: $db.contacts,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$ContactGroupsTableOrderingComposer get groupId {
+    final $$ContactGroupsTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.groupId,
+        referencedTable: $db.contactGroups,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$ContactGroupsTableOrderingComposer(
+              $db: $db,
+              $table: $db.contactGroups,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$ContactGroupMembershipsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ContactGroupMembershipsTable> {
+  $$ContactGroupMembershipsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  $$ContactsTableAnnotationComposer get contactId {
+    final $$ContactsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.contactId,
+        referencedTable: $db.contacts,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$ContactsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.contacts,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$ContactGroupsTableAnnotationComposer get groupId {
+    final $$ContactGroupsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.groupId,
+        referencedTable: $db.contactGroups,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$ContactGroupsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.contactGroups,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$ContactGroupMembershipsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $ContactGroupMembershipsTable,
+    ContactGroupMembership,
+    $$ContactGroupMembershipsTableFilterComposer,
+    $$ContactGroupMembershipsTableOrderingComposer,
+    $$ContactGroupMembershipsTableAnnotationComposer,
+    $$ContactGroupMembershipsTableCreateCompanionBuilder,
+    $$ContactGroupMembershipsTableUpdateCompanionBuilder,
+    (ContactGroupMembership, $$ContactGroupMembershipsTableReferences),
+    ContactGroupMembership,
+    PrefetchHooks Function({bool contactId, bool groupId})> {
+  $$ContactGroupMembershipsTableTableManager(
+      _$AppDatabase db, $ContactGroupMembershipsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ContactGroupMembershipsTableFilterComposer(
+                  $db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ContactGroupMembershipsTableOrderingComposer(
+                  $db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ContactGroupMembershipsTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> contactId = const Value.absent(),
+            Value<int> groupId = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              ContactGroupMembershipsCompanion(
+            contactId: contactId,
+            groupId: groupId,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required int contactId,
+            required int groupId,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              ContactGroupMembershipsCompanion.insert(
+            contactId: contactId,
+            groupId: groupId,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$ContactGroupMembershipsTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: ({contactId = false, groupId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (contactId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.contactId,
+                    referencedTable: $$ContactGroupMembershipsTableReferences
+                        ._contactIdTable(db),
+                    referencedColumn: $$ContactGroupMembershipsTableReferences
+                        ._contactIdTable(db)
+                        .id,
+                  ) as T;
+                }
+                if (groupId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.groupId,
+                    referencedTable: $$ContactGroupMembershipsTableReferences
+                        ._groupIdTable(db),
+                    referencedColumn: $$ContactGroupMembershipsTableReferences
+                        ._groupIdTable(db)
+                        .id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$ContactGroupMembershipsTableProcessedTableManager
+    = ProcessedTableManager<
+        _$AppDatabase,
+        $ContactGroupMembershipsTable,
+        ContactGroupMembership,
+        $$ContactGroupMembershipsTableFilterComposer,
+        $$ContactGroupMembershipsTableOrderingComposer,
+        $$ContactGroupMembershipsTableAnnotationComposer,
+        $$ContactGroupMembershipsTableCreateCompanionBuilder,
+        $$ContactGroupMembershipsTableUpdateCompanionBuilder,
+        (ContactGroupMembership, $$ContactGroupMembershipsTableReferences),
+        ContactGroupMembership,
+        PrefetchHooks Function({bool contactId, bool groupId})>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -4343,4 +5506,9 @@ class $AppDatabaseManager {
       $$HolidaysTableTableManager(_db, _db.holidays);
   $$DailyPlansTableTableManager get dailyPlans =>
       $$DailyPlansTableTableManager(_db, _db.dailyPlans);
+  $$ContactGroupsTableTableManager get contactGroups =>
+      $$ContactGroupsTableTableManager(_db, _db.contactGroups);
+  $$ContactGroupMembershipsTableTableManager get contactGroupMemberships =>
+      $$ContactGroupMembershipsTableTableManager(
+          _db, _db.contactGroupMemberships);
 }

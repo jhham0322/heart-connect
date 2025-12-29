@@ -97,6 +97,34 @@
   "contactsMessageSent": "Terkirim",
   "contactsMessageReceived": "Diterima",
   
+  "contactsGroups": "Grup",
+  "groupManage": "Kelola Grup",
+  "groupAdd": "Tambah Grup",
+  "groupEdit": "Edit Grup",
+  "groupDelete": "Hapus Grup",
+  "groupName": "Nama Grup",
+  "groupNameHint": "Masukkan nama grup",
+  "groupNameRequired": "Masukkan nama grup",
+  "groupDeleteConfirm": "Hapus grup \"{name}\"?",
+  "@groupDeleteConfirm": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "groupDeleteDesc": "Hanya grup yang dihapus, kontak akan dipertahankan.",
+  "groupEmpty": "Tidak ada kontak dalam grup ini",
+  "groupAddContact": "Tambah Kontak",
+  "groupRemoveContact": "Hapus dari Grup",
+  "groupSelectGroups": "Pilih Grup",
+  "groupNoGroups": "Tidak ada grup terdaftar",
+  "groupCreateFirst": "Buat grup pertama Anda!",
+  "groupMemberCount": "{count}",
+  "@groupMemberCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  
   "shareTitle": "Bagikan",
   "shareOtherApps": "Aplikasi lain",
   "shareKakaoTalk": "KakaoTalk",

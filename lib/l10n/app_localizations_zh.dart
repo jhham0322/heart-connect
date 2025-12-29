@@ -282,6 +282,61 @@ class AppLocalizationsZh extends AppLocalizations {
   String get contactsMessageReceived => '已接收';
 
   @override
+  String get contactsGroups => '分组';
+
+  @override
+  String get groupManage => '分组管理';
+
+  @override
+  String get groupAdd => '添加分组';
+
+  @override
+  String get groupEdit => '编辑分组';
+
+  @override
+  String get groupDelete => '删除分组';
+
+  @override
+  String get groupName => '分组名称';
+
+  @override
+  String get groupNameHint => '请输入分组名称';
+
+  @override
+  String get groupNameRequired => '请输入分组名称';
+
+  @override
+  String groupDeleteConfirm(String name) {
+    return '确定删除「$name」分组吗？';
+  }
+
+  @override
+  String get groupDeleteDesc => '仅删除分组，联系人将保留。';
+
+  @override
+  String get groupEmpty => '分组中没有联系人';
+
+  @override
+  String get groupAddContact => '添加联系人';
+
+  @override
+  String get groupRemoveContact => '从分组移除';
+
+  @override
+  String get groupSelectGroups => '选择分组';
+
+  @override
+  String get groupNoGroups => '暂无已注册的分组';
+
+  @override
+  String get groupCreateFirst => '创建您的第一个分组！';
+
+  @override
+  String groupMemberCount(int count) {
+    return '$count人';
+  }
+
+  @override
   String get shareTitle => '分享';
 
   @override

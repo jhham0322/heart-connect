@@ -97,6 +97,34 @@
   "contactsMessageSent": "भेजा गया",
   "contactsMessageReceived": "प्राप्त हुआ",
   
+  "contactsGroups": "समूह",
+  "groupManage": "समूह प्रबंधन",
+  "groupAdd": "समूह जोड़ें",
+  "groupEdit": "समूह संपादित करें",
+  "groupDelete": "समूह हटाएं",
+  "groupName": "समूह का नाम",
+  "groupNameHint": "समूह का नाम दर्ज करें",
+  "groupNameRequired": "कृपया समूह का नाम दर्ज करें",
+  "groupDeleteConfirm": "\"{name}\" समूह हटाएं?",
+  "@groupDeleteConfirm": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "groupDeleteDesc": "केवल समूह हटाया जाएगा, संपर्क बने रहेंगे।",
+  "groupEmpty": "इस समूह में कोई संपर्क नहीं",
+  "groupAddContact": "संपर्क जोड़ें",
+  "groupRemoveContact": "समूह से हटाएं",
+  "groupSelectGroups": "समूह चुनें",
+  "groupNoGroups": "कोई पंजीकृत समूह नहीं",
+  "groupCreateFirst": "अपना पहला समूह बनाएं!",
+  "groupMemberCount": "{count}",
+  "@groupMemberCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  
   "shareTitle": "साझा करें",
   "shareOtherApps": "अन्य ऐप्स",
   "shareKakaoTalk": "KakaoTalk",

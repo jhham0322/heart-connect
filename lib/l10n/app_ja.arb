@@ -97,6 +97,34 @@
   "contactsMessageSent": "送信",
   "contactsMessageReceived": "受信",
   
+  "contactsGroups": "グループ",
+  "groupManage": "グループ管理",
+  "groupAdd": "グループ追加",
+  "groupEdit": "グループ編集",
+  "groupDelete": "グループ削除",
+  "groupName": "グループ名",
+  "groupNameHint": "グループ名を入力",
+  "groupNameRequired": "グループ名を入力してください",
+  "groupDeleteConfirm": "「{name}」グループを削除しますか？",
+  "@groupDeleteConfirm": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "groupDeleteDesc": "グループのみ削除され、連絡先は保持されます。",
+  "groupEmpty": "グループに連絡先がありません",
+  "groupAddContact": "連絡先追加",
+  "groupRemoveContact": "グループから削除",
+  "groupSelectGroups": "グループ選択",
+  "groupNoGroups": "登録されたグループがありません",
+  "groupCreateFirst": "最初のグループを作成しましょう！",
+  "groupMemberCount": "{count}人",
+  "@groupMemberCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  
   "shareTitle": "共有",
   "shareOtherApps": "他のアプリで共有",
   "shareKakaoTalk": "カカオトーク",

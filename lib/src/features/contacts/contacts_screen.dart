@@ -24,7 +24,7 @@ class ContactsScreen extends ConsumerStatefulWidget {
 }
 
 class _ContactsScreenState extends ConsumerState<ContactsScreen> {
-  int _selectedTabIndex = 0; // 0: My People, 1: Memory Record
+  int _selectedTabIndex = 0; // 0: My People, 1: Groups, 2: Memory Record
   String _searchQuery = '';
   Contact? _selectedContact; // 현재 선택된 연락처
   String _selectedFilter = '전체'; // 기본은 전체
@@ -55,11 +55,12 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
               // The mockup shows search in My People. Let's keep it for both but maybe filter differently.
               _buildSearchSection(),
 
-               // Contact List Area
               Expanded(
                 child: _selectedTabIndex == 0 
                   ? _buildMyPeopleList(database)
-                  : _buildMemoryList(database),
+                  : _selectedTabIndex == 1
+                    ? _buildGroupsList(database)
+                    : _buildMemoryList(database),
               ),
             ],
           ),
@@ -81,13 +82,22 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
               onTap: () => setState(() => _selectedTabIndex = 0),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 8),
+          Expanded(
+            child: _TabPill(
+              text: ref.watch(appStringsProvider).contactsGroups,
+              icon: FontAwesomeIcons.userGroup,
+              isActive: _selectedTabIndex == 1,
+              onTap: () => setState(() => _selectedTabIndex = 1),
+            ),
+          ),
+          const SizedBox(width: 8),
           Expanded(
             child: _TabPill(
               text: ref.watch(appStringsProvider).contactsMemories,
               icon: FontAwesomeIcons.star,
-              isActive: _selectedTabIndex == 1,
-              onTap: () => setState(() => _selectedTabIndex = 1),
+              isActive: _selectedTabIndex == 2,
+              onTap: () => setState(() => _selectedTabIndex = 2),
             ),
           ),
         ],
@@ -387,6 +397,398 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
           },
         );
       },
+    );
+  }
+
+  Widget _buildGroupsList(AppDatabase database) {
+    final strings = ref.watch(appStringsProvider);
+    
+    return StreamBuilder<List<ContactGroup>>(
+      stream: database.watchAllContactGroups(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        
+        final groups = snapshot.data ?? [];
+        
+        return Stack(
+          children: [
+            groups.isEmpty
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(FontAwesomeIcons.userGroup, size: 48, color: Colors.grey),
+                      const SizedBox(height: 16),
+                      Text(strings.groupNoGroups, style: const TextStyle(color: Colors.grey)),
+                      const SizedBox(height: 8),
+                      Text(strings.groupCreateFirst, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                    ],
+                  ),
+                )
+              : ListView.builder(
+                  padding: const EdgeInsets.fromLTRB(20, 10, 20, 100),
+                  itemCount: groups.length,
+                  itemBuilder: (context, index) {
+                    return _buildGroupCard(groups[index], database);
+                  },
+                ),
+            // Floating Action Button
+            Positioned(
+              right: 20,
+              bottom: 100,
+              child: FloatingActionButton(
+                onPressed: () => _showAddGroupDialog(database),
+                backgroundColor: const Color(0xFF5D4037),
+                child: const Icon(FontAwesomeIcons.plus, color: Colors.white, size: 20),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildGroupCard(ContactGroup group, AppDatabase database) {
+    final strings = ref.watch(appStringsProvider);
+    
+    return FutureBuilder<int>(
+      future: database.getContactCountInGroup(group.id),
+      builder: (context, countSnapshot) {
+        final memberCount = countSnapshot.data ?? 0;
+        
+        return GestureDetector(
+          onTap: () => _showGroupDetailDialog(group, database),
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: const Color(0xFF5D4037).withOpacity(0.1)),
+              boxShadow: [
+                BoxShadow(color: Colors.black.withOpacity(0.03), offset: const Offset(0, 4), blurRadius: 10)
+              ],
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 50, height: 50,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFE0B2),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: const Color(0xFF5D4037)),
+                  ),
+                  child: const Center(child: Icon(FontAwesomeIcons.userGroup, color: Color(0xFF5D4037), size: 20)),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(group.name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Color(0xFF3E2723))),
+                      const SizedBox(height: 2),
+                      Text(strings.groupMemberCount(memberCount), style: const TextStyle(fontSize: 12, color: Color(0xFF795548))),
+                    ],
+                  ),
+                ),
+                PopupMenuButton<String>(
+                  icon: const Icon(FontAwesomeIcons.ellipsisVertical, color: Color(0xFF795548), size: 18),
+                  onSelected: (value) {
+                    if (value == 'edit') {
+                      _showEditGroupDialog(group, database);
+                    } else if (value == 'delete') {
+                      _showDeleteGroupDialog(group, database);
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    PopupMenuItem(value: 'edit', child: Text(strings.groupEdit)),
+                    PopupMenuItem(value: 'delete', child: Text(strings.groupDelete, style: const TextStyle(color: Colors.red))),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showAddGroupDialog(AppDatabase database) {
+    final strings = ref.read(appStringsProvider);
+    final controller = TextEditingController();
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(strings.groupAdd),
+        content: TextField(
+          controller: controller,
+          decoration: InputDecoration(
+            labelText: strings.groupName,
+            hintText: strings.groupNameHint,
+            border: const OutlineInputBorder(),
+          ),
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(strings.cancel),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              if (controller.text.trim().isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(strings.groupNameRequired)),
+                );
+                return;
+              }
+              await database.insertContactGroup(
+                ContactGroupsCompanion.insert(name: controller.text.trim()),
+              );
+              if (mounted) Navigator.pop(context);
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF5D4037)),
+            child: Text(strings.add, style: const TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showEditGroupDialog(ContactGroup group, AppDatabase database) {
+    final strings = ref.read(appStringsProvider);
+    final controller = TextEditingController(text: group.name);
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(strings.groupEdit),
+        content: TextField(
+          controller: controller,
+          decoration: InputDecoration(
+            labelText: strings.groupName,
+            hintText: strings.groupNameHint,
+            border: const OutlineInputBorder(),
+          ),
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(strings.cancel),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              if (controller.text.trim().isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(strings.groupNameRequired)),
+                );
+                return;
+              }
+              await database.updateContactGroup(
+                group.copyWith(name: controller.text.trim()),
+              );
+              if (mounted) Navigator.pop(context);
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF5D4037)),
+            child: Text(strings.save, style: const TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeleteGroupDialog(ContactGroup group, AppDatabase database) {
+    final strings = ref.read(appStringsProvider);
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(strings.groupDelete),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(strings.groupDeleteConfirm(group.name)),
+            const SizedBox(height: 8),
+            Text(strings.groupDeleteDesc, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(strings.cancel),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              await database.deleteContactGroup(group.id);
+              if (mounted) Navigator.pop(context);
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: Text(strings.delete, style: const TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showGroupDetailDialog(ContactGroup group, AppDatabase database) {
+    final strings = ref.read(appStringsProvider);
+    
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.7,
+        decoration: const BoxDecoration(
+          color: Color(0xFFFFFDF5),
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(24),
+            topRight: Radius.circular(24),
+          ),
+        ),
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: const BoxDecoration(
+                color: Color(0xFF5D4037),
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(24),
+                  topRight: Radius.circular(24),
+                ),
+              ),
+              child: Row(
+                children: [
+                  const Icon(FontAwesomeIcons.userGroup, color: Colors.white),
+                  const SizedBox(width: 12),
+                  Expanded(child: Text(group.name, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold))),
+                  IconButton(
+                    icon: const Icon(FontAwesomeIcons.userPlus, color: Colors.white, size: 18),
+                    onPressed: () => _showAddContactToGroupDialog(group, database),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: StreamBuilder<List<Contact>>(
+                stream: database.watchContactsInGroup(group.id),
+                builder: (context, snapshot) {
+                  final contacts = snapshot.data ?? [];
+                  if (contacts.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(FontAwesomeIcons.userSlash, size: 48, color: Colors.grey),
+                          const SizedBox(height: 16),
+                          Text(strings.groupEmpty, style: const TextStyle(color: Colors.grey)),
+                        ],
+                      ),
+                    );
+                  }
+                  return ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: contacts.length,
+                    itemBuilder: (context, index) {
+                      final contact = contacts[index];
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: const Color(0xFF5D4037).withOpacity(0.1)),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 40, height: 40,
+                              decoration: const BoxDecoration(
+                                color: Color(0xFFFFF59D),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Center(child: Text("👩🏻", style: TextStyle(fontSize: 20))),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(contact.name, style: const TextStyle(fontWeight: FontWeight.w600)),
+                                  Text(formatPhone(contact.phone), style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                                ],
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(FontAwesomeIcons.xmark, color: Colors.red, size: 16),
+                              onPressed: () async {
+                                await database.removeContactFromGroup(contact.id, group.id);
+                              },
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showAddContactToGroupDialog(ContactGroup group, AppDatabase database) async {
+    final strings = ref.read(appStringsProvider);
+    final allContacts = await database.getAllContacts();
+    final groupContacts = await database.getContactsInGroup(group.id);
+    final groupContactIds = groupContacts.map((c) => c.id).toSet();
+    
+    final availableContacts = allContacts.where((c) => !groupContactIds.contains(c.id)).toList();
+    
+    if (!mounted) return;
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(strings.groupAddContact),
+        content: SizedBox(
+          width: double.maxFinite,
+          height: 400,
+          child: availableContacts.isEmpty
+              ? Center(child: Text(strings.contactsEmpty))
+              : ListView.builder(
+                  itemCount: availableContacts.length,
+                  itemBuilder: (context, index) {
+                    final contact = availableContacts[index];
+                    return ListTile(
+                      leading: const CircleAvatar(child: Text("👩🏻")),
+                      title: Text(contact.name),
+                      subtitle: Text(formatPhone(contact.phone)),
+                      trailing: IconButton(
+                        icon: const Icon(FontAwesomeIcons.plus, color: Color(0xFF5D4037)),
+                        onPressed: () async {
+                          await database.addContactToGroup(contact.id, group.id);
+                          if (mounted) Navigator.pop(context);
+                        },
+                      ),
+                    );
+                  },
+                ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(strings.close),
+          ),
+        ],
+      ),
     );
   }
 

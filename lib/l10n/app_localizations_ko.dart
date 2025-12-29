@@ -285,6 +285,61 @@ class AppLocalizationsKo extends AppLocalizations {
   String get contactsMessageReceived => '받음';
 
   @override
+  String get contactsGroups => '연락 그룹';
+
+  @override
+  String get groupManage => '그룹 관리';
+
+  @override
+  String get groupAdd => '그룹 추가';
+
+  @override
+  String get groupEdit => '그룹 편집';
+
+  @override
+  String get groupDelete => '그룹 삭제';
+
+  @override
+  String get groupName => '그룹 이름';
+
+  @override
+  String get groupNameHint => '그룹 이름을 입력하세요';
+
+  @override
+  String get groupNameRequired => '그룹 이름을 입력해주세요';
+
+  @override
+  String groupDeleteConfirm(String name) {
+    return '\"$name\" 그룹을 삭제하시겠습니까?';
+  }
+
+  @override
+  String get groupDeleteDesc => '그룹만 삭제되며, 연락처는 유지됩니다.';
+
+  @override
+  String get groupEmpty => '그룹에 연락처가 없습니다';
+
+  @override
+  String get groupAddContact => '연락처 추가';
+
+  @override
+  String get groupRemoveContact => '그룹에서 제거';
+
+  @override
+  String get groupSelectGroups => '그룹 선택';
+
+  @override
+  String get groupNoGroups => '등록된 그룹이 없습니다';
+
+  @override
+  String get groupCreateFirst => '첫 번째 그룹을 만들어보세요!';
+
+  @override
+  String groupMemberCount(int count) {
+    return '$count명';
+  }
+
+  @override
   String get shareTitle => '공유하기';
 
   @override

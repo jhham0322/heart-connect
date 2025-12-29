@@ -71,6 +71,24 @@ class Holidays extends Table {
   BoolColumn get isLunar => boolean().withDefault(const Constant(false))();
 }
 
+// 7. Contact Groups Table
+class ContactGroups extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get name => text().withLength(min: 1, max: 50)();
+  TextColumn get icon => text().withDefault(const Constant('group'))();
+  IntColumn get sortOrder => integer().withDefault(const Constant(0))();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+}
+
+// 8. Contact-Group Memberships Table (Many-to-Many)
+class ContactGroupMemberships extends Table {
+  IntColumn get contactId => integer().references(Contacts, #id)();
+  IntColumn get groupId => integer().references(ContactGroups, #id)();
+  
+  @override
+  Set<Column> get primaryKey => {contactId, groupId};
+}
+
 class DailyPlans extends Table {
   IntColumn get id => integer().autoIncrement()();
   DateTimeColumn get date => dateTime()();
@@ -83,7 +101,7 @@ class DailyPlans extends Table {
   TextColumn get recipients => text().nullable()(); // JSON list of recipients: [{"name":"Kim","phone":"010..."}]
 }
 
-@DriftDatabase(tables: [Contacts, History, Templates, GalleryFavorites, SavedCards, Holidays, DailyPlans])
+@DriftDatabase(tables: [Contacts, History, Templates, GalleryFavorites, SavedCards, Holidays, DailyPlans, ContactGroups, ContactGroupMemberships])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
   
@@ -91,7 +109,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(QueryExecutor e) : super(e);
 
   @override
-  int get schemaVersion => 10; // Incremented to force migration check
+  int get schemaVersion => 11; // Version 11: Contact Groups
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -135,6 +153,11 @@ class AppDatabase extends _$AppDatabase {
       if (from < 10) {
         // Version 10: Ensure recipients column exists (re-run of 9 if needed, but Drift handles versioning)
         // No new schema changes, just a bump to trigger migration logic if it was missed.
+      }
+      if (from < 11) {
+        // Version 11: Contact Groups feature
+        await m.createTable(contactGroups);
+        await m.createTable(contactGroupMemberships);
       }
     },
     beforeOpen: (details) async {
@@ -558,6 +581,91 @@ class AppDatabase extends _$AppDatabase {
   Future<int> insertSavedCard(SavedCardsCompanion entry) => into(savedCards).insert(entry);
   Future<bool> updateSavedCard(SavedCard entry) => update(savedCards).replace(entry);
   Future<int> deleteSavedCard(int id) => (delete(savedCards)..where((t) => t.id.equals(id))).go();
+
+  // --- Contact Groups Methods ---
+  Future<List<ContactGroup>> getAllContactGroups() => 
+    (select(contactGroups)..orderBy([(t) => OrderingTerm(expression: t.sortOrder)])).get();
+  
+  Stream<List<ContactGroup>> watchAllContactGroups() => 
+    (select(contactGroups)..orderBy([(t) => OrderingTerm(expression: t.sortOrder)])).watch();
+  
+  Future<int> insertContactGroup(ContactGroupsCompanion entry) => 
+    into(contactGroups).insert(entry);
+  
+  Future<bool> updateContactGroup(ContactGroup entry) => 
+    update(contactGroups).replace(entry);
+  
+  Future<int> deleteContactGroup(int id) async {
+    // First remove all memberships for this group
+    await (delete(contactGroupMemberships)..where((t) => t.groupId.equals(id))).go();
+    // Then delete the group
+    return (delete(contactGroups)..where((t) => t.id.equals(id))).go();
+  }
+
+  // --- Contact Group Memberships Methods ---
+  Future<int> addContactToGroup(int contactId, int groupId) => 
+    into(contactGroupMemberships).insert(
+      ContactGroupMembershipsCompanion.insert(contactId: contactId, groupId: groupId),
+      mode: InsertMode.insertOrIgnore,
+    );
+  
+  Future<int> removeContactFromGroup(int contactId, int groupId) => 
+    (delete(contactGroupMemberships)..where((t) => 
+      t.contactId.equals(contactId) & t.groupId.equals(groupId)
+    )).go();
+  
+  Future<List<ContactGroup>> getGroupsForContact(int contactId) {
+    final query = select(contactGroups).join([
+      innerJoin(contactGroupMemberships, 
+        contactGroupMemberships.groupId.equalsExp(contactGroups.id))
+    ])..where(contactGroupMemberships.contactId.equals(contactId));
+    
+    return query.map((row) => row.readTable(contactGroups)).get();
+  }
+  
+  Stream<List<ContactGroup>> watchGroupsForContact(int contactId) {
+    final query = select(contactGroups).join([
+      innerJoin(contactGroupMemberships, 
+        contactGroupMemberships.groupId.equalsExp(contactGroups.id))
+    ])..where(contactGroupMemberships.contactId.equals(contactId));
+    
+    return query.map((row) => row.readTable(contactGroups)).watch();
+  }
+  
+  Future<List<Contact>> getContactsInGroup(int groupId) {
+    final query = select(contacts).join([
+      innerJoin(contactGroupMemberships, 
+        contactGroupMemberships.contactId.equalsExp(contacts.id))
+    ])..where(contactGroupMemberships.groupId.equals(groupId));
+    
+    return query.map((row) => row.readTable(contacts)).get();
+  }
+  
+  Stream<List<Contact>> watchContactsInGroup(int groupId) {
+    final query = select(contacts).join([
+      innerJoin(contactGroupMemberships, 
+        contactGroupMemberships.contactId.equalsExp(contacts.id))
+    ])..where(contactGroupMemberships.groupId.equals(groupId));
+    
+    return query.map((row) => row.readTable(contacts)).watch();
+  }
+  
+  Future<int> getContactCountInGroup(int groupId) async {
+    final query = selectOnly(contactGroupMemberships)
+      ..addColumns([contactGroupMemberships.contactId.count()])
+      ..where(contactGroupMemberships.groupId.equals(groupId));
+    
+    return await query.map((row) => row.read(contactGroupMemberships.contactId.count())).getSingle() ?? 0;
+  }
+  
+  Future<void> updateContactGroups(int contactId, List<int> groupIds) async {
+    // Remove all existing memberships
+    await (delete(contactGroupMemberships)..where((t) => t.contactId.equals(contactId))).go();
+    // Add new memberships
+    for (final groupId in groupIds) {
+      await addContactToGroup(contactId, groupId);
+    }
+  }
 
 
 }

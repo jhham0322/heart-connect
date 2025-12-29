@@ -289,6 +289,61 @@ class AppLocalizationsTr extends AppLocalizations {
   String get contactsMessageReceived => 'Alındı';
 
   @override
+  String get contactsGroups => 'Gruplar';
+
+  @override
+  String get groupManage => 'Grupları Yönet';
+
+  @override
+  String get groupAdd => 'Grup Ekle';
+
+  @override
+  String get groupEdit => 'Grubu Düzenle';
+
+  @override
+  String get groupDelete => 'Grubu Sil';
+
+  @override
+  String get groupName => 'Grup Adı';
+
+  @override
+  String get groupNameHint => 'Grup adını girin';
+
+  @override
+  String get groupNameRequired => 'Grup adını girin';
+
+  @override
+  String groupDeleteConfirm(String name) {
+    return '\"$name\" grubu silinsin mi?';
+  }
+
+  @override
+  String get groupDeleteDesc => 'Yalnızca grup silinir, kişiler korunur.';
+
+  @override
+  String get groupEmpty => 'Bu grupta kişi yok';
+
+  @override
+  String get groupAddContact => 'Kişi Ekle';
+
+  @override
+  String get groupRemoveContact => 'Gruptan Çıkar';
+
+  @override
+  String get groupSelectGroups => 'Grupları Seç';
+
+  @override
+  String get groupNoGroups => 'Kayıtlı grup yok';
+
+  @override
+  String get groupCreateFirst => 'İlk grubunuzu oluşturun!';
+
+  @override
+  String groupMemberCount(int count) {
+    return '$count';
+  }
+
+  @override
   String get shareTitle => 'Paylaş';
 
   @override

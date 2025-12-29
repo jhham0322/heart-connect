@@ -284,6 +284,61 @@ class AppLocalizationsJa extends AppLocalizations {
   String get contactsMessageReceived => '受信';
 
   @override
+  String get contactsGroups => 'グループ';
+
+  @override
+  String get groupManage => 'グループ管理';
+
+  @override
+  String get groupAdd => 'グループ追加';
+
+  @override
+  String get groupEdit => 'グループ編集';
+
+  @override
+  String get groupDelete => 'グループ削除';
+
+  @override
+  String get groupName => 'グループ名';
+
+  @override
+  String get groupNameHint => 'グループ名を入力';
+
+  @override
+  String get groupNameRequired => 'グループ名を入力してください';
+
+  @override
+  String groupDeleteConfirm(String name) {
+    return '「$name」グループを削除しますか？';
+  }
+
+  @override
+  String get groupDeleteDesc => 'グループのみ削除され、連絡先は保持されます。';
+
+  @override
+  String get groupEmpty => 'グループに連絡先がありません';
+
+  @override
+  String get groupAddContact => '連絡先追加';
+
+  @override
+  String get groupRemoveContact => 'グループから削除';
+
+  @override
+  String get groupSelectGroups => 'グループ選択';
+
+  @override
+  String get groupNoGroups => '登録されたグループがありません';
+
+  @override
+  String get groupCreateFirst => '最初のグループを作成しましょう！';
+
+  @override
+  String groupMemberCount(int count) {
+    return '$count人';
+  }
+
+  @override
   String get shareTitle => '共有';
 
   @override

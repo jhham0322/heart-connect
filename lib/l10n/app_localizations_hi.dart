@@ -289,6 +289,61 @@ class AppLocalizationsHi extends AppLocalizations {
   String get contactsMessageReceived => 'प्राप्त हुआ';
 
   @override
+  String get contactsGroups => 'समूह';
+
+  @override
+  String get groupManage => 'समूह प्रबंधन';
+
+  @override
+  String get groupAdd => 'समूह जोड़ें';
+
+  @override
+  String get groupEdit => 'समूह संपादित करें';
+
+  @override
+  String get groupDelete => 'समूह हटाएं';
+
+  @override
+  String get groupName => 'समूह का नाम';
+
+  @override
+  String get groupNameHint => 'समूह का नाम दर्ज करें';
+
+  @override
+  String get groupNameRequired => 'कृपया समूह का नाम दर्ज करें';
+
+  @override
+  String groupDeleteConfirm(String name) {
+    return '\"$name\" समूह हटाएं?';
+  }
+
+  @override
+  String get groupDeleteDesc => 'केवल समूह हटाया जाएगा, संपर्क बने रहेंगे।';
+
+  @override
+  String get groupEmpty => 'इस समूह में कोई संपर्क नहीं';
+
+  @override
+  String get groupAddContact => 'संपर्क जोड़ें';
+
+  @override
+  String get groupRemoveContact => 'समूह से हटाएं';
+
+  @override
+  String get groupSelectGroups => 'समूह चुनें';
+
+  @override
+  String get groupNoGroups => 'कोई पंजीकृत समूह नहीं';
+
+  @override
+  String get groupCreateFirst => 'अपना पहला समूह बनाएं!';
+
+  @override
+  String groupMemberCount(int count) {
+    return '$count';
+  }
+
+  @override
   String get shareTitle => 'साझा करें';
 
   @override

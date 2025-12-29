@@ -97,6 +97,34 @@
   "contactsMessageSent": "Отправлено",
   "contactsMessageReceived": "Получено",
   
+  "contactsGroups": "Группы",
+  "groupManage": "Управление группами",
+  "groupAdd": "Добавить группу",
+  "groupEdit": "Редактировать группу",
+  "groupDelete": "Удалить группу",
+  "groupName": "Название группы",
+  "groupNameHint": "Введите название группы",
+  "groupNameRequired": "Введите название группы",
+  "groupDeleteConfirm": "Удалить группу \"{name}\"?",
+  "@groupDeleteConfirm": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "groupDeleteDesc": "Будет удалена только группа, контакты сохранятся.",
+  "groupEmpty": "В этой группе нет контактов",
+  "groupAddContact": "Добавить контакт",
+  "groupRemoveContact": "Удалить из группы",
+  "groupSelectGroups": "Выбрать группы",
+  "groupNoGroups": "Нет зарегистрированных групп",
+  "groupCreateFirst": "Создайте первую группу!",
+  "groupMemberCount": "{count}",
+  "@groupMemberCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  
   "shareTitle": "Поделиться",
   "shareOtherApps": "Другие приложения",
   "shareKakaoTalk": "KakaoTalk",

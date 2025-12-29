@@ -97,6 +97,34 @@
   "contactsMessageSent": "보냄",
   "contactsMessageReceived": "받음",
   
+  "contactsGroups": "연락 그룹",
+  "groupManage": "그룹 관리",
+  "groupAdd": "그룹 추가",
+  "groupEdit": "그룹 편집",
+  "groupDelete": "그룹 삭제",
+  "groupName": "그룹 이름",
+  "groupNameHint": "그룹 이름을 입력하세요",
+  "groupNameRequired": "그룹 이름을 입력해주세요",
+  "groupDeleteConfirm": "\"{name}\" 그룹을 삭제하시겠습니까?",
+  "@groupDeleteConfirm": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "groupDeleteDesc": "그룹만 삭제되며, 연락처는 유지됩니다.",
+  "groupEmpty": "그룹에 연락처가 없습니다",
+  "groupAddContact": "연락처 추가",
+  "groupRemoveContact": "그룹에서 제거",
+  "groupSelectGroups": "그룹 선택",
+  "groupNoGroups": "등록된 그룹이 없습니다",
+  "groupCreateFirst": "첫 번째 그룹을 만들어보세요!",
+  "groupMemberCount": "{count}명",
+  "@groupMemberCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  
   "shareTitle": "공유하기",
   "shareOtherApps": "기타 앱으로 공유",
   "shareKakaoTalk": "카카오톡",

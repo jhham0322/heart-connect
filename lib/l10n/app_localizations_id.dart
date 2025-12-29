@@ -288,6 +288,62 @@ class AppLocalizationsId extends AppLocalizations {
   String get contactsMessageReceived => 'Diterima';
 
   @override
+  String get contactsGroups => 'Grup';
+
+  @override
+  String get groupManage => 'Kelola Grup';
+
+  @override
+  String get groupAdd => 'Tambah Grup';
+
+  @override
+  String get groupEdit => 'Edit Grup';
+
+  @override
+  String get groupDelete => 'Hapus Grup';
+
+  @override
+  String get groupName => 'Nama Grup';
+
+  @override
+  String get groupNameHint => 'Masukkan nama grup';
+
+  @override
+  String get groupNameRequired => 'Masukkan nama grup';
+
+  @override
+  String groupDeleteConfirm(String name) {
+    return 'Hapus grup \"$name\"?';
+  }
+
+  @override
+  String get groupDeleteDesc =>
+      'Hanya grup yang dihapus, kontak akan dipertahankan.';
+
+  @override
+  String get groupEmpty => 'Tidak ada kontak dalam grup ini';
+
+  @override
+  String get groupAddContact => 'Tambah Kontak';
+
+  @override
+  String get groupRemoveContact => 'Hapus dari Grup';
+
+  @override
+  String get groupSelectGroups => 'Pilih Grup';
+
+  @override
+  String get groupNoGroups => 'Tidak ada grup terdaftar';
+
+  @override
+  String get groupCreateFirst => 'Buat grup pertama Anda!';
+
+  @override
+  String groupMemberCount(int count) {
+    return '$count';
+  }
+
+  @override
   String get shareTitle => 'Bagikan';
 
   @override

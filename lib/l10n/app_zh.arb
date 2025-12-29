@@ -97,6 +97,34 @@
   "contactsMessageSent": "已发送",
   "contactsMessageReceived": "已接收",
   
+  "contactsGroups": "分组",
+  "groupManage": "分组管理",
+  "groupAdd": "添加分组",
+  "groupEdit": "编辑分组",
+  "groupDelete": "删除分组",
+  "groupName": "分组名称",
+  "groupNameHint": "请输入分组名称",
+  "groupNameRequired": "请输入分组名称",
+  "groupDeleteConfirm": "确定删除「{name}」分组吗？",
+  "@groupDeleteConfirm": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "groupDeleteDesc": "仅删除分组，联系人将保留。",
+  "groupEmpty": "分组中没有联系人",
+  "groupAddContact": "添加联系人",
+  "groupRemoveContact": "从分组移除",
+  "groupSelectGroups": "选择分组",
+  "groupNoGroups": "暂无已注册的分组",
+  "groupCreateFirst": "创建您的第一个分组！",
+  "groupMemberCount": "{count}人",
+  "@groupMemberCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  
   "shareTitle": "分享",
   "shareOtherApps": "分享到其他应用",
   "shareKakaoTalk": "KakaoTalk",

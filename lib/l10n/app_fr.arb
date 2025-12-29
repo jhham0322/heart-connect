@@ -97,6 +97,34 @@
   "contactsMessageSent": "Envoyé",
   "contactsMessageReceived": "Reçu",
   
+  "contactsGroups": "Groupes",
+  "groupManage": "Gérer les groupes",
+  "groupAdd": "Ajouter un groupe",
+  "groupEdit": "Modifier le groupe",
+  "groupDelete": "Supprimer le groupe",
+  "groupName": "Nom du groupe",
+  "groupNameHint": "Entrez le nom du groupe",
+  "groupNameRequired": "Veuillez entrer le nom du groupe",
+  "groupDeleteConfirm": "Supprimer le groupe \"{name}\" ?",
+  "@groupDeleteConfirm": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "groupDeleteDesc": "Seul le groupe sera supprimé, les contacts sont conservés.",
+  "groupEmpty": "Aucun contact dans ce groupe",
+  "groupAddContact": "Ajouter un contact",
+  "groupRemoveContact": "Retirer du groupe",
+  "groupSelectGroups": "Sélectionner les groupes",
+  "groupNoGroups": "Aucun groupe enregistré",
+  "groupCreateFirst": "Créez votre premier groupe !",
+  "groupMemberCount": "{count}",
+  "@groupMemberCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  
   "shareTitle": "Partager",
   "shareOtherApps": "Autres applications",
   "shareKakaoTalk": "KakaoTalk",

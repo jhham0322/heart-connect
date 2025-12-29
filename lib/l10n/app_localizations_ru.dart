@@ -289,6 +289,62 @@ class AppLocalizationsRu extends AppLocalizations {
   String get contactsMessageReceived => 'Получено';
 
   @override
+  String get contactsGroups => 'Группы';
+
+  @override
+  String get groupManage => 'Управление группами';
+
+  @override
+  String get groupAdd => 'Добавить группу';
+
+  @override
+  String get groupEdit => 'Редактировать группу';
+
+  @override
+  String get groupDelete => 'Удалить группу';
+
+  @override
+  String get groupName => 'Название группы';
+
+  @override
+  String get groupNameHint => 'Введите название группы';
+
+  @override
+  String get groupNameRequired => 'Введите название группы';
+
+  @override
+  String groupDeleteConfirm(String name) {
+    return 'Удалить группу \"$name\"?';
+  }
+
+  @override
+  String get groupDeleteDesc =>
+      'Будет удалена только группа, контакты сохранятся.';
+
+  @override
+  String get groupEmpty => 'В этой группе нет контактов';
+
+  @override
+  String get groupAddContact => 'Добавить контакт';
+
+  @override
+  String get groupRemoveContact => 'Удалить из группы';
+
+  @override
+  String get groupSelectGroups => 'Выбрать группы';
+
+  @override
+  String get groupNoGroups => 'Нет зарегистрированных групп';
+
+  @override
+  String get groupCreateFirst => 'Создайте первую группу!';
+
+  @override
+  String groupMemberCount(int count) {
+    return '$count';
+  }
+
+  @override
   String get shareTitle => 'Поделиться';
 
   @override

@@ -97,6 +97,34 @@
   "contactsMessageSent": "تم الإرسال",
   "contactsMessageReceived": "تم الاستلام",
   
+  "contactsGroups": "المجموعات",
+  "groupManage": "إدارة المجموعات",
+  "groupAdd": "إضافة مجموعة",
+  "groupEdit": "تعديل المجموعة",
+  "groupDelete": "حذف المجموعة",
+  "groupName": "اسم المجموعة",
+  "groupNameHint": "أدخل اسم المجموعة",
+  "groupNameRequired": "يرجى إدخال اسم المجموعة",
+  "groupDeleteConfirm": "حذف مجموعة \"{name}\"؟",
+  "@groupDeleteConfirm": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "groupDeleteDesc": "سيتم حذف المجموعة فقط، وستبقى جهات الاتصال.",
+  "groupEmpty": "لا توجد جهات اتصال في هذه المجموعة",
+  "groupAddContact": "إضافة جهة اتصال",
+  "groupRemoveContact": "إزالة من المجموعة",
+  "groupSelectGroups": "اختر المجموعات",
+  "groupNoGroups": "لا توجد مجموعات مسجلة",
+  "groupCreateFirst": "أنشئ مجموعتك الأولى!",
+  "groupMemberCount": "{count}",
+  "@groupMemberCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  
   "shareTitle": "مشاركة",
   "shareOtherApps": "تطبيقات أخرى",
   "shareKakaoTalk": "KakaoTalk",
