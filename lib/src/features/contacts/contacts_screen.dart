@@ -29,6 +29,7 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
   Contact? _selectedContact; // 현재 선택된 연락처
   String _selectedFilter = '전체'; // 기본은 전체
   bool _isSyncing = false; // 동기화 중 상태
+  int? _selectedGroupId; // 선택된 그룹 ID
 
   @override
   Widget build(BuildContext context) {
@@ -414,34 +415,79 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
         
         return Stack(
           children: [
-            groups.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(FontAwesomeIcons.userGroup, size: 48, color: Colors.grey),
-                      const SizedBox(height: 16),
-                      Text(strings.groupNoGroups, style: const TextStyle(color: Colors.grey)),
-                      const SizedBox(height: 8),
-                      Text(strings.groupCreateFirst, style: const TextStyle(color: Colors.grey, fontSize: 12)),
-                    ],
-                  ),
-                )
-              : ListView.builder(
-                  padding: const EdgeInsets.fromLTRB(20, 10, 20, 100),
-                  itemCount: groups.length,
-                  itemBuilder: (context, index) {
-                    return _buildGroupCard(groups[index], database);
-                  },
+            Column(
+              children: [
+                // 가족 그룹 (고정, 맨 위)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+                  child: _buildFamilyGroupCard(database),
                 ),
-            // Floating Action Button
+                // 사용자 정의 그룹 목록
+                Expanded(
+                  child: groups.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(FontAwesomeIcons.userGroup, size: 48, color: Colors.grey),
+                            const SizedBox(height: 16),
+                            Text(strings.groupNoGroups, style: const TextStyle(color: Colors.grey)),
+                            const SizedBox(height: 8),
+                            Text(strings.groupCreateFirst, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                          ],
+                        ),
+                      )
+                    : ReorderableListView.builder(
+                        padding: const EdgeInsets.fromLTRB(20, 10, 20, 100),
+                        itemCount: groups.length,
+                        onReorder: (oldIndex, newIndex) async {
+                          if (newIndex > oldIndex) newIndex--;
+                          final movedGroup = groups[oldIndex];
+                          // Update sort order in database
+                          for (int i = 0; i < groups.length; i++) {
+                            int newOrder = i;
+                            if (i == newIndex) newOrder = oldIndex;
+                            else if (oldIndex < newIndex && i > oldIndex && i <= newIndex) newOrder = i - 1;
+                            else if (oldIndex > newIndex && i >= newIndex && i < oldIndex) newOrder = i + 1;
+                            
+                            if (i == oldIndex) {
+                              await database.updateContactGroup(movedGroup.copyWith(sortOrder: newIndex));
+                            }
+                          }
+                          setState(() {});
+                        },
+                        itemBuilder: (context, index) {
+                          return _buildGroupCard(groups[index], database, key: ValueKey(groups[index].id));
+                        },
+                      ),
+                ),
+              ],
+            ),
+            // Floating Action Buttons
             Positioned(
               right: 20,
               bottom: 100,
-              child: FloatingActionButton(
-                onPressed: () => _showAddGroupDialog(database),
-                backgroundColor: const Color(0xFF5D4037),
-                child: const Icon(FontAwesomeIcons.plus, color: Colors.white, size: 20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // 카드 쓰기 버튼 (그룹 선택시만 표시)
+                  if (_selectedGroupId != null)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: FloatingActionButton(
+                        heroTag: 'writeCard',
+                        onPressed: () => _navigateToWriteCardWithGroup(database),
+                        backgroundColor: const Color(0xFFE65100),
+                        child: const Icon(FontAwesomeIcons.pen, color: Colors.white, size: 20),
+                      ),
+                    ),
+                  FloatingActionButton(
+                    heroTag: 'addGroup',
+                    onPressed: () => _showAddGroupDialog(database),
+                    backgroundColor: const Color(0xFF5D4037),
+                    child: const Icon(FontAwesomeIcons.plus, color: Colors.white, size: 20),
+                  ),
+                ],
               ),
             ),
           ],
@@ -450,29 +496,105 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
     );
   }
 
-  Widget _buildGroupCard(ContactGroup group, AppDatabase database) {
+  // 가족 그룹 카드 (고정)
+  Widget _buildFamilyGroupCard(AppDatabase database) {
     final strings = ref.watch(appStringsProvider);
+    final isSelected = _selectedGroupId == -1; // 가족은 -1로 표시
     
-    return FutureBuilder<int>(
-      future: database.getContactCountInGroup(group.id),
-      builder: (context, countSnapshot) {
-        final memberCount = countSnapshot.data ?? 0;
+    return FutureBuilder<List<Contact>>(
+      future: database.getFamilyContacts(),
+      builder: (context, snapshot) {
+        final memberCount = snapshot.data?.length ?? 0;
         
         return GestureDetector(
-          onTap: () => _showGroupDetailDialog(group, database),
+          onTap: () {
+            setState(() {
+              _selectedGroupId = isSelected ? null : -1;
+            });
+          },
+          onDoubleTap: () => _showFamilyDetailDialog(database),
           child: Container(
             margin: const EdgeInsets.only(bottom: 12),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: isSelected ? const Color(0xFFFFE0B2) : Colors.white,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: const Color(0xFF5D4037).withOpacity(0.1)),
+              border: Border.all(
+                color: isSelected ? const Color(0xFF5D4037) : const Color(0xFF5D4037).withOpacity(0.1),
+                width: isSelected ? 2 : 1,
+              ),
               boxShadow: [
                 BoxShadow(color: Colors.black.withOpacity(0.03), offset: const Offset(0, 4), blurRadius: 10)
               ],
             ),
             child: Row(
               children: [
+                Container(
+                  width: 50, height: 50,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFCDD2),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: const Color(0xFFE91E63)),
+                  ),
+                  child: const Center(child: Icon(FontAwesomeIcons.house, color: Color(0xFFE91E63), size: 20)),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(strings.contactsFamily, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Color(0xFF3E2723))),
+                      const SizedBox(height: 2),
+                      Text(strings.groupMemberCount(memberCount), style: const TextStyle(fontSize: 12, color: Color(0xFF795548))),
+                    ],
+                  ),
+                ),
+                if (isSelected)
+                  const Icon(FontAwesomeIcons.check, color: Color(0xFF5D4037), size: 18),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildGroupCard(ContactGroup group, AppDatabase database, {Key? key}) {
+    final strings = ref.watch(appStringsProvider);
+    final isSelected = _selectedGroupId == group.id;
+    
+    return FutureBuilder<int>(
+      key: key,
+      future: database.getContactCountInGroup(group.id),
+      builder: (context, countSnapshot) {
+        final memberCount = countSnapshot.data ?? 0;
+        
+        return GestureDetector(
+          onTap: () {
+            setState(() {
+              _selectedGroupId = isSelected ? null : group.id;
+            });
+          },
+          onDoubleTap: () => _showGroupDetailDialog(group, database),
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: isSelected ? const Color(0xFFFFE0B2) : Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: isSelected ? const Color(0xFF5D4037) : const Color(0xFF5D4037).withOpacity(0.1),
+                width: isSelected ? 2 : 1,
+              ),
+              boxShadow: [
+                BoxShadow(color: Colors.black.withOpacity(0.03), offset: const Offset(0, 4), blurRadius: 10)
+              ],
+            ),
+            child: Row(
+              children: [
+                // 드래그 핸들
+                const Icon(FontAwesomeIcons.gripVertical, color: Color(0xFFBCAAA4), size: 16),
+                const SizedBox(width: 12),
                 Container(
                   width: 50, height: 50,
                   decoration: BoxDecoration(
@@ -493,6 +615,11 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
                     ],
                   ),
                 ),
+                if (isSelected)
+                  const Padding(
+                    padding: EdgeInsets.only(right: 8),
+                    child: Icon(FontAwesomeIcons.check, color: Color(0xFF5D4037), size: 18),
+                  ),
                 PopupMenuButton<String>(
                   icon: const Icon(FontAwesomeIcons.ellipsisVertical, color: Color(0xFF795548), size: 18),
                   onSelected: (value) {
@@ -513,6 +640,243 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
         );
       },
     );
+  }
+
+  // 가족 그룹 상세 다이얼로그
+  void _showFamilyDetailDialog(AppDatabase database) {
+    final strings = ref.read(appStringsProvider);
+    
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.7,
+        decoration: const BoxDecoration(
+          color: Color(0xFFFFFDF5),
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(24),
+            topRight: Radius.circular(24),
+          ),
+        ),
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: const BoxDecoration(
+                color: Color(0xFFE91E63),
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(24),
+                  topRight: Radius.circular(24),
+                ),
+              ),
+              child: Row(
+                children: [
+                  const Icon(FontAwesomeIcons.house, color: Colors.white),
+                  const SizedBox(width: 12),
+                  Expanded(child: Text(strings.contactsFamily, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold))),
+                  IconButton(
+                    icon: const Icon(FontAwesomeIcons.userPlus, color: Colors.white, size: 18),
+                    onPressed: () => _showAddFamilyContactDialog(database),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: FutureBuilder<List<Contact>>(
+                future: database.getFamilyContacts(),
+                builder: (context, snapshot) {
+                  final contacts = snapshot.data ?? [];
+                  if (contacts.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(FontAwesomeIcons.userSlash, size: 48, color: Colors.grey),
+                          const SizedBox(height: 16),
+                          Text(strings.groupEmpty, style: const TextStyle(color: Colors.grey)),
+                        ],
+                      ),
+                    );
+                  }
+                  return ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: contacts.length,
+                    itemBuilder: (context, index) {
+                      final contact = contacts[index];
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: const Color(0xFFE91E63).withOpacity(0.2)),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 40, height: 40,
+                              decoration: const BoxDecoration(
+                                color: Color(0xFFFFCDD2),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Center(child: Text("👨‍👩‍👧", style: TextStyle(fontSize: 18))),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(contact.name, style: const TextStyle(fontWeight: FontWeight.w600)),
+                                  Text(formatPhone(contact.phone), style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                                ],
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(FontAwesomeIcons.xmark, color: Colors.red, size: 16),
+                              onPressed: () async {
+                                await database.updateContactFamily(contact.id, false);
+                                setState(() {});
+                                if (mounted) Navigator.pop(context);
+                                _showFamilyDetailDialog(database); // Refresh
+                              },
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // 가족 연락처 추가 다이얼로그
+  void _showAddFamilyContactDialog(AppDatabase database) async {
+    final strings = ref.read(appStringsProvider);
+    final allContacts = await database.getAllContacts();
+    final familyContacts = await database.getFamilyContacts();
+    final familyIds = familyContacts.map((c) => c.id).toSet();
+    
+    final availableContacts = allContacts.where((c) => !familyIds.contains(c.id)).toList();
+    
+    if (!mounted) return;
+    
+    String searchQuery = '';
+    Set<int> selectedIds = {};
+    
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          final filteredContacts = searchQuery.isEmpty
+              ? availableContacts
+              : availableContacts.where((c) => 
+                  c.name.toLowerCase().contains(searchQuery.toLowerCase()) ||
+                  c.phone.contains(searchQuery)
+                ).toList();
+          
+          return AlertDialog(
+            title: Text(strings.groupAddContact),
+            content: SizedBox(
+              width: double.maxFinite,
+              height: 500,
+              child: Column(
+                children: [
+                  TextField(
+                    onChanged: (value) => setDialogState(() => searchQuery = value),
+                    decoration: InputDecoration(
+                      prefixIcon: const Icon(FontAwesomeIcons.magnifyingGlass, size: 16),
+                      hintText: strings.contactsSearchPlaceholder,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      isDense: true,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      TextButton.icon(
+                        onPressed: () => setDialogState(() => selectedIds = filteredContacts.map((c) => c.id).toSet()),
+                        icon: const Icon(FontAwesomeIcons.checkDouble, size: 14),
+                        label: Text(strings.all, style: const TextStyle(fontSize: 12)),
+                      ),
+                      TextButton.icon(
+                        onPressed: () => setDialogState(() => selectedIds.clear()),
+                        icon: const Icon(FontAwesomeIcons.xmark, size: 14),
+                        label: Text(strings.cancel, style: const TextStyle(fontSize: 12)),
+                      ),
+                      const Spacer(),
+                      Text('${selectedIds.length}${strings.sendPerson}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                  const Divider(),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: filteredContacts.length,
+                      itemBuilder: (context, index) {
+                        final contact = filteredContacts[index];
+                        return CheckboxListTile(
+                          value: selectedIds.contains(contact.id),
+                          onChanged: (v) => setDialogState(() => v == true ? selectedIds.add(contact.id) : selectedIds.remove(contact.id)),
+                          secondary: const CircleAvatar(child: Text("👩🏻")),
+                          title: Text(contact.name, style: const TextStyle(fontSize: 14)),
+                          subtitle: Text(formatPhone(contact.phone), style: const TextStyle(fontSize: 12)),
+                          dense: true,
+                          activeColor: const Color(0xFFE91E63),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(context), child: Text(strings.close)),
+              ElevatedButton.icon(
+                onPressed: selectedIds.isEmpty ? null : () async {
+                  for (final id in selectedIds) {
+                    await database.updateContactFamily(id, true);
+                  }
+                  if (mounted) Navigator.pop(context);
+                  Navigator.pop(context); // Close bottom sheet
+                  _showFamilyDetailDialog(database); // Refresh
+                },
+                icon: const Icon(FontAwesomeIcons.plus, size: 14, color: Colors.white),
+                label: Text('${strings.add} (${selectedIds.length})', style: const TextStyle(color: Colors.white)),
+                style: ElevatedButton.styleFrom(backgroundColor: selectedIds.isEmpty ? Colors.grey : const Color(0xFFE91E63)),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  // 선택된 그룹으로 카드 쓰기 화면 이동
+  Future<void> _navigateToWriteCardWithGroup(AppDatabase database) async {
+    List<Contact> groupContacts = [];
+    
+    if (_selectedGroupId == -1) {
+      // 가족 그룹
+      groupContacts = await database.getFamilyContacts();
+    } else if (_selectedGroupId != null) {
+      groupContacts = await database.getContactsInGroup(_selectedGroupId!);
+    }
+    
+    if (groupContacts.isEmpty) return;
+    
+    // recipients JSON 형식으로 변환
+    final recipients = groupContacts.map((c) => {'name': c.name, 'phone': c.phone}).toList();
+    final recipientsJson = Uri.encodeComponent(jsonEncode(recipients));
+    
+    if (mounted) {
+      context.go('/write?recipients=$recipientsJson');
+    }
   }
 
   void _showAddGroupDialog(AppDatabase database) {

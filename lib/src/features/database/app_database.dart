@@ -255,6 +255,11 @@ class AppDatabase extends _$AppDatabase {
     await (update(contacts)..where((t) => t.id.equals(contactId))).write(companion);
   }
 
+  // 가족 연락처 조회
+  Future<List<Contact>> getFamilyContacts() {
+    return (select(contacts)..where((t) => t.groupTag.equals('가족'))).get();
+  }
+
   // HISTORY methods
   Future<List<HistoryData>> getHistoryForContact(int contactId) {
     return (select(history)..where((t) => t.contactId.equals(contactId))).get();
