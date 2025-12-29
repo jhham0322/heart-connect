@@ -738,9 +738,8 @@ class _FullScreenViewerState extends ConsumerState<_FullScreenViewer> {
   @override
   void dispose() {
     _pageController.dispose();
-    // Reset selection when viewer is closed
-    // Use microtask to avoid modifying provider during widget tree updates
-    Future.microtask(() => ref.read(currentSelectionProvider.notifier).state = null);
+    // FAB에서 카드 화면으로 이동할 때 선택 정보가 필요하므로 초기화하지 않음
+    // 갤러리 상세 화면으로 돌아올 때 새로운 선택으로 덮어씌워짐
     super.dispose();
   }
 
@@ -911,8 +910,7 @@ class _DevicePhotoViewerState extends ConsumerState<_DevicePhotoViewer> {
   @override
   void dispose() {
     _pageController.dispose();
-    // 선택 초기화
-    Future.microtask(() => ref.read(currentSelectionProvider.notifier).state = null);
+    // FAB에서 카드 화면으로 이동할 때 선택 정보가 필요하므로 초기화하지 않음
     super.dispose();
   }
 
