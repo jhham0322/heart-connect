@@ -1371,7 +1371,11 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
            if (fStyle['bgOpacity'] != null) _footerBgOpacity = (fStyle['bgOpacity'] as num).toDouble();
            if (fStyle['radius'] != null) _footerRadius = (fStyle['radius'] as num).toDouble();
            if (fStyle['color'] != null) _footerColor = Color(fStyle['color']);
-           if (fStyle['fontSize'] != null) _footerFontSize = (fStyle['fontSize'] as num).toDouble();
+           if (fStyle['fontSize'] != null) {
+             final loadedSize = (fStyle['fontSize'] as num).toDouble();
+             // 최소 14 이상으로 설정 (기존 10 값 무시)
+             _footerFontSize = loadedSize < 14 ? 20.0 : loadedSize;
+           }
            if (fStyle['font'] != null) _footerFont = fStyle['font'];
            if (fStyle['isBold'] != null) _isFooterBold = fStyle['isBold'];
            if (fStyle['isItalic'] != null) _isFooterItalic = fStyle['isItalic'];
@@ -3013,7 +3017,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                           
                           // Footer: 글상자 오른쪽 하단
                           final footerRight = (cardWidth - boxWidth) / 2 - _dragOffset.dx + 45;
-                          final footerTop = cardHeight / 2 + _dragOffset.dy + 60; // 글상자 중앙에서 아래로
+                          final footerTop = cardHeight / 2 + _dragOffset.dy + 65; // 60 + 5
                           
                           return Positioned(
                             top: footerTop,
