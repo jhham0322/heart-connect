@@ -2894,11 +2894,11 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                                       mainAxisSize: MainAxisSize.min,
                                       crossAxisAlignment: CrossAxisAlignment.stretch,
                                       children: [
-                                        // 2. 편집 가능한 QuillEditor (최소 4줄, 최대 7줄)
+                                        // 2. 편집 가능한 QuillEditor (고정 높이)
                                         ConstrainedBox(
-                                          constraints: BoxConstraints(
-                                            minHeight: _fontSize * 1.5 * 4, // 최소 4줄
-                                            maxHeight: _fontSize * 1.5 * 7, // 최대 7줄
+                                          constraints: const BoxConstraints(
+                                            minHeight: 100, // 고정 최소 높이
+                                            maxHeight: 180, // 고정 최대 높이
                                           ),
                                           child: QuillEditor(
                                             controller: _quillController,
