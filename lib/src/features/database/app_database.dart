@@ -260,6 +260,50 @@ class AppDatabase extends _$AppDatabase {
     return (select(contacts)..where((t) => t.groupTag.equals('가족'))).get();
   }
 
+  // ========== groupTag 기반 그룹 관리 ==========
+  
+  // 모든 고유 그룹 태그 조회 (즐겨찾기 제외)
+  Future<List<String>> getDistinctGroupTags() async {
+    final result = await customSelect(
+      'SELECT DISTINCT group_tag FROM contacts WHERE group_tag IS NOT NULL AND group_tag != \'\' ORDER BY group_tag',
+    ).get();
+    return result.map((row) => row.read<String>('group_tag')).toList();
+  }
+
+  // 특정 그룹 태그를 가진 연락처 조회
+  Future<List<Contact>> getContactsByGroupTag(String groupTag) {
+    return (select(contacts)..where((t) => t.groupTag.equals(groupTag))).get();
+  }
+
+  // 특정 그룹 태그를 가진 연락처 수
+  Future<int> getContactCountByGroupTag(String groupTag) async {
+    final count = await customSelect(
+      'SELECT COUNT(*) as cnt FROM contacts WHERE group_tag = ?',
+      variables: [Variable.withString(groupTag)],
+    ).getSingle();
+    return count.read<int>('cnt');
+  }
+
+  // 연락처의 그룹 태그 업데이트
+  Future<void> updateContactGroupTag(int contactId, String? groupTag) async {
+    final companion = ContactsCompanion(
+      groupTag: Value(groupTag),
+    );
+    await (update(contacts)..where((t) => t.id.equals(contactId))).write(companion);
+  }
+
+  // 여러 연락처를 특정 그룹 태그에 추가
+  Future<void> addContactsToGroupTag(List<int> contactIds, String groupTag) async {
+    for (final id in contactIds) {
+      await updateContactGroupTag(id, groupTag);
+    }
+  }
+
+  // 연락처를 그룹에서 제거 (groupTag를 null로)
+  Future<void> removeContactFromGroupTag(int contactId) async {
+    await updateContactGroupTag(contactId, null);
+  }
+
   // HISTORY methods
   Future<List<HistoryData>> getHistoryForContact(int contactId) {
     return (select(history)..where((t) => t.contactId.equals(contactId))).get();
