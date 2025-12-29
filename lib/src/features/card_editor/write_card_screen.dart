@@ -268,9 +268,9 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   Color _defaultColor = const Color(0xFF1A1A1A);
   TextAlign _defaultTextAlign = TextAlign.center;
 
-  // Focus Node for Quill Editor (초기에는 포커스 불가)
-  final FocusNode _editorFocusNode = FocusNode(skipTraversal: true);
-  final FocusNode _footerFocusNode = FocusNode(skipTraversal: true); // 푸터 포커스 노드 추가
+  // Focus Node for Quill Editor
+  final FocusNode _editorFocusNode = FocusNode();
+  final FocusNode _footerFocusNode = FocusNode(); // 푸터 포커스 노드 추가
   
   // GlobalKey for RepaintBoundary (이미지 캡처용)
   final GlobalKey _captureKey = GlobalKey();
@@ -299,14 +299,6 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     // Set default message as localized placeholder (will be done after first build)
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializeDefaultMessage();
-      // 초기 진입 시 텍스트 필드 포커스 해제 (지연 실행)
-      Future.delayed(const Duration(milliseconds: 300), () {
-        if (mounted) {
-          _editorFocusNode.unfocus();
-          _footerFocusNode.unfocus();
-          FocusScope.of(context).unfocus();
-        }
-      });
     });
     
     _quillController.addListener(_onEditorChanged);
@@ -2908,12 +2900,10 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                                             minHeight: _fontSize * 1.5 * 4, // 최소 4줄
                                             maxHeight: _fontSize * 1.5 * 7, // 최대 7줄
                                           ),
-                                          child: IgnorePointer(
-                                            ignoring: !_isEditorActive, // 편집 모드가 아니면 터치 무시
-                                            child: QuillEditor(
-                                              controller: _quillController,
-                                              focusNode: _editorFocusNode,
-                                              scrollController: ScrollController(),
+                                          child: QuillEditor(
+                                            controller: _quillController,
+                                            focusNode: _editorFocusNode,
+                                            scrollController: ScrollController(),
                                               config: QuillEditorConfig(
                                                 autoFocus: false,
                                                 expands: false,
@@ -2941,7 +2931,6 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                                                 ),
                                               ),
                                             ), 
-                                          ),
                                           ),
                                         ),
                                         // Footer space placeholder if needed? No, it floats.
@@ -2978,12 +2967,10 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                                                       ? Border.all(color: const Color(0xFFF29D86), width: 2.0)
                                                       : Border.all(color: Colors.transparent, width: 2.0),
                                                 ),
-                                                child: IgnorePointer(
-                                                  ignoring: !_isFooterActive, // Footer 편집 모드가 아니면 터치 무시
-                                                  child: QuillEditor(
-                                                    controller: _footerQuillController,
-                                                    focusNode: _footerFocusNode,
-                                                    scrollController: ScrollController(),
+                                                child: QuillEditor(
+                                                  controller: _footerQuillController,
+                                                  focusNode: _footerFocusNode,
+                                                  scrollController: ScrollController(),
                                                   config: QuillEditorConfig(
                                                     autoFocus: false,
                                                     expands: false,
@@ -3018,7 +3005,6 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                                                       ),
                                                     ),
                                                   ),
-                                                ),
                                                 ),
                                               ),
                                             ),
