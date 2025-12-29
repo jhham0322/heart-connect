@@ -1801,11 +1801,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                                 {'type': 'bubble_left', 'icon': Icons.chat_bubble_outline, 'label': ref.watch(appStringsProvider).shapeBubbleLeft},
                                 {'type': 'bubble_center', 'icon': Icons.chat_bubble_outline, 'label': ref.watch(appStringsProvider).shapeBubbleCenter},
                                 {'type': 'bubble_right', 'icon': Icons.chat_bubble_outline, 'label': ref.watch(appStringsProvider).shapeBubbleRight},
-                                {'type': 'heart', 'icon': Icons.favorite_border, 'label': ref.watch(appStringsProvider).shapeHeart},
-                                {'type': 'star', 'icon': Icons.star_border, 'label': ref.watch(appStringsProvider).shapeStar},
-                                {'type': 'diamond', 'icon': FontAwesomeIcons.gem, 'label': ref.watch(appStringsProvider).shapeDiamond},
-                                {'type': 'hexagon', 'icon': FontAwesomeIcons.drawPolygon, 'label': ref.watch(appStringsProvider).shapeHexagon},
-                                {'type': 'cloud', 'icon': Icons.cloud_queue, 'label': ref.watch(appStringsProvider).shapeCloud},
+                                // 하트, 별, 다이아, 육각형, 구름 도형 임시 비활성화
                               ].map((item) {
                                 final isSelected = _boxShape == item['type'] || (_boxShape == 'bubble' && item['type'] == 'bubble_right');
                                 
@@ -3234,8 +3230,8 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                         },
                       ),
                     
-                    // Footer (CardPreview Stack - 글상자와 독립적으로 탭 가능)
-                    if (!_isCapturing)
+                    // Footer (임시 비활성화)
+                    if (false) // 푸터 기능 일시 비활성화
                       Builder(
                         builder: (context) {
                           // 글상자와 동일한 위치 계산 (단순 오프셋 방식)
