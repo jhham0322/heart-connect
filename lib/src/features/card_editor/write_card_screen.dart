@@ -301,10 +301,6 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
       selection: const TextSelection.collapsed(offset: 0),
     );
     
-    // Set default message as localized placeholder (will be done after first build)
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _initializeDefaultMessage();
-    });
     
     _quillController.addListener(_onEditorChanged);
     _footerQuillController.addListener(_onFooterEditorChanged);
@@ -543,22 +539,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     }
   }
 
-  /// 메시지가 비어있으면 기본 플레이스홀더 텍스트 설정
-  void _initializeDefaultMessage() {
-    if (!mounted) return;
-    
-    // 이미 드래프트에서 메시지가 로드되었으면 스킵
-    final plainText = _quillController.document.toPlainText().trim();
-    if (plainText.isNotEmpty) return;
-    
-    final strings = ref.read(appStringsProvider);
-    final placeholder = strings.editorMessagePlaceholder;
-    
-    setState(() {
-      _message = placeholder;
-      _quillController.document = Document()..insert(0, placeholder);
-    });
-  }
+  // 플레이스홀더는 QuillEditor의 placeholder 속성으로 처리됨 (코드 제거됨)
 
   /// DB에서 사용 가능한 주제 목록 로드
   Future<void> _loadAvailableTopics() async {
