@@ -670,6 +670,10 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                           });
                           Navigator.pop(ctx);
                           _saveDraft(); // 주제 선택 저장
+                          // 주제 선택 후 AI 팝업 자동 열기
+                          Future.delayed(const Duration(milliseconds: 100), () {
+                            if (mounted) _showAiToneSelector();
+                          });
                         },
                       );
                     }).toList(),
@@ -1599,8 +1603,9 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   void _showAiToneSelector() {
     if (!mounted) return;
     if (_isAiLoading) return;
-    if (_message.trim().isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("메시지를 먼저 입력해주세요.")));
+    // 메시지가 비어있고 주제도 선택되지 않았으면 안내 메시지 표시
+    if (_message.trim().isEmpty && _selectedTopic == null) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("메시지를 입력하거나 주제를 선택해주세요.")));
         return;
     }
     
@@ -3075,19 +3080,15 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                                       mainAxisSize: MainAxisSize.min,
                                       crossAxisAlignment: CrossAxisAlignment.stretch,
                                       children: [
-                                        // 2. 편집 가능한 QuillEditor (고정 높이 140 = 180 - 40)
-                                        ConstrainedBox(
-                                          constraints: const BoxConstraints(
-                                            minHeight: 200, // 240 - 40 (padding)
-                                            maxHeight: 200,
-                                          ),
+                                        // 2. 편집 가능한 QuillEditor (고정 높이 - 패딩 고려)
+                                        Expanded(
                                           child: QuillEditor(
                                             controller: _quillController,
                                             focusNode: _editorFocusNode,
                                             scrollController: ScrollController(),
                                               config: QuillEditorConfig(
                                                 autoFocus: false,
-                                                expands: false,
+                                                expands: true,
                                                 scrollable: true,
                                               padding: EdgeInsets.zero,
                                               showCursor: true,
@@ -3114,8 +3115,6 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                                             ), 
                                           ),
                                         ),
-                                        // Footer space placeholder if needed? No, it floats.
-                                        const SizedBox(height: 40), // Reserve some space so main text doesn't overlap footer initially
                                       ],
                                     ),
                                     
