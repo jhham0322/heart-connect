@@ -353,23 +353,18 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
       print("[WriteCardScreen] initialContact is NULL");
     }
 
-    _loadTemplateAssets();
+    // 갤러리에서 전달받은 카테고리 이미지 목록이 있으면 바로 템플릿으로 사용
+    if (widget.initialCategoryImages != null && widget.initialCategoryImages!.isNotEmpty) {
+      _templates = widget.initialCategoryImages!;
+      _isLoading = false;
+      print("[WriteCardScreen] Using ${_templates.length} images from gallery category: ${widget.initialCategoryId}");
+    } else {
+      _loadTemplateAssets(); // 갤러리에서 오지 않은 경우에만 기본 템플릿 로드
+    }
+    
     _loadFrameAssets();
     _loadDraft(); // Load full draft including footer
     _loadAvailableTopics(); // DB에서 주제 목록 로드
-    
-    // 갤러리에서 전달받은 카테고리 이미지 목록이 있으면 템플릿으로 사용
-    if (widget.initialCategoryImages != null && widget.initialCategoryImages!.isNotEmpty) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          setState(() {
-            _templates = widget.initialCategoryImages!;
-            _isLoading = false;
-          });
-          print("[WriteCardScreen] Loaded ${_templates.length} images from gallery category: ${widget.initialCategoryId}");
-        }
-      });
-    }
     // 더미 수신자 데이터 생성 삭제 (사용자 요청: 1명만 있어야 함)
     // for (int i = 1; i <= 20; i++) {
     //   _recipients.add("수신자 $i 010-0000-${i.toString().padLeft(4, '0')}");
