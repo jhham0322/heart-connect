@@ -161,12 +161,12 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   bool _isLoadingFrames = false;
 
   // Style State
-  TextStyle _currentStyle = GoogleFonts.gowunDodum(fontSize: 18, color: const Color(0xFF1A1A1A), height: 1.2);
+  TextStyle _currentStyle = GoogleFonts.gowunDodum(fontSize: 20, color: const Color(0xFF1A1A1A), height: 1.2);
   TextAlign _textAlign = TextAlign.center;
   bool _isBold = false;
   bool _isItalic = false;
   bool _isUnderline = false;
-  double _fontSize = 18.0;
+  double _fontSize = 20.0;
   String _fontName = 'Gowun Dodum';
   
   // Templates (Loaded Dynamically)
@@ -201,7 +201,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
 
   // Footer Style State
   Color _footerColor = Colors.white;
-  double _footerFontSize = 18.0; // 기본 푸터 폰트 크기
+  double _footerFontSize = 20.0; // 기본 푸터 폰트 크기
   String _footerFont = 'Roboto'; // 푸터 폰트 (기본값)
   bool _isFooterBold = true;
   bool _isFooterItalic = false;
@@ -455,12 +455,16 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
       final prefs = await SharedPreferences.getInstance();
       final draftJson = prefs.getString('card_draft_v2');
       
+      print("[DEBUG] _loadDraft: draftJson is ${draftJson == null ? 'NULL' : (draftJson.isEmpty ? 'EMPTY' : 'EXISTS (${draftJson.length} chars)')}");
+      
       if (draftJson == null || draftJson.isEmpty) {
         _loadSavedFooter(); // Fallback to old footer save if no full draft
         // 이전 드래프트가 없으면 주제 선택 팝업 자동 표시
+        print("[DEBUG] No draft - showing AI topic popup");
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) {
             Future.delayed(const Duration(milliseconds: 500), () {
+              print("[DEBUG] Calling _showAiToneSelector (no draft)");
               if (mounted) _showAiToneSelector();
             });
           }
@@ -469,6 +473,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
       }
 
       final data = jsonDecode(draftJson) as Map<String, dynamic>;
+      print("[DEBUG] Draft data keys: ${data.keys.toList()}");
       
       if (mounted) {
         setState(() {
@@ -555,14 +560,21 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
         
         // 드래프트가 있지만 메시지가 비어있으면 주제 선택 팝업 표시
         final messageContent = _quillController.document.toPlainText().trim();
+        print("[DEBUG] Draft loaded - messageContent: '${messageContent.length > 20 ? messageContent.substring(0, 20) + '...' : messageContent}' (${messageContent.length} chars)");
+        print("[DEBUG] Current fontSize: $_fontSize, fontName: $_fontName");
+        
         if (messageContent.isEmpty) {
+          print("[DEBUG] Message is empty - showing AI topic popup");
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
               Future.delayed(const Duration(milliseconds: 500), () {
+                print("[DEBUG] Calling _showAiToneSelector (empty message)");
                 if (mounted) _showAiToneSelector();
               });
             }
           });
+        } else {
+          print("[DEBUG] Message exists - NOT showing AI topic popup");
         }
       }
     } catch (e) {
@@ -978,9 +990,17 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     final list = _isFrameMode ? _frameImages : _templates;
     final selected = _isFrameMode ? _selectedFrame : _selectedImage;
 
-    if (list.isEmpty || selected == null || selected.isEmpty) return;
+    print("[DEBUG] _scrollToSelected: selected=$selected");
+    print("[DEBUG] _scrollToSelected: templates count=${_templates.length}, list count=${list.length}");
+    
+    if (list.isEmpty || selected == null || selected.isEmpty) {
+      print("[DEBUG] _scrollToSelected: returning early (empty list or no selection)");
+      return;
+    }
     
     final index = list.indexOf(selected);
+    print("[DEBUG] _scrollToSelected: index=$index for selected image");
+    
     if (index != -1 && _scrollController.hasClients) {
       final screenWidth = MediaQuery.of(context).size.width;
       final offset = (index * 92.0) - (screenWidth / 2) + 40; // 40 is half item width
@@ -990,6 +1010,8 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
+    } else if (index == -1) {
+      print("[DEBUG] _scrollToSelected: MISMATCH - selected image not found in templates!");
     }
   }
 
