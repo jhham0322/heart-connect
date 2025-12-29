@@ -333,8 +333,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with TickerProvider
                         child: Transform.rotate(
                           angle: _heartRotate.value,
                           child: Container(
-                            width: 120,
-                            height: 120,
+                            width: 320,
+                            height: 320,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               gradient: RadialGradient(
@@ -344,9 +344,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with TickerProvider
                             child: Center(
                               child: Image.asset(
                                 'assets/icons/app_icon.png',
-                                width: 80,
-                                height: 80,
-                                errorBuilder: (context, error, stackTrace) => const Text('💝', style: TextStyle(fontSize: 60)),
+                                width: 240,
+                                height: 240,
+                                errorBuilder: (context, error, stackTrace) => const Text('💝', style: TextStyle(fontSize: 160)),
                               ),
                             ),
                           ),
