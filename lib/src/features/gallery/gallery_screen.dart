@@ -611,7 +611,8 @@ class _GalleryDetailScreenState extends ConsumerState<GalleryDetailScreen> {
                 // newyear 카테고리: New1_만 무료, New2_~New6_는 유료
                 final bool isPremium;
                 if (widget.category.id == 'newyear') {
-                  final fileName = imagePath.split('/').last.toLowerCase();
+                  // 파일명 추출 (Windows/Unix 경로 모두 처리)
+                  final fileName = imagePath.split(RegExp(r'[/\\]')).last.toLowerCase();
                   // new1_로 시작하면 무료, 그 외(new2_~new6_)는 유료
                   isPremium = !fileName.startsWith('new1_');
                 } else {

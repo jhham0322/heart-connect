@@ -151,8 +151,8 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   late final TextEditingController _footerController;
   String _footerText = ""; // 기본값 빈 문자열 (처음에 안 보임)
   
-  // Default placeholder matching the Nativity scene
-  String _selectedImage = "assets/images/cards/christmas/baecb8cc-2d6e-40a3-9754-95eae4022ab7.png"; 
+  // Default placeholder - 신년 테마 첫 번째 이미지
+  String _selectedImage = "assets/images/cards/newyear/new1_00004_.jpg"; 
   
   // Frame Logic
   bool _isFrameMode = false;
