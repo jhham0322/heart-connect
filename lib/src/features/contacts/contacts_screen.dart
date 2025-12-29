@@ -754,40 +754,127 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
     
     if (!mounted) return;
     
+    String searchQuery = '';
+    Set<int> selectedIds = {};
+    
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(strings.groupAddContact),
-        content: SizedBox(
-          width: double.maxFinite,
-          height: 400,
-          child: availableContacts.isEmpty
-              ? Center(child: Text(strings.contactsEmpty))
-              : ListView.builder(
-                  itemCount: availableContacts.length,
-                  itemBuilder: (context, index) {
-                    final contact = availableContacts[index];
-                    return ListTile(
-                      leading: const CircleAvatar(child: Text("👩🏻")),
-                      title: Text(contact.name),
-                      subtitle: Text(formatPhone(contact.phone)),
-                      trailing: IconButton(
-                        icon: const Icon(FontAwesomeIcons.plus, color: Color(0xFF5D4037)),
-                        onPressed: () async {
-                          await database.addContactToGroup(contact.id, group.id);
-                          if (mounted) Navigator.pop(context);
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          final filteredContacts = searchQuery.isEmpty
+              ? availableContacts
+              : availableContacts.where((c) => 
+                  c.name.toLowerCase().contains(searchQuery.toLowerCase()) ||
+                  c.phone.contains(searchQuery)
+                ).toList();
+          
+          return AlertDialog(
+            title: Text(strings.groupAddContact),
+            content: SizedBox(
+              width: double.maxFinite,
+              height: 500,
+              child: Column(
+                children: [
+                  // 검색 창
+                  TextField(
+                    onChanged: (value) => setDialogState(() => searchQuery = value),
+                    decoration: InputDecoration(
+                      prefixIcon: const Icon(FontAwesomeIcons.magnifyingGlass, size: 16),
+                      hintText: strings.contactsSearchPlaceholder,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      isDense: true,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  // 모두 선택/취소 버튼
+                  Row(
+                    children: [
+                      TextButton.icon(
+                        onPressed: () {
+                          setDialogState(() {
+                            selectedIds = filteredContacts.map((c) => c.id).toSet();
+                          });
                         },
+                        icon: const Icon(FontAwesomeIcons.checkDouble, size: 14),
+                        label: Text(strings.all, style: const TextStyle(fontSize: 12)),
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                        ),
                       ),
-                    );
-                  },
+                      TextButton.icon(
+                        onPressed: () {
+                          setDialogState(() {
+                            selectedIds.clear();
+                          });
+                        },
+                        icon: const Icon(FontAwesomeIcons.xmark, size: 14),
+                        label: Text(strings.cancel, style: const TextStyle(fontSize: 12)),
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                        ),
+                      ),
+                      const Spacer(),
+                      Text(
+                        '${selectedIds.length}${strings.sendPerson}',
+                        style: const TextStyle(fontSize: 12, color: Color(0xFF5D4037), fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                  const Divider(),
+                  // 연락처 목록
+                  Expanded(
+                    child: filteredContacts.isEmpty
+                        ? Center(child: Text(strings.contactsEmpty))
+                        : ListView.builder(
+                            itemCount: filteredContacts.length,
+                            itemBuilder: (context, index) {
+                              final contact = filteredContacts[index];
+                              final isSelected = selectedIds.contains(contact.id);
+                              return CheckboxListTile(
+                                value: isSelected,
+                                onChanged: (value) {
+                                  setDialogState(() {
+                                    if (value == true) {
+                                      selectedIds.add(contact.id);
+                                    } else {
+                                      selectedIds.remove(contact.id);
+                                    }
+                                  });
+                                },
+                                secondary: const CircleAvatar(child: Text("👩🏻")),
+                                title: Text(contact.name, style: const TextStyle(fontSize: 14)),
+                                subtitle: Text(formatPhone(contact.phone), style: const TextStyle(fontSize: 12)),
+                                dense: true,
+                                activeColor: const Color(0xFF5D4037),
+                              );
+                            },
+                          ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(strings.close),
+              ),
+              ElevatedButton.icon(
+                onPressed: selectedIds.isEmpty ? null : () async {
+                  for (final id in selectedIds) {
+                    await database.addContactToGroup(id, group.id);
+                  }
+                  if (mounted) Navigator.pop(context);
+                },
+                icon: const Icon(FontAwesomeIcons.plus, size: 14, color: Colors.white),
+                label: Text('${strings.add} (${selectedIds.length})', style: const TextStyle(color: Colors.white)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: selectedIds.isEmpty ? Colors.grey : const Color(0xFF5D4037),
                 ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(strings.close),
-          ),
-        ],
+              ),
+            ],
+          );
+        },
       ),
     );
   }
