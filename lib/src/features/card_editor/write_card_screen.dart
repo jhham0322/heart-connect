@@ -2954,17 +2954,24 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                     if (!_isCapturing)
                       Builder(
                         builder: (context) {
-                          // 글상자와 동일한 위치 계산
-                          final boxWidth = MediaQuery.of(context).size.width * 0.78;
-                          final cardWidth = MediaQuery.of(context).size.width * 0.92;
-                          // 글상자 오른쪽 = (cardWidth - boxWidth) / 2 + boxWidth + dragOffset.dx
-                          // 아이콘은 글상자 오른쪽에서 왼쪽으로 (0으로 설정)
-                          final iconRight = (cardWidth - boxWidth) / 2 - _dragOffset.dx;
-                          // 글상자 상단 위치 (카드 중앙 기준)
-                          final cardHeight = cardWidth * (4 / 3);
-                          // 글상자 중앙 Y = cardHeight / 2 + dragOffset.dy
-                          // AI 아이콘: 글상자 상단 위 (고정 높이 100 기준 -50 - 35 = -85)
-                          final iconTop = cardHeight / 2 + _dragOffset.dy - 85;
+                          // 글상자 RenderBox에서 실제 크기와 위치 가져오기
+                          final textBoxRenderBox = _textBoxKey.currentContext?.findRenderObject() as RenderBox?;
+                          if (textBoxRenderBox == null) {
+                            return const SizedBox.shrink();
+                          }
+                          
+                          // Stack 내의 위치 계산을 위해 상위 RenderBox 필요
+                          final stackRenderBox = context.findRenderObject() as RenderBox?;
+                          if (stackRenderBox == null) {
+                            return const SizedBox.shrink();
+                          }
+                          
+                          final textBoxPosition = textBoxRenderBox.localToGlobal(Offset.zero, ancestor: stackRenderBox);
+                          final textBoxSize = textBoxRenderBox.size;
+                          
+                          // AI 아이콘: 글상자 상단 위, 오른쪽 정렬 (왼쪽으로 20픽셀)
+                          final iconTop = textBoxPosition.dy - 35; // 글상자 상단에서 35px 위
+                          final iconRight = MediaQuery.of(context).size.width * 0.92 - textBoxPosition.dx - textBoxSize.width + 20; // 왼쪽으로 20px
                           
                           return Positioned(
                             top: iconTop,
@@ -3008,13 +3015,23 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                     if (!_isCapturing)
                       Builder(
                         builder: (context) {
-                          // 글상자와 동일한 위치 계산
-                          final boxWidth = MediaQuery.of(context).size.width * 0.78;
-                          final cardWidth = MediaQuery.of(context).size.width * 0.92;
-                          final cardHeight = cardWidth * (4 / 3);
-                          // Footer 위치: 글상자 하단 아래 (고정 높이 100 기준 +50 + 20 = +70)
-                          final footerRight = (cardWidth - boxWidth) / 2 - _dragOffset.dx + 15;
-                          final footerTop = cardHeight / 2 + _dragOffset.dy + 70;
+                          // 글상자 RenderBox에서 실제 크기와 위치 가져오기
+                          final textBoxRenderBox = _textBoxKey.currentContext?.findRenderObject() as RenderBox?;
+                          if (textBoxRenderBox == null) {
+                            return const SizedBox.shrink();
+                          }
+                          
+                          final stackRenderBox = context.findRenderObject() as RenderBox?;
+                          if (stackRenderBox == null) {
+                            return const SizedBox.shrink();
+                          }
+                          
+                          final textBoxPosition = textBoxRenderBox.localToGlobal(Offset.zero, ancestor: stackRenderBox);
+                          final textBoxSize = textBoxRenderBox.size;
+                          
+                          // Footer: 글상자 하단 + 50px, 왼쪽으로 20px
+                          final footerTop = textBoxPosition.dy + textBoxSize.height + 50;
+                          final footerRight = MediaQuery.of(context).size.width * 0.92 - textBoxPosition.dx - textBoxSize.width + 20;
                           
                           return Positioned(
                             top: footerTop,
