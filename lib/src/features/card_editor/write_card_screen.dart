@@ -626,6 +626,102 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     }
   }
 
+  /// 주제 선택 바텀시트 표시
+  void _showTopicSelector() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 16),
+                child: Text(
+                  "주제 선택",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ),
+              // 주제 목록 (스크롤 가능)
+              Container(
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(context).size.height * 0.4,
+                ),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: _availableTopics.map((topic) {
+                      final isSelected = _selectedTopic == topic;
+                      return ListTile(
+                        leading: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: isSelected 
+                                ? const Color(0xFFF29D86).withOpacity(0.2)
+                                : const Color(0xFFFFF0EB),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(
+                            FontAwesomeIcons.tag,
+                            color: isSelected 
+                                ? const Color(0xFFF29D86)
+                                : Colors.grey[600],
+                            size: 16,
+                          ),
+                        ),
+                        title: Text(
+                          topic,
+                          style: TextStyle(
+                            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                            color: isSelected ? const Color(0xFFF29D86) : Colors.black87,
+                          ),
+                        ),
+                        trailing: isSelected 
+                            ? const Icon(FontAwesomeIcons.check, color: Color(0xFFF29D86), size: 14)
+                            : null,
+                        onTap: () {
+                          setState(() {
+                            _selectedTopic = topic;
+                          });
+                          Navigator.pop(ctx);
+                          _saveDraft(); // 주제 선택 저장
+                        },
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ),
+              // 선택 해제 버튼
+              if (_selectedTopic != null)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: TextButton.icon(
+                    onPressed: () {
+                      setState(() {
+                        _selectedTopic = null;
+                      });
+                      Navigator.pop(ctx);
+                      _saveDraft();
+                    },
+                    icon: const Icon(FontAwesomeIcons.xmark, size: 14),
+                    label: const Text("선택 해제"),
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.grey[600],
+                    ),
+                  ),
+                ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   Future<void> _fetchAllSavedCards() async {
     final db = ref.read(appDatabaseProvider);
     final cards = await db.getAllSavedCards(); // Assuming this method returns all cards sorted by date DESC
@@ -3073,6 +3169,38 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
+                                // 주제 선택 드롭다운 버튼
+                                if (_availableTopics.isNotEmpty)
+                                  GestureDetector(
+                                    behavior: HitTestBehavior.opaque,
+                                    onTap: _showTopicSelector,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white.withOpacity(0.9),
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(color: const Color(0xFFF29D86).withOpacity(0.5)),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(FontAwesomeIcons.tag, size: 10, color: const Color(0xFFF29D86)),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            _selectedTopic ?? '주제',
+                                            style: TextStyle(
+                                              fontSize: 10, 
+                                              color: _selectedTopic != null ? const Color(0xFFF29D86) : Colors.grey[600],
+                                              fontWeight: _selectedTopic != null ? FontWeight.w600 : FontWeight.normal,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 2),
+                                          Icon(FontAwesomeIcons.caretDown, size: 8, color: Colors.grey[600]),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                if (_availableTopics.isNotEmpty) const SizedBox(width: 6),
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                   decoration: BoxDecoration(
