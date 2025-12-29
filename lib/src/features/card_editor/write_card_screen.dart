@@ -2772,7 +2772,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                               child: Transform.translate(
                                 offset: _dragOffset,
                                 child: GestureDetector(
-                                  behavior: HitTestBehavior.deferToChild, // AI 아이콘 클릭 가능하게
+                                  behavior: HitTestBehavior.translucent, // Footer도 탭 가능하게
                                   onPanDown: _isZoomMode ? null : (details) {
                                     setState(() => _isDragMode = true);
                                   },
