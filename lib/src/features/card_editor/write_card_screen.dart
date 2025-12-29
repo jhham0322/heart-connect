@@ -2858,10 +2858,11 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                                 child: Container(
                                   key: _textBoxKey,
                                   width: MediaQuery.of(context).size.width * 0.78,
-                                constraints: BoxConstraints(
-                                  maxHeight: MediaQuery.of(context).size.width * 0.90 * 0.85,
-                                ),
-                                padding: const EdgeInsets.fromLTRB(20, 20, 30, 20),
+                                 constraints: const BoxConstraints(
+                                   minHeight: 180, // 고정 높이
+                                   maxHeight: 180, // 고정 높이
+                                 ),
+                                 padding: const EdgeInsets.fromLTRB(20, 20, 30, 20), // 위아래 20씩
                                 decoration: ShapeDecoration(
                                   // 프레임 이미지가 있으면 이미지 배경, 없으면 사용자 정의 스타일
                                   color: _selectedFrame != null ? null : _boxColor.withOpacity(_boxOpacity),
@@ -2899,12 +2900,9 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                                       mainAxisSize: MainAxisSize.min,
                                       crossAxisAlignment: CrossAxisAlignment.stretch,
                                       children: [
-                                        // 2. 편집 가능한 QuillEditor (고정 높이)
-                                        ConstrainedBox(
-                                          constraints: const BoxConstraints(
-                                            minHeight: 100, // 고정 최소 높이
-                                            maxHeight: 180, // 고정 최대 높이
-                                          ),
+                                        // 2. 편집 가능한 QuillEditor (고정 높이 140 = 180 - 40)
+                                        SizedBox(
+                                          height: 140, // 글상자 높이 180에서 위아래 20씩 뺄
                                           child: QuillEditor(
                                             controller: _quillController,
                                             focusNode: _editorFocusNode,
@@ -3015,9 +3013,9 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                           final cardWidth = MediaQuery.of(context).size.width * 0.92;
                           final cardHeight = cardWidth * (4 / 3);
                           
-                          // Footer: 글상자 오른쪽 하단 (글상자 중앙 + 글상자 높이의 절반 50)
+                          // Footer: 글상자 오른쪽 하단
                           final footerRight = (cardWidth - boxWidth) / 2 - _dragOffset.dx + 45;
-                          final footerTop = cardHeight / 2 + _dragOffset.dy + 50; // 글상자 중앙 + 50 (높이 100의 절반)
+                          final footerTop = cardHeight / 2 + _dragOffset.dy + 120; // 글상자 중앙 + 120
                           
                           return Positioned(
                             top: footerTop,
