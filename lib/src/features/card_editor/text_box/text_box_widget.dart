@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -62,28 +63,38 @@ class _TextBoxWidgetState extends State<TextBoxWidget> {
   // 컨텐츠 높이 측정용
   final GlobalKey _contentKey = GlobalKey();
   
-  // Long Press 드래그용 이전 위치
-  Offset _lastLongPressPosition = Offset.zero;
+  // 드래그용 이전 위치
+  Offset _lastDragPosition = Offset.zero;
   
   // 리사이즈 모드
   bool _isResizing = false;
   Offset _lastResizePosition = Offset.zero;
   
+  // 이동 모드
+  bool _isDragging = false;
+  
   // 최소/최대 넓이 상수
   static const double _minWidth = 150.0;
   static const double _maxWidth = 500.0;
+  
+  // 아이콘 바 표시 상태 (포커스 기반)
+  bool _showIconBar = false;
+  Timer? _hideIconBarTimer;
 
 
   @override
   void initState() {
     super.initState();
     widget.controller.addListener(_onControllerChanged);
+    widget.controller.focusNode.addListener(_onFocusChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) => _measureHeight());
   }
 
   @override
   void dispose() {
     widget.controller.removeListener(_onControllerChanged);
+    widget.controller.focusNode.removeListener(_onFocusChanged);
+    _hideIconBarTimer?.cancel();
     super.dispose();
   }
 
@@ -92,7 +103,9 @@ class _TextBoxWidgetState extends State<TextBoxWidget> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.controller != widget.controller) {
       oldWidget.controller.removeListener(_onControllerChanged);
+      oldWidget.controller.focusNode.removeListener(_onFocusChanged);
       widget.controller.addListener(_onControllerChanged);
+      widget.controller.focusNode.addListener(_onFocusChanged);
     }
   }
 
@@ -100,6 +113,29 @@ class _TextBoxWidgetState extends State<TextBoxWidget> {
     if (mounted) {
       setState(() {});
       WidgetsBinding.instance.addPostFrameCallback((_) => _measureHeight());
+    }
+  }
+
+  /// 포커스 변경 감지 - 아이콘 바 표시/숨김
+  void _onFocusChanged() {
+    if (!mounted) return;
+    
+    if (widget.controller.focusNode.hasFocus) {
+      // 포커스 획득 시 아이콘 바 표시
+      _hideIconBarTimer?.cancel();
+      setState(() {
+        _showIconBar = true;
+      });
+    } else {
+      // 포커스 해제 시 3초 후 아이콘 바 숨김
+      _hideIconBarTimer?.cancel();
+      _hideIconBarTimer = Timer(const Duration(seconds: 3), () {
+        if (mounted && !widget.controller.focusNode.hasFocus) {
+          setState(() {
+            _showIconBar = false;
+          });
+        }
+      });
     }
   }
 
@@ -119,25 +155,31 @@ class _TextBoxWidgetState extends State<TextBoxWidget> {
     final model = widget.controller.model;
     final style = widget.controller.style;
     
+    // 아이콘 바 표시 여부 (포커스 기반 + 캡처 모드 제외)
+    final shouldShowIconBar = _showIconBar && !widget.isCapturing;
+    
     return Positioned(
       left: model.position.dx,
-      top: model.position.dy - TextBoxController.iconBarHeight - TextBoxController.iconBarSpacing,
+      top: model.position.dy - (shouldShowIconBar ? TextBoxController.iconBarHeight + TextBoxController.iconBarSpacing : 0),
       child: SizedBox(
         width: model.width,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            // 1. 상단 아이콘 바 (캡처 모드일 때는 투명하게 - 레이아웃 유지)
-            Opacity(
-              opacity: widget.isCapturing ? 0.0 : 1.0,
-              child: _buildTopIconBar(),
-            ),
+            // 1. 상단 아이콘 바 (포커스 있을 때만 표시)
+            if (shouldShowIconBar)
+              AnimatedOpacity(
+                opacity: 1.0,
+                duration: const Duration(milliseconds: 200),
+                child: _buildTopIconBar(),
+              ),
             
-            const SizedBox(height: TextBoxController.iconBarSpacing),
+            if (shouldShowIconBar)
+              const SizedBox(height: TextBoxController.iconBarSpacing),
             
-            // 2. 메인 컨텐츠 박스 (Long Press로 드래그 모드 진입)
-            _buildMainBoxWithLongPressDrag(style, model),
+            // 2. 메인 컨텐츠 박스 (핸들 버튼으로 이동/리사이즈)
+            _buildMainBoxWithHandles(style, model),
           ],
         ),
       ),
@@ -145,28 +187,10 @@ class _TextBoxWidgetState extends State<TextBoxWidget> {
   }
 
 
-  /// 메인 박스 + 길게 누르기 드래그
-  Widget _buildMainBoxWithLongPressDrag(TextBoxStyle style, model) {
+  /// 메인 박스 + 핸들 버튼 (이동/리사이즈)
+  Widget _buildMainBoxWithHandles(TextBoxStyle style, model) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      // 길게 누르면 드래그 모드 진입
-      onLongPressStart: _canDrag ? (details) {
-        _lastLongPressPosition = details.globalPosition;
-        widget.controller.setDragMode(true);
-      } : null,
-      // 길게 누른 상태에서 이동
-      onLongPressMoveUpdate: _canDrag ? (details) {
-        if (widget.controller.model.isDragMode) {
-          final delta = details.globalPosition - _lastLongPressPosition;
-          _lastLongPressPosition = details.globalPosition;
-          widget.controller.updatePosition(delta);
-        }
-      } : null,
-      // 손을 떼면 드래그 모드 종료
-      onLongPressEnd: _canDrag ? (details) {
-        widget.controller.setDragMode(false);
-        widget.onDragEnd?.call();
-      } : null,
       // 일반 탭은 편집 모드
       onTap: widget.onTap ?? () => widget.controller.activate(),
       child: Stack(
@@ -181,17 +205,10 @@ class _TextBoxWidgetState extends State<TextBoxWidget> {
                 minHeight: model.minHeight,
                 maxHeight: model.maxHeight,
               ),
-              decoration: model.isDragMode 
+              decoration: (_isDragging || _isResizing) 
                 ? ShapeDecoration(
-                    // 드래그 모드일 때 테두리 강조
-                    shape: (style.shapeBorder ?? RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(style.borderRadius),
-                    )).lerpTo(
-                      (style.shapeBorder ?? RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(style.borderRadius),
-                      )),
-                      1.0,
-                    ) as OutlinedBorder? ?? RoundedRectangleBorder(
+                    // 드래그/리사이즈 모드일 때 테두리 강조
+                    shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(style.borderRadius),
                       side: const BorderSide(color: Color(0xFFF29D86), width: 3),
                     ),
@@ -206,52 +223,52 @@ class _TextBoxWidgetState extends State<TextBoxWidget> {
                   )
                 : style.shapeDecoration,
               child: Padding(
-              padding: style.contentPadding,
-              child: IntrinsicHeight(
-                child: Container(
-                  key: _contentKey,
-                  child: style.isVertical
-                      ? _buildVerticalText(style, model)
-                      : QuillEditor(
-                          controller: widget.controller.quillController,
-                          focusNode: widget.controller.focusNode,
-                          scrollController: ScrollController(),
-                          config: QuillEditorConfig(
-                            autoFocus: false,
-                            expands: false,
-                            scrollable: true,
-                            padding: EdgeInsets.zero,
-                            showCursor: !model.isDragMode, // 드래그 모드에서 커서 숨김
-                            placeholder: '여기를 탭하여 메시지 입력...',
-                            customStyleBuilder: (attribute) {
-                              if (attribute.key == 'font') {
-                                try {
-                                  return GoogleFonts.getFont(attribute.value);
-                                } catch (e) {
-                                  return const TextStyle();
+                padding: style.contentPadding,
+                child: IntrinsicHeight(
+                  child: Container(
+                    key: _contentKey,
+                    child: style.isVertical
+                        ? _buildVerticalText(style, model)
+                        : QuillEditor(
+                            controller: widget.controller.quillController,
+                            focusNode: widget.controller.focusNode,
+                            scrollController: ScrollController(),
+                            config: QuillEditorConfig(
+                              autoFocus: false,
+                              expands: false,
+                              scrollable: true,
+                              padding: EdgeInsets.zero,
+                              showCursor: !_isDragging, // 드래그 모드에서 커서 숨김
+                              placeholder: '여기를 탭하여 메시지 입력...',
+                              customStyleBuilder: (attribute) {
+                                if (attribute.key == 'font') {
+                                  try {
+                                    return GoogleFonts.getFont(attribute.value);
+                                  } catch (e) {
+                                    return const TextStyle();
+                                  }
                                 }
-                              }
-                              return const TextStyle();
-                            },
-                            customStyles: DefaultStyles(
-                              paragraph: DefaultTextBlockStyle(
-                                style.textStyle,
-                                HorizontalSpacing.zero,
-                                VerticalSpacing.zero,
-                                VerticalSpacing.zero,
-                                null,
+                                return const TextStyle();
+                              },
+                              customStyles: DefaultStyles(
+                                paragraph: DefaultTextBlockStyle(
+                                  style.textStyle,
+                                  HorizontalSpacing.zero,
+                                  VerticalSpacing.zero,
+                                  VerticalSpacing.zero,
+                                  null,
+                                ),
                               ),
                             ),
                           ),
-                        ),
+                  ),
                 ),
               ),
-            ),
-          ), // Container 닫기
+            ), // Container 닫기
           ), // ClipPath 닫기
           
-          // 드래그 모드 인디케이터 + 안내 메시지
-          if (model.isDragMode && !widget.isCapturing)
+          // 드래그/리사이즈 모드 인디케이터
+          if ((_isDragging || _isResizing) && !widget.isCapturing)
             Positioned(
               left: 0,
               right: 0,
@@ -278,11 +295,15 @@ class _TextBoxWidgetState extends State<TextBoxWidget> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.open_with, color: Colors.white, size: 16),
+                      Icon(
+                        _isDragging ? Icons.open_with : Icons.open_in_full,
+                        color: Colors.white,
+                        size: 16,
+                      ),
                       const SizedBox(width: 6),
-                      const Text(
-                        '이동 중...',
-                        style: TextStyle(
+                      Text(
+                        _isDragging ? '이동 중...' : '크기 조절 중...',
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
@@ -293,6 +314,10 @@ class _TextBoxWidgetState extends State<TextBoxWidget> {
                 ),
               ),
             ),
+          
+          // 이동 핸들 (왼쪽 하단) - 캡처 모드에서는 숨김
+          if (!widget.isCapturing && _canDrag)
+            _buildMoveHandle(),
           
           // 리사이즈 핸들 (오른쪽 하단) - 캡처 모드에서는 숨김
           if (!widget.isCapturing)
@@ -306,53 +331,125 @@ class _TextBoxWidgetState extends State<TextBoxWidget> {
 
   bool get _canDrag => widget.isDraggable && !widget.isZoomMode;
 
-  Widget _buildMainBox(TextBoxStyle style) {
+  /// 이동 핸들 빌더 (왼쪽 하단)
+  Widget _buildMoveHandle() {
+    return Positioned(
+      left: -12,
+      bottom: -12,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onPanStart: (details) {
+          setState(() {
+            _isDragging = true;
+            _lastDragPosition = details.globalPosition;
+          });
+          widget.controller.setDragMode(true);
+        },
+        onPanUpdate: (details) {
+          if (_isDragging) {
+            final delta = details.globalPosition - _lastDragPosition;
+            _lastDragPosition = details.globalPosition;
+            widget.controller.updatePosition(delta);
+          }
+        },
+        onPanEnd: (details) {
+          setState(() {
+            _isDragging = false;
+          });
+          widget.controller.setDragMode(false);
+          widget.onDragEnd?.call();
+        },
+        child: Container(
+          width: 28,
+          height: 28,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: _isDragging
+                  ? [const Color(0xFF64B5F6), const Color(0xFF42A5F5)]
+                  : [const Color(0xFF90CAF9).withOpacity(0.9), const Color(0xFF64B5F6).withOpacity(0.9)],
+            ),
+            borderRadius: BorderRadius.circular(6),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(_isDragging ? 0.35 : 0.25),
+                blurRadius: _isDragging ? 8 : 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
+            border: _isDragging
+                ? Border.all(color: Colors.white, width: 2)
+                : null,
+          ),
+          child: const Icon(
+            Icons.open_with,
+            color: Colors.white,
+            size: 16,
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// 리사이즈 핸들 빌더 (오른쪽 하단)
+  Widget _buildResizeHandle() {
     final model = widget.controller.model;
     
-    return Container(
-      width: model.width,
-      constraints: BoxConstraints(
-        minHeight: model.minHeight,
-        maxHeight: model.maxHeight,
-      ),
-      decoration: style.boxDecoration,
-      child: Padding(
-        padding: style.contentPadding,
-        child: IntrinsicHeight(
-          child: Container(
-            key: _contentKey,
-            child: QuillEditor(
-              controller: widget.controller.quillController,
-              focusNode: widget.controller.focusNode,
-              scrollController: ScrollController(),
-              config: QuillEditorConfig(
-                autoFocus: false,
-                expands: false,
-                scrollable: true,
-                padding: EdgeInsets.zero,
-                showCursor: true,
-                placeholder: '여기를 탭하여 메시지 입력...',
-                customStyleBuilder: (attribute) {
-                  if (attribute.key == 'font') {
-                    try {
-                      return GoogleFonts.getFont(attribute.value);
-                    } catch (e) {
-                      return const TextStyle();
-                    }
-                  }
-                  return const TextStyle();
-                },
-                customStyles: DefaultStyles(
-                  paragraph: DefaultTextBlockStyle(
-                    style.textStyle,
-                    HorizontalSpacing.zero,
-                    VerticalSpacing.zero,
-                    VerticalSpacing.zero,
-                    null,
-                  ),
-                ),
-              ),
+    return Positioned(
+      right: -12,
+      bottom: -12,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onPanStart: (details) {
+          setState(() {
+            _isResizing = true;
+            _lastResizePosition = details.globalPosition;
+          });
+        },
+        onPanUpdate: (details) {
+          if (_isResizing) {
+            final delta = details.globalPosition - _lastResizePosition;
+            _lastResizePosition = details.globalPosition;
+            
+            // 가로 넓이만 조절 (세로는 콘텐츠에 따라 자동)
+            final newWidth = (model.width + delta.dx).clamp(_minWidth, _maxWidth);
+            widget.controller.updateWidth(newWidth);
+          }
+        },
+        onPanEnd: (details) {
+          setState(() {
+            _isResizing = false;
+          });
+          widget.onDragEnd?.call();
+        },
+        child: Container(
+          width: 28,
+          height: 28,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: _isResizing
+                  ? [const Color(0xFFFFB74D), const Color(0xFFF29D86)]
+                  : [const Color(0xFFF29D86).withOpacity(0.9), const Color(0xFFFFB74D).withOpacity(0.9)],
             ),
+            borderRadius: BorderRadius.circular(6),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(_isResizing ? 0.35 : 0.25),
+                blurRadius: _isResizing ? 8 : 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
+            border: _isResizing
+                ? Border.all(color: Colors.white, width: 2)
+                : null,
+          ),
+          child: const Icon(
+            Icons.open_in_full,
+            color: Colors.white,
+            size: 16,
           ),
         ),
       ),
@@ -463,105 +560,6 @@ class _TextBoxWidgetState extends State<TextBoxWidget> {
     );
   }
 
-  Widget _buildDragIndicator() {
-    return Container(
-      padding: const EdgeInsets.all(6),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF29D86),
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.3),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: const Icon(
-        Icons.open_with,
-        color: Colors.white,
-        size: 18,
-      ),
-    );
-  }
-
-  void _onPanStart(DragStartDetails details) {
-    widget.controller.setDragMode(true);
-  }
-
-  void _onPanUpdate(DragUpdateDetails details) {
-    widget.controller.updatePosition(details.delta);
-  }
-
-  void _onPanEnd(DragEndDetails details) {
-    widget.controller.setDragMode(false);
-    widget.onDragEnd?.call();
-  }
-
-  /// 리사이즈 핸들 빌더 (오른쪽 하단)
-  Widget _buildResizeHandle() {
-    final model = widget.controller.model;
-    
-    return Positioned(
-      right: -12,
-      bottom: -12,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onPanStart: (details) {
-          setState(() {
-            _isResizing = true;
-            _lastResizePosition = details.globalPosition;
-          });
-        },
-        onPanUpdate: (details) {
-          if (_isResizing) {
-            final delta = details.globalPosition - _lastResizePosition;
-            _lastResizePosition = details.globalPosition;
-            
-            // 가로 넓이만 조절 (세로는 콘텐츠에 따라 자동)
-            final newWidth = (model.width + delta.dx).clamp(_minWidth, _maxWidth);
-            widget.controller.updateWidth(newWidth);
-          }
-        },
-        onPanEnd: (details) {
-          setState(() {
-            _isResizing = false;
-          });
-          widget.onDragEnd?.call();
-        },
-        child: Container(
-          width: 28,
-          height: 28,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: _isResizing
-                  ? [const Color(0xFFFFB74D), const Color(0xFFF29D86)]
-                  : [const Color(0xFFF29D86).withOpacity(0.8), const Color(0xFFFFB74D).withOpacity(0.8)],
-            ),
-            borderRadius: BorderRadius.circular(6),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(_isResizing ? 0.35 : 0.25),
-                blurRadius: _isResizing ? 8 : 4,
-                offset: const Offset(0, 2),
-              ),
-            ],
-            border: _isResizing
-                ? Border.all(color: Colors.white, width: 2)
-                : null,
-          ),
-          child: const Icon(
-            Icons.open_in_full,
-            color: Colors.white,
-            size: 16,
-          ),
-        ),
-      ),
-    );
-  }
-
   /// 세로 글쓰기 텍스트 빌더
   /// 오른쪽에서 왼쪽으로 세로로 텍스트를 배치합니다 (한국어/일본어/중국어 전통 스타일)
   Widget _buildVerticalText(TextBoxStyle style, dynamic model) {
@@ -634,5 +632,39 @@ class _TextBoxWidgetState extends State<TextBoxWidget> {
     // 가로로 쓰인 구두점, 괄호 등은 회전 필요
     const rotateChars = '—–-()[]{}「」『』《》〈〉…';
     return rotateChars.contains(char);
+  }
+
+  // ========== DEPRECATED: 롱프레스 드래그 (보존용) ==========
+  
+  /// [DEPRECATED] 메인 박스 + 길게 누르기 드래그
+  /// 새 버전에서는 핸들 버튼 방식으로 변경됨
+  // ignore: unused_element
+  Widget _deprecated_buildMainBoxWithLongPressDrag(TextBoxStyle style, model) {
+    Offset lastLongPressPosition = Offset.zero;
+    
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      // 길게 누르면 드래그 모드 진입
+      onLongPressStart: _canDrag ? (details) {
+        lastLongPressPosition = details.globalPosition;
+        widget.controller.setDragMode(true);
+      } : null,
+      // 길게 누른 상태에서 이동
+      onLongPressMoveUpdate: _canDrag ? (details) {
+        if (widget.controller.model.isDragMode) {
+          final delta = details.globalPosition - lastLongPressPosition;
+          lastLongPressPosition = details.globalPosition;
+          widget.controller.updatePosition(delta);
+        }
+      } : null,
+      // 손을 떼면 드래그 모드 종료
+      onLongPressEnd: _canDrag ? (details) {
+        widget.controller.setDragMode(false);
+        widget.onDragEnd?.call();
+      } : null,
+      // 일반 탭은 편집 모드
+      onTap: widget.onTap ?? () => widget.controller.activate(),
+      child: const SizedBox(), // Placeholder - 실제 내용은 위의 새 버전 메서드 참조
+    );
   }
 }
