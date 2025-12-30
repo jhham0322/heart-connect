@@ -32,6 +32,7 @@ import 'package:heart_connect/src/services/mms_intent_service.dart'; // MMS Inte
 import 'package:heart_connect/src/l10n/app_strings.dart';
 import 'package:heart_connect/src/providers/locale_provider.dart';
 import 'package:heart_connect/src/utils/ad_helper.dart'; // AdMob
+import 'text_box/text_box.dart'; // 글상자 모듈
 
 class AutoScrollingText extends StatefulWidget {
   final String text;
@@ -258,8 +259,11 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   // Font size dropdown options (6~32)
   final List<double> _fontSizeOptions = [6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32];
 
-  // Text Drag Offset - 이제 위치 유지됨
+  // Text Drag Offset - 이제 위치 유지됨 (레거시, TextBoxController로 대체 예정)
   Offset _dragOffset = Offset.zero;
+  
+  // 새로운 글상자 컨트롤러
+  late TextBoxController _textBoxController;
   
   // Zoom & Pan State
   final TransformationController _transformationController = TransformationController();
@@ -297,6 +301,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
 
   // Greeting Templates State (주제별 인사말)
   String? _selectedTopic;  // 현재 선택된 주제
+
   List<String> _availableTopics = [];  // DB에서 가져온 주제 목록
 
   @override
@@ -313,6 +318,28 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
       selection: const TextSelection.collapsed(offset: 0),
     );
     
+    // 새로운 글상자 컨트롤러 초기화
+    _textBoxController = TextBoxController(
+      quillController: _quillController,
+      focusNode: _editorFocusNode,
+      model: TextBoxModel(
+        width: 300, // 나중에 MediaQuery로 계산
+        minHeight: 80,
+        maxHeight: 400,
+      ),
+      style: TextBoxStyle(
+        backgroundColor: _boxColor,
+        backgroundOpacity: _boxOpacity,
+        borderRadius: _boxRadius,
+        hasBorder: _hasBorder,
+        borderColor: _borderColor,
+        borderWidth: _borderWidth,
+        fontFamily: _fontName,
+        fontSize: _fontSize,
+        textColor: _defaultColor,
+        textAlign: _textAlign,
+      ),
+    );
     
     _quillController.addListener(_onEditorChanged);
     _footerQuillController.addListener(_onFooterEditorChanged);
@@ -320,6 +347,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     // 포커스 리스너 추가
     _footerFocusNode.addListener(_onFocusChanged);
     _editorFocusNode.addListener(_onFocusChanged);
+
 
     print("[WriteCardScreen] initState at ${DateTime.now()}");
     print("[WriteCardScreen] Received InitialImage: ${widget.initialImage}");
@@ -862,8 +890,10 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     _footerQuillController.removeListener(_onFooterEditorChanged);
     _quillController.dispose();
     _footerQuillController.dispose();
+    _textBoxController.dispose(); // 글상자 컨트롤러 해제
     super.dispose();
   }
+
 
   void _onFocusChanged() {
     // Prevent unnecessary rebuilds by checking if state actually changed
