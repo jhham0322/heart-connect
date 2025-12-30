@@ -1009,9 +1009,9 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
       
       // 폰트 패밀리 확인
       if (style.containsKey('font')) {
-         _fontName = style.attributes['font']?.value ?? 'Great Vibes';
+         _fontName = style.attributes['font']?.value ?? 'Gowun Dodum';
       } else {
-         _fontName = _isFooterActive ? _footerFont : 'Great Vibes';
+         _fontName = _isFooterActive ? _footerFont : 'Gowun Dodum';
       }
       
       // 색상 확인
@@ -1251,9 +1251,14 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
        });
     } else {
        controller.formatSelection(alignAttr);
-       // Do not update defaults
+       // 선택 영역이 있어도 _textAlign 업데이트
+       setState(() {
+         _textAlign = align;
+       });
     }
     _saveDraft();
+    // 정렬 적용 후 툴바 상태 업데이트
+    _updateToolbarState();
   }
 
   // 폰트 변경
