@@ -743,7 +743,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             ),
             style: const TextStyle(fontSize: 18),
             textAlign: TextAlign.center,
-            textCapitalization: TextCapitalization.words,
+            // textCapitalization 제거: 한글 조합형 입력 시 키보드 버퍼와 충돌하여
+            // 삭제한 텍스트가 다시 나타나는 버그 발생
           ),
           
           const SizedBox(height: 24),
