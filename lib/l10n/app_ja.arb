@@ -429,5 +429,12 @@
   "photoPermissionStep3": "3. 「写真と動画」をタップ",
   "photoPermissionStep4": "4. 「許可」または「すべての写真を許可」を選択",
   "photoPermissionNote": "⚡ 権限を許可した後、この画面に戻ると\n自動的に写真が表示されます。",
-  "openSettings": "設定を開く"
+  "openSettings": "設定を開く",
+  
+  "premiumImage": "プレミアム画像",
+  "watchAdToUnlock": "広告を見てロック解除",
+  "unlockSuccess": "ロック解除しました！",
+  "adNotReady": "広告の準備ができていません。後でもう一度お試しください。",
+  "watchAd": "広告を見る",
+  "premiumLocked": "ロック中"
 }

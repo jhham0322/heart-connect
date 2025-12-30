@@ -429,5 +429,12 @@
   "photoPermissionStep3": "3. Toca \"Fotos y vídeos\"",
   "photoPermissionStep4": "4. Selecciona \"Permitir\"",
   "photoPermissionNote": "⚡ Después de permitir, vuelve aquí\ny las fotos aparecerán.",
-  "openSettings": "Abrir ajustes"
+  "openSettings": "Abrir ajustes",
+  
+  "premiumImage": "Imagen Premium",
+  "watchAdToUnlock": "Ver anuncio para desbloquear",
+  "unlockSuccess": "¡Desbloqueado!",
+  "adNotReady": "El anuncio no está listo. Inténtalo de nuevo más tarde.",
+  "watchAd": "Ver anuncio",
+  "premiumLocked": "Bloqueado"
 }

@@ -429,5 +429,12 @@
   "photoPermissionStep3": "3. \"Fotoğraflar ve Videolar\"a dokunun",
   "photoPermissionStep4": "4. \"İzin Ver\"i seçin",
   "photoPermissionNote": "⚡ İzin verdikten sonra buraya dönün,\nfotoğraflar otomatik olarak görünecektir.",
-  "openSettings": "Ayarları Aç"
+  "openSettings": "Ayarları Aç",
+  
+  "premiumImage": "Premium Resim",
+  "watchAdToUnlock": "Kilidi açmak için reklam izle",
+  "unlockSuccess": "Kilit açıldı!",
+  "adNotReady": "Reklam hazır değil. Lütfen daha sonra tekrar deneyin.",
+  "watchAd": "Reklam İzle",
+  "premiumLocked": "Kilitli"
 }

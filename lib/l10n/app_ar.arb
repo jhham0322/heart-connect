@@ -429,5 +429,12 @@
   "photoPermissionStep3": "3. اضغط على \"الصور والفيديو\"",
   "photoPermissionStep4": "4. اختر \"سماح\"",
   "photoPermissionNote": "⚡ بعد السماح، عد هنا\nوستظهر الصور تلقائياً.",
-  "openSettings": "فتح الإعدادات"
+  "openSettings": "فتح الإعدادات",
+  
+  "premiumImage": "صورة مميزة",
+  "watchAdToUnlock": "شاهد إعلان لفتح القفل",
+  "unlockSuccess": "تم فتح القفل!",
+  "adNotReady": "الإعلان غير جاهز. يرجى المحاولة مرة أخرى لاحقاً.",
+  "watchAd": "شاهد إعلان",
+  "premiumLocked": "مقفل"
 }

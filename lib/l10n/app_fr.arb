@@ -429,5 +429,12 @@
   "photoPermissionStep3": "3. Appuyez sur \"Photos et vidéos\"",
   "photoPermissionStep4": "4. Sélectionnez \"Autoriser\"",
   "photoPermissionNote": "⚡ Après autorisation, revenez ici\net les photos s'afficheront.",
-  "openSettings": "Ouvrir les paramètres"
+  "openSettings": "Ouvrir les paramètres",
+  
+  "premiumImage": "Image Premium",
+  "watchAdToUnlock": "Regarder pub pour débloquer",
+  "unlockSuccess": "Débloqué !",
+  "adNotReady": "La publicité n'est pas prête. Veuillez réessayer plus tard.",
+  "watchAd": "Regarder la pub",
+  "premiumLocked": "Verrouillé"
 }

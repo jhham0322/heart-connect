@@ -429,5 +429,12 @@
   "photoPermissionStep3": "3. Ketuk \"Foto dan video\"",
   "photoPermissionStep4": "4. Pilih \"Izinkan\"",
   "photoPermissionNote": "⚡ Setelah diizinkan, kembali ke sini\ndan foto akan muncul.",
-  "openSettings": "Buka Pengaturan"
+  "openSettings": "Buka Pengaturan",
+  
+  "premiumImage": "Gambar Premium",
+  "watchAdToUnlock": "Tonton iklan untuk membuka",
+  "unlockSuccess": "Terbuka!",
+  "adNotReady": "Iklan belum siap. Silakan coba lagi nanti.",
+  "watchAd": "Tonton Iklan",
+  "premiumLocked": "Terkunci"
 }

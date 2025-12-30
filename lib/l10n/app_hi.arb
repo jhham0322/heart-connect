@@ -429,5 +429,12 @@
   "photoPermissionStep3": "3. \"फ़ोटो और वीडियो\" टैप करें",
   "photoPermissionStep4": "4. \"अनुमति दें\" चुनें",
   "photoPermissionNote": "⚡ अनुमति देने के बाद, यहां वापस आएं\nऔर तस्वीरें अपने आप दिखाई देंगी।",
-  "openSettings": "सेटिंग्स खोलें"
+  "openSettings": "सेटिंग्स खोलें",
+  
+  "premiumImage": "प्रीमियम छवि",
+  "watchAdToUnlock": "अनलॉक करने के लिए विज्ञापन देखें",
+  "unlockSuccess": "अनलॉक हो गया!",
+  "adNotReady": "विज्ञापन तैयार नहीं है। कृपया बाद में पुनः प्रयास करें।",
+  "watchAd": "विज्ञापन देखें",
+  "premiumLocked": "लॉक है"
 }

@@ -429,5 +429,12 @@
   "photoPermissionStep3": "3. 点击“照片和视频”",
   "photoPermissionStep4": "4. 选择“允许”或“允许所有照片”",
   "photoPermissionNote": "⚡ 允许权限后返回此画面，\n照片将自动显示。",
-  "openSettings": "打开设置"
+  "openSettings": "打开设置",
+  
+  "premiumImage": "高级图片",
+  "watchAdToUnlock": "观看广告解锁",
+  "unlockSuccess": "已解锁！",
+  "adNotReady": "广告尚未准备好。请稍后再试。",
+  "watchAd": "观看广告",
+  "premiumLocked": "已锁定"
 }

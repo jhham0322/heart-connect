@@ -429,5 +429,12 @@
   "photoPermissionStep3": "3. Tippen Sie auf \"Fotos und Videos\"",
   "photoPermissionStep4": "4. Wählen Sie \"Zulassen\"",
   "photoPermissionNote": "⚡ Nach dem Zulassen kehren Sie hierher zurück\nund Fotos werden automatisch geladen.",
-  "openSettings": "Einstellungen öffnen"
+  "openSettings": "Einstellungen öffnen",
+  
+  "premiumImage": "Premium-Bild",
+  "watchAdToUnlock": "Werbung ansehen zum Entsperren",
+  "unlockSuccess": "Entsperrt!",
+  "adNotReady": "Werbung ist nicht bereit. Bitte versuchen Sie es später erneut.",
+  "watchAd": "Werbung ansehen",
+  "premiumLocked": "Gesperrt"
 }
