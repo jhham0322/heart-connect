@@ -328,7 +328,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
       model: TextBoxModel(
         width: 300, // 나중에 MediaQuery로 계산
         minHeight: 80,
-        maxHeight: 400,
+        maxHeight: 280, // 최대 8줄 (약 35px * 8)
       ),
       style: TextBoxStyle(
         backgroundColor: _boxColor,
@@ -2959,6 +2959,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
           onTopicSelectorTap: _showTopicSelector,
           onAiButtonTap: _showAiToneSelector,
           maxMessageLength: 75,
+          maxLines: 8, // 최대 8줄
           isAiLoading: _isAiLoading,
           isCapturing: _isCapturing,
           isDraggable: !_isZoomMode,
@@ -3311,90 +3312,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                         ),
                       ),
                     ),
-                    
-                    // 글자수 & AI 버튼 (글상자 오른쪽 위에 배치)
-                    // 캡처 모드가 아닐 때만 표시
-                    if (!_isCapturing)
-                      Builder(
-                        builder: (context) {
-                          // 글상자와 동일한 위치 계산 (단순 오프셋 방식)
-                          final boxWidth = MediaQuery.of(context).size.width * 0.78;
-                          final cardWidth = MediaQuery.of(context).size.width * 0.92;
-                          final cardHeight = cardWidth * (4 / 3);
-                          
-                          // AI 아이콘: 글상자 오른쪽 상단 (글상자 위 35px, 왼쪽으로 30px)
-                          final iconRight = (cardWidth - boxWidth) / 2 - _dragOffset.dx + 30;
-                          final iconTop = cardHeight / 2 + _dragOffset.dy - 105; // 글상자 중앙에서 위로
-                          
-                          return Positioned(
-                            top: iconTop,
-                            right: iconRight,
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                // 주제 선택 드롭다운 버튼
-                                if (_availableTopics.isNotEmpty)
-                                  GestureDetector(
-                                    behavior: HitTestBehavior.opaque,
-                                    onTap: _showTopicSelector,
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white.withOpacity(0.9),
-                                        borderRadius: BorderRadius.circular(8),
-                                        border: Border.all(color: const Color(0xFFF29D86).withOpacity(0.5)),
-                                      ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Icon(FontAwesomeIcons.tag, size: 10, color: const Color(0xFFF29D86)),
-                                          const SizedBox(width: 4),
-                                          Text(
-                                            _selectedTopic ?? '주제',
-                                            style: TextStyle(
-                                              fontSize: 10, 
-                                              color: _selectedTopic != null ? const Color(0xFFF29D86) : Colors.grey[600],
-                                              fontWeight: _selectedTopic != null ? FontWeight.w600 : FontWeight.normal,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 2),
-                                          Icon(FontAwesomeIcons.caretDown, size: 8, color: Colors.grey[600]),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                if (_availableTopics.isNotEmpty) const SizedBox(width: 6),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.85),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Text(
-                                    "${_message.length} / 75",
-                                    style: TextStyle(fontSize: 10, color: _message.length >= 75 ? Colors.red : Colors.grey[700]),
-                                  ),
-                                ),
-                                const SizedBox(width: 6),
-                                GestureDetector(
-                                  behavior: HitTestBehavior.opaque,
-                                  onTap: _showAiToneSelector,
-                                  child: Container(
-                                    padding: const EdgeInsets.all(8),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(0.85),
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                    child: _isAiLoading 
-                                      ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFFF29D86)))
-                                      : const Icon(FontAwesomeIcons.wandMagicSparkles, size: 12, color: Color(0xFFF29D86)),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
+                    // 레거시 아이콘 바 제거됨 (TextBoxWidget에 통합)
                     
                     // Footer (임시 비활성화)
                     if (false) // 푸터 기능 일시 비활성화
