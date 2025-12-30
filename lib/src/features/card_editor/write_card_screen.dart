@@ -655,6 +655,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
 
   /// Generator에서 특정 주제+감성의 랜덤 인사말 생성 (DB 불필요)
   /// 텍스트박스 설정에 맞게 자연스러운 줄 바꿈 적용
+  /// 가운데 정렬을 기본으로 적용
   void _getRandomGreetingFromGenerator(String sentiment) {
     if (_selectedTopic == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -686,7 +687,15 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
       setState(() {
         _message = greeting;
         _quillController.document = Document()..insert(0, greeting);
+        
+        // 가운데 정렬 적용
+        _textAlign = TextAlign.center;
+        _defaultTextAlign = TextAlign.center;
       });
+      
+      // Quill 에디터에 가운데 정렬 적용
+      _applyAlignmentToDocument(Attribute.centerAlignment);
+      
       _saveDraft();
       Navigator.pop(context); // 팝업 닫기
       ScaffoldMessenger.of(context).showSnackBar(
@@ -697,6 +706,19 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
         SnackBar(content: Text("'$_selectedTopic' 주제에 해당하는 문구를 생성할 수 없습니다.")),
       );
     }
+  }
+  
+  /// Quill 문서 전체에 정렬 적용
+  void _applyAlignmentToDocument(Attribute<dynamic> alignAttribute) {
+    final docLength = _quillController.document.length;
+    if (docLength <= 1) return;
+    
+    // 전체 문서 선택 후 정렬 적용
+    _quillController.formatText(
+      0, 
+      docLength - 1, 
+      alignAttribute,
+    );
   }
 
   /// 주제 선택 바텀시트 표시
@@ -2268,7 +2290,6 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   }
   
   // PNG를 JPEG로 변환하여 저장 (MMS 전송용 파일 크기 최적화)
-  // 하단에 "마음을 전합니다(마음이음)" 워터마크 추가
   Future<Uint8List?> _convertPngToJpeg(Uint8List pngBytes) async {
     try {
       // PNG 디코딩
@@ -2278,32 +2299,19 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
         return null;
       }
       
-      // 워터마크 추가를 위한 새 이미지 생성 (원본 + 하단 여백)
-      const watermarkHeight = 40;
-      final newImage = img.Image(
+      // RGB 이미지로 변환 (알파 채널 제거)
+      final rgbImage = img.Image(
         width: image.width,
-        height: image.height + watermarkHeight,
+        height: image.height,
         numChannels: 3,
       );
       
-      // 배경을 흰색으로 채우기
-      img.fill(newImage, color: img.ColorFloat32.rgb(255, 255, 255));
-      
-      // 원본 이미지 복사
-      img.compositeImage(newImage, image, dstX: 0, dstY: 0);
-      
-      // 워터마크 텍스트 추가
-      img.drawString(
-        newImage,
-        '마음을 전합니다 (마음이음)',
-        font: img.arial24,
-        x: (image.width ~/ 2) - 130, // 중앙 정렬 (대략)
-        y: image.height + 8,
-        color: img.ColorFloat32.rgb(128, 128, 128), // 회색
-      );
+      // 원본 이미지 복사 (배경을 흰색으로)
+      img.fill(rgbImage, color: img.ColorFloat32.rgb(255, 255, 255));
+      img.compositeImage(rgbImage, image, dstX: 0, dstY: 0);
       
       // JPEG로 인코딩 (품질 85% - 파일 크기와 화질 균형)
-      final jpegBytes = img.encodeJpg(newImage, quality: 85);
+      final jpegBytes = img.encodeJpg(rgbImage, quality: 85);
       return Uint8List.fromList(jpegBytes);
     } catch (e) {
       print("JPEG 변환 오류: $e");
