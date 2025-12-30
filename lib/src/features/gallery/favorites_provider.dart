@@ -13,9 +13,8 @@ class FavoritesNotifier extends StateNotifier<Set<String>> {
     try {
       final list = await _db.getAllGalleryFavorites();
       state = list.toSet();
-      print('[DB] Loaded ${list.length} favorites from SQLite.');
     } catch (e) {
-      print('[DB Error] Failed to load favorites: $e');
+      // Error loading favorites - silent fail
     }
   }
 
@@ -26,16 +25,14 @@ class FavoritesNotifier extends StateNotifier<Set<String>> {
         state = {...state}..remove(imagePath);
         // Remove from DB
         await _db.removeGalleryFavorite(imagePath);
-        print('[DB] Removed favorite: $imagePath');
       } else {
         // Add locally
         state = {...state}..add(imagePath);
         // Add to DB
         await _db.addGalleryFavorite(imagePath);
-        print('[DB] Added favorite: $imagePath');
       }
     } catch (e) {
-      print('[DB Error] Failed to toggle favorite: $e');
+      // Error toggling favorite - silent fail
     }
   }
 

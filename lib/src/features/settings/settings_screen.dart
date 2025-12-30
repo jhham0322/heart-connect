@@ -423,7 +423,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ));
             restoredContacts++;
           } catch (e) {
-            print('연락처 복원 오류: $e');
+            // 연락처 복원 오류 - silent fail
           }
         }
       }
@@ -600,7 +600,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ));
             restoredContacts++;
           } catch (e) {
-            print('연락처 가져오기 오류: $e');
+            // 연락처 가져오기 오류 - silent fail
           }
         }
       }

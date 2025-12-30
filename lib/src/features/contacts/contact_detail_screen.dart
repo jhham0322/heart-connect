@@ -77,7 +77,6 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          print("[ContactDetailScreen] FAB pressed for contact: ${contact.name}");
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => WriteCardScreen(initialContact: contact)),

@@ -22,9 +22,8 @@ class GreetingDataLoader {
     try {
       final content = await rootBundle.loadString(assetPath);
       await parseAndInsertGreetings(content);
-      print('[GreetingDataLoader] Successfully loaded greetings from $assetPath');
     } catch (e) {
-      print('[GreetingDataLoader] Error loading greetings: $e');
+      // Error loading greetings - silent fail
     }
   }
   
@@ -75,9 +74,6 @@ class GreetingDataLoader {
     final existingGreetings = await db.getAllGreetingTemplates();
     if (existingGreetings.isEmpty && greetings.isNotEmpty) {
       await db.insertGreetings(greetings);
-      print('[GreetingDataLoader] Inserted ${greetings.length} greetings for ${topics.length} topics');
-    } else {
-      print('[GreetingDataLoader] Greetings already exist (${existingGreetings.length} entries). Skipping insertion.');
     }
   }
   

@@ -1,17 +1,17 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-/// SMS 발송 서비스
-/// Android에서는 기본 메시지 앱을 열거나 네이티브 API 사용
+/// SMS 諛쒖넚 ?쒕퉬??
+/// Android?먯꽌??湲곕낯 硫붿떆吏 ?깆쓣 ?닿굅???ㅼ씠?곕툕 API ?ъ슜
 class NativeSmsService {
   
   // Method Channel for native SMS sending
   static const _channel = MethodChannel('com.heartconnect/sms');
   
-  /// SMS 발송 권한 확인
+  /// SMS 諛쒖넚 沅뚰븳 ?뺤씤
   static Future<bool> checkPermission() async {
     if (!Platform.isAndroid) return false;
     
@@ -19,7 +19,7 @@ class NativeSmsService {
     return status.isGranted;
   }
   
-  /// SMS 발송 권한 요청
+  /// SMS 諛쒖넚 沅뚰븳 ?붿껌
   static Future<bool> requestPermission() async {
     if (!Platform.isAndroid) return false;
     
@@ -27,105 +27,105 @@ class NativeSmsService {
     return status.isGranted;
   }
   
-  /// SMS 발송 (기본 메시지 앱 열기)
-  /// [phoneNumber]: 수신자 전화번호
-  /// [message]: 발송할 메시지
-  /// Returns: 발송 성공 여부
+  /// SMS 諛쒖넚 (湲곕낯 硫붿떆吏 ???닿린)
+  /// [phoneNumber]: ?섏떊???꾪솕踰덊샇
+  /// [message]: 諛쒖넚??硫붿떆吏
+  /// Returns: 諛쒖넚 ?깃났 ?щ?
   static Future<bool> sendSmsViaApp({
     required String phoneNumber,
     required String message,
   }) async {
     try {
-      // 전화번호 정규화 (숫자만)
+      // ?꾪솕踰덊샇 ?뺢퇋??(?レ옄留?
       final cleanPhone = phoneNumber.replaceAll(RegExp(r'[^\d]'), '');
       
       if (cleanPhone.length < 10 || cleanPhone.length > 11) {
-        debugPrint('[NativeSms] 잘못된 전화번호: $cleanPhone');
+        
         return false;
       }
       
-      // SMS URL 생성
+      // SMS URL ?앹꽦
       final Uri smsUri = Uri(
         scheme: 'sms',
         path: cleanPhone,
         queryParameters: {'body': message},
       );
       
-      debugPrint('[NativeSms] SMS 앱 열기: $cleanPhone');
+      
       
       if (await canLaunchUrl(smsUri)) {
         await launchUrl(smsUri);
         return true;
       } else {
-        debugPrint('[NativeSms] SMS 앱을 열 수 없습니다');
+        
         return false;
       }
     } catch (e) {
-      debugPrint('[NativeSms] 오류: $e');
+      
       return false;
     }
   }
   
-  /// 네이티브 SMS 발송 (직접 발송, 권한 필요)
-  /// Android에서만 동작, SEND_SMS 권한 필요
+  /// ?ㅼ씠?곕툕 SMS 諛쒖넚 (吏곸젒 諛쒖넚, 沅뚰븳 ?꾩슂)
+  /// Android?먯꽌留??숈옉, SEND_SMS 沅뚰븳 ?꾩슂
   static Future<bool> sendSmsNative({
     required String phoneNumber,
     required String message,
   }) async {
     if (!Platform.isAndroid) {
-      debugPrint('[NativeSms] Android만 지원됩니다.');
+      
       return false;
     }
     
     try {
-      // 전화번호 정규화
+      // ?꾪솕踰덊샇 ?뺢퇋??
       final cleanPhone = phoneNumber.replaceAll(RegExp(r'[^\d]'), '');
       
       if (cleanPhone.length < 10 || cleanPhone.length > 11) {
-        debugPrint('[NativeSms] 잘못된 전화번호: $cleanPhone');
+        
         return false;
       }
       
-      // 권한 확인
+      // 沅뚰븳 ?뺤씤
       final hasPermission = await checkPermission();
       if (!hasPermission) {
-        debugPrint('[NativeSms] SMS 권한이 없습니다. 앱으로 발송합니다.');
+        
         return await sendSmsViaApp(phoneNumber: cleanPhone, message: message);
       }
       
-      debugPrint('[NativeSms] 네이티브 발송 시도: $cleanPhone');
       
-      // 네이티브 메소드 채널로 발송
+      
+      // ?ㅼ씠?곕툕 硫붿냼??梨꾨꼸濡?諛쒖넚
       final result = await _channel.invokeMethod<bool>('sendSms', {
         'phone': cleanPhone,
         'message': message,
       });
       
       if (result == true) {
-        debugPrint('[NativeSms] 발송 성공: $cleanPhone');
+        
         return true;
       } else {
-        debugPrint('[NativeSms] 발송 실패, 앱으로 대체합니다.');
+        
         return await sendSmsViaApp(phoneNumber: cleanPhone, message: message);
       }
     } catch (e) {
-      debugPrint('[NativeSms] 네이티브 발송 오류: $e');
-      // 오류 시 기본 앱으로 fallback
+      
+      // ?ㅻ쪟 ??湲곕낯 ?깆쑝濡?fallback
       return await sendSmsViaApp(phoneNumber: phoneNumber, message: message);
     }
   }
   
-  /// SMS 발송 (자동 선택)
-  /// 권한이 있으면 네이티브로, 없으면 앱으로
+  /// SMS 諛쒖넚 (?먮룞 ?좏깮)
+  /// 沅뚰븳???덉쑝硫??ㅼ씠?곕툕濡? ?놁쑝硫??깆쑝濡?
   static Future<bool> sendSms({
     required String phoneNumber,
     required String message,
   }) async {
-    // 먼저 네이티브 시도, 실패 시 앱으로 fallback
+    // 癒쇱? ?ㅼ씠?곕툕 ?쒕룄, ?ㅽ뙣 ???깆쑝濡?fallback
     return await sendSmsNative(phoneNumber: phoneNumber, message: message);
   }
   
-  /// SMS 발송 (여러 수신자)
+  /// SMS 諛쒖넚 (?щ윭 ?섏떊??
   static Future<int> sendSmsToMultiple({
     required List<String> phoneNumbers,
     required String message,
@@ -136,10 +136,11 @@ class NativeSmsService {
       final success = await sendSms(phoneNumber: phone, message: message);
       if (success) successCount++;
       
-      // 발송 간 간격 (스팸 방지)
+      // 諛쒖넚 媛?媛꾧꺽 (?ㅽ뙵 諛⑹?)
       await Future.delayed(const Duration(milliseconds: 500));
     }
     
     return successCount;
   }
 }
+

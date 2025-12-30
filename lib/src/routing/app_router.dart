@@ -64,11 +64,6 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             }
           }
           
-          print("[AppRouter] /write route - extra type: ${extra.runtimeType}");
-          print("[AppRouter] /write route - extra: $extra");
-          print("[AppRouter] /write route - initialImage: $initialImage");
-          print("[AppRouter] /write route - categoryId: $categoryId");
-          print("[AppRouter] /write route - categoryImages count: ${categoryImages?.length ?? 0}");
           return MaterialPage(
             fullscreenDialog: true,
             child: WriteCardScreen(

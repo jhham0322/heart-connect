@@ -1,23 +1,23 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:heart_connect/src/l10n/app_strings.dart';
 
-/// 소셜 미디어 공유 서비스
+/// ?뚯뀥 誘몃뵒??怨듭쑀 ?쒕퉬??
 class SocialShareService {
   
-  /// 지원하는 소셜 미디어 플랫폼
+  /// 吏?먰븯???뚯뀥 誘몃뵒???뚮옯??
   static const List<SocialPlatform> platforms = [
     SocialPlatform(
       id: 'share',
-      name: '기타 앱으로 공유',
+      name: '湲고? ?깆쑝濡?怨듭쑀',
       icon: Icons.share,
       color: Colors.blueGrey,
     ),
     SocialPlatform(
       id: 'kakaotalk',
-      name: '카카오톡',
+      name: '移댁뭅?ㅽ넚',
       icon: Icons.chat_bubble,
       color: Color(0xFFFEE500),
       packageAndroid: 'com.kakao.talk',
@@ -25,7 +25,7 @@ class SocialShareService {
     ),
     SocialPlatform(
       id: 'instagram',
-      name: '인스타그램',
+      name: '?몄뒪?洹몃옩',
       icon: Icons.camera_alt,
       color: Color(0xFFE4405F),
       packageAndroid: 'com.instagram.android',
@@ -33,7 +33,7 @@ class SocialShareService {
     ),
     SocialPlatform(
       id: 'facebook',
-      name: '페이스북',
+      name: '?섏씠?ㅻ턿',
       icon: Icons.facebook,
       color: Color(0xFF1877F2),
       packageAndroid: 'com.facebook.katana',
@@ -41,7 +41,7 @@ class SocialShareService {
     ),
     SocialPlatform(
       id: 'x',
-      name: 'X (트위터)',
+      name: 'X (?몄쐞??',
       icon: Icons.alternate_email,
       color: Colors.black,
       packageAndroid: 'com.twitter.android',
@@ -57,7 +57,7 @@ class SocialShareService {
     ),
     SocialPlatform(
       id: 'telegram',
-      name: '텔레그램',
+      name: '?붾젅洹몃옩',
       icon: Icons.send,
       color: Color(0xFF0088CC),
       packageAndroid: 'org.telegram.messenger',
@@ -65,7 +65,7 @@ class SocialShareService {
     ),
   ];
 
-  /// 이미지를 특정 플랫폼으로 공유
+  /// ?대?吏瑜??뱀젙 ?뚮옯?쇱쑝濡?怨듭쑀
   static Future<ShareResult> shareImage({
     required String imagePath,
     required String platformId,
@@ -74,21 +74,21 @@ class SocialShareService {
     final file = XFile(imagePath);
     
     if (platformId == 'share') {
-      // 기본 공유 (사용자가 앱 선택)
+      // 湲곕낯 怨듭쑀 (?ъ슜?먭? ???좏깮)
       return await Share.shareXFiles(
         [file],
-        text: text ?? '마음을 전합니다 💝',
-        subject: 'Heart-Connect 카드',
+        text: text ?? '留덉쓬???꾪빀?덈떎 ?뮑',
+        subject: 'Heart-Connect 移대뱶',
       );
     }
     
-    // 특정 플랫폼으로 공유
+    // ?뱀젙 ?뚮옯?쇱쑝濡?怨듭쑀
     final platform = platforms.firstWhere(
       (p) => p.id == platformId,
       orElse: () => platforms.first,
     );
     
-    // 플랫폼별 공유 시도
+    // ?뚮옯?쇰퀎 怨듭쑀 ?쒕룄
     switch (platformId) {
       case 'kakaotalk':
         return await _shareToKakao(file, text);
@@ -99,82 +99,82 @@ class SocialShareService {
       case 'x':
         return await _shareToX(file, text);
       default:
-        // 기본 공유로 fallback
+        // 湲곕낯 怨듭쑀濡?fallback
         return await Share.shareXFiles([file], text: text);
     }
   }
 
-  /// 카카오톡으로 공유
+  /// 移댁뭅?ㅽ넚?쇰줈 怨듭쑀
   static Future<ShareResult> _shareToKakao(XFile file, String? text) async {
     try {
       if (Platform.isAndroid) {
-        // Android: 카카오톡 앱으로 직접 공유
+        // Android: 移댁뭅?ㅽ넚 ?깆쑝濡?吏곸젒 怨듭쑀
         return await Share.shareXFiles(
           [file],
-          text: text ?? '마음을 전합니다 💝',
+          text: text ?? '留덉쓬???꾪빀?덈떎 ?뮑',
         );
       } else if (Platform.isIOS) {
-        // iOS: 카카오톡 URL Scheme 사용
+        // iOS: 移댁뭅?ㅽ넚 URL Scheme ?ъ슜
         final uri = Uri.parse('kakaotalk://');
         if (await canLaunchUrl(uri)) {
           return await Share.shareXFiles([file], text: text);
         }
       }
     } catch (e) {
-      debugPrint('[SocialShare] 카카오톡 공유 오류: $e');
+      
     }
     
-    // Fallback: 기본 공유
+    // Fallback: 湲곕낯 怨듭쑀
     return await Share.shareXFiles([file], text: text);
   }
 
-  /// 인스타그램으로 공유 (Stories)
+  /// ?몄뒪?洹몃옩?쇰줈 怨듭쑀 (Stories)
   static Future<ShareResult> _shareToInstagram(XFile file, String? text) async {
     try {
       if (Platform.isAndroid) {
-        // Android: 인스타그램 스토리로 공유
+        // Android: ?몄뒪?洹몃옩 ?ㅽ넗由щ줈 怨듭쑀
         return await Share.shareXFiles(
           [file],
           text: text,
         );
       } else if (Platform.isIOS) {
-        // iOS: 인스타그램 Stories API
+        // iOS: ?몄뒪?洹몃옩 Stories API
         final uri = Uri.parse('instagram-stories://share');
         if (await canLaunchUrl(uri)) {
           return await Share.shareXFiles([file], text: text);
         }
       }
     } catch (e) {
-      debugPrint('[SocialShare] 인스타그램 공유 오류: $e');
+      
     }
     
     return await Share.shareXFiles([file], text: text);
   }
 
-  /// 페이스북으로 공유
+  /// ?섏씠?ㅻ턿?쇰줈 怨듭쑀
   static Future<ShareResult> _shareToFacebook(XFile file, String? text) async {
     try {
       return await Share.shareXFiles([file], text: text);
     } catch (e) {
-      debugPrint('[SocialShare] 페이스북 공유 오류: $e');
+      
       return await Share.shareXFiles([file], text: text);
     }
   }
 
-  /// X (트위터)로 공유
+  /// X (?몄쐞??濡?怨듭쑀
   static Future<ShareResult> _shareToX(XFile file, String? text) async {
     try {
       return await Share.shareXFiles([file], text: text);
     } catch (e) {
-      debugPrint('[SocialShare] X 공유 오류: $e');
+      
       return await Share.shareXFiles([file], text: text);
     }
   }
 
-  /// 공유 플랫폼 선택 다이얼로그 표시
-  /// [strings]는 다국어 처리를 위해 선택적으로 전달 가능
+  /// 怨듭쑀 ?뚮옯???좏깮 ?ㅼ씠?쇰줈洹??쒖떆
+  /// [strings]???ㅺ뎅??泥섎━瑜??꾪빐 ?좏깮?곸쑝濡??꾨떖 媛??
   static Future<String?> showShareDialog(BuildContext context, {AppStrings? strings}) async {
-    // 플랫폼 이름 다국어 처리
+    // ?뚮옯???대쫫 ?ㅺ뎅??泥섎━
     final localizedPlatforms = strings != null ? [
       SocialPlatform(id: 'share', name: strings.shareOtherApps, icon: Icons.share, color: Colors.blueGrey),
       SocialPlatform(id: 'kakaotalk', name: strings.shareKakaoTalk, icon: Icons.chat_bubble, color: const Color(0xFFFEE500), packageAndroid: 'com.kakao.talk', schemeIOS: 'kakaotalk://'),
@@ -185,8 +185,8 @@ class SocialShareService {
       SocialPlatform(id: 'telegram', name: strings.shareTelegram, icon: Icons.send, color: const Color(0xFF0088CC), packageAndroid: 'org.telegram.messenger', schemeIOS: 'tg://'),
     ] : platforms;
     
-    final shareTitle = strings?.shareTitle ?? '공유하기';
-    final cancelLabel = strings?.cancel ?? '취소';
+    final shareTitle = strings?.shareTitle ?? '怨듭쑀?섍린';
+    final cancelLabel = strings?.cancel ?? '痍⑥냼';
     
     return await showModalBottomSheet<String>(
       context: context,
@@ -242,30 +242,30 @@ class SocialShareService {
     );
   }
 
-  /// MMS로 이미지 발송
+  /// MMS濡??대?吏 諛쒖넚
   static Future<bool> sendMMS({
     required String imagePath,
     required String phoneNumber,
     String? message,
   }) async {
     try {
-      // 전화번호 정규화
+      // ?꾪솕踰덊샇 ?뺢퇋??
       final cleanPhone = phoneNumber.replaceAll(RegExp(r'[^\d]'), '');
       
       if (Platform.isAndroid) {
-        // Android: Intent로 MMS 발송
+        // Android: Intent濡?MMS 諛쒖넚
         final uri = Uri.parse(
           'sms:$cleanPhone?body=${Uri.encodeComponent(message ?? '')}'
         );
         
-        // 이미지 첨부는 share_plus 사용
+        // ?대?吏 泥⑤???share_plus ?ъ슜
         await Share.shareXFiles(
           [XFile(imagePath)],
           text: message,
         );
         return true;
       } else if (Platform.isIOS) {
-        // iOS: MMS 발송
+        // iOS: MMS 諛쒖넚
         final uri = Uri.parse('sms:$cleanPhone');
         if (await canLaunchUrl(uri)) {
           await Share.shareXFiles([XFile(imagePath)], text: message);
@@ -275,13 +275,13 @@ class SocialShareService {
       
       return false;
     } catch (e) {
-      debugPrint('[SocialShare] MMS 발송 오류: $e');
+      
       return false;
     }
   }
 }
 
-/// 소셜 플랫폼 정보
+/// ?뚯뀥 ?뚮옯???뺣낫
 class SocialPlatform {
   final String id;
   final String name;
@@ -300,7 +300,7 @@ class SocialPlatform {
   });
 }
 
-/// 공유 버튼 위젯
+/// 怨듭쑀 踰꾪듉 ?꾩젽
 class _ShareButton extends StatelessWidget {
   final SocialPlatform platform;
   final VoidCallback onTap;
@@ -346,3 +346,4 @@ class _ShareButton extends StatelessWidget {
     );
   }
 }
+

@@ -33,7 +33,6 @@ class _AdBannerWidgetState extends State<AdBannerWidget> {
       request: const AdRequest(),
       listener: BannerAdListener(
         onAdLoaded: (ad) {
-          debugPrint('[AdBanner] Banner ad loaded');
           if (mounted) {
             setState(() {
               _isLoaded = true;
@@ -41,11 +40,10 @@ class _AdBannerWidgetState extends State<AdBannerWidget> {
           }
         },
         onAdFailedToLoad: (ad, error) {
-          debugPrint('[AdBanner] Banner ad failed to load: $error');
           ad.dispose();
         },
-        onAdOpened: (ad) => debugPrint('[AdBanner] Banner ad opened'),
-        onAdClosed: (ad) => debugPrint('[AdBanner] Banner ad closed'),
+        onAdOpened: (ad) {},
+        onAdClosed: (ad) {},
       ),
     );
 

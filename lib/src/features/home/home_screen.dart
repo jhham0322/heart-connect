@@ -49,7 +49,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
            await _checkCalendarPermission();
          }
        } catch (e) {
-         debugPrint("Init Error: $e");
+         // Init error - silent fail
        }
     });
   }
@@ -57,11 +57,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   // 캘린더 권한 확인 및 요청
   Future<void> _checkCalendarPermission() async {
     final status = await Permission.calendar.status;
-    debugPrint('[HomeScreen] Calendar permission status: $status');
     
     if (status.isGranted) {
       setState(() => _hasCalendarPermission = true);
-      debugPrint('[HomeScreen] Calendar permission already granted');
       // 지원 캘린더 안내 확인
       _checkCalendarGuide();
     } else {
@@ -69,7 +67,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       
       // 권한이 허용되지 않았으면 다이얼로그 표시
       if (mounted) {
-        debugPrint('[HomeScreen] Showing calendar permission dialog');
         _showCalendarPermissionDialog();
       }
     }
@@ -201,9 +198,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   
   // 지원 캘린더 안내 (처음 한 번만 표시)
   Future<void> _checkCalendarGuide() async {
-    debugPrint('[HomeScreen] Checking calendar guide...');
     if (!Platform.isAndroid) {
-      debugPrint('[HomeScreen] Not Android, skipping');
       return;
     }
     
@@ -213,17 +208,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       final hasSeenGuide = prefs.getBool('has_seen_calendar_guide') ?? false;
       
       if (hasSeenGuide) {
-        debugPrint('[HomeScreen] Already seen calendar guide, skipping');
         return;
       }
       
       // 안내 다이얼로그 표시
-      debugPrint('[HomeScreen] Showing calendar guide dialog');
       if (mounted) {
         showCalendarGuideDialog(context, markAsSeen: true);
       }
     } catch (e) {
-      debugPrint('[HomeScreen] Calendar guide check error: $e');
+      // Calendar guide check error - silent fail
     }
   }
   
@@ -1215,9 +1208,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
                 ElevatedButton(
                     onPressed: () {
-                      print('Save Button Clicked');
                       if (titleController.text.isNotEmpty) {
-                         print('Updating plan ${plan.id} with recipients: $selectedRecipients');
                          ref.read(homeViewModelProvider.notifier).updateScheduleDetails(
                            plan.id,
                            titleController.text,

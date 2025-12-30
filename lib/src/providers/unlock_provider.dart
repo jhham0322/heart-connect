@@ -19,7 +19,6 @@ class UnlockProvider extends ChangeNotifier {
     _unlockedImages = saved.toSet();
     _isLoaded = true;
     notifyListeners();
-    debugPrint('[UnlockProvider] Loaded ${_unlockedImages.length} unlocked images');
   }
 
   /// 이미지 잠금 해제 여부 확인
@@ -38,7 +37,6 @@ class UnlockProvider extends ChangeNotifier {
     // SharedPreferences에 저장
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList(_storageKey, _unlockedImages.toList());
-    debugPrint('[UnlockProvider] Unlocked: $key');
   }
 
   /// 특정 카테고리의 해제된 이미지 인덱스 목록

@@ -196,13 +196,10 @@ class AppDatabase extends _$AppDatabase {
         final columns = await customSelect('PRAGMA table_info(daily_plans)').get();
         final hasRecipients = columns.any((row) => row.read<String>('name') == 'recipients');
         if (!hasRecipients) {
-          print('[AppDatabase] Repairing DB: Adding missing recipients column to daily_plans');
           await customStatement('ALTER TABLE daily_plans ADD COLUMN recipients TEXT NULL');
-        } else {
-           print('[AppDatabase] recipients column exists.');
         }
       } catch (e) {
-        print('[AppDatabase] Error checking/repairing schema: $e');
+        // Error checking/repairing schema - silent fail
       }
     },
   );
@@ -465,8 +462,6 @@ class AppDatabase extends _$AppDatabase {
   }
 
   Future<void> updatePlanDetailsWithRecipients(int id, String title, DateTime date, String type, String? recipients) {
-    print('[AppDatabase] Executing UPDATE DailyPlans: id=$id, title=$title, recipients=$recipients');
-    _logToDebugFile('[AppDatabase] Executing UPDATE DailyPlans: id=$id, title=$title, recipients=$recipients');
     return (update(dailyPlans)..where((t) => t.id.equals(id))).write(
       DailyPlansCompanion(
         content: Value(title),
@@ -474,22 +469,7 @@ class AppDatabase extends _$AppDatabase {
         type: Value(type),
         recipients: Value(recipients),
       )
-    ).then((rows) {
-      _logToDebugFile('[AppDatabase] Update Result: $rows rows affected for plan $id');
-      print('[AppDatabase] Update Result: $rows rows affected for plan $id');
-    });
-  }
-
-  Future<void> _logToDebugFile(String message) async {
-    try {
-      final file = File('Assets/Debug/debug.txt');
-      if (!await file.exists()) {
-        await file.create(recursive: true);
-      }
-      await file.writeAsString('${DateTime.now()}: $message\n', mode: FileMode.append);
-    } catch (e) {
-      print('Failed to write to debug file: $e');
-    }
+    );
   }
 
   Future<void> updatePlanRecipients(int id, String? recipients) {
@@ -517,7 +497,6 @@ class AppDatabase extends _$AppDatabase {
     for (var title in mockTitles) {
       await (delete(dailyPlans)..where((t) => t.content.equals(title))).go();
     }
-    print('[AppDatabase] Deleted mock plans from database');
   }
 
   // --- Plan Generation Logic ---

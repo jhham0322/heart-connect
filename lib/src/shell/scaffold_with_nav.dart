@@ -117,7 +117,6 @@ class ScaffoldWithNav extends ConsumerWidget {
               
               if (groupContacts.isNotEmpty) {
                 final recipients = groupContacts.map((c) => {'name': c.name, 'phone': c.phone}).toList();
-                print("[ScaffoldWithNav] Navigating to Write with group: $selectedGroupTag, ${recipients.length} recipients");
                 context.push('/write', extra: {'recipients': recipients});
                 return;
               }
@@ -125,13 +124,11 @@ class ScaffoldWithNav extends ConsumerWidget {
             
             if (currentContact != null) {
               // 연락처 상세화면에서 FAB를 누른 경우 - 해당 연락처를 수신자로 설정
-              print("[ScaffoldWithNav] Navigating to Write with contact: ${currentContact.name}");
               context.push('/write', extra: currentContact);
             } else if (selectedImage != null) {
                // 갤러리에서 선택한 이미지가 있는 경우
                final categoryId = ref.read(currentCategoryProvider);
                final categoryImages = ref.read(currentCategoryImagesProvider);
-               print("[ScaffoldWithNav] Navigating to Write with image: $selectedImage, category: $categoryId");
                context.push('/write', extra: {
                  'image': selectedImage,
                  'categoryId': categoryId,

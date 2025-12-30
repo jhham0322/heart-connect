@@ -26,7 +26,6 @@ class AdHelper {
     
     await MobileAds.instance.initialize();
     _isInitialized = true;
-    debugPrint('[AdHelper] MobileAds SDK initialized');
     
     // 전면 광고 미리 로드
     loadInterstitialAd();
@@ -89,18 +88,15 @@ class AdHelper {
         onAdLoaded: (ad) {
           _interstitialAd = ad;
           _isInterstitialAdReady = true;
-          debugPrint('[AdHelper] Interstitial ad loaded');
           
           ad.fullScreenContentCallback = FullScreenContentCallback(
             onAdDismissedFullScreenContent: (ad) {
-              debugPrint('[AdHelper] Interstitial ad dismissed');
               ad.dispose();
               _isInterstitialAdReady = false;
               // 다음 광고 미리 로드
               loadInterstitialAd();
             },
             onAdFailedToShowFullScreenContent: (ad, error) {
-              debugPrint('[AdHelper] Interstitial ad failed to show: $error');
               ad.dispose();
               _isInterstitialAdReady = false;
               loadInterstitialAd();
@@ -108,7 +104,6 @@ class AdHelper {
           );
         },
         onAdFailedToLoad: (error) {
-          debugPrint('[AdHelper] Interstitial ad failed to load: $error');
           _isInterstitialAdReady = false;
         },
       ),
@@ -124,10 +119,8 @@ class AdHelper {
         onAdLoaded: (ad) {
           _rewardedAd = ad;
           _isRewardedAdReady = true;
-          debugPrint('[AdHelper] Rewarded ad loaded');
         },
         onAdFailedToLoad: (error) {
-          debugPrint('[AdHelper] Rewarded ad failed to load: $error');
           _isRewardedAdReady = false;
         },
       ),
@@ -137,7 +130,6 @@ class AdHelper {
   /// 전면 광고 표시
   Future<bool> showInterstitialAd() async {
     if (!_isInterstitialAdReady || _interstitialAd == null) {
-      debugPrint('[AdHelper] Interstitial ad not ready');
       return false;
     }
     
@@ -149,20 +141,17 @@ class AdHelper {
   /// [onRewarded] 콜백은 사용자가 광고를 끝까지 시청했을 때 호출됩니다.
   Future<bool> showRewardedAd({required Function() onRewarded}) async {
     if (!_isRewardedAdReady || _rewardedAd == null) {
-      debugPrint('[AdHelper] Rewarded ad not ready');
       return false;
     }
     
     _rewardedAd!.fullScreenContentCallback = FullScreenContentCallback(
       onAdDismissedFullScreenContent: (ad) {
-        debugPrint('[AdHelper] Rewarded ad dismissed');
         ad.dispose();
         _isRewardedAdReady = false;
         // 다음 광고 미리 로드
         loadRewardedAd();
       },
       onAdFailedToShowFullScreenContent: (ad, error) {
-        debugPrint('[AdHelper] Rewarded ad failed to show: $error');
         ad.dispose();
         _isRewardedAdReady = false;
         loadRewardedAd();
@@ -171,7 +160,6 @@ class AdHelper {
     
     await _rewardedAd!.show(
       onUserEarnedReward: (ad, reward) {
-        debugPrint('[AdHelper] User earned reward: ${reward.amount} ${reward.type}');
         onRewarded();
       },
     );

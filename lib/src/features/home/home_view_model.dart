@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:io'; // Added for File and FileMode
 import 'dart:convert'; // Added for JSON
 import 'package:flutter/material.dart';
@@ -86,13 +86,13 @@ class HomeViewModel extends StateNotifier<HomeState> {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     
-    // 2. Get Plans from DB (빠름)
+    // 2. Get Plans from DB (鍮좊쫫)
     final plans = await db.getFuturePlans(today);
     
-    // 3. Get Contacts from DB for recipient matching (빠름)
+    // 3. Get Contacts from DB for recipient matching (鍮좊쫫)
     final contacts = await db.getAllContacts();
     
-    // 4. Process Plans (로컬 처리만)
+    // 4. Process Plans (濡쒖뺄 泥섎━留?
     final List<DailyPlan> todayPlans = [];
     final List<EventItem> futureEvents = [];
     int todayGoal = 0;
@@ -244,15 +244,11 @@ class HomeViewModel extends StateNotifier<HomeState> {
   Future<void> updateScheduleDetails(int id, String title, DateTime date, String type, {List<Map<String, String>> recipients = const []}) async {
     final db = ref.read(appDatabaseProvider);
     final jsonRecipients = jsonEncode(recipients);
-    final logMsg = '[HomeViewModel] Updating schedule $id with recipients: $jsonRecipients';
-    print(logMsg);
-    _logToDebugFile(logMsg);
     
     await db.updatePlanDetailsWithRecipients(id, title, date, type, jsonRecipients);
     
     // Verify update
-    final updatedPlan = await db.getPlan(id);
-    _logToDebugFile('[HomeViewModel] Verified update for plan $id. New recipients in DB: ${updatedPlan.recipients}');
+    await db.getPlan(id);
     
     loadData();
   }
@@ -286,10 +282,10 @@ class HomeViewModel extends StateNotifier<HomeState> {
                    }
                }
            }
-           _logToDebugFile('[HomeViewModel] AI extracted recipients for "$title": $finalRecipients');
+           
         }
       } catch (e) {
-        _logToDebugFile('[HomeViewModel] AI extraction error: $e');
+        
       }
     }
 
@@ -312,24 +308,7 @@ class HomeViewModel extends StateNotifier<HomeState> {
     loadData();
   }
 
-  Future<void> _logToDebugFile(String message) async {
-    try {
-      final file = File('Assets/Debug/debug.txt');
-      if (!await file.exists()) {
-        await file.create(recursive: true);
-      }
-      final timestamp = DateTime.now().toString();
-      final logLine = '$timestamp: $message\n';
-      
-      // Write to file
-      await file.writeAsString(logLine, mode: FileMode.append);
-      
-      // Also print to console for immediate visibility if user is monitoring console
-      print('DEBUG_LOG: $logLine');
-    } catch (e) {
-      print('Failed to write to debug file: $e');
-    }
-  }
+
 
   Future<void> activateFuturePlan(int id) async {
     final db = ref.read(appDatabaseProvider);
@@ -360,7 +339,7 @@ class HomeViewModel extends StateNotifier<HomeState> {
         state = state.copyWith(todayPlans: updatedPlans);
       }
     } catch (e) {
-      debugPrint("Error activating plan: $e");
+      // Error activating plan - silent fail
     }
   }
 }
@@ -368,3 +347,4 @@ class HomeViewModel extends StateNotifier<HomeState> {
 final homeViewModelProvider = StateNotifierProvider<HomeViewModel, HomeState>((ref) {
   return HomeViewModel(ref);
 });
+
