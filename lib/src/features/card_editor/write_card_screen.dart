@@ -337,6 +337,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
         hasBorder: _hasBorder,
         borderColor: _borderColor,
         borderWidth: _borderWidth,
+        shapeBorder: null, // 초기화 시점에는 기본 RoundedRectangle
         fontFamily: _fontName,
         fontSize: _fontSize,
         textColor: _defaultColor,
@@ -2942,6 +2943,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
       hasBorder: _hasBorder,
       borderColor: _borderColor,
       borderWidth: _borderWidth,
+      shapeBorder: _getShapeBorder(), // 글상자 모양 적용
       fontFamily: _fontName,
       fontSize: _fontSize,
       textColor: _defaultColor,

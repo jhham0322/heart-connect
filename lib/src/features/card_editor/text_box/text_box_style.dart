@@ -15,6 +15,9 @@ class TextBoxStyle {
   final Color borderColor;
   final double borderWidth;
   
+  // === 모양 (shape) ===
+  final ShapeBorder? shapeBorder; // 원형, 말풍선 등 커스텀 모양
+  
   // === 프레임 이미지 ===
   final String? frameImage;
   
@@ -37,6 +40,7 @@ class TextBoxStyle {
     this.hasBorder = true,
     this.borderColor = Colors.white,
     this.borderWidth = 1.0,
+    this.shapeBorder, // 커스텀 모양 (null이면 기본 RoundedRectangle)
     this.frameImage,
     this.fontFamily = 'Gowun Dodum',
     this.fontSize = 20.0,
@@ -76,7 +80,7 @@ class TextBoxStyle {
     );
   }
 
-  /// BoxDecoration 생성
+  /// BoxDecoration 생성 (shapeBorder 미사용 시)
   BoxDecoration get boxDecoration {
     if (frameImage != null) {
       return BoxDecoration(
@@ -94,6 +98,38 @@ class TextBoxStyle {
       border: hasBorder
           ? Border.all(color: borderColor, width: borderWidth)
           : null,
+    );
+  }
+  
+  /// ShapeDecoration 생성 (shapeBorder 사용 시)
+  ShapeDecoration get shapeDecoration {
+    final shape = shapeBorder ?? RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(borderRadius),
+      side: hasBorder 
+          ? BorderSide(color: borderColor, width: borderWidth)
+          : BorderSide.none,
+    );
+    
+    if (frameImage != null) {
+      return ShapeDecoration(
+        shape: shape,
+        image: DecorationImage(
+          image: AssetImage(frameImage!),
+          fit: BoxFit.fill,
+        ),
+      );
+    }
+    
+    return ShapeDecoration(
+      color: backgroundColor.withOpacity(backgroundOpacity),
+      shape: shape,
+    );
+  }
+  
+  /// 클리핑용 ShapeBorder (ClipPath에 사용)
+  ShapeBorder get clipShape {
+    return shapeBorder ?? RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(borderRadius),
     );
   }
 

@@ -164,33 +164,40 @@ class _TextBoxWidgetState extends State<TextBoxWidget> {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          // 메인 컨텐츠 박스
-          Container(
-            width: model.width,
-            constraints: BoxConstraints(
-              minHeight: model.minHeight,
-              maxHeight: model.maxHeight,
-            ),
-            decoration: model.isDragMode 
-              ? BoxDecoration(
-                  // 드래그 모드일 때 테두리 강조
-                  border: Border.all(
-                    color: const Color(0xFFF29D86),
-                    width: 3,
-                  ),
-                  borderRadius: BorderRadius.circular(style.borderRadius),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFFF29D86).withOpacity(0.4),
-                      blurRadius: 12,
-                      spreadRadius: 2,
+          // 메인 컨텐츠 박스 (ClipPath로 모양 적용)
+          ClipPath(
+            clipper: ShapeBorderClipper(shape: style.clipShape),
+            child: Container(
+              width: model.width,
+              constraints: BoxConstraints(
+                minHeight: model.minHeight,
+                maxHeight: model.maxHeight,
+              ),
+              decoration: model.isDragMode 
+                ? ShapeDecoration(
+                    // 드래그 모드일 때 테두리 강조
+                    shape: (style.shapeBorder ?? RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(style.borderRadius),
+                    )).lerpTo(
+                      (style.shapeBorder ?? RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(style.borderRadius),
+                      )),
+                      1.0,
+                    ) as OutlinedBorder? ?? RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(style.borderRadius),
+                      side: const BorderSide(color: Color(0xFFF29D86), width: 3),
                     ),
-                  ],
-                  color: style.boxDecoration?.color,
-                  image: style.boxDecoration?.image,
-                )
-              : style.boxDecoration,
-            child: Padding(
+                    shadows: [
+                      BoxShadow(
+                        color: const Color(0xFFF29D86).withOpacity(0.4),
+                        blurRadius: 12,
+                        spreadRadius: 2,
+                      ),
+                    ],
+                    color: style.backgroundColor.withOpacity(style.backgroundOpacity),
+                  )
+                : style.shapeDecoration,
+              child: Padding(
               padding: style.contentPadding,
               child: IntrinsicHeight(
                 child: Container(
@@ -230,7 +237,8 @@ class _TextBoxWidgetState extends State<TextBoxWidget> {
                 ),
               ),
             ),
-          ),
+          ), // Container 닫기
+          ), // ClipPath 닫기
           
           // 드래그 모드 인디케이터 + 안내 메시지
           if (model.isDragMode && !widget.isCapturing)
