@@ -384,6 +384,7 @@ class _ContactPickerDialogState extends ConsumerState<ContactPickerDialog> {
       avatar: Icon(icon, size: 16, color: isActive ? Colors.white : Colors.grey[700]),
       selected: isActive,
       selectedColor: const Color(0xFFF29D86),
+      showCheckmark: false, // 체크 아이콘 제거
       labelStyle: TextStyle(
         color: isActive ? Colors.white : Colors.grey[700],
         fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
