@@ -107,11 +107,15 @@ class ScaffoldWithNav extends ConsumerWidget {
           heroTag: 'write-fab',
           onPressed: () async {
             final selectedImage = ref.read(currentSelectionProvider);
-            final currentContact = ref.read(currentContactProvider);
             final selectedGroupTag = ref.read(selectedGroupTagProvider);
             
-            // 그룹이 선택된 경우 - 그룹 멤버를 수신자로 설정
-            if (selectedGroupTag != null) {
+            // 연락처 탭에서만 currentContact 사용
+            final currentContact = navigationShell.currentIndex == 1 
+                ? ref.read(currentContactProvider) 
+                : null;
+            
+            // 그룹이 선택된 경우 (연락처 탭) - 그룹 멤버를 수신자로 설정
+            if (navigationShell.currentIndex == 1 && selectedGroupTag != null) {
               final database = ref.read(appDatabaseProvider);
               final groupContacts = await database.getContactsByGroupTag(selectedGroupTag);
               
@@ -123,7 +127,7 @@ class ScaffoldWithNav extends ConsumerWidget {
             }
             
             if (currentContact != null) {
-              // 연락처 상세화면에서 FAB를 누른 경우 - 해당 연락처를 수신자로 설정
+              // 연락처 탭에서 FAB를 누른 경우 - 해당 연락처를 수신자로 설정
               context.push('/write', extra: currentContact);
             } else if (selectedImage != null) {
                // 갤러리에서 선택한 이미지가 있는 경우
@@ -135,6 +139,7 @@ class ScaffoldWithNav extends ConsumerWidget {
                  'categoryImages': categoryImages,
                });
             } else {
+               // 홈/갤러리(이미지 미선택)에서 FAB - 수신자 없이 시작
                context.push('/write');
             }
           },
