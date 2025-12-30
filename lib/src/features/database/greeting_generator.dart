@@ -1,7 +1,13 @@
 import 'dart:math';
+import 'package:flutter/material.dart';
+import '../card_editor/text_box/text_formatter.dart';
 
 /// 인사말 동적 생성 엔진
 /// DB 대신 내장된 문구 구성 요소(도입 + 전개 + 결말)를 조합하여 수천 개의 자연스러운 문장을 생성합니다.
+/// 
+/// 사용법:
+/// 1. 기본 생성: GreetingGenerator.generateGreeting(topic, sentiment)
+/// 2. 포맷팅 적용: GreetingGenerator.generateFormattedGreeting(topic, sentiment, boxWidth, style)
 class GreetingGenerator {
   static final Random _random = Random();
   
@@ -692,6 +698,121 @@ class GreetingGenerator {
     final ender = fallbackEnders[_random.nextInt(fallbackEnders.length)];
     
     return '$opener, $middle $ender';
+  }
+
+  /// 텍스트박스 설정에 맞게 포맷팅된 인사말 생성
+  /// 
+  /// [topic] 카테고리 (새해, 생일, 감사 등)
+  /// [sentiment] 감성 (polite, witty, friendly, poetic)
+  /// [boxWidth] 텍스트박스 너비
+  /// [style] 텍스트 스타일 (폰트, 크기 등)
+  /// [padding] 좌우 패딩 (기본 48.0)
+  static String? generateFormattedGreeting(
+    String topic, 
+    String sentiment, {
+    required double boxWidth,
+    required TextStyle style,
+    double padding = 48.0,
+  }) {
+    final topicData = _data[topic];
+    if (topicData == null) {
+      final fallback = _generateFallback(topic, sentiment);
+      if (fallback == null) return null;
+      return TextFormatter.formatGreeting(
+        greeting: fallback,
+        boxWidth: boxWidth,
+        style: style,
+        padding: padding,
+      );
+    }
+    
+    final components = topicData[sentiment];
+    if (components == null) {
+      final fallback = _generateFallback(topic, sentiment);
+      if (fallback == null) return null;
+      return TextFormatter.formatGreeting(
+        greeting: fallback,
+        boxWidth: boxWidth,
+        style: style,
+        padding: padding,
+      );
+    }
+    
+    // 구성 요소 선택
+    final opener = components.openers[_random.nextInt(components.openers.length)];
+    final middle = components.middles[_random.nextInt(components.middles.length)];
+    final ender = components.enders[_random.nextInt(components.enders.length)];
+    
+    // 구조화된 포맷팅 적용
+    return TextFormatter.formatGeneratedGreeting(
+      opener: opener,
+      middle: middle,
+      ender: ender,
+      boxWidth: boxWidth,
+      style: style,
+      padding: padding,
+    );
+  }
+
+  /// 여러 개의 포맷팅된 인사말 생성
+  static List<String> generateMultipleFormattedGreetings(
+    String topic, 
+    String sentiment, 
+    int count, {
+    required double boxWidth,
+    required TextStyle style,
+    double padding = 48.0,
+  }) {
+    final Set<String> results = {};
+    int attempts = 0;
+    
+    while (results.length < count && attempts < count * 10) {
+      final greeting = generateFormattedGreeting(
+        topic, 
+        sentiment,
+        boxWidth: boxWidth,
+        style: style,
+        padding: padding,
+      );
+      if (greeting != null && greeting.length >= 30) {
+        results.add(greeting);
+      }
+      attempts++;
+    }
+    
+    return results.toList();
+  }
+
+  /// 기존 텍스트를 텍스트박스에 맞게 포맷팅
+  static String formatExistingText(
+    String text, {
+    required double boxWidth,
+    required TextStyle style,
+    double padding = 48.0,
+  }) {
+    return TextFormatter.formatGreeting(
+      greeting: text,
+      boxWidth: boxWidth,
+      style: style,
+      padding: padding,
+    );
+  }
+
+  /// 텍스트박스 스타일 정보로 TextStyle 생성 헬퍼
+  static TextStyle createStyleFromParams({
+    required String fontFamily,
+    required double fontSize,
+    Color? textColor,
+    bool isBold = false,
+    bool isItalic = false,
+  }) {
+    return TextFormatter.createTextStyle(
+      fontFamily: fontFamily,
+      fontSize: fontSize,
+      textColor: textColor,
+      isBold: isBold,
+      isItalic: isItalic,
+    );
   }
 }
 

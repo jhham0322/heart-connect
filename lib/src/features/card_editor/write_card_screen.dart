@@ -654,6 +654,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   }
 
   /// Generator에서 특정 주제+감성의 랜덤 인사말 생성 (DB 불필요)
+  /// 텍스트박스 설정에 맞게 자연스러운 줄 바꿈 적용
   void _getRandomGreetingFromGenerator(String sentiment) {
     if (_selectedTopic == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -662,7 +663,24 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
       return;
     }
     
-    final greeting = GreetingGenerator.generateGreeting(_selectedTopic!, sentiment);
+    // 텍스트박스 너비와 스타일 정보 가져오기
+    final boxWidth = _textBoxController.model.width;
+    final textStyle = GreetingGenerator.createStyleFromParams(
+      fontFamily: _fontName,
+      fontSize: _fontSize,
+      textColor: _defaultColor,
+      isBold: _isBold,
+      isItalic: _isItalic,
+    );
+    
+    // 포맷팅이 적용된 인사말 생성
+    final greeting = GreetingGenerator.generateFormattedGreeting(
+      _selectedTopic!, 
+      sentiment,
+      boxWidth: boxWidth,
+      style: textStyle,
+      padding: 48.0, // contentPadding: 24 * 2
+    );
     
     if (greeting != null && mounted) {
       setState(() {

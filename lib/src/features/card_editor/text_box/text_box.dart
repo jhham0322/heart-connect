@@ -26,3 +26,4 @@ export 'text_box_model.dart';
 export 'text_box_style.dart';
 export 'text_box_controller.dart';
 export 'text_box_widget.dart';
+export 'text_formatter.dart';
