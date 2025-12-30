@@ -102,107 +102,82 @@ class _TextBoxWidgetState extends State<TextBoxWidget> {
     }
   }
 
+  // 드래그 테두리 두께
+  static const double _dragBorderWidth = 16.0;
+
   @override
   Widget build(BuildContext context) {
     final model = widget.controller.model;
     final style = widget.controller.style;
     
     return Positioned(
-      left: model.position.dx,
-      top: model.position.dy - TextBoxController.iconBarHeight - TextBoxController.iconBarSpacing - 36, // 드래그 핸들 높이 36
+      left: model.position.dx - _dragBorderWidth,
+      top: model.position.dy - TextBoxController.iconBarHeight - TextBoxController.iconBarSpacing - _dragBorderWidth,
       child: SizedBox(
-        width: model.width,
+        width: model.width + _dragBorderWidth * 2,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            // 0. 드래그 핸들 바 (항상 표시, 캡처 모드 제외)
-            if (!widget.isCapturing)
-              _buildDragHandle(),
-            
             // 1. 상단 아이콘 바 (캡처 모드가 아닐 때만)
             if (!widget.isCapturing)
-              _buildTopIconBar(),
+              Padding(
+                padding: const EdgeInsets.only(right: _dragBorderWidth),
+                child: _buildTopIconBar(),
+              ),
             
             const SizedBox(height: TextBoxController.iconBarSpacing),
             
-            // 2. 메인 컨텐츠 박스 (드래그 제거, 탭만 처리)
-            GestureDetector(
-              behavior: HitTestBehavior.deferToChild,
-              onTap: widget.onTap ?? () => widget.controller.activate(),
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  _buildMainBox(style),
-                  
-                  // 드래그 모드 인디케이터
-                  if (model.isDragMode && !widget.isCapturing)
-                    Positioned(
-                      left: -12,
-                      top: -12,
-                      child: _buildDragIndicator(),
-                    ),
-                ],
-              ),
-            ),
+            // 2. 메인 컨텐츠 박스 + 드래그 테두리
+            _buildFrameWithDragBorder(style, model),
           ],
         ),
       ),
     );
   }
 
-  /// 드래그 핸들 바 - 글상자 상단에 표시
-  Widget _buildDragHandle() {
+  /// 프레임 + 드래그 테두리 (외곽 영역은 드래그, 내부는 텍스트 편집)
+  Widget _buildFrameWithDragBorder(TextBoxStyle style, model) {
     return GestureDetector(
-      behavior: HitTestBehavior.opaque,
+      behavior: HitTestBehavior.translucent,
       onPanStart: _canDrag ? _onPanStart : null,
       onPanUpdate: _canDrag ? _onPanUpdate : null,
       onPanEnd: _canDrag ? _onPanEnd : null,
       child: Container(
-        width: double.infinity,
-        height: 28,
-        margin: const EdgeInsets.only(bottom: 4),
+        width: model.width + _dragBorderWidth * 2,
         decoration: BoxDecoration(
-          gradient: LinearGradient(
+          // 드래그 모드일 때 테두리 색상 강조
+          gradient: model.isDragMode ? LinearGradient(
             colors: [
-              const Color(0xFFF29D86).withOpacity(0.9),
-              const Color(0xFFFFB74D).withOpacity(0.9),
+              const Color(0xFFF29D86).withOpacity(0.6),
+              const Color(0xFFFFB74D).withOpacity(0.6),
             ],
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
-          ),
-          borderRadius: BorderRadius.circular(14),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.15),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
-            ),
-          ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ) : null,
+          color: model.isDragMode ? null : Colors.transparent,
+          borderRadius: BorderRadius.circular(style.borderRadius + _dragBorderWidth / 2),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+        padding: const EdgeInsets.all(_dragBorderWidth),
+        child: Stack(
+          clipBehavior: Clip.none,
           children: [
-            Icon(
-              Icons.drag_indicator,
-              color: Colors.white.withOpacity(0.9),
-              size: 18,
+            // 메인 컨텐츠 박스 (드래그 제외, 탭/텍스트 편집만)
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onPanStart: (_) {}, // 내부 영역은 드래그 이벤트 소비하여 외부로 전파 방지
+              onPanUpdate: (_) {},
+              onTap: widget.onTap ?? () => widget.controller.activate(),
+              child: _buildMainBox(style),
             ),
-            const SizedBox(width: 4),
-            Text(
-              '드래그하여 이동',
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.95),
-                fontSize: 11,
-                fontWeight: FontWeight.w500,
+            
+            // 드래그 모드 인디케이터
+            if (model.isDragMode && !widget.isCapturing)
+              Positioned(
+                left: -_dragBorderWidth - 8,
+                top: -_dragBorderWidth - 8,
+                child: _buildDragIndicator(),
               ),
-            ),
-            const SizedBox(width: 4),
-            Icon(
-              Icons.drag_indicator,
-              color: Colors.white.withOpacity(0.9),
-              size: 18,
-            ),
           ],
         ),
       ),
