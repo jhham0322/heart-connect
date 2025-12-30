@@ -331,11 +331,11 @@ class _TextBoxWidgetState extends State<TextBoxWidget> {
 
   bool get _canDrag => widget.isDraggable && !widget.isZoomMode;
 
-  /// 이동 핸들 빌더 (왼쪽 하단) - 터치 영역 확대
+  /// 이동 핸들 빌더 (왼쪽 하단) - 터치 영역 4배 확대
   Widget _buildMoveHandle() {
     return Positioned(
-      left: -26, // 더 큰 영역을 위해 위치 조정
-      bottom: -26,
+      left: -54, // 4배 확대된 터치 영역(112px)의 중심을 맞추기 위한 오프셋
+      bottom: -54,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onPanStart: (details) {
@@ -359,10 +359,10 @@ class _TextBoxWidgetState extends State<TextBoxWidget> {
           widget.controller.setDragMode(false);
           widget.onDragEnd?.call();
         },
-        // 터치 영역 확대: 56x56px 투명 영역
+        // 터치 영역 4배 확대: 112x112px 투명 영역
         child: Container(
-          width: 56,
-          height: 56,
+          width: 112,
+          height: 112,
           color: Colors.transparent, // 투명한 터치 영역
           alignment: Alignment.center,
           child: Container(
@@ -399,13 +399,13 @@ class _TextBoxWidgetState extends State<TextBoxWidget> {
     );
   }
 
-  /// 리사이즈 핸들 빌더 (오른쪽 하단) - 터치 영역 확대
+  /// 리사이즈 핸들 빌더 (오른쪽 하단) - 터치 영역 4배 확대
   Widget _buildResizeHandle() {
     final model = widget.controller.model;
     
     return Positioned(
-      right: -26, // 더 큰 영역을 위해 위치 조정
-      bottom: -26,
+      right: -54, // 4배 확대된 터치 영역(112px)의 중심을 맞추기 위한 오프셋
+      bottom: -54,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onPanStart: (details) {
@@ -430,10 +430,10 @@ class _TextBoxWidgetState extends State<TextBoxWidget> {
           });
           widget.onDragEnd?.call();
         },
-        // 터치 영역 확대: 56x56px 투명 영역
+        // 터치 영역 4배 확대: 112x112px 투명 영역
         child: Container(
-          width: 56,
-          height: 56,
+          width: 112,
+          height: 112,
           color: Colors.transparent, // 투명한 터치 영역
           alignment: Alignment.center,
           child: Container(
