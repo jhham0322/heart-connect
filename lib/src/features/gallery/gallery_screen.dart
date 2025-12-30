@@ -273,6 +273,11 @@ class _GalleryDetailScreenState extends ConsumerState<GalleryDetailScreen> {
   List<AssetEntity> _deviceAssets = []; // 기기 갤러리 사진용
   bool _isLoading = true;
   bool _isDeviceGallery = false; // 기기 갤러리 여부
+  
+  // 썸네일 캐시 (ID -> Thumbnail bytes)
+  final Map<String, Uint8List> _thumbnailCache = {};
+  // 파일 경로 캐시 (ID -> File path)
+  final Map<String, String> _filePathCache = {};
 
   @override
   void initState() {
@@ -841,58 +846,84 @@ class _GalleryDetailScreenState extends ConsumerState<GalleryDetailScreen> {
     );
   }
   
-  // 기기 사진 썸네일 빌더
+  // 기기 사진 썸네일 빌더 (캐시 적용)
   Widget _buildDevicePhotoTile(int index) {
     final asset = _deviceAssets[index];
     
-    return FutureBuilder<List<dynamic>>(
-      future: Future.wait([
-        asset.thumbnailDataWithSize(const ThumbnailSize(200, 200)),
-        asset.file,
-      ]),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.done && 
-            snapshot.data != null && 
-            snapshot.data![0] != null) {
-          final thumbnailData = snapshot.data![0] as Uint8List;
-          final file = snapshot.data![1] as File?;
-          final filePath = file?.path ?? '';
-          final isFavorite = ref.watch(favoritesProvider).contains(filePath);
-          
-          return GestureDetector(
-            onTap: () => _openDevicePhotoViewer(index),
-            child: Hero(
-              tag: asset.id,
-              child: Stack(
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.grey[200],
-                      image: DecorationImage(
-                        image: MemoryImage(thumbnailData),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
+    // 캐시에 있으면 바로 사용
+    if (_thumbnailCache.containsKey(asset.id)) {
+      final thumbnailData = _thumbnailCache[asset.id]!;
+      final filePath = _filePathCache[asset.id] ?? '';
+      final isFavorite = ref.watch(favoritesProvider).contains(filePath);
+      
+      return GestureDetector(
+        onTap: () => _openDevicePhotoViewer(index),
+        child: Hero(
+          tag: asset.id,
+          child: Stack(
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.grey[200],
+                  image: DecorationImage(
+                    image: MemoryImage(thumbnailData),
+                    fit: BoxFit.cover,
                   ),
-                  if (isFavorite)
-                    const Positioned(
-                      top: 6,
-                      left: 6,
-                      child: Stack(
-                        children: [
-                          Icon(FontAwesomeIcons.solidHeart, color: Color(0xFFFF7043), size: 16),
-                          Icon(FontAwesomeIcons.heart, color: Colors.white, size: 16),
-                        ],
-                      ),
-                    ),
-                ],
+                ),
               ),
-            ),
-          );
-        }
-        return Container(color: Colors.grey[300]);
-      },
+              if (isFavorite)
+                const Positioned(
+                  top: 6,
+                  left: 6,
+                  child: Stack(
+                    children: [
+                      Icon(FontAwesomeIcons.solidHeart, color: Color(0xFFFF7043), size: 16),
+                      Icon(FontAwesomeIcons.heart, color: Colors.white, size: 16),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+        ),
+      );
+    }
+    
+    // 캐시에 없으면 비동기로 로드 (한 번만)
+    _loadThumbnail(asset);
+    
+    // 로딩 플레이스홀더
+    return Container(
+      color: Colors.grey[300],
+      child: const Center(
+        child: SizedBox(
+          width: 20,
+          height: 20,
+          child: CircularProgressIndicator(strokeWidth: 2),
+        ),
+      ),
     );
+  }
+  
+  // 썸네일 비동기 로드 및 캐시
+  Future<void> _loadThumbnail(AssetEntity asset) async {
+    if (_thumbnailCache.containsKey(asset.id)) return;
+    
+    try {
+      final thumbnail = await asset.thumbnailDataWithSize(
+        const ThumbnailSize(200, 200),
+        quality: 80,
+      );
+      final file = await asset.file;
+      
+      if (thumbnail != null && mounted) {
+        setState(() {
+          _thumbnailCache[asset.id] = thumbnail;
+          _filePathCache[asset.id] = file?.path ?? '';
+        });
+      }
+    } catch (e) {
+      // 실패 시 무시
+    }
   }
   
   // 기기 사진 전체화면 뷰어

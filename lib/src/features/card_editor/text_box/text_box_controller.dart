@@ -31,18 +31,27 @@ class TextBoxController extends ChangeNotifier {
   /// 컨텐츠 높이 (자동 계산됨)
   double _contentHeight = 0;
   double get contentHeight => _contentHeight;
+  
+  /// 최대 줄 수 제한
+  int maxLines;
+  
+  /// 이전 문서 내용 (줄 수 초과 시 롤백용)
+  String _previousContent = '';
+  int _previousSelectionOffset = 0;
 
   TextBoxController({
     TextBoxModel? model,
     TextBoxStyle? style,
     QuillController? quillController,
     FocusNode? focusNode,
+    this.maxLines = 8, // 기본 최대 8줄
   })  : _model = model ?? TextBoxModel(),
         _style = style ?? const TextBoxStyle(),
         quillController = quillController ?? QuillController.basic(),
         focusNode = focusNode ?? FocusNode() {
     this.quillController.addListener(_onTextChanged);
     this.focusNode.addListener(_onFocusChanged);
+    _previousContent = this.quillController.document.toPlainText();
   }
 
   @override
@@ -54,9 +63,37 @@ class TextBoxController extends ChangeNotifier {
 
   // === 텍스트 변경 ===
   void _onTextChanged() {
-    final newContent = quillController.document.toPlainText().trim();
-    if (_model.content != newContent) {
-      _model = _model.copyWith(content: newContent);
+    final newContent = quillController.document.toPlainText();
+    final lineCount = '\n'.allMatches(newContent).length;
+    
+    // 최대 줄 수 초과 시 롤백
+    if (lineCount > maxLines) {
+      // 비동기로 롤백 (현재 이벤트 루프 완료 후)
+      Future.microtask(() {
+        if (quillController.document.toPlainText() != _previousContent) {
+          // 이전 내용으로 복원
+          quillController.document.delete(0, quillController.document.length - 1);
+          quillController.document.insert(0, _previousContent.trimRight());
+          
+          // 커서 위치 복원
+          final newLength = quillController.document.length - 1;
+          final safeOffset = _previousSelectionOffset.clamp(0, newLength);
+          quillController.updateSelection(
+            TextSelection.collapsed(offset: safeOffset),
+            ChangeSource.local,
+          );
+        }
+      });
+      return;
+    }
+    
+    // 정상 입력 - 상태 저장
+    _previousContent = newContent;
+    _previousSelectionOffset = quillController.selection.baseOffset;
+    
+    final trimmedContent = newContent.trim();
+    if (_model.content != trimmedContent) {
+      _model = _model.copyWith(content: trimmedContent);
       notifyListeners();
     }
   }
