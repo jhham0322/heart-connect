@@ -428,17 +428,16 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     });
 
     // [UX 개선] 이미지를 선택하지 않고 진입했다면(빈 카드),
-    // 사용자가 무엇을 해야 할지 알 수 있도록 500ms 후 '글상자 스타일' 메뉴를 자동으로 엽니다.
-    if (widget.initialImage == null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        // 화면이 안정화된 후 살짝 늦게 오픈 (자연스러운 연출)
-        Future.delayed(const Duration(milliseconds: 500), () {
-          if (mounted) {
-            _showBoxStylePicker();
-          }
-        });
-      });
-    }
+    // 이전에는 글상자 스타일 메뉴를 자동으로 열었으나 사용자 피드백으로 비활성화
+    // if (widget.initialImage == null) {
+    //   WidgetsBinding.instance.addPostFrameCallback((_) {
+    //     Future.delayed(const Duration(milliseconds: 500), () {
+    //       if (mounted) {
+    //         _showBoxStylePicker();
+    //       }
+    //     });
+    //   });
+    // }
   }
   
   // --- Draft Persistence ---
@@ -2537,7 +2536,8 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
           // - 줌 모드: 드래그/확대축소 방법 안내
           // - 드래그 중: 이동 가능 표시
           // - 핀치 중: 확대/축소 가능 표시
-          if (_showInitialHint && !_isZoomMode)
+          // 텍스트 편집 시 (에디터/푸터 포커스) 즉시 숨김
+          if (_showInitialHint && !_isZoomMode && !_isEditorActive && !_isFooterActive)
             Positioned(
               top: MediaQuery.of(context).padding.top + 50,
               left: 16,

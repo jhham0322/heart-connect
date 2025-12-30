@@ -331,11 +331,11 @@ class _TextBoxWidgetState extends State<TextBoxWidget> {
 
   bool get _canDrag => widget.isDraggable && !widget.isZoomMode;
 
-  /// 이동 핸들 빌더 (왼쪽 하단)
+  /// 이동 핸들 빌더 (왼쪽 하단) - 터치 영역 확대
   Widget _buildMoveHandle() {
     return Positioned(
-      left: -12,
-      bottom: -12,
+      left: -26, // 더 큰 영역을 위해 위치 조정
+      bottom: -26,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onPanStart: (details) {
@@ -359,46 +359,53 @@ class _TextBoxWidgetState extends State<TextBoxWidget> {
           widget.controller.setDragMode(false);
           widget.onDragEnd?.call();
         },
+        // 터치 영역 확대: 56x56px 투명 영역
         child: Container(
-          width: 28,
-          height: 28,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: _isDragging
-                  ? [const Color(0xFF64B5F6), const Color(0xFF42A5F5)]
-                  : [const Color(0xFF90CAF9).withOpacity(0.9), const Color(0xFF64B5F6).withOpacity(0.9)],
-            ),
-            borderRadius: BorderRadius.circular(6),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(_isDragging ? 0.35 : 0.25),
-                blurRadius: _isDragging ? 8 : 4,
-                offset: const Offset(0, 2),
+          width: 56,
+          height: 56,
+          color: Colors.transparent, // 투명한 터치 영역
+          alignment: Alignment.center,
+          child: Container(
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: _isDragging
+                    ? [const Color(0xFF64B5F6), const Color(0xFF42A5F5)]
+                    : [const Color(0xFF90CAF9).withOpacity(0.9), const Color(0xFF64B5F6).withOpacity(0.9)],
               ),
-            ],
-            border: _isDragging
-                ? Border.all(color: Colors.white, width: 2)
-                : null,
-          ),
-          child: const Icon(
-            Icons.open_with,
-            color: Colors.white,
-            size: 16,
+              borderRadius: BorderRadius.circular(6),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(_isDragging ? 0.35 : 0.25),
+                  blurRadius: _isDragging ? 8 : 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+              border: _isDragging
+                  ? Border.all(color: Colors.white, width: 2)
+                  : null,
+            ),
+            child: const Icon(
+              Icons.open_with,
+              color: Colors.white,
+              size: 16,
+            ),
           ),
         ),
       ),
     );
   }
 
-  /// 리사이즈 핸들 빌더 (오른쪽 하단)
+  /// 리사이즈 핸들 빌더 (오른쪽 하단) - 터치 영역 확대
   Widget _buildResizeHandle() {
     final model = widget.controller.model;
     
     return Positioned(
-      right: -12,
-      bottom: -12,
+      right: -26, // 더 큰 영역을 위해 위치 조정
+      bottom: -26,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onPanStart: (details) {
@@ -423,33 +430,40 @@ class _TextBoxWidgetState extends State<TextBoxWidget> {
           });
           widget.onDragEnd?.call();
         },
+        // 터치 영역 확대: 56x56px 투명 영역
         child: Container(
-          width: 28,
-          height: 28,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: _isResizing
-                  ? [const Color(0xFFFFB74D), const Color(0xFFF29D86)]
-                  : [const Color(0xFFF29D86).withOpacity(0.9), const Color(0xFFFFB74D).withOpacity(0.9)],
-            ),
-            borderRadius: BorderRadius.circular(6),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(_isResizing ? 0.35 : 0.25),
-                blurRadius: _isResizing ? 8 : 4,
-                offset: const Offset(0, 2),
+          width: 56,
+          height: 56,
+          color: Colors.transparent, // 투명한 터치 영역
+          alignment: Alignment.center,
+          child: Container(
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: _isResizing
+                    ? [const Color(0xFFFFB74D), const Color(0xFFF29D86)]
+                    : [const Color(0xFFF29D86).withOpacity(0.9), const Color(0xFFFFB74D).withOpacity(0.9)],
               ),
-            ],
-            border: _isResizing
-                ? Border.all(color: Colors.white, width: 2)
-                : null,
-          ),
-          child: const Icon(
-            Icons.open_in_full,
-            color: Colors.white,
-            size: 16,
+              borderRadius: BorderRadius.circular(6),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(_isResizing ? 0.35 : 0.25),
+                  blurRadius: _isResizing ? 8 : 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+              border: _isResizing
+                  ? Border.all(color: Colors.white, width: 2)
+                  : null,
+            ),
+            child: const Icon(
+              Icons.open_in_full,
+              color: Colors.white,
+              size: 16,
+            ),
           ),
         ),
       ),
@@ -563,7 +577,8 @@ class _TextBoxWidgetState extends State<TextBoxWidget> {
   /// 세로 글쓰기 텍스트 빌더
   /// 오른쪽에서 왼쪽으로 세로로 텍스트를 배치합니다 (한국어/일본어/중국어 전통 스타일)
   Widget _buildVerticalText(TextBoxStyle style, dynamic model) {
-    final text = widget.controller.model.content;
+    // quillController에서 직접 텍스트를 가져옴 (동기화 보장)
+    final text = widget.controller.quillController.document.toPlainText().trim();
     
     if (text.isEmpty) {
       // 빈 텍스트일 때 플레이스홀더 표시
