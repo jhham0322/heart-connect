@@ -981,17 +981,31 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
       _isItalic = style.containsKey(Attribute.italic.key);
       _isUnderline = style.containsKey(Attribute.underline.key);
       
-      // 정렬 상태 확인
-      if (style.containsKey(Attribute.leftAlignment.key)) {
-        _textAlign = TextAlign.left;
-      } else if (style.containsKey(Attribute.centerAlignment.key)) {
-        _textAlign = TextAlign.center;
-      } else if (style.containsKey(Attribute.rightAlignment.key)) {
-        _textAlign = TextAlign.right;
+      // 정렬 상태 확인 - Quill의 align 속성 값 직접 확인
+      final alignAttr = style.attributes[Attribute.align.key];
+      print('[DEBUG] Alignment attr: $alignAttr, value: ${alignAttr?.value}');
+      print('[DEBUG] Style keys: ${style.attributes.keys}');
+      
+      if (alignAttr != null) {
+        final alignValue = alignAttr.value;
+        if (alignValue == 'left') {
+          _textAlign = TextAlign.left;
+        } else if (alignValue == 'center') {
+          _textAlign = TextAlign.center;
+        } else if (alignValue == 'right') {
+          _textAlign = TextAlign.right;
+        } else if (alignValue == 'justify') {
+          _textAlign = TextAlign.justify;
+        } else {
+          // 기본값
+          _textAlign = _isFooterActive ? TextAlign.right : TextAlign.center;
+        }
       } else {
-        // Default alignments
+        // align 속성이 없으면 기본값 사용
         _textAlign = _isFooterActive ? TextAlign.right : TextAlign.center;
       }
+      print('[DEBUG] Final _textAlign: $_textAlign');
+
 
       // 폰트 사이즈 확인
       if (style.containsKey('size')) {
@@ -3035,6 +3049,29 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
             });
             _updateToolbarState();
             _saveDraft();
+            
+            // 텍스트박스가 비어있을 때 자동 팝업
+            final isTextEmpty = _message.trim().isEmpty;
+            if (isTextEmpty) {
+              // 주제가 선택되지 않았으면 주제 선택 팝업
+              if (_selectedTopic == null && _availableTopics.isNotEmpty) {
+                Future.delayed(const Duration(milliseconds: 300), () {
+                  if (mounted) {
+                    _showTopicSelector();
+                  }
+                });
+                return; // 다른 안내 메시지 표시 안함
+              } 
+              // 주제가 선택되어 있으면 AI 감성 변환 팝업
+              else if (_selectedTopic != null) {
+                Future.delayed(const Duration(milliseconds: 300), () {
+                  if (mounted) {
+                    _showAiToneSelector();
+                  }
+                });
+                return; // 다른 안내 메시지 표시 안함
+              }
+            }
             
             // 처음 글상자 클릭 시 드래그 안내
             if (!_hasShownTextBoxDragHint) {
