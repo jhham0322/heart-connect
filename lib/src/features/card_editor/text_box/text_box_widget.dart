@@ -120,9 +120,11 @@ class _TextBoxWidgetState extends State<TextBoxWidget> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            // 1. 상단 아이콘 바 (캡처 모드가 아닐 때만)
-            if (!widget.isCapturing)
-              _buildTopIconBar(),
+            // 1. 상단 아이콘 바 (캡처 모드일 때는 투명하게 - 레이아웃 유지)
+            Opacity(
+              opacity: widget.isCapturing ? 0.0 : 1.0,
+              child: _buildTopIconBar(),
+            ),
             
             const SizedBox(height: TextBoxController.iconBarSpacing),
             
