@@ -1080,20 +1080,20 @@ class AppLocalizationsZh extends AppLocalizations {
   String get openSettings => '打开设置';
 
   @override
-  String get premiumImage => '프리미엄 이미지';
+  String get premiumImage => '高级图片';
 
   @override
-  String get watchAdToUnlock => '광고를 시청하고 잠금 해제';
+  String get watchAdToUnlock => '观看广告解锁';
 
   @override
-  String get unlockSuccess => '잠금이 해제되었습니다!';
+  String get unlockSuccess => '已解锁！';
 
   @override
-  String get adNotReady => '광고가 준비되지 않았습니다. 잠시 후 다시 시도해주세요.';
+  String get adNotReady => '广告尚未准备好。请稍后再试。';
 
   @override
-  String get watchAd => '광고 보기';
+  String get watchAd => '观看广告';
 
   @override
-  String get premiumLocked => '잠금';
+  String get premiumLocked => '已锁定';
 }

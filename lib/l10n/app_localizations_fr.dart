@@ -1097,20 +1097,21 @@ class AppLocalizationsFr extends AppLocalizations {
   String get openSettings => 'Ouvrir les paramètres';
 
   @override
-  String get premiumImage => '프리미엄 이미지';
+  String get premiumImage => 'Image Premium';
 
   @override
-  String get watchAdToUnlock => '광고를 시청하고 잠금 해제';
+  String get watchAdToUnlock => 'Regarder pub pour débloquer';
 
   @override
-  String get unlockSuccess => '잠금이 해제되었습니다!';
+  String get unlockSuccess => 'Débloqué !';
 
   @override
-  String get adNotReady => '광고가 준비되지 않았습니다. 잠시 후 다시 시도해주세요.';
+  String get adNotReady =>
+      'La publicité n\'est pas prête. Veuillez réessayer plus tard.';
 
   @override
-  String get watchAd => '광고 보기';
+  String get watchAd => 'Regarder la pub';
 
   @override
-  String get premiumLocked => '잠금';
+  String get premiumLocked => 'Verrouillé';
 }

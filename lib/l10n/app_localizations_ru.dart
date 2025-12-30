@@ -1097,20 +1097,20 @@ class AppLocalizationsRu extends AppLocalizations {
   String get openSettings => 'Открыть настройки';
 
   @override
-  String get premiumImage => '프리미엄 이미지';
+  String get premiumImage => 'Премиум изображение';
 
   @override
-  String get watchAdToUnlock => '광고를 시청하고 잠금 해제';
+  String get watchAdToUnlock => 'Смотреть рекламу для разблокировки';
 
   @override
-  String get unlockSuccess => '잠금이 해제되었습니다!';
+  String get unlockSuccess => 'Разблокировано!';
 
   @override
-  String get adNotReady => '광고가 준비되지 않았습니다. 잠시 후 다시 시도해주세요.';
+  String get adNotReady => 'Реклама не готова. Пожалуйста, попробуйте позже.';
 
   @override
-  String get watchAd => '광고 보기';
+  String get watchAd => 'Смотреть рекламу';
 
   @override
-  String get premiumLocked => '잠금';
+  String get premiumLocked => 'Закрыто';
 }

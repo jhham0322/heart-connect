@@ -5338,13 +5338,9 @@ class EnclosingCircleBorder extends OutlinedBorder {
 
   @override
   Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
-    // 텍스트를 모두 포함하는 가장 작은 원 (외접원)
-    // 직사각형의 외접원 지름 = sqrt(w^2 + h^2)
-    final double diameter = math.sqrt(rect.width * rect.width + rect.height * rect.height);
-    // 여백 약간 추가
-    final double size = diameter * 1.05;
-    
-    return Path()..addOval(Rect.fromCenter(center: rect.center, width: size, height: size));
+    // 컨테이너 내부에 맞는 타원 (내접 타원)
+    // rect 크기 그대로 사용하여 타원을 그림
+    return Path()..addOval(rect);
   }
 
   @override

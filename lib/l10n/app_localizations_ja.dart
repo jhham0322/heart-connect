@@ -1086,20 +1086,20 @@ class AppLocalizationsJa extends AppLocalizations {
   String get openSettings => '設定を開く';
 
   @override
-  String get premiumImage => '프리미엄 이미지';
+  String get premiumImage => 'プレミアム画像';
 
   @override
-  String get watchAdToUnlock => '광고를 시청하고 잠금 해제';
+  String get watchAdToUnlock => '広告を見てロック解除';
 
   @override
-  String get unlockSuccess => '잠금이 해제되었습니다!';
+  String get unlockSuccess => 'ロック解除しました！';
 
   @override
-  String get adNotReady => '광고가 준비되지 않았습니다. 잠시 후 다시 시도해주세요.';
+  String get adNotReady => '広告の準備ができていません。後でもう一度お試しください。';
 
   @override
-  String get watchAd => '광고 보기';
+  String get watchAd => '広告を見る';
 
   @override
-  String get premiumLocked => '잠금';
+  String get premiumLocked => 'ロック中';
 }
