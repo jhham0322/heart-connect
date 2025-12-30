@@ -3212,7 +3212,11 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                                     );
                                   }
                                 },
-                                child: Container(
+                                child: ClipPath(
+                                  clipper: ShapeBorderClipper(
+                                    shape: _getShapeBorder(),
+                                  ),
+                                  child: Container(
                                   key: _textBoxKey,
                                   width: MediaQuery.of(context).size.width * 0.78,
                                  constraints: const BoxConstraints(
@@ -3300,7 +3304,8 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                                     // Footer는 CardPreview Stack으로 이동됨
                                   ],
                                 ),
-                              ),
+                              ), // Container 닫기
+                              ), // ClipPath 닫기
                             ),
                           ),
                         ),
@@ -3308,8 +3313,8 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                     ),
                     
                     // 글자수 & AI 버튼 (글상자 오른쪽 위에 배치)
-                    // 새 위젯 사용 시 비활성화 (TextBoxWidget에 포함됨)
-                    if (!_isCapturing && !_useNewTextBox)
+                    // 캡처 모드가 아닐 때만 표시
+                    if (!_isCapturing)
                       Builder(
                         builder: (context) {
                           // 글상자와 동일한 위치 계산 (단순 오프셋 방식)
