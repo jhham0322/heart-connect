@@ -226,6 +226,9 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
   List<String> _pendingRecipients = [];
   int _sentCount = 0;
   bool _autoContinue = false; // 자동 발송 여부
+  
+  // 새로운 글상자 위젯 사용 여부 (true: 새 위젯, false: 기존 코드)
+  static const bool _useNewTextBox = true;
 
   final List<String> _fontList = [
     'Great Vibes', 'Caveat', 'Dancing Script', 'Pacifico', 'Indie Flower',
@@ -2971,6 +2974,97 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     });
   }
 
+  /// 새로운 글상자 빌더 - TextBoxWidget 사용
+  Widget _buildNewTextBox(BoxConstraints constraints) {
+    // 카드 크기를 컨트롤러에 전달
+    final cardWidth = constraints.maxWidth;
+    final cardHeight = constraints.maxHeight;
+    _textBoxController.cardSize = Size(cardWidth, cardHeight);
+    
+    // 글상자 너비 계산 (카드 너비의 85%)
+    final boxWidth = cardWidth * 0.85;
+    _textBoxController.updateWidth(boxWidth);
+    
+    // 초기 위치가 (0,0)이면 중앙으로 설정
+    if (_textBoxController.model.position == Offset.zero) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _textBoxController.centerInCard();
+        }
+      });
+    }
+    
+    // 스타일 동기화 (기존 설정값 반영)
+    _textBoxController.updateStyle(TextBoxStyle(
+      backgroundColor: _boxColor,
+      backgroundOpacity: _boxOpacity,
+      borderRadius: _boxRadius,
+      hasBorder: _hasBorder,
+      borderColor: _borderColor,
+      borderWidth: _borderWidth,
+      fontFamily: _fontName,
+      fontSize: _fontSize,
+      textColor: _defaultColor,
+      textAlign: _textAlign,
+      frameImage: _selectedFrame,
+    ));
+    
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        TextBoxWidget(
+          controller: _textBoxController,
+          selectedTopic: _selectedTopic,
+          availableTopics: _availableTopics,
+          onTopicSelectorTap: _showTopicSelector,
+          onAiButtonTap: _showAiToneSelector,
+          maxMessageLength: 75,
+          isAiLoading: _isAiLoading,
+          isCapturing: _isCapturing,
+          isDraggable: !_isZoomMode,
+          isZoomMode: _isZoomMode,
+          onTap: () {
+            setState(() {
+              _isEditorActive = true;
+              _isFooterActive = false;
+            });
+            _updateToolbarState();
+            _saveDraft();
+            
+            // 처음 글상자 클릭 시 드래그 안내
+            if (!_hasShownTextBoxDragHint) {
+              _hasShownTextBoxDragHint = true;
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: const Row(
+                    children: [
+                      Icon(Icons.open_with, color: Colors.white, size: 20),
+                      SizedBox(width: 8),
+                      Expanded(
+                        child: Text('💡 글상자를 드래그하면 위치를 이동할 수 있어요!'),
+                      ),
+                    ],
+                  ),
+                  backgroundColor: const Color(0xFFF29D86),
+                  duration: const Duration(seconds: 3),
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+              );
+            }
+          },
+          onDragEnd: () {
+            // 드래그 완료 시 위치 동기화 및 저장
+            setState(() {
+              _dragOffset = _textBoxController.model.position;
+            });
+            _saveDraft();
+          },
+        ),
+      ],
+    );
+  }
+
   Widget _buildCardPreview() {
     return Container(
       padding: EdgeInsets.zero,
@@ -3063,7 +3157,13 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                           ),
                         ),
 
-                        // 2. Draggable Text Area (줌 모드가 아닐 때만 드래그 가능)
+                        // 2. 글상자 (새 위젯 또는 기존 코드)
+                        if (_useNewTextBox)
+                          LayoutBuilder(
+                            builder: (context, constraints) => _buildNewTextBox(constraints),
+                          )
+                        else
+                        // 기존 Draggable Text Area (레거시 코드)
                         Positioned.fill(
                           child: IgnorePointer(
                             ignoring: _isZoomMode, // 줌 모드일 때 글상자 터치 무시
@@ -3245,7 +3345,8 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                     ),
                     
                     // 글자수 & AI 버튼 (글상자 오른쪽 위에 배치)
-                    if (!_isCapturing)
+                    // 새 위젯 사용 시 비활성화 (TextBoxWidget에 포함됨)
+                    if (!_isCapturing && !_useNewTextBox)
                       Builder(
                         builder: (context) {
                           // 글상자와 동일한 위치 계산 (단순 오프셋 방식)
