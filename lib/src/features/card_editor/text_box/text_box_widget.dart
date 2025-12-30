@@ -64,6 +64,14 @@ class _TextBoxWidgetState extends State<TextBoxWidget> {
   
   // Long Press 드래그용 이전 위치
   Offset _lastLongPressPosition = Offset.zero;
+  
+  // 리사이즈 모드
+  bool _isResizing = false;
+  Offset _lastResizePosition = Offset.zero;
+  
+  // 최소/최대 넓이 상수
+  static const double _minWidth = 150.0;
+  static const double _maxWidth = 500.0;
 
 
   @override
@@ -202,38 +210,40 @@ class _TextBoxWidgetState extends State<TextBoxWidget> {
               child: IntrinsicHeight(
                 child: Container(
                   key: _contentKey,
-                  child: QuillEditor(
-                    controller: widget.controller.quillController,
-                    focusNode: widget.controller.focusNode,
-                    scrollController: ScrollController(),
-                    config: QuillEditorConfig(
-                      autoFocus: false,
-                      expands: false,
-                      scrollable: true,
-                      padding: EdgeInsets.zero,
-                      showCursor: !model.isDragMode, // 드래그 모드에서 커서 숨김
-                      placeholder: '여기를 탭하여 메시지 입력...',
-                      customStyleBuilder: (attribute) {
-                        if (attribute.key == 'font') {
-                          try {
-                            return GoogleFonts.getFont(attribute.value);
-                          } catch (e) {
-                            return const TextStyle();
-                          }
-                        }
-                        return const TextStyle();
-                      },
-                      customStyles: DefaultStyles(
-                        paragraph: DefaultTextBlockStyle(
-                          style.textStyle,
-                          HorizontalSpacing.zero,
-                          VerticalSpacing.zero,
-                          VerticalSpacing.zero,
-                          null,
+                  child: style.isVertical
+                      ? _buildVerticalText(style, model)
+                      : QuillEditor(
+                          controller: widget.controller.quillController,
+                          focusNode: widget.controller.focusNode,
+                          scrollController: ScrollController(),
+                          config: QuillEditorConfig(
+                            autoFocus: false,
+                            expands: false,
+                            scrollable: true,
+                            padding: EdgeInsets.zero,
+                            showCursor: !model.isDragMode, // 드래그 모드에서 커서 숨김
+                            placeholder: '여기를 탭하여 메시지 입력...',
+                            customStyleBuilder: (attribute) {
+                              if (attribute.key == 'font') {
+                                try {
+                                  return GoogleFonts.getFont(attribute.value);
+                                } catch (e) {
+                                  return const TextStyle();
+                                }
+                              }
+                              return const TextStyle();
+                            },
+                            customStyles: DefaultStyles(
+                              paragraph: DefaultTextBlockStyle(
+                                style.textStyle,
+                                HorizontalSpacing.zero,
+                                VerticalSpacing.zero,
+                                VerticalSpacing.zero,
+                                null,
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                  ),
                 ),
               ),
             ),
@@ -283,6 +293,10 @@ class _TextBoxWidgetState extends State<TextBoxWidget> {
                 ),
               ),
             ),
+          
+          // 리사이즈 핸들 (오른쪽 하단) - 캡처 모드에서는 숨김
+          if (!widget.isCapturing)
+            _buildResizeHandle(),
         ],
       ),
     );
@@ -482,5 +496,143 @@ class _TextBoxWidgetState extends State<TextBoxWidget> {
   void _onPanEnd(DragEndDetails details) {
     widget.controller.setDragMode(false);
     widget.onDragEnd?.call();
+  }
+
+  /// 리사이즈 핸들 빌더 (오른쪽 하단)
+  Widget _buildResizeHandle() {
+    final model = widget.controller.model;
+    
+    return Positioned(
+      right: -12,
+      bottom: -12,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onPanStart: (details) {
+          setState(() {
+            _isResizing = true;
+            _lastResizePosition = details.globalPosition;
+          });
+        },
+        onPanUpdate: (details) {
+          if (_isResizing) {
+            final delta = details.globalPosition - _lastResizePosition;
+            _lastResizePosition = details.globalPosition;
+            
+            // 가로 넓이만 조절 (세로는 콘텐츠에 따라 자동)
+            final newWidth = (model.width + delta.dx).clamp(_minWidth, _maxWidth);
+            widget.controller.updateWidth(newWidth);
+          }
+        },
+        onPanEnd: (details) {
+          setState(() {
+            _isResizing = false;
+          });
+          widget.onDragEnd?.call();
+        },
+        child: Container(
+          width: 28,
+          height: 28,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: _isResizing
+                  ? [const Color(0xFFFFB74D), const Color(0xFFF29D86)]
+                  : [const Color(0xFFF29D86).withOpacity(0.8), const Color(0xFFFFB74D).withOpacity(0.8)],
+            ),
+            borderRadius: BorderRadius.circular(6),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(_isResizing ? 0.35 : 0.25),
+                blurRadius: _isResizing ? 8 : 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
+            border: _isResizing
+                ? Border.all(color: Colors.white, width: 2)
+                : null,
+          ),
+          child: const Icon(
+            Icons.open_in_full,
+            color: Colors.white,
+            size: 16,
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// 세로 글쓰기 텍스트 빌더
+  /// 오른쪽에서 왼쪽으로 세로로 텍스트를 배치합니다 (한국어/일본어/중국어 전통 스타일)
+  Widget _buildVerticalText(TextBoxStyle style, dynamic model) {
+    final text = widget.controller.model.content;
+    
+    if (text.isEmpty) {
+      // 빈 텍스트일 때 플레이스홀더 표시
+      return GestureDetector(
+        onTap: () => widget.controller.activate(),
+        child: Center(
+          child: Text(
+            '탭하여 입력...',
+            style: TextStyle(
+              color: Colors.grey[400],
+              fontSize: style.fontSize,
+            ),
+          ),
+        ),
+      );
+    }
+    
+    // 각 줄을 분리
+    final lines = text.split('\n');
+    
+    return GestureDetector(
+      onTap: () => widget.controller.activate(),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        reverse: true, // 오른쪽에서 왼쪽으로
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: lines.map((line) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: line.isEmpty 
+                    ? [SizedBox(height: style.fontSize)]
+                    : line.split('').map((char) {
+                        // 특수 문자 회전 처리 (괄호, 구두점 등)
+                        final shouldRotate = _shouldRotateChar(char);
+                        
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 1),
+                          child: shouldRotate
+                              ? Transform.rotate(
+                                  angle: 1.5708, // 90도
+                                  child: Text(
+                                    char,
+                                    style: style.textStyle,
+                                  ),
+                                )
+                              : Text(
+                                  char,
+                                  style: style.textStyle,
+                                ),
+                        );
+                      }).toList(),
+              ),
+            );
+          }).toList().reversed.toList(), // 역순으로 배치 (오른쪽부터)
+        ),
+      ),
+    );
+  }
+
+  /// 세로 글쓰기 시 회전이 필요한 문자인지 확인
+  bool _shouldRotateChar(String char) {
+    // 가로로 쓰인 구두점, 괄호 등은 회전 필요
+    const rotateChars = '—–-()[]{}「」『』《》〈〉…';
+    return rotateChars.contains(char);
   }
 }

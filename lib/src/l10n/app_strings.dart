@@ -455,6 +455,10 @@ class AppStrings {
   String get footerBgOpacity => _fallback(_l10n?.footerBgOpacity, '배경 투명도');
   String get footerBgRadius => _fallback(_l10n?.footerBgRadius, '배경 둥근 모서리');
   
+  // 세로 글쓰기
+  String get verticalWriting => '세로 글쓰기';
+  String get verticalWritingHint => '※ 세로 글쓰기는 한국어, 일본어, 중국어에 적합합니다.';
+  
   // ========== 연락처 피커 ==========
   String get contactPickerTitle => _fallback(_l10n?.contactPickerTitle, '발송 대상 선택');
   String get contactPickerSearchHint => _fallback(_l10n?.contactPickerSearchHint, '이름 또는 전화번호...');

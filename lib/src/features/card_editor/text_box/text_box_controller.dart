@@ -219,9 +219,18 @@ class TextBoxController extends ChangeNotifier {
     _style = _style.copyWith(isItalic: !_style.isItalic);
     notifyListeners();
   }
-
   void toggleUnderline() {
     _style = _style.copyWith(isUnderline: !_style.isUnderline);
+    notifyListeners();
+  }
+
+  void toggleVertical() {
+    _style = _style.copyWith(isVertical: !_style.isVertical);
+    notifyListeners();
+  }
+
+  void setVertical(bool isVertical) {
+    _style = _style.copyWith(isVertical: isVertical);
     notifyListeners();
   }
 

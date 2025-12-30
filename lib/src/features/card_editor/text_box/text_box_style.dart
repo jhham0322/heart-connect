@@ -30,6 +30,9 @@ class TextBoxStyle {
   final bool isItalic;
   final bool isUnderline;
   
+  // === 세로 글쓰기 ===
+  final bool isVertical;
+  
   // === 패딩 ===
   final EdgeInsets contentPadding;
 
@@ -49,6 +52,7 @@ class TextBoxStyle {
     this.isBold = false,
     this.isItalic = false,
     this.isUnderline = false,
+    this.isVertical = false,
     this.contentPadding = const EdgeInsets.fromLTRB(24, 20, 24, 20),
   });
 
@@ -149,6 +153,7 @@ class TextBoxStyle {
     'isBold': isBold,
     'isItalic': isItalic,
     'isUnderline': isUnderline,
+    'isVertical': isVertical,
   };
 
   /// JSON에서 역직렬화
@@ -171,6 +176,7 @@ class TextBoxStyle {
       isBold: json['isBold'] as bool? ?? false,
       isItalic: json['isItalic'] as bool? ?? false,
       isUnderline: json['isUnderline'] as bool? ?? false,
+      isVertical: json['isVertical'] as bool? ?? false,
     );
   }
 
@@ -190,6 +196,7 @@ class TextBoxStyle {
     bool? isBold,
     bool? isItalic,
     bool? isUnderline,
+    bool? isVertical,
     EdgeInsets? contentPadding,
   }) {
     return TextBoxStyle(
@@ -207,6 +214,7 @@ class TextBoxStyle {
       isBold: isBold ?? this.isBold,
       isItalic: isItalic ?? this.isItalic,
       isUnderline: isUnderline ?? this.isUnderline,
+      isVertical: isVertical ?? this.isVertical,
       contentPadding: contentPadding ?? this.contentPadding,
     );
   }

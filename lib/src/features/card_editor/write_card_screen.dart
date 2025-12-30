@@ -426,6 +426,19 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
         }
       });
     });
+
+    // [UX 개선] 이미지를 선택하지 않고 진입했다면(빈 카드),
+    // 사용자가 무엇을 해야 할지 알 수 있도록 500ms 후 '글상자 스타일' 메뉴를 자동으로 엽니다.
+    if (widget.initialImage == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        // 화면이 안정화된 후 살짝 늦게 오픈 (자연스러운 연출)
+        Future.delayed(const Duration(milliseconds: 500), () {
+          if (mounted) {
+            _showBoxStylePicker();
+          }
+        });
+      });
+    }
   }
   
   // --- Draft Persistence ---
@@ -2101,6 +2114,32 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                               },
                             ),
                           ],
+                          
+                          // 5. 세로 글쓰기 설정
+                          const SizedBox(height: 10),
+                          Row(
+                            children: [
+                              Text(ref.watch(appStringsProvider).verticalWriting, style: const TextStyle(fontWeight: FontWeight.w600)),
+                              const Spacer(),
+                              Switch(
+                                value: _textBoxController.style.isVertical,
+                                activeColor: const Color(0xFFF29D86),
+                                onChanged: (val) {
+                                  setModalState(() => _textBoxController.setVertical(val));
+                                  this.setState(() {});
+                                  _saveDraft();
+                                },
+                              ),
+                            ],
+                          ),
+                          if (_textBoxController.style.isVertical)
+                            Padding(
+                              padding: const EdgeInsets.only(left: 8, top: 4),
+                              child: Text(
+                                '* 세로 글쓰기는 한국어, 일본어, 중국어에 적합합니다.',
+                                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                              ),
+                            ),
                           
                           const SizedBox(height: 20),
                           SizedBox(
