@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,6 +10,11 @@ import 'src/utils/ad_helper.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Release 빌드에서 모든 debugPrint 출력 비활성화
+  if (kReleaseMode) {
+    debugPrint = (String? message, {int? wrapWidth}) {};
+  }
   
   // Lock Portrait Mode (Mobile)
   await SystemChrome.setPreferredOrientations([
@@ -39,5 +46,17 @@ void main() async {
     await AdHelper().initialize();
   }
   
-  runApp(const ProviderScope(child: MyApp()));
+  // Release 빌드에서 모든 print 출력도 차단 (외부 라이브러리 로그 포함)
+  if (kReleaseMode) {
+    runZoned(
+      () => runApp(const ProviderScope(child: MyApp())),
+      zoneSpecification: ZoneSpecification(
+        print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
+          // Release 모드에서는 print 출력을 무시
+        },
+      ),
+    );
+  } else {
+    runApp(const ProviderScope(child: MyApp()));
+  }
 }
