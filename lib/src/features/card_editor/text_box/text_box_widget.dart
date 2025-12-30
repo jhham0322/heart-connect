@@ -19,6 +19,7 @@ class TextBoxWidget extends StatefulWidget {
   final VoidCallback? onTopicSelectorTap;
   final VoidCallback? onAiButtonTap;
   final int maxMessageLength;
+  final int maxLines; // 최대 줄 수
   final bool isAiLoading;
   
   /// 캡처 모드 (아이콘 숨김)
@@ -44,6 +45,7 @@ class TextBoxWidget extends StatefulWidget {
     this.onTopicSelectorTap,
     this.onAiButtonTap,
     this.maxMessageLength = 75,
+    this.maxLines = 5, // 최대 줄 수 (기본값 5줄)
     this.isAiLoading = false,
     this.isCapturing = false,
     this.isDraggable = true,
@@ -107,25 +109,26 @@ class _TextBoxWidgetState extends State<TextBoxWidget> {
     
     return Positioned(
       left: model.position.dx,
-      top: model.position.dy - TextBoxController.iconBarHeight - TextBoxController.iconBarSpacing,
+      top: model.position.dy - TextBoxController.iconBarHeight - TextBoxController.iconBarSpacing - 36, // 드래그 핸들 높이 36
       child: SizedBox(
         width: model.width,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
+            // 0. 드래그 핸들 바 (항상 표시, 캡처 모드 제외)
+            if (!widget.isCapturing)
+              _buildDragHandle(),
+            
             // 1. 상단 아이콘 바 (캡처 모드가 아닐 때만)
             if (!widget.isCapturing)
               _buildTopIconBar(),
             
             const SizedBox(height: TextBoxController.iconBarSpacing),
             
-            // 2. 메인 컨텐츠 박스
+            // 2. 메인 컨텐츠 박스 (드래그 제거, 탭만 처리)
             GestureDetector(
               behavior: HitTestBehavior.deferToChild,
-              onPanStart: _canDrag ? _onPanStart : null,
-              onPanUpdate: _canDrag ? _onPanUpdate : null,
-              onPanEnd: _canDrag ? _onPanEnd : null,
               onTap: widget.onTap ?? () => widget.controller.activate(),
               child: Stack(
                 clipBehavior: Clip.none,
@@ -147,6 +150,65 @@ class _TextBoxWidgetState extends State<TextBoxWidget> {
       ),
     );
   }
+
+  /// 드래그 핸들 바 - 글상자 상단에 표시
+  Widget _buildDragHandle() {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onPanStart: _canDrag ? _onPanStart : null,
+      onPanUpdate: _canDrag ? _onPanUpdate : null,
+      onPanEnd: _canDrag ? _onPanEnd : null,
+      child: Container(
+        width: double.infinity,
+        height: 28,
+        margin: const EdgeInsets.only(bottom: 4),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              const Color(0xFFF29D86).withOpacity(0.9),
+              const Color(0xFFFFB74D).withOpacity(0.9),
+            ],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+          ),
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.15),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.drag_indicator,
+              color: Colors.white.withOpacity(0.9),
+              size: 18,
+            ),
+            const SizedBox(width: 4),
+            Text(
+              '드래그하여 이동',
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.95),
+                fontSize: 11,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(width: 4),
+            Icon(
+              Icons.drag_indicator,
+              color: Colors.white.withOpacity(0.9),
+              size: 18,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
 
   bool get _canDrag => widget.isDraggable && !widget.isZoomMode;
 
