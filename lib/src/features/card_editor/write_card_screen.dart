@@ -2331,8 +2331,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                 children: [
                   // Card Preview (캡쳐 가능 영역)
                   _buildCardPreview(),
-                  // Toolbar
-                  _buildToolbar(),
+                  // 툴바는 상단으로 이동됨 (글상자 포커스 시만 표시)
                   // Template Selector (썸네일)
                   _buildTemplateSelector(),
                   // 하단 여백 (발송 버튼 공간)
@@ -2388,6 +2387,18 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
                 _buildHeaderButton(
                   icon: Icons.save, 
                   onTap: _saveCurrentCard,
+                ),
+                const SizedBox(width: 8),
+                // Undo 버튼 (상단 고정)
+                _buildHeaderButton(
+                  icon: Icons.undo,
+                  onTap: _undo,
+                ),
+                const SizedBox(width: 4),
+                // Redo 버튼 (상단 고정)
+                _buildHeaderButton(
+                  icon: Icons.redo,
+                  onTap: _redo,
                 ),
                 
                 const Spacer(),
@@ -2470,19 +2481,20 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
             ),
           ),
 
-          // Undo/Redo Buttons (Fixed below Text Box button)
-          Positioned(
-            top: MediaQuery.of(context).padding.top + 54, 
-            right: 16,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _buildSquareButton(Icons.undo, _undo),
-                const SizedBox(width: 8),
-                _buildSquareButton(Icons.redo, _redo),
-              ],
+          // Undo/Redo 버튼은 상단 앱바로 이동됨
+          
+          // 텍스트 스타일 툴바 (글상자 포커스 시에만 표시, 상단 두 번째 줄)
+          if (_isEditorActive || _isFooterActive)
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 50,
+              left: 16,
+              right: 16,
+              child: AnimatedOpacity(
+                opacity: 1.0,
+                duration: const Duration(milliseconds: 200),
+                child: _buildToolbar(),
+              ),
             ),
-          ),
           
           // 줌 모드 표시 아이콘 (클릭하면 줌 모드 종료)
           if (_isZoomMode)
