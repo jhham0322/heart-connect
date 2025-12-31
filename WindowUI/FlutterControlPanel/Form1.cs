@@ -656,11 +656,21 @@ namespace FlutterControlPanel
             Log("=== AAB (App Bundle) 빌드 시작 ===");
             Log("Google Play 스토어 업로드용 AAB 파일을 생성합니다...\n");
 
+            // 프로젝트명과 버전 가져오기
+            string projectName = new DirectoryInfo(projectRoot).Name; // ConnectHeart
+            string version = GetPubspecVersion();
+            string newFileName = $"{projectName}-release_{version}.aab";
+
             // AAB 빌드 명령 실행
             string aabBuildCmd = "flutter build appbundle --release";
             
-            // 빌드 완료 후 폴더 열기 위해 체인 명령 사용 (chcp 65001로 UTF-8 강제 설정)
-            string fullCmd = $"chcp 65001 && {aabBuildCmd} && echo. && echo ===================================== && echo AAB Build Success! (AAB 빌드 완료!) && echo File: build\\app\\outputs\\bundle\\release\\app-release.aab && echo =====================================";
+            // 파일 경로 (Relative to project root)
+            string buildDir = @"build\app\outputs\bundle\release";
+            string srcFile = Path.Combine(buildDir, "app-release.aab");
+            string destFile = Path.Combine(buildDir, newFileName);
+
+            // 빌드 완료 후 파일명 변경 및 폴더 열기 명령 체인
+            string fullCmd = $"chcp 65001 && {aabBuildCmd} && move /Y \"{srcFile}\" \"{destFile}\" && echo. && echo ===================================== && echo AAB Build Complete! && echo File: {destFile} && echo =====================================";
             
             StartProcess("cmd", "/c " + fullCmd);
         }
@@ -1081,6 +1091,25 @@ namespace FlutterControlPanel
             }
             
             StartProcess(adbPath, deviceArg + arguments);
+        }
+
+        private string GetPubspecVersion()
+        {
+            try
+            {
+                string path = Path.Combine(projectRoot, "pubspec.yaml");
+                if (File.Exists(path))
+                {
+                    string content = File.ReadAllText(path);
+                    var match = System.Text.RegularExpressions.Regex.Match(content, @"^version:\s+(\S+)", System.Text.RegularExpressions.RegexOptions.Multiline);
+                    if (match.Success)
+                    {
+                        return match.Groups[1].Value.Replace("+", "_");
+                    }
+                }
+            }
+            catch { }
+            return "1.0.0";
         }
     }
     
