@@ -1,0 +1,190 @@
+{
+  "$schema": "디자인-코드 분리를 위한 이미지 사양",
+  "description": "디자이너와 개발자 간의 계약 문서. 이미지 교체 시 이 규격을 따라야 합니다.",
+  "version": "1.0.0",
+  "lastUpdated": "2024-12-31",
+  
+  "backgrounds": {
+    "home_bg": {
+      "file": "home_bg.png",
+      "recommendedSize": {"width": 1080, "height": 1920},
+      "aspectRatio": "9:16",
+      "format": "PNG with transparency preferred",
+      "description": "홈 화면 전체 배경 (분홍-복숭아 그라데이션)"
+    },
+    "gradient_pink": {
+      "file": "gradient_pink.png",
+      "recommendedSize": {"width": 1080, "height": 1920},
+      "aspectRatio": "9:16",
+      "format": "PNG",
+      "description": "기본 분홍색 그라데이션 배경"
+    }
+  },
+  
+  "cards": {
+    "cloud_card_frame": {
+      "file": "cloud_card_frame.png",
+      "recommendedSize": {"width": 680, "height": 510},
+      "aspectRatio": "4:3",
+      "contentPadding": {"top": 30, "bottom": 20, "left": 24, "right": 24},
+      "format": "PNG with transparency",
+      "description": "메인 캘린더 카드 프레임 (구름 모양)"
+    },
+    "event_card_bg": {
+      "file": "event_card_bg.png",
+      "recommendedSize": {"width": 600, "height": 144},
+      "aspectRatio": "25:6",
+      "format": "PNG with transparency",
+      "description": "일정 아이템 배경 카드"
+    }
+  },
+  
+  "icons": {
+    "calendar_icon": {
+      "file": "calendar_icon.png",
+      "recommendedSize": {"width": 200, "height": 200},
+      "aspectRatio": "1:1",
+      "format": "PNG with transparency",
+      "description": "날짜 표시용 캘린더 아이콘 (12월 31 표시 가능)"
+    },
+    "app_logo": {
+      "file": "app_logo.png",
+      "recommendedSize": {"width": 200, "height": 64},
+      "format": "PNG with transparency",
+      "description": "앱 로고 (마음이음 + 하트 아이콘)"
+    },
+    "bell_icon": {
+      "file": "bell_icon.png",
+      "recommendedSize": {"width": 48, "height": 48},
+      "aspectRatio": "1:1",
+      "format": "PNG with transparency",
+      "description": "알림 벨 아이콘"
+    },
+    "settings_icon": {
+      "file": "settings_icon.png",
+      "recommendedSize": {"width": 48, "height": 48},
+      "aspectRatio": "1:1",
+      "format": "PNG with transparency",
+      "description": "설정 톱니바퀴 아이콘"
+    }
+  },
+  
+  "buttons": {
+    "btn_write": {
+      "file": "btn_write.png",
+      "recommendedSize": {"width": 240, "height": 96},
+      "format": "PNG with transparency",
+      "description": "하트 모양 작성 버튼 (펜 아이콘 + 작성 텍스트 포함)"
+    },
+    "btn_edit": {
+      "file": "btn_edit.png",
+      "recommendedSize": {"width": 96, "height": 96},
+      "aspectRatio": "1:1",
+      "format": "PNG with transparency",
+      "description": "편집 버튼 (원형)"
+    },
+    "btn_more": {
+      "file": "btn_more.png",
+      "recommendedSize": {"width": 96, "height": 96},
+      "aspectRatio": "1:1",
+      "format": "PNG with transparency",
+      "description": "더보기 버튼 (원형, ... 아이콘)"
+    }
+  },
+  
+  "avatars": {
+    "bear_avatar": {
+      "file": "bear_avatar.png",
+      "recommendedSize": {"width": 96, "height": 96},
+      "aspectRatio": "1:1",
+      "format": "PNG with transparency",
+      "description": "곰 아바타 (일정 아이템용)"
+    },
+    "rabbit_avatar": {
+      "file": "rabbit_avatar.png",
+      "recommendedSize": {"width": 96, "height": 96},
+      "aspectRatio": "1:1",
+      "format": "PNG with transparency",
+      "description": "토끼 아바타"
+    },
+    "cat_avatar": {
+      "file": "cat_avatar.png",
+      "recommendedSize": {"width": 96, "height": 96},
+      "aspectRatio": "1:1",
+      "format": "PNG with transparency",
+      "description": "고양이 아바타"
+    },
+    "dog_avatar": {
+      "file": "dog_avatar.png",
+      "recommendedSize": {"width": 96, "height": 96},
+      "aspectRatio": "1:1",
+      "format": "PNG with transparency",
+      "description": "강아지 아바타"
+    }
+  },
+  
+  "decorations": {
+    "heart_small": {
+      "file": "heart_small.png",
+      "recommendedSize": {"width": 32, "height": 32},
+      "format": "PNG with transparency",
+      "description": "작은 하트 장식"
+    },
+    "heart_large": {
+      "file": "heart_large.png",
+      "recommendedSize": {"width": 64, "height": 64},
+      "format": "PNG with transparency",
+      "description": "큰 하트 장식"
+    },
+    "star_small": {
+      "file": "star_small.png",
+      "recommendedSize": {"width": 32, "height": 32},
+      "format": "PNG with transparency",
+      "description": "작은 별 장식"
+    },
+    "balloon_small": {
+      "file": "balloon_small.png",
+      "recommendedSize": {"width": 32, "height": 48},
+      "format": "PNG with transparency",
+      "description": "작은 풍선 장식"
+    }
+  },
+  
+  "navigation": {
+    "nav_home": {
+      "file": "nav_home.png",
+      "recommendedSize": {"width": 56, "height": 56},
+      "aspectRatio": "1:1",
+      "format": "PNG with transparency",
+      "description": "홈 네비게이션 아이콘"
+    },
+    "nav_contacts": {
+      "file": "nav_contacts.png",
+      "recommendedSize": {"width": 56, "height": 56},
+      "aspectRatio": "1:1",
+      "format": "PNG with transparency",
+      "description": "연락처 네비게이션 아이콘"
+    },
+    "nav_gallery": {
+      "file": "nav_gallery.png",
+      "recommendedSize": {"width": 56, "height": 56},
+      "aspectRatio": "1:1",
+      "format": "PNG with transparency",
+      "description": "갤러리 네비게이션 아이콘"
+    },
+    "nav_message": {
+      "file": "nav_message.png",
+      "recommendedSize": {"width": 56, "height": 56},
+      "aspectRatio": "1:1",
+      "format": "PNG with transparency",
+      "description": "메시지 네비게이션 아이콘"
+    },
+    "fab_write": {
+      "file": "fab_write.png",
+      "recommendedSize": {"width": 128, "height": 128},
+      "aspectRatio": "1:1",
+      "format": "PNG with transparency",
+      "description": "중앙 FAB 작성 버튼 (원형, 펜 아이콘)"
+    }
+  }
+}

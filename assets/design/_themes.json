@@ -1,0 +1,136 @@
+{
+    "version": "1.0.0",
+    "description": "디자인 테마 목록 및 메타데이터",
+    "themes": {
+        "default": {
+            "name": "기본 디자인",
+            "description": "현재 앱의 기본 디자인 (코랄/베이지 색상)",
+            "author": "ConnectHeart Team",
+            "version": "1.0.0",
+            "colors": {
+                "primary": "#FF8A65",
+                "secondary": "#FDD835",
+                "background": "#FFFCF9"
+            }
+        },
+        "pink_kawaii": {
+            "name": "핑크 카와이",
+            "description": "분홍/복숭아 그라데이션의 귀여운 디자인",
+            "author": "Designer",
+            "version": "1.0.0",
+            "colors": {
+                "primary": "#FF9999",
+                "secondary": "#FFCCCC",
+                "background": "#FFF0F5"
+            }
+        }
+    },
+    "requiredAssets": {
+        "backgrounds": [
+            {
+                "file": "home_bg.png",
+                "description": "홈 화면 배경"
+            },
+            {
+                "file": "gradient_bg.png",
+                "description": "기본 그라데이션 배경"
+            }
+        ],
+        "cards": [
+            {
+                "file": "main_card_frame.png",
+                "description": "메인 카드 프레임"
+            },
+            {
+                "file": "event_card_bg.png",
+                "description": "일정 카드 배경"
+            }
+        ],
+        "icons": [
+            {
+                "file": "app_logo.png",
+                "description": "앱 로고"
+            },
+            {
+                "file": "heart_icon.png",
+                "description": "하트 아이콘"
+            },
+            {
+                "file": "calendar_icon.png",
+                "description": "캘린더 아이콘"
+            },
+            {
+                "file": "bell_icon.png",
+                "description": "알림 벨 아이콘"
+            },
+            {
+                "file": "settings_icon.png",
+                "description": "설정 아이콘"
+            },
+            {
+                "file": "btn_write.png",
+                "description": "작성 버튼"
+            },
+            {
+                "file": "btn_edit.png",
+                "description": "편집 버튼"
+            },
+            {
+                "file": "btn_more.png",
+                "description": "더보기 버튼"
+            },
+            {
+                "file": "avatar_bear.png",
+                "description": "곰 아바타"
+            },
+            {
+                "file": "avatar_rabbit.png",
+                "description": "토끼 아바타"
+            },
+            {
+                "file": "avatar_cat.png",
+                "description": "고양이 아바타"
+            },
+            {
+                "file": "avatar_dog.png",
+                "description": "강아지 아바타"
+            }
+        ],
+        "decorations": [
+            {
+                "file": "heart_small.png",
+                "description": "작은 하트 장식"
+            },
+            {
+                "file": "heart_large.png",
+                "description": "큰 하트 장식"
+            },
+            {
+                "file": "star_small.png",
+                "description": "작은 별 장식"
+            }
+        ],
+        "navigation": [
+            {
+                "file": "nav_home.png",
+                "description": "홈 네비 아이콘"
+            },
+            {
+                "file": "nav_contacts.png",
+                "description": "연락처 네비 아이콘"
+            },
+            {
+                "file": "nav_gallery.png",
+                "description": "갤러리 네비 아이콘"
+            },
+            {
+                "file": "nav_message.png",
+                "description": "메시지 네비 아이콘"
+            },
+            {
+                "file": "fab_write.png",
+                "description": "FAB 작성 버튼"
+            }
+        ]
+    }
+}

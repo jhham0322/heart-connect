@@ -99,4 +99,15 @@ flutter:
     - assets/images/frame/
     - assets/themes/
     - assets/data/
+    - assets/design/
+    - assets/design/default/backgrounds/
+    - assets/design/default/cards/
+    - assets/design/default/icons/
+    - assets/design/default/decorations/
+    - assets/design/default/navigation/
+    - assets/design/pink_kawaii/backgrounds/
+    - assets/design/pink_kawaii/cards/
+    - assets/design/pink_kawaii/icons/
+    - assets/design/pink_kawaii/decorations/
+    - assets/design/pink_kawaii/navigation/
 
