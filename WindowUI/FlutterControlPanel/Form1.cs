@@ -330,6 +330,18 @@ namespace FlutterControlPanel
             controlPanel.Controls.Add(btnGenRun);
             toolTip.SetToolTip(btnGenRun, "코드 생성 후 실행 (build_runner → run)");
 
+            // Memory Clean Button
+            Button btnCleanMemory = new Button();
+            btnCleanMemory.Text = "🧹 Clean Mem";
+            btnCleanMemory.Size = new Size(120, 50);
+            btnCleanMemory.Location = new Point(360, row2Y);
+            btnCleanMemory.BackColor = Color.FromArgb(239, 154, 154); // Light Red
+            btnCleanMemory.FlatStyle = FlatStyle.Flat;
+            btnCleanMemory.Font = new Font("Segoe UI", 10, FontStyle.Bold);
+            btnCleanMemory.Click += BtnCleanMemory_Click;
+            controlPanel.Controls.Add(btnCleanMemory);
+            toolTip.SetToolTip(btnCleanMemory, "개발 관련 프로세스(Java, Dart 등) 정리하여 메모리 확보");
+
             // Row 3: Log & Build Controls
             int row3Y = 135;
 
@@ -1147,6 +1159,106 @@ namespace FlutterControlPanel
             }
             catch { }
             return "1.0.0";
+        }
+
+        private void BtnCleanMemory_Click(object sender, EventArgs e)
+        {
+            long totalMem = 0;
+            int processCount = 0;
+            
+            var targets = new string[] { "java", "dart", "flutter", "adb", "qemu-system-x86_64" };
+            
+            var procs = Process.GetProcesses();
+            foreach (var p in procs)
+            {
+                try
+                {
+                    bool match = false;
+                    foreach (var t in targets) 
+                    {
+                        if (p.ProcessName.IndexOf(t, StringComparison.OrdinalIgnoreCase) >= 0)
+                        {
+                            match = true;
+                            break;
+                        }
+                    }
+                    
+                    if (match)
+                    {
+                        long mem = p.WorkingSet64;
+                        totalMem += mem;
+                        processCount++;
+                    }
+                }
+                catch { }
+            }
+            
+            double memMB = totalMem / (1024.0 * 1024.0);
+            double memGB = memMB / 1024.0;
+            
+            string msg = $"현재 개발 관련 프로세스 상태:\n\n" +
+                         $"- 실행 중인 프로세스: {processCount}개 (Java, Dart, Flutter 등)\n" +
+                         $"- 점유 메모리: {memMB:F0} MB ({memGB:F2} GB)\n\n" +
+                         $"이 프로세스들을 정리하여 메모리를 확보하시겠습니까?\n" +
+                         $"(주의: 현재 실행 중인 빌드나 앱이 종료됩니다.)";
+                         
+            if (MessageBox.Show(msg, "메모리 정리", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                CleanMemory();
+            }
+        }
+        
+        private void CleanMemory()
+        {
+            outputBox.Clear();
+            Log("=== 메모리 정리 시작 ===");
+            
+            // 1. Stop Gradle Daemon
+            Log("Stopping Gradle Daemon...");
+            try
+            {
+                string androidDir = Path.Combine(projectRoot, "android");
+                if (Directory.Exists(androidDir))
+                {
+                    ProcessStartInfo psi = new ProcessStartInfo();
+                    psi.FileName = Path.Combine(androidDir, "gradlew.bat");
+                    psi.Arguments = "--stop";
+                    psi.WorkingDirectory = androidDir;
+                    psi.UseShellExecute = false;
+                    psi.CreateNoWindow = true;
+                    Process.Start(psi)?.WaitForExit(5000);
+                    Log("Gradle Daemon 중지 명령 전송 완료.");
+                }
+            }
+            catch (Exception ex) { Log("Gradle 중지 실패: " + ex.Message); }
+            
+            // 2. Kill Processes
+            KillProcess("dart");
+            KillProcess("flutter");
+            KillProcess("java"); // 남은 자바 프로세스 강제 종료
+            
+            // ADB는 잠시 후 확인: ADB는 안 끄는게 나을 수도 있지만, 메모리 확보가 목적이면 끄고 다시 켬
+            Log("Restarting ADB Server...");
+            try {
+                KillProcess("adb");
+                StartProcess(adbPath, "start-server");
+            } catch {}
+            
+            Log("=== 메모리 정리 완료 ===");
+            MessageBox.Show("메모리 정리가 완료되었습니다.", "완료", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+        
+        private void KillProcess(string name)
+        {
+            try
+            {
+                var procs = Process.GetProcessesByName(name);
+                foreach (var p in procs)
+                {
+                    try { p.Kill(); Log($"Killed: {name} (PID: {p.Id})"); } catch { }
+                }
+            }
+            catch { }
         }
     }
     
