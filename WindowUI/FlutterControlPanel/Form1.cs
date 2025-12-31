@@ -29,9 +29,8 @@ namespace FlutterControlPanel
         private bool isBuilding = false;
         
         // Path to the Flutter project root
-        // Assuming we build to WindowUI/FlutterControlPanel/bin/Release, the root is up 4 levels?
-        // Let's just hardcode the path provided in user info or search for pubspec.yaml
-        private string projectRoot = @"e:\work2025\App\ConnectHeart";
+        // 실행 파일 위치 기준 상위 폴더에서 pubspec.yaml 탐색
+        private string projectRoot = "";
         
         // ADB path - Android SDK platform-tools
         private string adbPath = Path.Combine(
@@ -48,6 +47,26 @@ namespace FlutterControlPanel
         {
             InitializeComponent(); // Call the empty one to set basic properties
             
+            // 프로젝트 루트 자동 탐색 (pubspec.yaml 위치)
+            projectRoot = FindProjectRoot();
+            if (string.IsNullOrEmpty(projectRoot))
+            {
+                // 찾지 못한 경우 폴더 선택 다이얼로그
+                MessageBox.Show("Flutter 프로젝트 루트(pubspec.yaml)를 찾을 수 없습니다.\n프로젝트 폴더를 선택해주세요.", "경로 설정", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                using (var fbd = new FolderBrowserDialog())
+                {
+                    if (fbd.ShowDialog() == DialogResult.OK)
+                    {
+                        projectRoot = fbd.SelectedPath;
+                    }
+                    else
+                    {
+                        // 기본값: 현재 실행 위치의 상위 4단계 (가정)
+                        projectRoot = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\..\.."));
+                    }
+                }
+            }
+
             // 프로젝트별 설정 파일 경로 (프로젝트 폴더 내에 저장)
             settingsFilePath = Path.Combine(projectRoot, ".flutter_controller_settings");
             LoadProjectSettings();
@@ -1091,6 +1110,24 @@ namespace FlutterControlPanel
             }
             
             StartProcess(adbPath, deviceArg + arguments);
+        }
+
+        private string FindProjectRoot()
+        {
+            try 
+            {
+                DirectoryInfo dir = new DirectoryInfo(Application.StartupPath);
+                while (dir != null)
+                {
+                    if (File.Exists(Path.Combine(dir.FullName, "pubspec.yaml")))
+                    {
+                        return dir.FullName;
+                    }
+                    dir = dir.Parent;
+                }
+            }
+            catch {}
+            return null;
         }
 
         private string GetPubspecVersion()
