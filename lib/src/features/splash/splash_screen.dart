@@ -8,6 +8,7 @@ import 'package:heart_connect/src/features/home/home_view_model.dart';
 import 'package:heart_connect/src/features/database/database_provider.dart';
 import 'package:heart_connect/src/features/calendar/calendar_service.dart';
 import 'package:heart_connect/src/features/onboarding/onboarding_screen.dart';
+import '../../core/design_assets.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   final VoidCallback onInitComplete;

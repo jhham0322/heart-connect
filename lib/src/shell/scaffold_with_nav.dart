@@ -78,10 +78,8 @@ class ScaffoldWithNav extends ConsumerWidget {
                       IconButton(
                         icon: SafeImage(
                           assetPath: $assets.bellIcon,
-                          width: 20,
-                          height: 20,
-                          color: AppTheme.textPrimary,
-                          colorBlendMode: BlendMode.srcIn,
+                          width: 24,
+                          height: 24,
                           placeholder: Icon(FontAwesomeIcons.bell, size: 20, color: AppTheme.textPrimary),
                         ),
                         onPressed: () {},
@@ -89,10 +87,8 @@ class ScaffoldWithNav extends ConsumerWidget {
                       IconButton(
                         icon: SafeImage(
                           assetPath: $assets.settingsIcon,
-                          width: 20,
-                          height: 20,
-                          color: AppTheme.textPrimary,
-                          colorBlendMode: BlendMode.srcIn,
+                          width: 24,
+                          height: 24,
                           placeholder: Icon(FontAwesomeIcons.gear, size: 20, color: AppTheme.textPrimary),
                         ),
                         onPressed: () => context.push('/settings'),
@@ -178,8 +174,6 @@ class ScaffoldWithNav extends ConsumerWidget {
             assetPath: $assets.fabIcon,
             width: 28,
             height: 28,
-            color: Colors.white,
-            colorBlendMode: BlendMode.srcIn,
             placeholder: const Icon(FontAwesomeIcons.penNib, color: Colors.white, size: 28),
           ),
         ),
@@ -283,13 +277,14 @@ class _NavItem extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SafeImage(
-              assetPath: imagePath,
-              width: 22,
-              height: 22,
-              color: color,
-              colorBlendMode: BlendMode.srcIn,
-              placeholder: Icon(fallbackIcon, color: color, size: 22),
+            Opacity(
+              opacity: isSelected ? 1.0 : 0.5,
+              child: SafeImage(
+                assetPath: imagePath,
+                width: 24,
+                height: 24,
+                placeholder: Icon(fallbackIcon, color: color, size: 22),
+              ),
             ),
             const SizedBox(height: 4),
             Text(

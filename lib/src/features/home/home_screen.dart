@@ -506,7 +506,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   /// C. 카드 캐러셀 (오늘 계획)
   Widget _buildCardCarousel(List<DailyPlan> plans) {
     return SizedBox(
-      height: 340,
+      height: 360,
       child: PageView.builder(
         controller: _pageController,
         onPageChanged: (index) {
@@ -914,7 +914,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: isActive ? AppTheme.cardBg : AppTheme.white,
         borderRadius: BorderRadius.circular(24),
@@ -951,7 +951,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
           // 버튼들
           Row(
             children: [
