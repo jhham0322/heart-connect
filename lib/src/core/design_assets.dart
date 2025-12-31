@@ -77,28 +77,28 @@ class DesignAssets extends ChangeNotifier {
   
   // ===== Buttons =====
   
-  /// 작성 버튼
-  String get btnWrite => '$_basePath/icons/btn_write.png';
+  /// 작성 버튼 이미지 (하트 모양 등)
+  String get btnWrite => '$_basePath/buttons/btn_write.png';
   
-  /// 편집 버튼
-  String get btnEdit => '$_basePath/icons/btn_edit.png';
+  /// 편집 버튼 이미지
+  String get btnEdit => '$_basePath/buttons/btn_edit.png';
   
-  /// 더보기 버튼
-  String get btnMore => '$_basePath/icons/btn_more.png';
+  /// 더보기 버튼 이미지
+  String get btnMore => '$_basePath/buttons/btn_more.png';
   
   // ===== Avatars =====
   
   /// 곰 아바타
-  String get avatarBear => '$_basePath/icons/avatar_bear.png';
+  String get avatarBear => '$_basePath/avatars/avatar_bear.png';
   
   /// 토끼 아바타
-  String get avatarRabbit => '$_basePath/icons/avatar_rabbit.png';
+  String get avatarRabbit => '$_basePath/avatars/avatar_rabbit.png';
   
   /// 고양이 아바타
-  String get avatarCat => '$_basePath/icons/avatar_cat.png';
+  String get avatarCat => '$_basePath/avatars/avatar_cat.png';
   
   /// 강아지 아바타
-  String get avatarDog => '$_basePath/icons/avatar_dog.png';
+  String get avatarDog => '$_basePath/avatars/avatar_dog.png';
   
   /// 아바타 목록
   List<String> get avatars => [
@@ -126,6 +126,9 @@ class DesignAssets extends ChangeNotifier {
   
   // ===== Navigation =====
   
+  /// 네비게이션 바 배경
+  String get navBarBg => '$_basePath/navigation/nav_bar_bg.png';
+  
   /// 홈 네비 아이콘
   String get navHome => '$_basePath/navigation/nav_home.png';
   
@@ -138,8 +141,65 @@ class DesignAssets extends ChangeNotifier {
   /// 메시지 네비 아이콘
   String get navMessage => '$_basePath/navigation/nav_message.png';
   
-  /// FAB 작성 버튼
-  String get fabWrite => '$_basePath/navigation/fab_write.png';
+  /// FAB 배경 이미지
+  String get fabBg => '$_basePath/navigation/fab_bg.png';
+  
+  /// FAB 아이콘 이미지
+  String get fabIcon => '$_basePath/navigation/fab_icon.png';
+  
+  // ===== Common Icons =====
+  
+  /// 추가 아이콘
+  String get iconPlus => '$_basePath/icons/icon_plus.png';
+  
+  /// 편집 아이콘
+  String get iconEdit => '$_basePath/icons/icon_edit.png';
+  
+  /// 삭제 아이콘
+  String get iconDelete => '$_basePath/icons/icon_delete.png';
+  
+  /// 체크 아이콘
+  String get iconCheck => '$_basePath/icons/icon_check.png';
+  
+  /// 더보기 아이콘
+  String get iconMore => '$_basePath/icons/icon_more.png';
+  
+  /// 검색 아이콘
+  String get iconSearch => '$_basePath/icons/icon_search.png';
+  
+  // ===== Event Type Icons =====
+  
+  /// 일반 일정 아이콘
+  String get eventNormal => '$_basePath/icons/event_normal.png';
+  
+  /// 공휴일 아이콘
+  String get eventHoliday => '$_basePath/icons/event_holiday.png';
+  
+  /// 생일 아이콘
+  String get eventBirthday => '$_basePath/icons/event_birthday.png';
+  
+  /// 기념일 아이콘
+  String get eventAnniversary => '$_basePath/icons/event_anniversary.png';
+  
+  /// 업무 아이콘
+  String get eventWork => '$_basePath/icons/event_work.png';
+  
+  /// 개인 아이콘
+  String get eventPersonal => '$_basePath/icons/event_personal.png';
+  
+  /// 중요 아이콘
+  String get eventImportant => '$_basePath/icons/event_important.png';
+  
+  /// 일정 타입별 아이콘 맵
+  Map<String, String> get eventTypeIcons => {
+    'Normal': eventNormal,
+    'Holiday': eventHoliday,
+    'Birthday': eventBirthday,
+    'Anniversary': eventAnniversary,
+    'Work': eventWork,
+    'Personal': eventPersonal,
+    'Important': eventImportant,
+  };
   
   // ===== Static Constants (Fallback / 테마 무관) =====
   

@@ -76,11 +76,25 @@ class ScaffoldWithNav extends ConsumerWidget {
                   Row(
                     children: [
                       IconButton(
-                        icon: Icon(FontAwesomeIcons.bell, size: 20, color: AppTheme.textPrimary),
+                        icon: SafeImage(
+                          assetPath: $assets.bellIcon,
+                          width: 20,
+                          height: 20,
+                          color: AppTheme.textPrimary,
+                          colorBlendMode: BlendMode.srcIn,
+                          placeholder: Icon(FontAwesomeIcons.bell, size: 20, color: AppTheme.textPrimary),
+                        ),
                         onPressed: () {},
                       ),
                       IconButton(
-                        icon: Icon(FontAwesomeIcons.gear, size: 20, color: AppTheme.textPrimary),
+                        icon: SafeImage(
+                          assetPath: $assets.settingsIcon,
+                          width: 20,
+                          height: 20,
+                          color: AppTheme.textPrimary,
+                          colorBlendMode: BlendMode.srcIn,
+                          placeholder: Icon(FontAwesomeIcons.gear, size: 20, color: AppTheme.textPrimary),
+                        ),
                         onPressed: () => context.push('/settings'),
                       ),
                     ],
@@ -160,7 +174,14 @@ class ScaffoldWithNav extends ConsumerWidget {
           hoverColor: Colors.transparent,
           focusColor: Colors.transparent,
           shape: const CircleBorder(),
-          child: const Icon(FontAwesomeIcons.penNib, color: Colors.white, size: 28),
+          child: SafeImage(
+            assetPath: $assets.fabIcon,
+            width: 28,
+            height: 28,
+            color: Colors.white,
+            colorBlendMode: BlendMode.srcIn,
+            placeholder: const Icon(FontAwesomeIcons.penNib, color: Colors.white, size: 28),
+          ),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -190,13 +211,15 @@ class ScaffoldWithNav extends ConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     _NavItem(
-                      icon: FontAwesomeIcons.house,
+                      imagePath: $assets.navHome,
+                      fallbackIcon: FontAwesomeIcons.house,
                       label: ref.watch(appStringsProvider).navHome,
                       isSelected: navigationShell.currentIndex == 0,
                       onTap: () => _goBranch(0),
                     ),
                     _NavItem(
-                      icon: FontAwesomeIcons.addressBook,
+                      imagePath: $assets.navContacts,
+                      fallbackIcon: FontAwesomeIcons.addressBook,
                       label: ref.watch(appStringsProvider).navContacts,
                       isSelected: navigationShell.currentIndex == 1,
                       onTap: () => _goBranch(1),
@@ -210,13 +233,15 @@ class ScaffoldWithNav extends ConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     _NavItem(
-                      icon: FontAwesomeIcons.image,
+                      imagePath: $assets.navGallery,
+                      fallbackIcon: FontAwesomeIcons.image,
                       label: ref.watch(appStringsProvider).navGallery,
                       isSelected: navigationShell.currentIndex == 2,
                       onTap: () => _goBranch(2),
                     ),
                     _NavItem(
-                      icon: FontAwesomeIcons.envelope,
+                      imagePath: $assets.navMessage,
+                      fallbackIcon: FontAwesomeIcons.envelope,
                       label: ref.watch(appStringsProvider).navMessages,
                       isSelected: navigationShell.currentIndex == 3,
                       onTap: () => _goBranch(3),
@@ -233,13 +258,15 @@ class ScaffoldWithNav extends ConsumerWidget {
 }
 
 class _NavItem extends StatelessWidget {
-  final IconData icon;
+  final String imagePath;  // 이미지 경로
+  final IconData fallbackIcon;  // 이미지 없을 때 폴백 아이콘
   final String label;
   final bool isSelected;
   final VoidCallback onTap;
 
   const _NavItem({
-    required this.icon,
+    required this.imagePath,
+    required this.fallbackIcon,
     required this.label,
     required this.isSelected,
     required this.onTap,
@@ -256,7 +283,14 @@ class _NavItem extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: color, size: 22),
+            SafeImage(
+              assetPath: imagePath,
+              width: 22,
+              height: 22,
+              color: color,
+              colorBlendMode: BlendMode.srcIn,
+              placeholder: Icon(fallbackIcon, color: color, size: 22),
+            ),
             const SizedBox(height: 4),
             Text(
               label,
