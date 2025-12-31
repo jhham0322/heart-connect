@@ -117,6 +117,7 @@ namespace FlutterControlPanel
             numVersionCode.Minimum = 1;
             numVersionCode.Maximum = 999999;
             numVersionCode.Font = new Font("Consolas", 10);
+            numVersionCode.ValueChanged += NumVersionCode_ValueChanged;
             this.Controls.Add(numVersionCode);
 
             Label lblCodeHint = new Label();
@@ -234,6 +235,7 @@ namespace FlutterControlPanel
                     {
                         txtVersionName.Text = match.Groups[1].Value;
                         numVersionCode.Value = int.Parse(match.Groups[2].Value);
+                        previousVersionCode = (int)numVersionCode.Value;
                     }
                     else
                     {
@@ -242,6 +244,7 @@ namespace FlutterControlPanel
                         {
                             txtVersionName.Text = match.Groups[1].Value;
                             numVersionCode.Value = 1;
+                            previousVersionCode = 1;
                         }
                     }
                 }
@@ -287,6 +290,48 @@ namespace FlutterControlPanel
                         picIcon.Image = Image.FromStream(fs);
                     }
                 }
+            }
+        }
+
+        private int previousVersionCode = 0;
+        
+        private void NumVersionCode_ValueChanged(object sender, EventArgs e)
+        {
+            // 버전 코드가 증가하면 버전 이름 마지막 자리도 증가
+            if (!string.IsNullOrEmpty(txtVersionName.Text))
+            {
+                int currentCode = (int)numVersionCode.Value;
+                if (currentCode > previousVersionCode && previousVersionCode > 0)
+                {
+                    // 버전 이름 파싱 (예: 1.0.9)
+                    var parts = txtVersionName.Text.Split('.');
+                    if (parts.Length == 3 && int.TryParse(parts[2], out int patch))
+                    {
+                        // 마지막 자리 증가
+                        patch++;
+                        if (patch >= 10)
+                        {
+                            patch = 0;
+                            if (int.TryParse(parts[1], out int minor))
+                            {
+                                minor++;
+                                if (minor >= 10)
+                                {
+                                    minor = 0;
+                                    if (int.TryParse(parts[0], out int major))
+                                    {
+                                        major++;
+                                        parts[0] = major.ToString();
+                                    }
+                                }
+                                parts[1] = minor.ToString();
+                            }
+                        }
+                        parts[2] = patch.ToString();
+                        txtVersionName.Text = string.Join(".", parts);
+                    }
+                }
+                previousVersionCode = currentCode;
             }
         }
 

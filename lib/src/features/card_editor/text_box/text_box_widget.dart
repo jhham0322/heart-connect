@@ -37,6 +37,9 @@ class TextBoxWidget extends StatefulWidget {
   
   /// 드래그 완료 콜백
   final VoidCallback? onDragEnd;
+  
+  /// 리사이즈 완료 콜백
+  final VoidCallback? onResizeEnd;
 
   const TextBoxWidget({
     super.key,
@@ -53,6 +56,7 @@ class TextBoxWidget extends StatefulWidget {
     this.isZoomMode = false,
     this.onTap,
     this.onDragEnd,
+    this.onResizeEnd,
   });
 
   @override
@@ -74,7 +78,7 @@ class _TextBoxWidgetState extends State<TextBoxWidget> {
   bool _isDragging = false;
   
   // 최소/최대 넓이 상수
-  static const double _minWidth = 150.0;
+  static const double _minWidth = 100.0;
   static const double _maxWidth = 500.0;
   
   // 아이콘 바 표시 상태 (포커스 기반)
@@ -161,27 +165,24 @@ class _TextBoxWidgetState extends State<TextBoxWidget> {
     return Positioned(
       left: model.position.dx,
       top: model.position.dy - (shouldShowIconBar ? TextBoxController.iconBarHeight + TextBoxController.iconBarSpacing : 0),
-      child: SizedBox(
-        width: model.width,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            // 1. 상단 아이콘 바 (포커스 있을 때만 표시)
-            if (shouldShowIconBar)
-              AnimatedOpacity(
-                opacity: 1.0,
-                duration: const Duration(milliseconds: 200),
-                child: _buildTopIconBar(),
-              ),
-            
-            if (shouldShowIconBar)
-              const SizedBox(height: TextBoxController.iconBarSpacing),
-            
-            // 2. 메인 컨텐츠 박스 (핸들 버튼으로 이동/리사이즈)
-            _buildMainBoxWithHandles(style, model),
-          ],
-        ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 1. 상단 아이콘 바 (포커스 있을 때만 표시)
+          if (shouldShowIconBar)
+            AnimatedOpacity(
+              opacity: 1.0,
+              duration: const Duration(milliseconds: 200),
+              child: _buildTopIconBar(),
+            ),
+          
+          if (shouldShowIconBar)
+            const SizedBox(height: TextBoxController.iconBarSpacing),
+          
+          // 2. 메인 컨텐츠 박스 (핸들 버튼으로 이동/리사이즈)
+          _buildMainBoxWithHandles(style, model),
+        ],
       ),
     );
   }
@@ -189,15 +190,14 @@ class _TextBoxWidgetState extends State<TextBoxWidget> {
 
   /// 메인 박스 + 핸들 버튼 (이동/리사이즈)
   Widget _buildMainBoxWithHandles(TextBoxStyle style, model) {
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      // 일반 탭은 편집 모드
-      onTap: widget.onTap ?? () => widget.controller.activate(),
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          // 메인 컨텐츠 박스 (ClipPath로 모양 적용)
-          ClipPath(
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        // 메인 컨텐츠 박스
+        GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: widget.onTap ?? () => widget.controller.activate(),
+          child: ClipPath(
             clipper: ShapeBorderClipper(shape: style.clipShape),
             child: Container(
               width: model.width,
@@ -207,7 +207,6 @@ class _TextBoxWidgetState extends State<TextBoxWidget> {
               ),
               decoration: (_isDragging || _isResizing) 
                 ? ShapeDecoration(
-                    // 드래그/리사이즈 모드일 때 테두리 강조
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(style.borderRadius),
                       side: const BorderSide(color: Color(0xFFF29D86), width: 3),
@@ -238,7 +237,7 @@ class _TextBoxWidgetState extends State<TextBoxWidget> {
                               expands: false,
                               scrollable: true,
                               padding: EdgeInsets.zero,
-                              showCursor: !_isDragging, // 드래그 모드에서 커서 숨김
+                              showCursor: !_isDragging,
                               placeholder: '여기를 탭하여 메시지 입력...',
                               customStyleBuilder: (attribute) {
                                 if (attribute.key == 'font') {
@@ -264,106 +263,64 @@ class _TextBoxWidgetState extends State<TextBoxWidget> {
                   ),
                 ),
               ),
-            ), // Container 닫기
-          ), // ClipPath 닫기
-          
-          // 드래그/리사이즈 모드 인디케이터
-          if ((_isDragging || _isResizing) && !widget.isCapturing)
-            Positioned(
-              left: 0,
-              right: 0,
-              top: -32,
-              child: Center(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        const Color(0xFFF29D86),
-                        const Color(0xFFFFB74D),
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.2),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        _isDragging ? Icons.open_with : Icons.open_in_full,
-                        color: Colors.white,
-                        size: 16,
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        _isDragging ? '이동 중...' : '크기 조절 중...',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
             ),
+          ),
+        ),
+        
+        // 이동 핸들 (왼쪽 하단 코너) - 글상자 안쪽에 배치
+        if (!widget.isCapturing && _canDrag)
+          _buildMoveHandle(),
           
-          // 이동 핸들 (왼쪽 하단) - 캡처 모드에서는 숨김
-          if (!widget.isCapturing && _canDrag)
-            _buildMoveHandle(),
-          
-          // 리사이즈 핸들 (오른쪽 하단) - 캡처 모드에서는 숨김
-          if (!widget.isCapturing)
-            _buildResizeHandle(),
-        ],
-      ),
+        // 리사이즈 핸들 (오른쪽 하단 코너) - 글상자 안쪽에 배치
+        if (!widget.isCapturing)
+          _buildResizeHandle(),
+      ],
     );
   }
 
 
 
+
   bool get _canDrag => widget.isDraggable && !widget.isZoomMode;
 
-  /// 이동 핸들 빌더 (왼쪽 하단) - 터치 영역 4배 확대
+  /// 이동 핸들 빌더 (왼쪽 하단) - Listener로 즉시 반응
   Widget _buildMoveHandle() {
     return Positioned(
-      left: -54, // 4배 확대된 터치 영역(112px)의 중심을 맞추기 위한 오프셋
-      bottom: -54,
-      child: GestureDetector(
+      left: 0,
+      bottom: 0,
+      child: Listener(
         behavior: HitTestBehavior.opaque,
-        onPanStart: (details) {
+        onPointerDown: (event) {
           setState(() {
             _isDragging = true;
-            _lastDragPosition = details.globalPosition;
+            _lastDragPosition = event.position;
           });
           widget.controller.setDragMode(true);
         },
-        onPanUpdate: (details) {
+        onPointerMove: (event) {
           if (_isDragging) {
-            final delta = details.globalPosition - _lastDragPosition;
-            _lastDragPosition = details.globalPosition;
+            final delta = event.position - _lastDragPosition;
+            _lastDragPosition = event.position;
             widget.controller.updatePosition(delta);
           }
         },
-        onPanEnd: (details) {
+        onPointerUp: (event) {
           setState(() {
             _isDragging = false;
           });
           widget.controller.setDragMode(false);
           widget.onDragEnd?.call();
         },
-        // 터치 영역 4배 확대: 112x112px 투명 영역
+        onPointerCancel: (event) {
+          setState(() {
+            _isDragging = false;
+          });
+          widget.controller.setDragMode(false);
+        },
         child: Container(
-          width: 112,
-          height: 112,
-          color: Colors.transparent, // 투명한 터치 영역
+          width: 48,
+          height: 48,
+          color: Colors.transparent, // 투명 터치 영역
           alignment: Alignment.center,
           child: Container(
             width: 28,
@@ -399,42 +356,52 @@ class _TextBoxWidgetState extends State<TextBoxWidget> {
     );
   }
 
-  /// 리사이즈 핸들 빌더 (오른쪽 하단) - 터치 영역 4배 확대
+  /// 리사이즈 핸들 빌더 (오른쪽 하단) - Listener로 즉시 반응
   Widget _buildResizeHandle() {
     final model = widget.controller.model;
     
     return Positioned(
-      right: -54, // 4배 확대된 터치 영역(112px)의 중심을 맞추기 위한 오프셋
-      bottom: -54,
-      child: GestureDetector(
+      right: 0,
+      bottom: 0,
+      child: Listener(
         behavior: HitTestBehavior.opaque,
-        onPanStart: (details) {
+        onPointerDown: (event) {
           setState(() {
             _isResizing = true;
-            _lastResizePosition = details.globalPosition;
+            _lastResizePosition = event.position;
           });
         },
-        onPanUpdate: (details) {
+        onPointerMove: (event) {
           if (_isResizing) {
-            final delta = details.globalPosition - _lastResizePosition;
-            _lastResizePosition = details.globalPosition;
+            // 매번 최신 model을 가져와야 변경사항이 누적됨
+            final currentModel = widget.controller.model;
+            final delta = event.position - _lastResizePosition;
+            _lastResizePosition = event.position;
             
-            // 가로 넓이만 조절 (세로는 콘텐츠에 따라 자동)
-            final newWidth = (model.width + delta.dx).clamp(_minWidth, _maxWidth);
+            // 가로 넓이 조절
+            final newWidth = (currentModel.width + delta.dx).clamp(_minWidth, _maxWidth);
             widget.controller.updateWidth(newWidth);
+            
+            // 세로 높이 조절 (maxHeight 업데이트)
+            final newMaxHeight = currentModel.maxHeight + delta.dy;
+            widget.controller.updateMaxHeight(newMaxHeight);
           }
         },
-        onPanEnd: (details) {
+        onPointerUp: (event) {
           setState(() {
             _isResizing = false;
           });
-          widget.onDragEnd?.call();
+          widget.onResizeEnd?.call();
         },
-        // 터치 영역 4배 확대: 112x112px 투명 영역
+        onPointerCancel: (event) {
+          setState(() {
+            _isResizing = false;
+          });
+        },
         child: Container(
-          width: 112,
-          height: 112,
-          color: Colors.transparent, // 투명한 터치 영역
+          width: 48,
+          height: 48,
+          color: Colors.transparent, // 투명 터치 영역
           alignment: Alignment.center,
           child: Container(
             width: 28,
@@ -459,10 +426,13 @@ class _TextBoxWidgetState extends State<TextBoxWidget> {
                   ? Border.all(color: Colors.white, width: 2)
                   : null,
             ),
-            child: const Icon(
-              Icons.open_in_full,
-              color: Colors.white,
-              size: 16,
+            child: Transform.rotate(
+              angle: 1.5708, // 90도 회전 (π/2)
+              child: const Icon(
+                Icons.open_in_full,
+                color: Colors.white,
+                size: 16,
+              ),
             ),
           ),
         ),

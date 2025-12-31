@@ -14,7 +14,7 @@ class TextBoxModel {
   
   /// 크기 제약
   final double minHeight;
-  final double maxHeight;
+  double maxHeight; // mutable하게 변경하여 리사이즈 가능
   
   /// 텍스트 내용 (플레인 텍스트)
   String content;

@@ -24,14 +24,28 @@ namespace FlutterControlPanel
         private System.Windows.Forms.Timer refreshTimer;
         private Process logcatProcess;
         private string adbPath;
+        private string deviceId;
         private StringBuilder logBuffer = new StringBuilder();
         private bool isCapturing = false;
 
-        public DeviceMonitorForm(string adbPath)
+        public DeviceMonitorForm(string adbPath) : this(adbPath, "") { }
+        
+        public DeviceMonitorForm(string adbPath, string deviceId)
         {
             this.adbPath = adbPath;
+            this.deviceId = deviceId ?? "";
             InitializeUI();
             StartScreenCapture();
+        }
+        
+        // ADB 명령에 디바이스 ID 추가
+        private string GetAdbArgs(string baseArgs)
+        {
+            if (!string.IsNullOrEmpty(deviceId))
+            {
+                return $"-s {deviceId} {baseArgs}";
+            }
+            return baseArgs;
         }
 
         private void InitializeUI()
@@ -212,7 +226,7 @@ namespace FlutterControlPanel
                         var psiCapture = new ProcessStartInfo
                         {
                             FileName = adbPath,
-                            Arguments = $"shell screencap -p {phonePath}",
+                            Arguments = GetAdbArgs($"shell screencap -p {phonePath}"),
                             UseShellExecute = false,
                             CreateNoWindow = true,
                             RedirectStandardError = true
@@ -236,7 +250,7 @@ namespace FlutterControlPanel
                         var psiPull = new ProcessStartInfo
                         {
                             FileName = adbPath,
-                            Arguments = $"pull {phonePath} \"{tempPath}\"",
+                            Arguments = GetAdbArgs($"pull {phonePath} \"{tempPath}\""),
                             UseShellExecute = false,
                             CreateNoWindow = true,
                             RedirectStandardError = true
@@ -293,7 +307,7 @@ namespace FlutterControlPanel
                         var psiClean = new ProcessStartInfo
                         {
                             FileName = adbPath,
-                            Arguments = $"shell rm {phonePath}",
+                            Arguments = GetAdbArgs($"shell rm {phonePath}"),
                             UseShellExecute = false,
                             CreateNoWindow = true
                         };
@@ -330,7 +344,7 @@ namespace FlutterControlPanel
             {
                 ProcessStartInfo psi = new ProcessStartInfo();
                 psi.FileName = adbPath;
-                psi.Arguments = "logcat -v time flutter:V *:S";
+                psi.Arguments = GetAdbArgs("logcat -v time flutter:V *:S");
                 psi.UseShellExecute = false;
                 psi.RedirectStandardOutput = true;
                 psi.RedirectStandardError = true;

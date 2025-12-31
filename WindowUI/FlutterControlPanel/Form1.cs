@@ -38,10 +38,20 @@ namespace FlutterControlPanel
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "Android", "Sdk", "platform-tools", "adb.exe"
         );
+        
+        // Device selection
+        private ComboBox cmbDevices;
+        private string selectedDeviceId = "";
+        private string settingsFilePath;
 
         public Form1()
         {
             InitializeComponent(); // Call the empty one to set basic properties
+            
+            // 프로젝트별 설정 파일 경로 (프로젝트 폴더 내에 저장)
+            settingsFilePath = Path.Combine(projectRoot, ".flutter_controller_settings");
+            LoadProjectSettings();
+            
             SetupCustomUI();
             
             autoReloadTimer = new System.Windows.Forms.Timer();
@@ -54,6 +64,9 @@ namespace FlutterControlPanel
             
             // File System Watcher 초기화
             SetupFileWatcher();
+            
+            // 디바이스 목록 자동 새로고침
+            RefreshDeviceList();
         }
         
         private void SetupFileWatcher()
@@ -434,28 +447,59 @@ namespace FlutterControlPanel
             controlPanel.Controls.Add(btnStopLogcat);
             toolTip.SetToolTip(btnStopLogcat, "Logcat 중지");
 
-            // Check Devices Button
-            Button btnDevices = new Button();
-            btnDevices.Text = "📱 Devices";
-            btnDevices.Size = new Size(100, 35);
-            btnDevices.Location = new Point(410, row4Y);
-            btnDevices.BackColor = Color.FromArgb(206, 147, 216);
-            btnDevices.FlatStyle = FlatStyle.Flat;
-            btnDevices.Font = new Font("Segoe UI", 9, FontStyle.Bold);
-            btnDevices.Click += BtnCheckDevices_Click;
-            controlPanel.Controls.Add(btnDevices);
-            toolTip.SetToolTip(btnDevices, "연결된 Android 기기 목록 확인");
+            // Device Selection ComboBox
+            Label lblDevice = new Label();
+            lblDevice.Text = "📱";
+            lblDevice.Location = new Point(410, row4Y + 8);
+            lblDevice.AutoSize = true;
+            lblDevice.Font = new Font("Segoe UI", 11);
+            controlPanel.Controls.Add(lblDevice);
+            
+            cmbDevices = new ComboBox();
+            cmbDevices.Location = new Point(435, row4Y + 5);
+            cmbDevices.Width = 180;
+            cmbDevices.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbDevices.Font = new Font("Segoe UI", 9);
+            cmbDevices.SelectedIndexChanged += (s, ev) => {
+                if (cmbDevices.SelectedItem is DeviceItem item)
+                {
+                    selectedDeviceId = item.DeviceId;
+                    SaveProjectSettings();
+                    Log($"디바이스 선택: {item.DisplayText}");
+                }
+                else
+                {
+                    selectedDeviceId = "";
+                    SaveProjectSettings();
+                }
+            };
+            controlPanel.Controls.Add(cmbDevices);
+            toolTip.SetToolTip(cmbDevices, "ADB 명령에 사용할 디바이스 선택");
+            
+            // Refresh Devices Button
+            Button btnRefreshDevices = new Button();
+            btnRefreshDevices.Text = "🔄";
+            btnRefreshDevices.Size = new Size(30, 25);
+            btnRefreshDevices.Location = new Point(620, row4Y + 5);
+            btnRefreshDevices.FlatStyle = FlatStyle.Flat;
+            btnRefreshDevices.Font = new Font("Segoe UI", 9);
+            btnRefreshDevices.Click += (s, ev) => {
+                RefreshDeviceList();
+                Log("디바이스 목록 새로고침 완료");
+            };
+            controlPanel.Controls.Add(btnRefreshDevices);
+            toolTip.SetToolTip(btnRefreshDevices, "디바이스 목록 새로고침");
 
             // Device Monitor Button
             Button btnMonitor = new Button();
             btnMonitor.Text = "🖥 Monitor";
-            btnMonitor.Size = new Size(100, 35);
-            btnMonitor.Location = new Point(520, row4Y);
+            btnMonitor.Size = new Size(90, 35);
+            btnMonitor.Location = new Point(660, row4Y);
             btnMonitor.BackColor = Color.FromArgb(255, 183, 77);
             btnMonitor.FlatStyle = FlatStyle.Flat;
             btnMonitor.Font = new Font("Segoe UI", 9, FontStyle.Bold);
             btnMonitor.Click += (s, ev) => {
-                DeviceMonitorForm monitor = new DeviceMonitorForm(adbPath);
+                DeviceMonitorForm monitor = new DeviceMonitorForm(adbPath, selectedDeviceId);
                 monitor.Show();
             };
             controlPanel.Controls.Add(btnMonitor);
@@ -719,8 +763,15 @@ namespace FlutterControlPanel
                 return;
             }
             
+            // 선택된 디바이스가 있으면 -s 옵션 추가
+            string deviceArg = "";
+            if (!string.IsNullOrEmpty(selectedDeviceId))
+            {
+                deviceArg = $"-s {selectedDeviceId} ";
+            }
+            
             // adb.exe를 직접 fileName으로 전달 (StartProcess가 cmd /c로 감싸줌)
-            StartProcess(adbPath, arguments);
+            StartProcess(adbPath, deviceArg + arguments);
         }
 
         private void StopProcess()
@@ -912,5 +963,139 @@ namespace FlutterControlPanel
             catch { }
             return "com.example.heart_connect"; // fallback
         }
+        
+        // 프로젝트 설정 저장
+        private void SaveProjectSettings()
+        {
+            try
+            {
+                File.WriteAllText(settingsFilePath, $"device={selectedDeviceId}");
+            }
+            catch { }
+        }
+        
+        // 프로젝트 설정 로드
+        private void LoadProjectSettings()
+        {
+            try
+            {
+                if (File.Exists(settingsFilePath))
+                {
+                    string content = File.ReadAllText(settingsFilePath);
+                    var lines = content.Split('\n');
+                    foreach (var line in lines)
+                    {
+                        if (line.StartsWith("device="))
+                        {
+                            selectedDeviceId = line.Substring(7).Trim();
+                        }
+                    }
+                }
+            }
+            catch { }
+        }
+        
+        // 디바이스 목록 새로고침
+        private void RefreshDeviceList()
+        {
+            try
+            {
+                if (!File.Exists(adbPath)) return;
+                
+                ProcessStartInfo psi = new ProcessStartInfo();
+                psi.FileName = adbPath;
+                psi.Arguments = "devices -l";
+                psi.UseShellExecute = false;
+                psi.RedirectStandardOutput = true;
+                psi.CreateNoWindow = true;
+                
+                using (Process proc = Process.Start(psi))
+                {
+                    string output = proc.StandardOutput.ReadToEnd();
+                    proc.WaitForExit();
+                    
+                    cmbDevices.Items.Clear();
+                    cmbDevices.Items.Add("(자동 선택)");
+                    
+                    var lines = output.Split('\n');
+                    foreach (var line in lines)
+                    {
+                        if (line.Contains("device") && !line.StartsWith("List"))
+                        {
+                            // 디바이스 ID 추출 (첫 번째 공백 전까지)
+                            var parts = line.Trim().Split(new char[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+                            if (parts.Length >= 2 && parts[1] == "device")
+                            {
+                                string deviceId = parts[0];
+                                
+                                // 모델명 추출
+                                string model = "";
+                                var modelMatch = System.Text.RegularExpressions.Regex.Match(line, @"model:(\S+)");
+                                if (modelMatch.Success)
+                                {
+                                    model = modelMatch.Groups[1].Value;
+                                }
+                                
+                                string displayText = string.IsNullOrEmpty(model) ? deviceId : $"{model} ({deviceId})";
+                                cmbDevices.Items.Add(new DeviceItem(deviceId, displayText));
+                            }
+                        }
+                    }
+                    
+                    // 이전에 선택된 디바이스가 있으면 선택
+                    if (!string.IsNullOrEmpty(selectedDeviceId))
+                    {
+                        for (int i = 0; i < cmbDevices.Items.Count; i++)
+                        {
+                            if (cmbDevices.Items[i] is DeviceItem item && item.DeviceId == selectedDeviceId)
+                            {
+                                cmbDevices.SelectedIndex = i;
+                                return;
+                            }
+                        }
+                    }
+                    
+                    cmbDevices.SelectedIndex = 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log($"디바이스 목록 로드 실패: {ex.Message}");
+            }
+        }
+        
+        // 선택된 디바이스용 ADB 명령 실행
+        private void StartAdbCommandWithDevice(string arguments)
+        {
+            if (!File.Exists(adbPath))
+            {
+                Log($"ERROR: ADB not found at: {adbPath}");
+                Log("Please install Android SDK Platform Tools");
+                return;
+            }
+            
+            string deviceArg = "";
+            if (!string.IsNullOrEmpty(selectedDeviceId))
+            {
+                deviceArg = $"-s {selectedDeviceId} ";
+            }
+            
+            StartProcess(adbPath, deviceArg + arguments);
+        }
+    }
+    
+    // 디바이스 항목 클래스
+    public class DeviceItem
+    {
+        public string DeviceId { get; }
+        public string DisplayText { get; }
+        
+        public DeviceItem(string deviceId, string displayText)
+        {
+            DeviceId = deviceId;
+            DisplayText = displayText;
+        }
+        
+        public override string ToString() => DisplayText;
     }
 }

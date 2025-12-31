@@ -153,6 +153,14 @@ class TextBoxController extends ChangeNotifier {
     }
   }
 
+  void updateMaxHeight(double maxHeight) {
+    final clampedHeight = maxHeight.clamp(80.0, 600.0); // 최소 80, 최대 600
+    if (_model.maxHeight != clampedHeight) {
+      _model = _model.copyWith(maxHeight: clampedHeight);
+      notifyListeners();
+    }
+  }
+
   void updateContentHeight(double height) {
     if (_contentHeight != height) {
       _contentHeight = height;
