@@ -378,7 +378,7 @@ namespace FlutterControlPanel
             btnBuildAndroid = new Button();
             btnBuildAndroid.Text = "📱 APK";
             btnBuildAndroid.Size = new Size(70, 40);
-            btnBuildAndroid.Location = new Point(this.ClientSize.Width - 330, 10);
+            btnBuildAndroid.Location = new Point(this.ClientSize.Width - 380, 10);
             btnBuildAndroid.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             btnBuildAndroid.BackColor = Color.FromArgb(129, 199, 132);
             btnBuildAndroid.FlatStyle = FlatStyle.Flat;
@@ -399,6 +399,19 @@ namespace FlutterControlPanel
             btnBuildAAB.Click += BtnBuildAAB_Click;
             controlPanel.Controls.Add(btnBuildAAB);
             toolTip.SetToolTip(btnBuildAAB, "Android App Bundle 빌드 (Google Play 스토어용)");
+
+            // Open AAB Folder Button (New)
+            Button btnOpenAAB = new Button();
+            btnOpenAAB.Text = "📂";
+            btnOpenAAB.Size = new Size(40, 40);
+            btnOpenAAB.Location = new Point(this.ClientSize.Width - 300, 10); // APK 버튼과 AAB 버튼 사이
+            btnOpenAAB.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnOpenAAB.BackColor = Color.FromArgb(225, 190, 231); // Lighter Purple
+            btnOpenAAB.FlatStyle = FlatStyle.Flat;
+            btnOpenAAB.Font = new Font("Segoe UI", 12);
+            btnOpenAAB.Click += BtnOpenAABFolder_Click;
+            controlPanel.Controls.Add(btnOpenAAB);
+            toolTip.SetToolTip(btnOpenAAB, "AAB 빌드 폴더 열기");
 
             // Build & Test Button (Build + Install + Run)
             Button btnBuildTest = new Button();
