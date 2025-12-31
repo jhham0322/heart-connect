@@ -343,7 +343,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with TickerProvider
                             ),
                             child: Center(
                               child: Image.asset(
-                                'assets/icons/app_icon.png',
+                                DesignAssets.instance.appIcon,
                                 width: 240,
                                 height: 240,
                                 errorBuilder: (context, error, stackTrace) => const Text('💝', style: TextStyle(fontSize: 160)),

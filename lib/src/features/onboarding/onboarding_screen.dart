@@ -6,6 +6,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:heart_connect/src/providers/locale_provider.dart';
 import 'package:heart_connect/src/l10n/app_strings.dart';
+import 'package:heart_connect/src/core/design_assets.dart';
 
 /// 첫 실행 시 온보딩 화면
 class OnboardingScreen extends ConsumerStatefulWidget {
@@ -206,7 +207,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           
           // 앱 아이콘 (큰 사이즈) - 투명 배경 그대로 표시
           Image.asset(
-            'assets/icons/onboarding_heart.png',
+            DesignAssets.instance.onboardingHeart,
             width: 160,
             height: 160,
             fit: BoxFit.contain,

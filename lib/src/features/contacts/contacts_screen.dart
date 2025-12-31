@@ -16,6 +16,7 @@ import 'selected_group_provider.dart';
 import 'contact_service.dart';
 import '../../l10n/app_strings.dart';
 import '../../providers/locale_provider.dart';
+import '../../core/design_assets.dart';
 
 class ContactsScreen extends ConsumerStatefulWidget {
   const ContactsScreen({super.key});
@@ -125,7 +126,7 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
           Expanded(
             child: _TabPill(
               text: ref.watch(appStringsProvider).contactsMyPeople,
-              iconWidget: Image.asset('assets/icons/heart_icon.png', width: 24, height: 24),
+              iconWidget: Image.asset(DesignAssets.instance.heartIcon, width: 24, height: 24),
               isActive: _selectedTabIndex == 0,
               onTap: () => setState(() => _selectedTabIndex = 0),
             ),
@@ -1726,7 +1727,7 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
               ),
             IconButton(
               icon: Image.asset(
-                'assets/icons/heart_icon.png',
+                DesignAssets.instance.heartIcon,
                 width: 36,
                 height: 36,
               ),

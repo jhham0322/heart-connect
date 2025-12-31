@@ -11,6 +11,7 @@ import '../message/sms_service.dart';
 import '../../utils/phone_formatter.dart';
 import '../../l10n/app_strings.dart';
 import '../../providers/locale_provider.dart';
+import '../../core/design_assets.dart';
 import 'current_contact_provider.dart';
 
 class ContactDetailScreen extends ConsumerStatefulWidget {
@@ -63,7 +64,7 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
         actions: [
           IconButton(
             icon: Image.asset(
-              'assets/icons/heart_icon.png',
+              DesignAssets.instance.heartIcon,
               width: 36,
               height: 36,
             ),

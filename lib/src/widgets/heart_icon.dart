@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/design_assets.dart';
 
 /// 마음이음 커스텀 하트 아이콘 위젯
 /// assets/icons/heart_icon.png 이미지를 사용합니다.
@@ -17,7 +18,7 @@ class HeartIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Image.asset(
-      'assets/icons/heart_icon.png',
+      DesignAssets.instance.heartIcon,
       width: size,
       height: size,
       color: color,

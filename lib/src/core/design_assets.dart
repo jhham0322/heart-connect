@@ -52,6 +52,12 @@ class DesignAssets extends ChangeNotifier {
   /// 앱 로고
   String get appLogo => '$_basePath/icons/app_logo.png';
   
+  /// 앱 아이콘 (스플래시, 런처)
+  String get appIcon => '$_basePath/icons/app_icon.png';
+  
+  /// 온보딩 하트 아이콘
+  String get onboardingHeart => '$_basePath/icons/onboarding_heart.png';
+  
   /// 하트 아이콘
   String get heartIcon => '$_basePath/icons/heart_icon.png';
   
@@ -63,6 +69,11 @@ class DesignAssets extends ChangeNotifier {
   
   /// 설정 아이콘
   String get settingsIcon => '$_basePath/icons/settings_icon.png';
+  
+  // ===== Frames (카드 테두리) =====
+  
+  /// 프레임 폴더 경로
+  String get framesPath => '$_basePath/frames/';
   
   // ===== Buttons =====
   

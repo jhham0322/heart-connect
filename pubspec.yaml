@@ -105,6 +105,7 @@ flutter:
     - assets/design/default/icons/
     - assets/design/default/decorations/
     - assets/design/default/navigation/
+    - assets/design/default/frames/
     - assets/design/pink_kawaii/backgrounds/
     - assets/design/pink_kawaii/cards/
     - assets/design/pink_kawaii/icons/

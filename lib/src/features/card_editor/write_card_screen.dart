@@ -28,6 +28,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:file_selector/file_selector.dart'; // File Picker
 import 'package:image/image.dart' as img; // JPEG 변환용
 import 'package:heart_connect/src/services/social_share_service.dart'; // 소셜 미디어 공유
+import 'package:heart_connect/src/core/design_assets.dart'; // 테마 이미지 경로
 import 'package:heart_connect/src/services/mms_intent_service.dart'; // MMS Intent 발송
 import 'package:heart_connect/src/l10n/app_strings.dart';
 import 'package:heart_connect/src/providers/locale_provider.dart';
@@ -1174,7 +1175,7 @@ class _WriteCardScreenState extends ConsumerState<WriteCardScreen> {
     }
 
     final paths = allAssets
-        .where((String key) => key.startsWith('assets/images/frame/') && 
+        .where((String key) => key.startsWith(DesignAssets.instance.framesPath) && 
               (key.toLowerCase().endsWith('.png') || key.toLowerCase().endsWith('.jpg') || key.toLowerCase().endsWith('.jpeg')))
         .toList();
 
