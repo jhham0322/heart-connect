@@ -11,6 +11,9 @@ import 'package:permission_handler/permission_handler.dart'; // Added for permis
 import 'package:url_launcher/url_launcher.dart'; // Added for opening URLs
 import 'package:shared_preferences/shared_preferences.dart'; // Added for preferences
 import '../../theme/app_theme.dart';
+import '../../core/design_assets.dart';
+import '../../core/layout_constraints.dart';
+import '../../widgets/safe_image.dart';
 import '../contacts/contact_service.dart';
 import 'home_view_model.dart';
 import '../database/app_database.dart'; // Import for DailyPlan

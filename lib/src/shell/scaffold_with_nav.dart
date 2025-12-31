@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../theme/app_theme.dart';
+import '../core/design_assets.dart';
+import '../core/layout_constraints.dart';
+import '../widgets/safe_image.dart';
 import '../features/gallery/gallery_selection_provider.dart';
 import '../features/contacts/current_contact_provider.dart';
 import '../features/contacts/selected_group_provider.dart';
@@ -49,10 +52,15 @@ class ScaffoldWithNav extends ConsumerWidget {
                 children: [
                   Row(
                     children: [
-                      const Image(
-                        image: AssetImage('assets/icons/heart_icon.png'),
-                        width: 32,
-                        height: 32,
+                      SafeImage(
+                        assetPath: $assets.heartIcon,
+                        width: LayoutConstraints.logoHeight,
+                        height: LayoutConstraints.logoHeight,
+                        placeholder: Icon(
+                          FontAwesomeIcons.heart,
+                          color: AppTheme.accentCoral,
+                          size: LayoutConstraints.logoHeight,
+                        ),
                       ),
                       const SizedBox(width: 8),
                       Text(

@@ -20,6 +20,7 @@ import 'package:heart_connect/src/utils/app_version.dart';
 import 'package:heart_connect/src/l10n/app_strings.dart';
 import 'package:heart_connect/src/providers/locale_provider.dart';
 import 'package:heart_connect/src/providers/theme_provider.dart';
+import 'package:heart_connect/src/providers/design_theme_provider.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -988,6 +989,90 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
+  // 디자인 테마 선택 다이얼로그
+  void _showDesignThemeDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: const Color(0xFFE1BEE7).withOpacity(0.3),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(Icons.brush_outlined, color: Color(0xFF7B1FA2), size: 20),
+            ),
+            const SizedBox(width: 12),
+            const Expanded(child: Text('디자인 테마 선택', style: TextStyle(fontSize: 18))),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ...ref.read(availableThemesProvider).map((themeName) {
+              final isSelected = ref.watch(designThemeProvider) == themeName;
+              final displayName = themeDisplayNames[themeName] ?? themeName;
+              
+              return ListTile(
+                leading: Icon(
+                  isSelected ? Icons.check_circle : Icons.circle_outlined,
+                  color: isSelected ? const Color(0xFF7B1FA2) : Colors.grey,
+                ),
+                title: Text(
+                  displayName,
+                  style: TextStyle(
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    color: isSelected ? const Color(0xFF7B1FA2) : Colors.black87,
+                  ),
+                ),
+                subtitle: Text(
+                  themeName == 'default' ? '기본 코랄/베이지 스타일' : '분홍/복숭아 귀여운 스타일',
+                  style: const TextStyle(fontSize: 12),
+                ),
+                onTap: () {
+                  ref.read(designThemeProvider.notifier).setTheme(themeName);
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('$displayName 테마가 적용되었습니다.')),
+                  );
+                },
+              );
+            }),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.amber.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: const [
+                  Icon(FontAwesomeIcons.circleInfo, size: 14, color: Colors.amber),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      '새 테마는 디자이너가 이미지를 제공한 후 활성화됩니다.',
+                      style: TextStyle(fontSize: 11, color: Colors.amber),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('닫기'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final strings = ref.watch(appStringsProvider);
@@ -1063,6 +1148,30 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       setState(() => _brandingEnabled = v);
                       _saveSettings();
                     },
+                  ),
+                ),
+                const SizedBox(height: 16),
+                // 디자인 테마 선택
+                _buildSettingCard(
+                  iconBg: const Color(0xFFE1BEE7),
+                  icon: Icons.brush_outlined,
+                  title: '디자인 테마',
+                  desc: '앱 디자인 스타일 선택',
+                  descIcon: FontAwesomeIcons.palette,
+                  action: GestureDetector(
+                    onTap: () => _showDesignThemeDialog(),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE1BEE7).withOpacity(0.3),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFF7B1FA2)),
+                      ),
+                      child: Text(
+                        themeDisplayNames[ref.watch(designThemeProvider)] ?? '기본',
+                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF7B1FA2)),
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 16),
