@@ -8,7 +8,7 @@ import 'package:heart_connect/src/features/home/home_view_model.dart';
 import 'package:heart_connect/src/features/database/database_provider.dart';
 import 'package:heart_connect/src/features/calendar/calendar_service.dart';
 import 'package:heart_connect/src/features/onboarding/onboarding_screen.dart';
-import '../../core/design_assets.dart';
+import 'package:heart_connect/src/core/design_assets.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   final VoidCallback onInitComplete;
@@ -177,6 +177,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with TickerProvider
   /// 백그라운드 동기화
   void _startBackgroundSync(SharedPreferences prefs, int lastSyncTime) {
     Future.delayed(const Duration(seconds: 2), () async {
+      if (!mounted) return;
       try {
         final db = ref.read(appDatabaseProvider);
         final calendarService = ref.read(calendarServiceProvider);

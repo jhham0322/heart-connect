@@ -39,6 +39,9 @@ class DesignAssets extends ChangeNotifier {
   /// 기본 그라데이션 배경
   String get gradientBg => '$_basePath/backgrounds/gradient_bg.png';
   
+  /// 앱바 배경 배경
+  String get appBarBg => '$_basePath/backgrounds/app_bar_bg.png';
+  
   // ===== Cards =====
   
   /// 메인 카드 프레임 (구름 모양 등)

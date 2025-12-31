@@ -1,53 +1,38 @@
 ﻿import 'dart:async';
-import 'dart:io'; // Added for File and FileMode
-import 'dart:convert'; // Added for JSON
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:drift/drift.dart' hide Column;
 import '../database/database_provider.dart';
-import '../database/app_database.dart';
 import '../calendar/calendar_service.dart';
-import '../ai/ai_service.dart'; // Added AI Service
 
 // --- State Models ---
 class EventItem {
-  final int id;
   final String title;
   final String dateLabel;
-  final DateTime date;
-  final String type;
   final IconData icon;
   final Color color;
-  final String source;
-  final int daysAway;
-  final List<Map<String, String>> recipients; // Added recipients list
-
+  final String source; // 'Contacts', 'Google Calendar', etc.
+  final int daysAway;  // For sorting
+  
   const EventItem({
-    required this.id,
     required this.title, 
     required this.dateLabel, 
-    required this.date,
-    required this.type,
     required this.icon, 
     required this.color,
     this.source = '',
     this.daysAway = 999,
-    this.recipients = const [],
   });
 }
 
 class HomeState {
   final int sentCount;
   final int totalGoal;
-  final List<DailyPlan> todayPlans;
   final List<EventItem> upcomingEvents;
   final bool isLoading;
 
   const HomeState({
     this.sentCount = 0,
     this.totalGoal = 5,
-    this.todayPlans = const [],
     this.upcomingEvents = const [],
     this.isLoading = true,
   });
@@ -55,14 +40,12 @@ class HomeState {
   HomeState copyWith({
     int? sentCount,
     int? totalGoal,
-    List<DailyPlan>? todayPlans,
     List<EventItem>? upcomingEvents,
     bool? isLoading,
   }) {
     return HomeState(
       sentCount: sentCount ?? this.sentCount,
       totalGoal: totalGoal ?? this.totalGoal,
-      todayPlans: todayPlans ?? this.todayPlans,
       upcomingEvents: upcomingEvents ?? this.upcomingEvents,
       isLoading: isLoading ?? this.isLoading,
     );
@@ -81,109 +64,117 @@ class HomeViewModel extends StateNotifier<HomeState> {
 
   Future<void> loadData() async {
     final db = ref.read(appDatabaseProvider);
+    final calendarService = ref.read(calendarServiceProvider);
     
-    // 1. Prepare Dates
+    // 1. Sent Count
+    final count = await db.getTodaySentCount();
+    
+    // 2. Prepare Data
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
+    final endCalc = today.add(const Duration(days: 45));
     
-    // 2. Get Plans from DB (鍮좊쫫)
-    final plans = await db.getFuturePlans(today);
+    // Use a Map to handle merging: Key = "YYYY-MM-DD|Name"
+    // But since names might differ ("유재석" vs "유재석의 생일"), we need smarter logic or simpler separate lists then merge.
+    // Let's use a list and check manually.
+    final List<EventItem> allEvents = [];
     
-    // 3. Get Contacts from DB for recipient matching (鍮좊쫫)
+    // A. Contacts Birthdays
     final contacts = await db.getAllContacts();
-    
-    // 4. Process Plans (濡쒖뺄 泥섎━留?
-    final List<DailyPlan> todayPlans = [];
-    final List<EventItem> futureEvents = [];
-    int todayGoal = 0;
-
-    // Count ALL today's plans for goal
-    final allTodayPlans = plans.where((p) {
-      final diff = p.date.difference(today).inDays;
-      return diff == 0 && p.content != 'Daily Warmth';
-    }).toList();
-
-    todayGoal = allTodayPlans.length;
-    final sentCount = allTodayPlans.where((p) => p.isCompleted).length;
-
-    for (var plan in plans) {
-       final diff = plan.date.difference(today).inDays;
-       if (diff < 0) continue;
-       
-       // Parse recipients
-       List<Map<String, String>> recipients = [];
-       if (plan.recipients != null) {
-        try {
-          final List<dynamic> list = jsonDecode(plan.recipients!);
-          recipients = list.map((e) => Map<String, String>.from(e)).toList();
-        } catch (e) {
-          // Ignore parse errors
+    for (var c in contacts) {
+      if (c.birthday != null) {
+        final bday = c.birthday!;
+        DateTime nextBday = DateTime(now.year, bday.month, bday.day);
+        if (nextBday.isBefore(today)) {
+           nextBday = DateTime(now.year + 1, bday.month, bday.day);
+        }
+        
+        final diff = nextBday.difference(today).inDays;
+        
+        if (diff >= 0 && diff <= 45) {
+           allEvents.add(EventItem(
+             title: c.name,
+             dateLabel: _getLabel(diff),
+             icon: FontAwesomeIcons.cakeCandles,
+             color: Colors.orange,
+             source: 'App Contacts',
+             daysAway: diff,
+           ));
         }
       }
-
-       // Today Plans & Extended Range (D-5)
-       if (diff >= 0 && diff <= 5) {
-          if (!plan.isCompleted && plan.content != 'Daily Warmth') {
-             todayPlans.add(plan);
-          }
-       } 
-       else {
-          // Future Events (D-6+)
-          if (plan.content == 'Daily Warmth') continue;
-
-           IconData icon = FontAwesomeIcons.calendarDay;
-           Color color = Colors.blueAccent;
-           
-           switch(plan.type) {
-              case 'Holiday': 
-                 icon = FontAwesomeIcons.flag; 
-                 color = Colors.redAccent; 
-                 break;
-              case 'Birthday': 
-                 icon = FontAwesomeIcons.cakeCandles; 
-                 color = Colors.orangeAccent; 
-                 break;
-              case 'Anniversary': 
-                 icon = FontAwesomeIcons.heart; 
-                 color = Colors.pinkAccent; 
-                 break;
-              case 'Work':
-                 icon = FontAwesomeIcons.briefcase;
-                 color = Colors.brown;
-                 break;
-              case 'Personal':
-                 icon = FontAwesomeIcons.user;
-                 color = Colors.green; 
-                 break;
-              case 'Important':
-                 icon = FontAwesomeIcons.star;
-                 color = Colors.amber;
-                 break;
+    }
+    
+    // B. Calendar Events
+    final calEvents = await calendarService.getEvents(today, endCalc);
+    
+    for (var e in calEvents) {
+       final eDate = DateTime(e.date.year, e.date.month, e.date.day);
+       final diff = eDate.difference(today).inDays;
+       if (diff < 0) continue; // Past
+       
+       // Check for Merge
+       // If same day + Birthday + name match
+       bool merged = false;
+       if (e.type == 'Birthday') {
+           for (int i = 0; i < allEvents.length; i++) {
+               final existing = allEvents[i];
+               // Check if same day (diff) AND title similarity
+               if (existing.daysAway == diff && e.title.contains(existing.title)) {
+                   // MERGE
+                   allEvents[i] = EventItem(
+                       title: existing.title, // Keep simple name
+                       dateLabel: existing.dateLabel,
+                       icon: existing.icon,
+                       color: existing.color, // Keep Contact color preference
+                       source: 'Contacts + ${e.source}', // Combine sources
+                       daysAway: existing.daysAway
+                   );
+                   merged = true;
+                   break;
+               }
            }
-           
-           futureEvents.add(EventItem(
-              id: plan.id,
-              title: plan.content,
-              dateLabel: _getLabel(diff),
-              date: plan.date,
-              type: plan.type,
-              icon: icon,
-              color: color,
-              source: plan.isGenerated ? 'App' : 'Calendar',
-              daysAway: diff,
-              recipients: recipients,
-           ));
+       }
+       
+       if (!merged) {
+         // Create New
+          IconData icon = FontAwesomeIcons.calendarDay;
+          Color color = Colors.blueAccent;
+          
+          switch(e.type) {
+             case 'Holiday': 
+                icon = FontAwesomeIcons.flag; 
+                color = Colors.redAccent; 
+                break;
+             case 'Birthday': 
+                icon = FontAwesomeIcons.cakeCandles; 
+                color = Colors.orangeAccent; 
+                break;
+             case 'Anniversary': 
+                icon = FontAwesomeIcons.heart; 
+                color = Colors.pinkAccent; 
+                break;
+             default: 
+                // Defaults already set
+                break;
+          }
+          
+          allEvents.add(EventItem(
+             title: e.title,
+             dateLabel: _getLabel(diff),
+             icon: icon,
+             color: color,
+             source: e.source,
+             daysAway: diff,
+          ));
        }
     }
-
-    // Sort Future Events
-    futureEvents.sort((a, b) => a.daysAway.compareTo(b.daysAway));
+    
+    // Sort by Date (daysAway)
+    allEvents.sort((a, b) => a.daysAway.compareTo(b.daysAway));
     
     state = state.copyWith(
-      sentCount: sentCount,
-      totalGoal: todayGoal,
-      todayPlans: todayPlans,
-      upcomingEvents: futureEvents,
+      sentCount: count,
+      upcomingEvents: allEvents,
       isLoading: false,
     );
   }
@@ -197,154 +188,8 @@ class HomeViewModel extends StateNotifier<HomeState> {
   void refresh() {
       loadData();
   }
-
-  // --- Actions ---
-  Future<void> deletePlan(int id) async {
-    final db = ref.read(appDatabaseProvider);
-    await db.deletePlan(id);
-    loadData();
-  }
-
-  Future<void> completePlan(int id) async {
-    final db = ref.read(appDatabaseProvider);
-    await db.completePlan(id);
-    loadData();
-  }
-
-  Future<void> movePlanToEnd(int id) async {
-    final db = ref.read(appDatabaseProvider);
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    await db.movePlanToEnd(id, today);
-    loadData();
-  }
-
-  Future<void> reschedulePlan(int id, DateTime newDate) async {
-    final db = ref.read(appDatabaseProvider);
-    final targetDate = DateTime(newDate.year, newDate.month, newDate.day);
-    await db.reschedulePlan(id, targetDate);
-    loadData();
-  }
-
-  Future<void> updatePlanIcon(int id, String newType) async {
-    final db = ref.read(appDatabaseProvider);
-    await db.updatePlanType(id, newType);
-    loadData();
-  }
-
-  Future<void> updatePlanTitle(int id, String newTitle) async {
-    final db = ref.read(appDatabaseProvider);
-    // Since we don't have a direct updateTitle method in AppDatabase yet, we'll implement it or use raw SQL.
-    // Better: Add updatePlanTitle to AppDatabase. But for now, let's check AppDatabase.
-    // Assuming we need to add it.
-    await db.updatePlanContent(id, newTitle);
-    loadData();
-  }
-
-  Future<void> updateScheduleDetails(int id, String title, DateTime date, String type, {List<Map<String, String>> recipients = const []}) async {
-    final db = ref.read(appDatabaseProvider);
-    final jsonRecipients = jsonEncode(recipients);
-    
-    await db.updatePlanDetailsWithRecipients(id, title, date, type, jsonRecipients);
-    
-    // Verify update
-    await db.getPlan(id);
-    
-    loadData();
-  }
-
-  Future<void> addSchedule(String title, DateTime date, {String type = 'Schedule', List<Map<String, String>> recipients = const []}) async {
-    final db = ref.read(appDatabaseProvider);
-    final calendarService = ref.read(calendarServiceProvider);
-    final aiService = AiService();
-
-    // 1. AI Name Extraction if recipients are empty
-    List<Map<String, String>> finalRecipients = [...recipients];
-    if (finalRecipients.isEmpty) {
-      try {
-        final extractedNames = await aiService.extractNames(title);
-        if (extractedNames.isNotEmpty && extractedNames != "NOTHING") {
-           final contacts = await db.getAllContacts();
-           final names = extractedNames.split(',').map((s) => s.trim()).toList();
-           final Set<String> matchedPhones = {};
-           
-           for (var name in names) {
-               if (name.isEmpty) continue;
-               final cleanName = name.replaceAll(' ', '');
-               final matches = contacts.where((c) {
-                  final cleanContactName = c.name.replaceAll(' ', '');
-                  return cleanContactName.contains(cleanName) || cleanName.contains(cleanContactName);
-               }).toList();
-               
-               for (var match in matches) {
-                   if (matchedPhones.add(match.phone)) {
-                       finalRecipients.add({'name': match.name, 'phone': match.phone});
-                   }
-               }
-           }
-           
-        }
-      } catch (e) {
-        
-      }
-    }
-
-    // 2. Add to Device Calendar
-    await calendarService.addEvent(title, date);
-
-    // 3. Add to Local DB
-    await db.insertPlan(DailyPlansCompanion.insert(
-      date: date,
-      content: title,
-      type: Value(type),
-      goalCount: const Value(5),
-      isGenerated: const Value(false),
-      sortOrder: const Value(0),
-      isCompleted: const Value(false),
-      recipients: Value(jsonEncode(finalRecipients)),
-    ));
-
-    // 4. Refresh
-    loadData();
-  }
-
-
-
-  Future<void> activateFuturePlan(int id) async {
-    final db = ref.read(appDatabaseProvider);
-    try {
-      final plan = await db.getPlan(id);
-      
-      // Check if already in todayPlans
-      final existingIndex = state.todayPlans.indexWhere((p) => p.id == plan.id);
-      
-      if (existingIndex != -1) {
-        // Already exists, just ensure sorted (optional, but good for consistency)
-        final List<DailyPlan> updatedPlans = List<DailyPlan>.from(state.todayPlans);
-        // Re-sort to maintain date order
-        updatedPlans.sort((a, b) {
-          final dateComp = a.date.compareTo(b.date);
-          if (dateComp != 0) return dateComp;
-          return a.sortOrder.compareTo(b.sortOrder);
-        });
-        state = state.copyWith(todayPlans: updatedPlans);
-      } else {
-        // Add and sort
-        final updatedPlans = [...state.todayPlans, plan];
-        updatedPlans.sort((a, b) {
-          final dateComp = a.date.compareTo(b.date);
-          if (dateComp != 0) return dateComp;
-          return a.sortOrder.compareTo(b.sortOrder);
-        });
-        state = state.copyWith(todayPlans: updatedPlans);
-      }
-    } catch (e) {
-      // Error activating plan - silent fail
-    }
-  }
 }
 
 final homeViewModelProvider = StateNotifierProvider<HomeViewModel, HomeState>((ref) {
   return HomeViewModel(ref);
 });
-

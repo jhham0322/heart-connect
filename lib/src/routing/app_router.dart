@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../features/database/app_database.dart'; // Import Contact type
-import 'package:heart_connect/src/features/home/home_screen.dart';
-import 'package:heart_connect/src/features/contacts/contacts_screen.dart';
-import 'package:heart_connect/src/features/gallery/gallery_screen.dart';
-import 'package:heart_connect/src/features/card_editor/write_card_screen.dart';
-import 'package:heart_connect/src/features/settings/settings_screen.dart';
-import 'package:heart_connect/src/features/alarm/alarm_screen.dart';
-import 'package:heart_connect/src/features/message/message_screen.dart';
+import '../features/home/home_screen.dart';
+import '../features/contacts/contacts_screen.dart';
+import '../features/gallery/gallery_screen.dart';
+import '../features/card_editor/write_card_screen.dart';
+import '../features/settings/settings_screen.dart';
 import '../shell/scaffold_with_nav.dart';
 
 // Private navigator keys
@@ -29,51 +26,13 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: '/write',
         parentNavigatorKey: _rootNavigatorKey,
         pageBuilder: (context, state) {
-          String? initialImage = state.uri.queryParameters['image'];
-          final extra = state.extra;
-          Contact? initialContact;
-          String? originalMessage;
-          List<Map<String, String>>? initialRecipients;
-          String? categoryId;
-          List<String>? categoryImages;
-
-          if (extra is Contact) {
-            initialContact = extra;
-          } else if (extra is Map<String, dynamic>) {
-            if (extra['contact'] is Contact) {
-              initialContact = extra['contact'] as Contact;
-            }
-            if (extra['originalMessage'] is String) {
-              originalMessage = extra['originalMessage'] as String;
-            }
-            // 일정에서 전달받은 수신자 목록 처리
-            if (extra['recipients'] is List) {
-              initialRecipients = (extra['recipients'] as List)
-                  .map((e) => Map<String, String>.from(e as Map))
-                  .toList();
-            }
-            // 갤러리에서 전달된 이미지 및 카테고리 정보
-            if (extra['image'] is String) {
-              initialImage = extra['image'] as String;
-            }
-            if (extra['categoryId'] is String) {
-              categoryId = extra['categoryId'] as String;
-            }
-            if (extra['categoryImages'] is List) {
-              categoryImages = List<String>.from(extra['categoryImages'] as List);
-            }
-          }
-          
+          final initialImage = state.uri.queryParameters['image'];
+          print("[AppRouter] /write route (standalone). Param: $initialImage");
           return MaterialPage(
             fullscreenDialog: true,
             child: WriteCardScreen(
               key: ValueKey(initialImage),
               initialImage: initialImage,
-              initialContact: initialContact,
-              originalMessage: originalMessage,
-              initialRecipients: initialRecipients,
-              initialCategoryId: categoryId,
-              initialCategoryImages: categoryImages,
             ),
           );
         },
@@ -86,20 +45,6 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           return const MaterialPage(
             fullscreenDialog: true,
             child: SettingsScreen(),
-          );
-        },
-      ),
-      // Alarm Screen - 독립적인 전체 화면
-      GoRoute(
-        path: '/alarm',
-        parentNavigatorKey: _rootNavigatorKey,
-        pageBuilder: (context, state) {
-          final message = state.uri.queryParameters['message'];
-          return MaterialPage(
-            fullscreenDialog: true,
-            child: AlarmScreen(
-              message: message,
-            ),
           );
         },
       ),
@@ -140,7 +85,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/mailbox',
-                pageBuilder: (context, state) => const NoTransitionPage(child: MessageScreen()),
+                pageBuilder: (context, state) => const NoTransitionPage(child: Scaffold(body: Center(child: Text("Mailbox Construction")))),
               ),
             ],
           ),

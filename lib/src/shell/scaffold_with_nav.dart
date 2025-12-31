@@ -34,99 +34,54 @@ class ScaffoldWithNav extends ConsumerWidget {
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(60),
         child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.02),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      SafeImage(
-                        assetPath: $assets.heartIcon,
-                        width: LayoutConstraints.logoHeight,
-                        height: LayoutConstraints.logoHeight,
-                        placeholder: Icon(
+            color: Colors.transparent, 
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
                           FontAwesomeIcons.heart,
                           color: AppTheme.accentCoral,
                           size: LayoutConstraints.logoHeight,
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        ref.watch(appStringsProvider).appName,
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.textPrimary,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      IconButton(
-                        icon: Transform.scale(
-                          scale: 1.3,
-                          child: SafeImage(
-                            assetPath: $assets.bellIcon,
-                            width: 28,
-                            height: 28,
-                            placeholder: Icon(FontAwesomeIcons.bell, size: 24, color: AppTheme.textPrimary),
+                        const SizedBox(width: 8),
+                        Text(
+                          ref.watch(appStringsProvider).appName,
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.textPrimary,
                           ),
                         ),
-                        onPressed: () {},
-                      ),
-                      IconButton(
-                        icon: Transform.scale(
-                          scale: 1.3,
-                          child: SafeImage(
-                            assetPath: $assets.settingsIcon,
-                            width: 28,
-                            height: 28,
-                            placeholder: Icon(FontAwesomeIcons.gear, size: 24, color: AppTheme.textPrimary),
-                          ),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(FontAwesomeIcons.bell, size: 24, color: AppTheme.textPrimary),
+                          onPressed: () {},
                         ),
-                        onPressed: () => context.push('/settings'),
-                      ),
-                    ],
-                  ),
-                ],
+                        IconButton(
+                          icon: const Icon(FontAwesomeIcons.gear, size: 24, color: AppTheme.textPrimary),
+                          onPressed: () => context.push('/settings'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
         ),
       ),
       body: navigationShell,
       extendBody: false,
-      floatingActionButton: Container(
+      floatingActionButton: SizedBox(
         height: 70,
         width: 70,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: const LinearGradient(
-            colors: [Color(0xFFFF8A65), Color(0xFFFF7043)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFFFF8A65).withOpacity(0.4),
-              blurRadius: 20,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
         child: FloatingActionButton(
           heroTag: 'write-fab',
           onPressed: () async {
@@ -167,93 +122,74 @@ class ScaffoldWithNav extends ConsumerWidget {
                context.push('/write');
             }
           },
-          elevation: 0,
-          focusElevation: 0,
-          hoverElevation: 0,
-          highlightElevation: 0,
-          backgroundColor: Colors.transparent,
-          splashColor: Colors.transparent,
-          hoverColor: Colors.transparent,
-          focusColor: Colors.transparent,
+          elevation: 4,
+          backgroundColor: AppTheme.accentCoral, // Use theme color directly
           shape: const CircleBorder(),
-          child: Transform.scale(
-            scale: 1.5,
-            child: SafeImage(
-              assetPath: $assets.fabIcon,
-              width: 36,
-              height: 36,
-              placeholder: const Icon(FontAwesomeIcons.penNib, color: Colors.white, size: 32),
-            ),
-          ),
+          child: const Icon(FontAwesomeIcons.penNib, color: Colors.white, size: 32),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 20,
-              offset: const Offset(0, -5),
-            ),
+        height: 100, 
+        child: Stack(
+          alignment: Alignment.bottomCenter,
+          children: [
+             // 배경 이미지 (유지)
+             Positioned.fill(
+                child: SafeImage(
+                  assetPath: $assets.navBarBg,
+                  fit: BoxFit.fill, 
+                ),
+             ),
+             // 실제 버튼들
+             Padding(
+               padding: const EdgeInsets.only(bottom: 15), 
+               child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Expanded(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        _NavItem(
+                          icon: FontAwesomeIcons.house,
+                          label: ref.watch(appStringsProvider).navHome,
+                          isSelected: navigationShell.currentIndex == 0,
+                          onTap: () => _goBranch(0),
+                        ),
+                        _NavItem(
+                          icon: FontAwesomeIcons.addressBook,
+                          label: ref.watch(appStringsProvider).navContacts,
+                          isSelected: navigationShell.currentIndex == 1,
+                          onTap: () => _goBranch(1),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 80), // FAB 공간
+                  Expanded(
+                    child: Row(
+                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                       children: [
+                        _NavItem(
+                          icon: FontAwesomeIcons.image,
+                          label: ref.watch(appStringsProvider).navGallery,
+                          isSelected: navigationShell.currentIndex == 2,
+                          onTap: () => _goBranch(2),
+                        ),
+                        _NavItem(
+                          icon: FontAwesomeIcons.envelope,
+                          label: ref.watch(appStringsProvider).navMessages,
+                          isSelected: navigationShell.currentIndex == 3,
+                          onTap: () => _goBranch(3),
+                        ),
+                       ],
+                    ),
+                  ),
+                ],
+               ),
+             ),
           ],
-        ),
-        child: BottomAppBar(
-          shape: const CircularNotchedRectangle(),
-          notchMargin: 10.0,
-          color: Colors.white,
-          surfaceTintColor: Colors.white,
-          elevation: 0,
-          height: 85,
-          padding: EdgeInsets.zero,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Expanded(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _NavItem(
-                      imagePath: $assets.navHome,
-                      fallbackIcon: FontAwesomeIcons.house,
-                      label: ref.watch(appStringsProvider).navHome,
-                      isSelected: navigationShell.currentIndex == 0,
-                      onTap: () => _goBranch(0),
-                    ),
-                    _NavItem(
-                      imagePath: $assets.navContacts,
-                      fallbackIcon: FontAwesomeIcons.addressBook,
-                      label: ref.watch(appStringsProvider).navContacts,
-                      isSelected: navigationShell.currentIndex == 1,
-                      onTap: () => _goBranch(1),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 80),
-              Expanded(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _NavItem(
-                      imagePath: $assets.navGallery,
-                      fallbackIcon: FontAwesomeIcons.image,
-                      label: ref.watch(appStringsProvider).navGallery,
-                      isSelected: navigationShell.currentIndex == 2,
-                      onTap: () => _goBranch(2),
-                    ),
-                    _NavItem(
-                      imagePath: $assets.navMessage,
-                      fallbackIcon: FontAwesomeIcons.envelope,
-                      label: ref.watch(appStringsProvider).navMessages,
-                      isSelected: navigationShell.currentIndex == 3,
-                      onTap: () => _goBranch(3),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
         ),
       ),
     );
@@ -261,15 +197,13 @@ class ScaffoldWithNav extends ConsumerWidget {
 }
 
 class _NavItem extends StatelessWidget {
-  final String imagePath;  // 이미지 경로
-  final IconData fallbackIcon;  // 이미지 없을 때 폴백 아이콘
+  final IconData icon; 
   final String label;
   final bool isSelected;
   final VoidCallback onTap;
 
   const _NavItem({
-    required this.imagePath,
-    required this.fallbackIcon,
+    required this.icon,
     required this.label,
     required this.isSelected,
     required this.onTap,
@@ -286,18 +220,7 @@ class _NavItem extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Opacity(
-              opacity: isSelected ? 1.0 : 0.5,
-              child: Transform.scale(
-                scale: 1.4,
-                child: SafeImage(
-                  assetPath: imagePath,
-                  width: 32,
-                  height: 32,
-                  placeholder: Icon(fallbackIcon, color: color, size: 28),
-                ),
-              ),
-            ),
+             Icon(icon, color: color, size: 28),
             const SizedBox(height: 4),
             Text(
               label,

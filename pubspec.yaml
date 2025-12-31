@@ -1,7 +1,7 @@
 name: heart_connect
 description: "A Flutter-based emotional relationship management and semi-automatic card sending solution."
 publish_to: 'none'
-version: 1.1.3+18
+version: 1.0.0+1
 
 environment:
   sdk: '>=3.2.0 <4.0.0'
@@ -34,7 +34,6 @@ dependencies:
   share_plus: ^12.0.1
   url_launcher: ^6.2.5
   http: ^1.2.0
-  photo_manager: ^3.6.3
 
   # Notifications & Background
   flutter_local_notifications: ^18.0.1
@@ -55,15 +54,10 @@ dependencies:
   shared_preferences: ^2.5.4
   google_generative_ai: ^0.4.7
   
-  # Ads
-  google_mobile_ads: ^5.1.0
-
   # Rich Text Editor
   flutter_quill: ^11.5.0
   flutter_quill_extensions: ^11.0.0
   vsc_quill_delta_to_html: ^1.0.5
-  file_selector: ^1.1.0
-  file_selector_windows: ^0.9.3+5
 
 dev_dependencies:
   flutter_test:
@@ -71,14 +65,12 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   build_runner: ^2.4.8
   drift_dev: ^2.16.0
-  flutter_launcher_icons: ^0.13.1
 
 dependency_overrides:
   intl: ^0.19.0
   riverpod_generator: ^2.4.0
 
 flutter:
-  generate: true
   uses-material-design: true
   
   assets:
@@ -92,25 +84,8 @@ flutter:
     - assets/images/cards/motherDay/
     - assets/images/cards/teachersDay/
     - assets/images/cards/tour/
-    - assets/images/cards/hobby/
-    - assets/images/cards/sports/
+    - assets/images/cards/halloween/
+    - assets/images/cards/thanksgiving/
     - assets/images/cards/my_photos/
     - assets/images/cards/favorites/
-    - assets/images/frame/
-    - assets/themes/
-    - assets/data/
-    - assets/design/
-    - assets/design/default/backgrounds/
-    - assets/design/default/cards/
-    - assets/design/default/icons/
-    - assets/design/default/decorations/
-    - assets/design/default/navigation/
-    - assets/design/default/frames/
-    - assets/design/default/buttons/
-    - assets/design/default/avatars/
-    - assets/design/pink_kawaii/backgrounds/
-    - assets/design/pink_kawaii/cards/
-    - assets/design/pink_kawaii/icons/
-    - assets/design/pink_kawaii/decorations/
-    - assets/design/pink_kawaii/navigation/
-
+    - assets/images/cards/letters/
