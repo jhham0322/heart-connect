@@ -261,9 +261,11 @@ namespace FlutterControlPanel
                     if (File.Exists(path))
                     {
                         iconPath = path;
-                        using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read))
+                        // 파일 잠금 방지를 위해 바이트로 읽어서 메모리 스트림 생성
+                        byte[] bytes = File.ReadAllBytes(path);
+                        using (var ms = new MemoryStream(bytes))
                         {
-                            picIcon.Image = Image.FromStream(fs);
+                            picIcon.Image = Image.FromStream(ms);
                         }
                         break;
                     }
@@ -285,9 +287,10 @@ namespace FlutterControlPanel
                 if (ofd.ShowDialog() == DialogResult.OK)
                 {
                     iconPath = ofd.FileName;
-                    using (var fs = new FileStream(iconPath, FileMode.Open, FileAccess.Read))
+                    byte[] bytes = File.ReadAllBytes(iconPath);
+                    using (var ms = new MemoryStream(bytes))
                     {
-                        picIcon.Image = Image.FromStream(fs);
+                        picIcon.Image = Image.FromStream(ms);
                     }
                 }
             }
@@ -396,7 +399,11 @@ namespace FlutterControlPanel
         {
             try
             {
-                using (Image original = Image.FromFile(sourceIconPath))
+                // 원본 데이터를 메모리에 복사 (파일 핸들 즉시 해제)
+                byte[] sourceBytes = File.ReadAllBytes(sourceIconPath);
+                
+                using (var ms = new MemoryStream(sourceBytes))
+                using (Image original = Image.FromStream(ms))
                 {
                     // Android icon sizes
                     var sizes = new Dictionary<string, int>
@@ -425,14 +432,25 @@ namespace FlutterControlPanel
                             resized.Save(outputPath, System.Drawing.Imaging.ImageFormat.Png);
                         }
                     }
-
-                    // Also save to assets
-                    string assetsIconPath = Path.Combine(projectRoot, "assets", "icons");
-                    if (!Directory.Exists(assetsIconPath))
-                    {
-                        Directory.CreateDirectory(assetsIconPath);
-                    }
-                    File.Copy(sourceIconPath, Path.Combine(assetsIconPath, "app_icon.png"), true);
+                }
+                
+                // assets에 원본 저장 (이제 original Image가 dispose되었으므로 안전)
+                string assetsIconPath = Path.Combine(projectRoot, "assets", "icons");
+                if (!Directory.Exists(assetsIconPath))
+                {
+                    Directory.CreateDirectory(assetsIconPath);
+                }
+                
+                string destPath = Path.Combine(assetsIconPath, "app_icon.png");
+                
+                // 원본 경로와 대상 경로가 다를 때만 복사 (같으면 이미 있음)
+                // 경로 정규화해서 비교
+                string fullSource = Path.GetFullPath(sourceIconPath);
+                string fullDest = Path.GetFullPath(destPath);
+                
+                if (!string.Equals(fullSource, fullDest, StringComparison.OrdinalIgnoreCase))
+                {
+                   File.WriteAllBytes(destPath, sourceBytes);
                 }
             }
             catch (Exception ex)

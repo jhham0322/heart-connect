@@ -659,8 +659,8 @@ namespace FlutterControlPanel
             // AAB 빌드 명령 실행
             string aabBuildCmd = "flutter build appbundle --release";
             
-            // 빌드 완료 후 폴더 열기 위해 체인 명령 사용
-            string fullCmd = $"{aabBuildCmd} && echo. && echo ===================================== && echo AAB 빌드 완료! && echo 파일 위치: build\\app\\outputs\\bundle\\release\\app-release.aab && echo =====================================";
+            // 빌드 완료 후 폴더 열기 위해 체인 명령 사용 (chcp 65001로 UTF-8 강제 설정)
+            string fullCmd = $"chcp 65001 && {aabBuildCmd} && echo. && echo ===================================== && echo AAB Build Success! (AAB 빌드 완료!) && echo File: build\\app\\outputs\\bundle\\release\\app-release.aab && echo =====================================";
             
             StartProcess("cmd", "/c " + fullCmd);
         }
