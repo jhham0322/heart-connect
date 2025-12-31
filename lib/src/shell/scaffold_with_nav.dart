@@ -76,20 +76,26 @@ class ScaffoldWithNav extends ConsumerWidget {
                   Row(
                     children: [
                       IconButton(
-                        icon: SafeImage(
-                          assetPath: $assets.bellIcon,
-                          width: 28,
-                          height: 28,
-                          placeholder: Icon(FontAwesomeIcons.bell, size: 24, color: AppTheme.textPrimary),
+                        icon: Transform.scale(
+                          scale: 1.3,
+                          child: SafeImage(
+                            assetPath: $assets.bellIcon,
+                            width: 28,
+                            height: 28,
+                            placeholder: Icon(FontAwesomeIcons.bell, size: 24, color: AppTheme.textPrimary),
+                          ),
                         ),
                         onPressed: () {},
                       ),
                       IconButton(
-                        icon: SafeImage(
-                          assetPath: $assets.settingsIcon,
-                          width: 28,
-                          height: 28,
-                          placeholder: Icon(FontAwesomeIcons.gear, size: 24, color: AppTheme.textPrimary),
+                        icon: Transform.scale(
+                          scale: 1.3,
+                          child: SafeImage(
+                            assetPath: $assets.settingsIcon,
+                            width: 28,
+                            height: 28,
+                            placeholder: Icon(FontAwesomeIcons.gear, size: 24, color: AppTheme.textPrimary),
+                          ),
                         ),
                         onPressed: () => context.push('/settings'),
                       ),
@@ -170,11 +176,14 @@ class ScaffoldWithNav extends ConsumerWidget {
           hoverColor: Colors.transparent,
           focusColor: Colors.transparent,
           shape: const CircleBorder(),
-          child: SafeImage(
-            assetPath: $assets.fabIcon,
-            width: 36,
-            height: 36,
-            placeholder: const Icon(FontAwesomeIcons.penNib, color: Colors.white, size: 32),
+          child: Transform.scale(
+            scale: 1.5,
+            child: SafeImage(
+              assetPath: $assets.fabIcon,
+              width: 36,
+              height: 36,
+              placeholder: const Icon(FontAwesomeIcons.penNib, color: Colors.white, size: 32),
+            ),
           ),
         ),
       ),
@@ -279,11 +288,14 @@ class _NavItem extends StatelessWidget {
           children: [
             Opacity(
               opacity: isSelected ? 1.0 : 0.5,
-              child: SafeImage(
-                assetPath: imagePath,
-                width: 32,
-                height: 32,
-                placeholder: Icon(fallbackIcon, color: color, size: 28),
+              child: Transform.scale(
+                scale: 1.4,
+                child: SafeImage(
+                  assetPath: imagePath,
+                  width: 32,
+                  height: 32,
+                  placeholder: Icon(fallbackIcon, color: color, size: 28),
+                ),
               ),
             ),
             const SizedBox(height: 4),
